@@ -1,0 +1,111 @@
+# Contributing to My Tiny Office
+
+## Development Principles
+
+- Keep changes small and focused.
+- Prefer incremental changes over large rewrites.
+- Don't mix refactoring with feature work unless necessary.
+- Keep domain logic independent from UI.
+- Keep AI/Agent runtime integrations behind abstraction.
+- Preserve company-scoped agent ownership.
+- Add Korean/English strings for all user-facing text.
+- Reuse existing components.
+
+## Branch Naming
+
+```text
+feature/<short-description>
+fix/<short-description>
+refactor/<short-description>
+chore/<short-description>
+docs/<short-description>
+```
+
+Examples:
+
+```text
+feature/company-creation
+feature/employee-management
+feature/claude-code-runtime
+fix/pr-review-status
+refactor/agent-runtime
+docs/architecture
+```
+
+## Commit Messages
+
+Use Conventional Commits:
+
+```text
+<type>(<scope>): <description>
+```
+
+Examples:
+
+```text
+feat(office): add office map
+feat(employee): add employee hiring
+feat(agent): add Claude Code runtime
+feat(agent): scope sessions to company
+fix(employee): prevent vacation assignment
+refactor(agent): separate runtime adapter
+docs(architecture): document company agent ownership
+```
+
+Allowed types:
+
+```text
+feat
+fix
+refactor
+docs
+test
+chore
+perf
+build
+ci
+```
+
+Keep the subject concise, imperative, and preferably under 72 characters.
+
+## Pull Requests
+
+Explain:
+- what changed
+- why
+- screenshots for meaningful UI changes
+- tests
+- known limitations
+
+Do not combine unrelated features.
+
+## Before Opening a PR
+
+- typecheck
+- lint
+- tests
+- build
+- verify no secrets were committed
+- verify no unrelated Claude/agent sessions are imported
+- verify Korean/English strings for user-facing changes
+
+## AI-Assisted Development
+
+AI-generated code is allowed.
+
+The contributor is responsible for:
+- correctness
+- security
+- tests
+- architecture
+- reviewing generated code
+
+Do not blindly accept large AI-generated rewrites.
+
+## Agent Runtime Changes
+
+When changing a runtime integration:
+- keep runtime-specific code in the adapter
+- do not leak Claude-specific types into domain models
+- preserve explicit Company → Employee → Agent → Session ownership
+- do not add global session scanning unless explicitly designed and reviewed
