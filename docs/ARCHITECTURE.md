@@ -30,7 +30,35 @@ Electron and Tauri are not used in the MVP.
 
 Desktop packaging remains a natural long-term fit for local SQLite, local agent runtimes, process management, and workspace access, but it is a separate decision to be revisited when the product actually requires it. Until then, the UI and domain layers must stay usable as a plain web application.
 
-## 3. High-Level Architecture
+## 3. Simulation Time
+
+The MVP uses a real-time simulation. Progress on Tasks, Training, and other timed
+activities is derived from elapsed wall-clock time. There is no game tick loop.
+
+A timed activity stores:
+
+- `startedAt`
+- `estimatedDuration`
+
+Progress is computed from those values and the current time.
+
+```text
+startedAt         = 10:00
+estimatedDuration = 30 minutes
+current time      = 10:15
+
+→ progress ≈ 50%
+```
+
+Progress is a derived value, not stored mutable state. Persist timestamps and
+durations, and compute progress when it is read.
+
+Because elapsed time is measured against the real clock, time continues to pass
+while the application is closed. An activity started before shutdown may already
+be finished on the next launch, and the simulation must settle such activities on
+startup rather than assume it observed every moment of their progress.
+
+## 4. High-Level Architecture
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
@@ -60,7 +88,7 @@ Desktop packaging remains a natural long-term fit for local SQLite, local agent 
 └────────────────────────────────────────────────────────────┘
 ```
 
-## 4. Employee vs Agent
+## 5. Employee vs Agent
 
 An Employee is a game entity.
 
@@ -83,7 +111,7 @@ Employee
 
 Do not make the Employee itself a Claude Code session.
 
-## 5. Company-Scoped Ownership
+## 6. Company-Scoped Ownership
 
 The central rule is:
 
@@ -119,7 +147,7 @@ Only A/B/C are part of the TinySoft simulation.
 - Provides a clear privacy boundary.
 - Prevents global session discovery from becoming the product's core behavior.
 
-## 6. Domain Model
+## 7. Domain Model
 
 Suggested entities:
 
@@ -199,7 +227,7 @@ The simulation owns its own pull requests, reviews, and review statuses. Nothing
 
 A GitHub or GitLab integration may be added later as a separate integration. It must not replace the in-game entity.
 
-## 7. Runtime Adapter
+## 8. Runtime Adapter
 
 Use a provider-neutral interface.
 
@@ -220,7 +248,7 @@ interface AgentRuntime {
 
 The exact API may evolve. Keep the domain layer unaware of Claude-specific details.
 
-## 8. Claude Code Adapter — MVP
+## 9. Claude Code Adapter — MVP
 
 Claude Code is the first supported runtime.
 
@@ -272,7 +300,7 @@ Anthropic API Runtime
 
 Do not merge these concepts.
 
-## 9. Session Discovery
+## 10. Session Discovery
 
 The default strategy is explicit registration, not global discovery.
 
@@ -303,7 +331,7 @@ If session discovery is required for recovery after restart, discovery must be s
 
 Do not import arbitrary sessions.
 
-## 10. Workspace Model
+## 11. Workspace Model
 
 A Company may have one or more workspaces.
 
@@ -327,7 +355,7 @@ The stable ownership relationship is:
 Company → Employee → Agent → Session
 ```
 
-## 11. Domain Events
+## 12. Domain Events
 
 The simulation owns events such as:
 
@@ -362,7 +390,7 @@ Activity Feed / UI
 
 UI components should not manually mutate the activity feed.
 
-## 12. Failure Handling
+## 13. Failure Handling
 
 The game must distinguish:
 
@@ -385,7 +413,7 @@ Agent status: Disconnected
 
 The UI can show a clear state and allow reconnect/retry.
 
-## 13. Future Runtimes
+## 14. Future Runtimes
 
 The architecture should allow:
 
@@ -399,7 +427,7 @@ AgentRuntime
 
 Adding a runtime should not require changing Company, Employee, Task, PR, or Office domain models.
 
-## 14. Local Storage
+## 15. Local Storage
 
 Start with SQLite.
 
@@ -421,7 +449,7 @@ Runtime adapters remain outside the persistence/domain core.
 
 Store identifiers and configuration references, not secret credentials.
 
-## 15. Security
+## 16. Security
 
 Never:
 - commit API keys
