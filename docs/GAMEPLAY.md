@@ -67,6 +67,10 @@ Suggested statuses:
 
 ## PR Collaboration
 
+In the MVP a `PullRequest` is not a real GitHub or GitLab pull request. It is a
+game-world domain entity that exists to simulate review, collaboration, and work
+progress inside the company.
+
 A PR is an activity card, not just a record.
 
 Example:
