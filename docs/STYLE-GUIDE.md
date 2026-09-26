@@ -122,6 +122,10 @@ layout does not twitch.
   things that float.
 - Focus is `2px solid var(--brand)` with `outline-offset: 2px`, via
   `:focus-visible`. **Never removed anywhere.**
+- **Every inline `<svg>` needs an explicit width and height.** Without one it
+  stretches to fill its grid or flex cell, which has produced a giant plus and a
+  giant folder in this codebase already. Size it on the container rule, not per
+  icon.
 - Focus moves into a popover only when it was opened from the keyboard
   (`event.detail === 0`); a mouse user should never see a ring appear.
 

@@ -9,6 +9,7 @@ before building or changing a screen.
 | --- | --- |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/employees.html` | List and detail, org chart, memory, review areas |
+| `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
@@ -255,8 +256,13 @@ Both are employees and both do work. The difference is whether the work is real.
 | Connected | An agent actually works in a folder | Reported by the runtime |
 
 **The office must show which is which.** Hiding it would make the game claim
-more than it does. The treatment has to sit beside the existing status bubble
-and dot without competing with them — it is a second axis, not a fifth status.
+more than it does. It is a second axis, not a fifth status, so it takes its own
+corner: **status is the dot at bottom-right, the agent is the mark at
+top-left.** A connected employee whose session dropped reads as a red mark with
+an unchanged status — still working, no longer for real.
+
+Never fold connection into the status colour. "일하는 중" and "진짜로 일하는
+중" would stop being distinguishable.
 
 ## Agent connection
 

@@ -1,0 +1,988 @@
+<meta charset="utf-8" />
+<title>Tiny Office · 에이전트 연결</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #edecee;
+    --surface: #ffffff;
+    --subtle: #f6f6f7;
+    --sunk: #eeeef0;
+    --line: #ebebed;
+    --line-2: #e0e0e3;
+
+    --ink: #1b1b1f;
+    --solid: #17171c;
+    --muted: #86868d;
+    --faint: #b2b2b9;
+
+    --brand: #5b5bd6;
+    --brand-soft: #ecebfb;
+    --ok: #2fae62;
+    --ok-soft: #e4f6ec;
+    --info: #3b82f6;
+    --info-soft: #e8f0fe;
+    --warn: #eaa221;
+    --warn-soft: #fdf1dd;
+    --bad: #e5484d;
+    --bad-soft: #fdeaea;
+
+    --r-ctl: 10px;
+    --r-card: 12px;
+
+    --sans: "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+  body {
+    margin: 0; padding: 26px 20px 70px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  }
+  * { box-sizing: border-box; }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+
+  header.top { margin-bottom: 24px; }
+  header.top h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
+  header.top p { margin: 6px 0 0; color: var(--muted); max-width: 74ch; }
+
+  section { background: var(--surface); border-radius: 16px; padding: 22px; margin-bottom: 16px; box-shadow: 0 1px 2px rgb(20 20 25 / .05); }
+  section > h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+  section > .note { margin: 0 0 18px; color: var(--muted); font-size: 13px; max-width: 74ch; }
+  h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 24px 0 10px; }
+  h3:first-of-type { margin-top: 0; }
+  .spec { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .spec:last-child { border-bottom: none; }
+  .spec code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .grid2 { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ═══ buttons ═══ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font: inherit; font-weight: 600; white-space: nowrap;
+    border-radius: 999px; border: 1px solid transparent; cursor: pointer;
+    transition: background .1s, border-color .1s;
+  }
+  .btn svg { width: 15px; height: 15px; flex: none; }
+  .btn-md { height: 36px; padding-inline: 16px; font-size: 14px; }
+  .btn-sm { height: 30px; padding-inline: 13px; font-size: 13px; }
+  .btn-primary { background: var(--solid); color: #fff; }
+  .btn-primary:hover { background: #2a2a31; }
+  .btn-secondary { background: var(--surface); border-color: var(--line-2); color: var(--ink); }
+  .btn-secondary:hover { background: var(--subtle); }
+  .btn-ghost { background: none; color: var(--muted); }
+  .btn-ghost:hover { background: var(--subtle); color: var(--ink); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn:focus-visible, .pick:focus-visible, .copy:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* ═══ modal ═══ */
+  .modal {
+    width: 100%; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14);
+  }
+  .m-hd { display: flex; align-items: center; gap: 12px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
+  .m-av { position: relative; width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .m-t { display: block; font-size: 16.5px; font-weight: 600; line-height: 1.35; }
+  .m-s { display: block; font-size: 12.5px; color: var(--muted); }
+  .m-sec { padding: 15px 20px; border-bottom: 1px solid var(--line); }
+  .m-sec:last-of-type { border-bottom: none; }
+  .m-foot { padding: 15px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+  .k { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); margin-bottom: 8px; }
+
+  .pick {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: center; gap: 11px;
+    width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); cursor: pointer; text-align: left; margin-bottom: 7px;
+  }
+  .pick:last-of-type { margin-bottom: 0; }
+  .pick:hover { border-color: var(--line-2); background: var(--subtle); }
+  .pick[aria-checked="true"] { border-color: var(--brand); background: var(--brand-soft); }
+  .pick:disabled { opacity: .5; cursor: default; }
+  .pick:disabled:hover { border-color: var(--line); background: var(--surface); }
+  .radio { width: 16px; height: 16px; border-radius: 999px; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+  .pick[aria-checked="true"] .radio { border-color: var(--brand); }
+  .pick[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
+  .pick-t { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-m { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .folder {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px;
+  }
+  .folder > svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+  .folder .path { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .folder .path.empty { color: var(--faint); font-family: var(--sans); }
+
+  /* ═══ readiness checklist ═══ */
+  .check { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; }
+  .c-ic { width: 18px; height: 18px; border-radius: 999px; flex: none; margin-top: 2px; display: grid; place-items: center; }
+  .c-ic svg { width: 11px; height: 11px; }
+  .c-ic.ok { background: var(--ok-soft); color: #1f7a48; }
+  .c-ic.bad { background: var(--bad-soft); color: #a8322f; }
+  .c-ic.wait { background: var(--sunk); color: var(--muted); }
+  .c-tx { flex: 1; min-width: 0; font-size: 13px; }
+  .c-tx b { font-weight: 600; }
+  .c-tx span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .c-val { font-size: 12px; color: var(--faint); font-family: var(--mono); flex: none; }
+
+  .cmd {
+    margin-top: 9px; background: #17171c; border-radius: 10px; padding: 11px 12px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .cmd pre { margin: 0; flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #e8e8ea; overflow-x: auto; }
+  .cmd .p { color: #6f6f78; }
+  .copy {
+    flex: none; height: 26px; padding-inline: 10px; border-radius: 999px;
+    border: 1px solid #3a3a42; background: none; color: #c9c9ce;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .copy:hover { background: #26262d; color: #fff; }
+  .recheck { margin-top: 10px; display: flex; justify-content: flex-end; }
+
+  /* ═══ connected block ═══ */
+  .rt { border: 1px solid var(--line); border-radius: var(--r-card); }
+  .rt-hd { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .rt-hd h4 { margin: 0; font-size: 13.5px; font-weight: 600; }
+  .rt-bd { padding: 12px 14px; }
+  .kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 4px 0; }
+  .kv span:first-child { color: var(--muted); flex: none; }
+  .kv b { font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kv b.mono { font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
+  .rt-acts { display: flex; gap: 8px; padding: 0 14px 13px; }
+
+  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 600; flex: none; }
+  .chip.live { background: var(--ok-soft); color: #1f7a48; }
+  .chip.sim { background: var(--sunk); color: var(--muted); }
+  .chip.lost { background: var(--bad-soft); color: #a8322f; }
+
+  /* ═══ how a connected employee reads ═══ */
+  .agent-mark {
+    width: 15px; height: 15px; border-radius: 999px; background: var(--ok);
+    border: 2.5px solid var(--surface); display: grid; place-items: center; color: #fff;
+  }
+  .agent-mark svg { width: 8px; height: 8px; }
+  .agent-mark.lost { background: var(--bad); }
+  .av-demo { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; }
+  .av-demo .corner { position: absolute; left: -4px; top: -4px; }
+  .av-demo .status { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); background: var(--warn); }
+  .demo-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .demo-cell { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 12px 14px; }
+  .demo-cell .nm { display: block; font-size: 14px; font-weight: 600; }
+  .demo-cell .rl { display: block; font-size: 12.5px; color: var(--muted); }
+
+  .bubble {
+    display: inline-flex; align-items: center; gap: 5px; background: #fff;
+    border-radius: 8px; padding: 3px 9px; font-size: 12px; font-weight: 600;
+    box-shadow: 0 1px 3px rgb(20 20 25 / .2);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+  .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
+  .bubble .live-ic { width: 11px; height: 11px; color: var(--ok); }
+  .stage { background: #b0854f; border-radius: var(--r-card); padding: 16px; display: flex; gap: 22px; align-items: center; }
+
+  .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
+  .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
+  .exlabel { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+
+  .notice {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: var(--r-card); padding: 13px 14px;
+  }
+  .n-ic { width: 22px; height: 22px; border-radius: 999px; flex: none; margin-top: 1px; display: grid; place-items: center; background: var(--sunk); color: var(--muted); }
+  .n-ic svg { width: 13px; height: 13px; }
+  .n-tx { min-width: 0; flex: 1; }
+  .n-tx b { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+  .n-tx span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
+  .notice-bad { border-color: #f4c2c3; }
+  .notice-bad .n-ic { background: var(--bad-soft); color: #a8322f; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>에이전트 연결</h1>
+    <p>
+      직원 한 명을 시뮬레이션에서 <strong>실제로 일하는 상태</strong>로 올리는 화면입니다.
+      첫 실행 화면이 아닙니다 — 회사와 직원이 생긴 뒤에 옵니다. 어려운 부분은 연결 자체가 아니라
+      <strong>우리가 대신 해줄 수 없는 두 가지</strong>를 말하는 방식입니다.
+    </p>
+  </header>
+
+  <section>
+    <h2>준비됨</h2>
+    <p class="note">
+      세 줄이 모두 통과하면 연결할 수 있습니다. 확인은 전부 무료입니다 —
+      <code>claude auth status --json</code>은 요청을 쓰지 않습니다.
+    </p>
+    <div class="grid2">
+      <div class="modal" id="mReady"></div>
+      <div>
+        <div class="spec"><code>런타임</code><span>지금은 Claude Code 하나뿐입니다. 없는 런타임은 <strong>숨기지 않고 비활성</strong>으로 둬서 나중에 생긴다는 걸 알립니다.</span></div>
+        <div class="spec"><code>작업 폴더</code><span>직원마다 다릅니다. 프론트와 백엔드가 다른 레포에서 일하는 게 정상입니다.</span></div>
+        <div class="spec"><code>확인</code><span>설치 · 로그인 · 폴더 신뢰. 셋 다 <strong>돈이 들지 않는 검사</strong>입니다.</span></div>
+        <div class="spec"><code>연결 버튼</code><span>막힌 줄이 하나라도 있으면 비활성입니다. 눌러보고 실패하게 두지 않습니다.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>막힌 상태</h2>
+    <p class="note">
+      셋 다 <strong>이 앱 밖에서 고칩니다.</strong> 그래서 화면이 할 일은 시도하는 게 아니라
+      <strong>무엇을 어디서 하면 되는지 정확히 말하고, 다시 확인해 주는 것</strong>입니다.
+      명령은 복사할 수 있게 둡니다.
+    </p>
+    <div class="grid2" id="blocked"></div>
+  </section>
+
+  <section>
+    <h2>연결된 뒤</h2>
+    <p class="note">
+      직원 상세에 런타임 블록이 생깁니다. 세션은 <strong>우리가 띄운 것만</strong> 보여줍니다 —
+      <code>claude agents</code>는 이 컴퓨터의 모든 세션을 보여주지만, 회사 것이 아닌 세션은 남의 것입니다.
+    </p>
+    <div class="grid2" id="connected"></div>
+  </section>
+
+  <section>
+    <h2>사무실에서의 구분</h2>
+    <p class="note">
+      시뮬레이션 직원과 연결된 직원은 <strong>둘 다 일합니다.</strong> 다른 건 그 일이 실제인지입니다.
+      상태(업무 중·대기 중)와 <strong>다른 축</strong>이라 자리를 뺏지 않게 둡니다 —
+      상태는 오른쪽 아래 점, 에이전트는 왼쪽 위 표식입니다.
+    </p>
+    <div class="demo-row" id="marks"></div>
+
+    <h3>사무실 말풍선</h3>
+    <div class="stage" id="bubbles"></div>
+
+    <h3>Do &amp; don&rsquo;t</h3>
+    <div class="grid2">
+      <div class="good-ex">
+        <div class="exlabel" style="color:#1f7a48">✓ DO</div>
+        <div class="demo-row" id="doMark"></div>
+        <div class="note" style="margin:11px 0 0">에이전트 표식은 상태 점과 <strong>다른 모서리</strong>에 둡니다. 둘 다 읽힙니다.</div>
+      </div>
+      <div class="bad-ex">
+        <div class="exlabel" style="color:#a8322f">✕ DON&rsquo;T</div>
+        <div class="demo-row" id="dontMark"></div>
+        <div class="note" style="margin:11px 0 0">연결 여부를 상태 색으로 섞으면 "일하는 중"과 "진짜로 일하는 중"을 구분할 수 없습니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>규칙</h2>
+    <ul style="margin:0;padding-left:20px;line-height:2">
+      <li>이 화면은 <strong>첫 실행이 아닙니다.</strong> 회사와 직원이 먼저입니다.</li>
+      <li><strong>토큰 입력칸을 만들지 않습니다.</strong> 인증은 Claude Code 것입니다. 이 화면이 그 유혹이 생기는 자리입니다.</li>
+      <li>고칠 수 없는 것은 <strong>어디서 고치는지</strong>를 말하고 <strong>다시 확인</strong> 버튼을 줍니다.</li>
+      <li>붙여넣을 명령은 <strong>복사</strong>할 수 있게 둡니다. 받아 적게 하지 않습니다.</li>
+      <li>막힌 줄이 있으면 연결 버튼은 <strong>비활성</strong>입니다. 실패할 걸 알면서 누르게 하지 않습니다.</li>
+      <li>연결이 끊겨도 <strong>직원과 업무는 그대로입니다.</strong> 런타임 실패가 회사 데이터를 지우지 않습니다.</li>
+      <li>세션 목록은 <strong>우리가 띄운 것만</strong>입니다. 폴더가 같다고 남의 세션을 가져오지 않습니다.</li>
+      <li>연결은 <strong>직원 한 명</strong> 단위입니다. 회사 전체를 한 번에 켜지 않습니다.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  /* ── sprites ─────────────────────────────────────────────────── */
+  const P = { ".": null, K: "#2f2a3d", E: "#2f2a3d" };
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+  const CAT = [
+    "...KK......KK...",
+    "..KBBK....KBBK..",
+    "..KBBBKKKKBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FOX = [
+    "..KK........KK..",
+    "..KAK......KAK..",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SQUIRREL = [
+    "....K......K....",
+    "...KAK....KAK...",
+    "..KBAKKKKKKABK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BUNNY = [
+    "...KKK....KKK...",
+    "...KAK....KAK...",
+    "...KAK....KAK...",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DOG = [
+    "...KKKKKKKKKK...",
+    "..KAABBBBBBAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAAEBEEBEAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAABBNNBBAAK..",
+    "..KHBBBBBBBBHK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BEAR = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PANDA = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBAABBBBAABK..",
+    "..KHAEBEEBEAHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const MOUSE = [
+    ".KKK........KKK.",
+    ".KAAK......KAAK.",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HAMSTER = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KHBBEBEEBEBBHK.",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const KOALA = [
+    "................",
+    ".KK..........KK.",
+    "KAAK........KAAK",
+    "KAAKKKKKKKKKKAAK",
+    ".KKBBBBBBBBBBKK.",
+    "..KHBEBEEBEBHK..",
+    "..KBBBNNNNBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const CHICK = [
+    "................",
+    ".......KK.......",
+    "......KAAK......",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBNNBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DUCK = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBKNNNNNNKBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const OWL = [
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBOOBBBBOOBK..",
+    "..KBOEBBBBEOBK..",
+    "..KHOOBNNBOOHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PENGUIN = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KBLLLLLLLLBK..",
+    "..KHLELNNLELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FROG = [
+    "...KKK....KKK...",
+    "..KOOOK..KOOOK..",
+    "..KOEOK..KOEOK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHHBBEEBBHHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const COW = [
+    "KK............KK",
+    ".KAK........KAK.",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KNNNBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DEER = [
+    "...K.K....K.K...",
+    "...KKK....KKK...",
+    "....KKKKKKKK....",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SHEEP = [
+    "..KK.KKKKKK.KK..",
+    ".KAAKAAAAAAKAAK.",
+    ".KAAAAAAAAAAAAK.",
+    ".KAAAAAAAAAAAAK.",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HEDGEHOG = [
+    "...K.K.KK.K.K...",
+    "..KAKAKAAKAKAK..",
+    "..KAAAAAAAAAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PIG = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+
+  const CAST = [
+    { key: "cat", sprite: CAT, ko: "모카", en: "Mocha", species: "고양이", family: "뾰족 귀",
+      B: "#f3e0c8", L: "#fdf3e2", A: "#e3bfa0", H: "#f4a7b0", N: "#e3bfa0" },
+    { key: "fox", sprite: FOX, ko: "여우", en: "Fennec", species: "여우", family: "뾰족 귀",
+      B: "#e89055", L: "#fdf2e6", A: "#a85f34", H: "#f4a7b0", N: "#a85f34" },
+    { key: "squirrel", sprite: SQUIRREL, ko: "도토", en: "Acorn", species: "다람쥐", family: "뾰족 귀",
+      B: "#c97f4a", L: "#f7e6cf", A: "#a8663a", H: "#f4a7b0", N: "#a8663a" },
+    { key: "bunny", sprite: BUNNY, ko: "두부", en: "Tofu", species: "토끼", family: "긴 귀",
+      B: "#fbfafb", L: "#fff1f4", A: "#f6c6d0", H: "#f4a7b0", N: "#f6c6d0" },
+    { key: "dog", sprite: DOG, ko: "콩이", en: "Bean", species: "강아지", family: "처진 귀",
+      B: "#d9b083", L: "#f3e2c9", A: "#a87f55", H: "#f4a7b0", N: "#6b4c33" },
+    { key: "bear", sprite: BEAR, ko: "코코", en: "Coco", species: "곰", family: "둥근 귀",
+      B: "#b79070", L: "#d2ad8c", A: "#96704f", H: "#e2929c", N: "#96704f" },
+    { key: "panda", sprite: PANDA, ko: "반달", en: "Moon", species: "판다", family: "둥근 귀",
+      B: "#fafafb", L: "#ffffff", A: "#3f3a44", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "mouse", sprite: MOUSE, ko: "치즈", en: "Cheese", species: "생쥐", family: "둥근 귀",
+      B: "#b9b4bd", L: "#d8d4dc", A: "#f2c0cb", H: "#f4a7b0", N: "#f2c0cb" },
+    { key: "hamster", sprite: HAMSTER, ko: "밤톨", en: "Nut", species: "햄스터", family: "둥근 귀",
+      B: "#f0cf9a", L: "#fdf0d8", A: "#d9a86a", H: "#f4a7b0", N: "#d9a86a" },
+    { key: "koala", sprite: KOALA, ko: "유칼", en: "Euca", species: "코알라", family: "둥근 귀",
+      B: "#a8adb8", L: "#ccd0d8", A: "#8b909c", H: "#f4a7b0", N: "#5d6470" },
+    { key: "chick", sprite: CHICK, ko: "삐약", en: "Pip", species: "병아리", family: "머리 장식",
+      B: "#f9da80", L: "#fdecb2", A: "#eda93c", H: "#f4a7b0", N: "#eda93c" },
+    { key: "owl", sprite: OWL, ko: "야간", en: "Nox", species: "부엉이", family: "머리 장식",
+      B: "#a3845f", L: "#c9ac86", A: "#7d6244", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "sheep", sprite: SHEEP, ko: "구름", en: "Cloud", species: "양", family: "머리 장식",
+      B: "#e6d6bf", L: "#fff8ee", A: "#fdfbf6", H: "#f4a7b0", N: "#c9bda8" },
+    { key: "hedgehog", sprite: HEDGEHOG, ko: "가시", en: "Quill", species: "고슴도치", family: "머리 장식",
+      B: "#e6d3b8", L: "#f6ecdc", A: "#8a6a4a", H: "#f4a7b0", N: "#8a6a4a" },
+    { key: "duck", sprite: DUCK, ko: "꽥꽥", en: "Quack", species: "오리", family: "부리·코",
+      B: "#fbfbfc", L: "#ffffff", A: "#f0a63c", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "penguin", sprite: PENGUIN, ko: "별", en: "Star", species: "펭귄", family: "부리·코",
+      B: "#61708f", L: "#fafbfd", A: "#495470", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "pig", sprite: PIG, ko: "분홍", en: "Rosy", species: "돼지", family: "부리·코",
+      B: "#f4b8c0", L: "#fbd9de", A: "#e295a2", H: "#e87f90", N: "#e08e9c" },
+    { key: "cow", sprite: COW, ko: "얼룩", en: "Patch", species: "소", family: "뿔",
+      B: "#fafafb", L: "#ffffff", A: "#e8dfc8", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "deer", sprite: DEER, ko: "단풍", en: "Maple", species: "사슴", family: "뿔",
+      B: "#cfa274", L: "#ecd7ba", A: "#8a6b49", H: "#f4a7b0", N: "#8a6b49" },
+    { key: "frog", sprite: FROG, ko: "완두", en: "Pea", species: "개구리", family: "솟은 눈",
+      B: "#a6d988", L: "#c4e8aa", A: "#7ab863", H: "#f2a0b8", N: "#7ab863" },
+  ];
+  const skin = (c) => ({ B: c.B, L: c.L, O: "#ffffff", A: c.A, H: c.H, N: c.N });
+
+  function paint(ctx, rows, scale, ox, oy, extra) {
+    const pal = extra ? { ...P, ...extra } : P;
+    for (let y = 0; y < rows.length; y++) {
+      const row = rows[y];
+      let x = 0;
+      while (x < row.length) {
+        const ch = row[x];
+        let run = 1;
+        while (x + run < row.length && row[x + run] === ch) run++;
+        const color = pal[ch];
+        if (color) { ctx.fillStyle = color; ctx.fillRect(ox + x * scale, oy + y * scale, run * scale, scale); }
+        x += run;
+      }
+    }
+  }
+  const SPECIES = new Map(CAST.map((c) => [c.key, c]));
+  function avatar(species, px) {
+    const el = document.createElement("canvas");
+    el.width = el.height = px;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(species);
+    const scale = Math.max(1, Math.floor(px / 16));
+    const pad = Math.floor((px - 16 * scale) / 2);
+    paint(g, sp.sprite, scale, pad, pad, skin(sp));
+    return el;
+  }
+
+  const I = {
+    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg>',
+    x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+    dash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h8"/></svg>',
+    plug: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z"/><path d="M8 11.8V14"/></svg>',
+    folder: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.8 4h4.2l1.4 1.8h6.8V13H1.8z"/></svg>',
+    info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg>',
+    refresh: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 7A5.2 5.2 0 1 0 12 11.2"/><path d="M13.4 3.4v3.8h-3.8"/></svg>',
+  };
+
+  const EMP = { name: "모카", species: "cat", role: "Backend Engineer", team: "백엔드팀" };
+
+  /* ── the connection modal, in one state ──────────────────────── */
+  const CHECKS = {
+    installed: (v) => ({ icon: "ok", title: "Claude Code 설치됨", value: v }),
+    missing: () => ({
+      icon: "bad",
+      title: "Claude Code가 없어요",
+      detail: "설치하지 않아도 사무실은 그대로 돌아가요. 설치하면 이 직원이 실제로 일해요.",
+    }),
+    loggedIn: (v) => ({ icon: "ok", title: "로그인됨", value: v }),
+    loggedOut: () => ({
+      icon: "bad",
+      title: "아직 로그인하지 않았어요",
+      detail: "터미널에서 한 번 로그인해 주세요. 브라우저가 열려요.",
+      cmd: ["claude auth login"],
+    }),
+    trusted: () => ({ icon: "ok", title: "이 폴더를 신뢰함" }),
+    untrusted: (dir) => ({
+      icon: "bad",
+      title: "이 폴더가 아직 신뢰되지 않았어요",
+      detail: "폴더에서 claude를 한 번 실행하고 신뢰를 허용해 주세요. 이건 건너뛸 방법이 없어요.",
+      cmd: ["cd " + dir, "claude"],
+    }),
+    waiting: (title) => ({ icon: "wait", title, detail: "앞 단계를 끝내면 확인해요." }),
+  };
+
+  function checkRow(c) {
+    const ic = { ok: I.check, bad: I.x, wait: I.dash }[c.icon];
+    return `
+      <div class="check">
+        <span class="c-ic ${c.icon}">${ic}</span>
+        <span class="c-tx">
+          <b>${c.title}</b>
+          ${c.detail ? `<span>${c.detail}</span>` : ""}
+        </span>
+        ${c.value ? `<span class="c-val">${c.value}</span>` : ""}
+      </div>
+      ${
+        c.cmd
+          ? `<div class="cmd">
+               <pre>${c.cmd.map((l) => `<span class="p">$</span> ${l}`).join("\n")}</pre>
+               <button class="copy" type="button">복사</button>
+             </div>`
+          : ""
+      }`;
+  }
+
+  function modal({ dir, checks, ready, runtimeReady }) {
+    const el = document.createElement("div");
+    el.className = "modal";
+    el.innerHTML = `
+      <div class="m-hd">
+        <span class="m-av"></span>
+        <span style="flex:1;min-width:0">
+          <span class="m-t">${EMP.name}를 실제로 일하게 하기</span>
+          <span class="m-s">${EMP.role} · ${EMP.team}</span>
+        </span>
+      </div>
+
+      <div class="m-sec">
+        <span class="k">런타임</span>
+        <button class="pick" type="button" role="radio" aria-checked="true">
+          <span class="radio"></span>
+          <span class="pick-t">Claude Code</span>
+          <span></span><span class="pick-m">${runtimeReady ? "사용 가능" : "확인 필요"}</span>
+        </button>
+        <button class="pick" type="button" role="radio" aria-checked="false" disabled>
+          <span class="radio"></span>
+          <span class="pick-t">Local AI</span>
+          <span></span><span class="pick-m">아직 없어요</span>
+        </button>
+      </div>
+
+      <div class="m-sec">
+        <span class="k">작업 폴더</span>
+        <div class="folder">
+          ${I.folder}
+          <span class="path${dir ? "" : " empty"}">${dir ?? "아직 고르지 않았어요"}</span>
+          <button class="btn btn-secondary btn-sm" type="button">${dir ? "바꾸기" : "고르기"}</button>
+        </div>
+      </div>
+
+      <div class="m-sec">
+        <span class="k">확인</span>
+        ${checks.map(checkRow).join("")}
+        ${
+          ready
+            ? ""
+            : `<div class="recheck"><button class="btn btn-secondary btn-sm" type="button">${I.refresh}다시 확인</button></div>`
+        }
+      </div>
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button">나중에</button>
+        <button class="btn btn-primary btn-md" type="button"${ready ? "" : " disabled"}>연결하기</button>
+      </div>`;
+    el.querySelector(".m-av").appendChild(avatar(EMP.species, 44));
+    return el;
+  }
+
+  document.getElementById("mReady").replaceWith(
+    modal({
+      dir: "~/Projects/tinysoft",
+      runtimeReady: true,
+      ready: true,
+      checks: [CHECKS.installed("2.1.283"), CHECKS.loggedIn("pro"), CHECKS.trusted()],
+    }),
+  );
+
+  /* ── the three blocked states ────────────────────────────────── */
+  const blocked = document.getElementById("blocked");
+  const states = [
+    {
+      label: "Claude Code가 없음",
+      m: modal({
+        dir: "~/Projects/tinysoft",
+        runtimeReady: false,
+        ready: false,
+        checks: [CHECKS.missing(), CHECKS.waiting("로그인"), CHECKS.waiting("폴더 신뢰")],
+      }),
+      note: "없어도 게임은 돌아갑니다. 그 사실을 먼저 말하고 나서 설치를 권합니다.",
+    },
+    {
+      label: "로그인 안 됨",
+      m: modal({
+        dir: "~/Projects/tinysoft",
+        runtimeReady: true,
+        ready: false,
+        checks: [CHECKS.installed("2.1.283"), CHECKS.loggedOut(), CHECKS.waiting("폴더 신뢰")],
+      }),
+      note: "브라우저가 열리는 건 Claude Code의 흐름입니다. 우리는 이메일도 토큰도 받지 않습니다.",
+    },
+    {
+      label: "폴더가 신뢰되지 않음",
+      m: modal({
+        dir: "~/Projects/tinysoft",
+        runtimeReady: true,
+        ready: false,
+        checks: [CHECKS.installed("2.1.283"), CHECKS.loggedIn("pro"), CHECKS.untrusted("~/Projects/tinysoft")],
+      }),
+      note: "비대화형 방법이 아예 없습니다. 로그인을 앱에서 해결해도 이 단계는 남습니다.",
+    },
+  ];
+  for (const st of states) {
+    const box = document.createElement("div");
+    box.innerHTML = `<h3 style="margin-top:0">${st.label}</h3>`;
+    box.appendChild(st.m);
+    box.insertAdjacentHTML("beforeend", `<p class="note" style="margin:11px 0 0">${st.note}</p>`);
+    blocked.appendChild(box);
+  }
+
+  /* ── after connecting ────────────────────────────────────────── */
+  const connected = document.getElementById("connected");
+  const runtimeBlock = (state) => {
+    const live = state === "live";
+    const el = document.createElement("div");
+    el.className = "rt";
+    el.innerHTML = `
+      <div class="rt-hd">
+        <h4>에이전트</h4>
+        <span class="chip ${live ? "live" : "lost"}">${live ? "연결됨" : "연결 끊김"}</span>
+      </div>
+      <div class="rt-bd">
+        <div class="kv"><span>런타임</span><b>Claude Code 2.1.283</b></div>
+        <div class="kv"><span>작업 폴더</span><b class="mono">~/Projects/tinysoft</b></div>
+        <div class="kv"><span>세션</span><b class="mono">434e0703</b></div>
+        <div class="kv"><span>이번 달 비용</span><b>$1.42</b></div>
+      </div>
+      ${
+        live
+          ? `<div class="rt-acts">
+               <button class="btn btn-secondary btn-sm" type="button">로그 보기</button>
+               <button class="btn btn-ghost btn-sm" type="button">연결 끊기</button>
+             </div>`
+          : `<div style="padding:0 14px 13px">
+               <div class="notice notice-bad">
+                 <span class="n-ic">${I.x}</span>
+                 <span class="n-tx">
+                   <b>세션이 끊어졌어요</b>
+                   <span>진행 중이던 업무와 기억은 그대로 있어요. 다시 연결하면 이어서 해요.</span>
+                 </span>
+                 <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 연결</button></span>
+               </div>
+             </div>`
+      }`;
+    return el;
+  };
+  for (const [label, state, note] of [
+    ["연결됨", "live", "비용을 숨기지 않습니다. 업무 하나에 고정 오버헤드가 붙는 구조라 플레이어가 알아야 합니다."],
+    ["연결 끊김", "lost", "런타임 실패가 회사 데이터를 건드리지 않는다는 걸 문장으로 말합니다."],
+  ]) {
+    const box = document.createElement("div");
+    box.innerHTML = `<h3 style="margin-top:0">${label}</h3>`;
+    box.appendChild(runtimeBlock(state));
+    box.insertAdjacentHTML("beforeend", `<p class="note" style="margin:11px 0 0">${note}</p>`);
+    connected.appendChild(box);
+  }
+
+  /* ── how a connected employee reads ──────────────────────────── */
+  const demoCell = (opts) => {
+    const el = document.createElement("span");
+    el.className = "demo-cell";
+    el.innerHTML = `
+      <span class="av-demo">
+        <span class="status"${opts.statusColor ? ` style="background:${opts.statusColor}"` : ""}></span>
+        ${opts.mark ? `<span class="corner"><span class="agent-mark${opts.lost ? " lost" : ""}">${I.plug}</span></span>` : ""}
+      </span>
+      <span>
+        <span class="nm">${opts.name}</span>
+        <span class="rl">${opts.role}</span>
+      </span>
+      <span class="chip ${opts.chip}">${opts.chipText}</span>`;
+    el.querySelector(".av-demo").prepend(avatar(opts.species, 40));
+    return el;
+  };
+
+  const marks = document.getElementById("marks");
+  marks.appendChild(demoCell({ name: "모카", species: "cat", role: "업무 중", mark: true, chip: "live", chipText: "실제로 일하는 중" }));
+  marks.appendChild(demoCell({ name: "두부", species: "bunny", role: "업무 중", mark: false, chip: "sim", chipText: "시뮬레이션" }));
+  marks.appendChild(demoCell({ name: "삐약", species: "chick", role: "업무 중", mark: true, lost: true, chip: "lost", chipText: "연결 끊김" }));
+
+  const bubbles = document.getElementById("bubbles");
+  for (const [species, connectedNow] of [["cat", true], ["bunny", false]]) {
+    const wrap = document.createElement("span");
+    wrap.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:7px";
+    wrap.innerHTML = `<span class="bubble">
+        <span class="dot working"></span>업무 중${connectedNow ? `<span class="live-ic">${I.plug}</span>` : ""}
+      </span>`;
+    const c = avatar(species, 48);
+    c.style.imageRendering = "pixelated";
+    wrap.appendChild(c);
+    bubbles.appendChild(wrap);
+  }
+
+  const doMark = document.getElementById("doMark");
+  doMark.appendChild(demoCell({ name: "모카", species: "cat", role: "업무 중", mark: true, chip: "live", chipText: "실제로 일하는 중" }));
+
+  const dontMark = document.getElementById("dontMark");
+  dontMark.appendChild(
+    demoCell({ name: "모카", species: "cat", role: "업무 중", mark: false, statusColor: "var(--ok)", chip: "sim", chipText: "초록이면 연결됨?" }),
+  );
+</script>
