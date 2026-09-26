@@ -204,25 +204,27 @@ export async function settleDueTasks(
     dueTasks.push({ task, employee });
   }
 
-  const settlements: { task: taskDomain.Task; event: TaskCompleted }[] = [];
-  for (const { task, employee } of dueTasks) {
-    const settled = taskDomain.settleTask(task, employee, toEventId(ctx.newId()), now);
-    if (!settled.ok) {
-      return { ok: false, reason: settled.reason };
+  return ctx.withTransaction(async (): Promise<SettleDueTasksResult> => {
+    const settlements: { task: taskDomain.Task; event: TaskCompleted }[] = [];
+    for (const { task, employee } of dueTasks) {
+      const settled = taskDomain.settleTask(task, employee, toEventId(ctx.newId()), now);
+      if (!settled.ok) {
+        return { ok: false, reason: settled.reason };
+      }
+
+      settlements.push({ task: settled.task, event: settled.events[0] });
     }
 
-    settlements.push({ task: settled.task, event: settled.events[0] });
-  }
+    settlements.sort((a, b) => a.event.completedAt - b.event.completedAt);
 
-  settlements.sort((a, b) => a.event.completedAt - b.event.completedAt);
+    for (const { task } of settlements) {
+      await ctx.tasks.save(task);
+    }
 
-  for (const { task } of settlements) {
-    await ctx.tasks.save(task);
-  }
-
-  return {
-    ok: true,
-    value: { settledTasks: settlements.map((settlement) => settlement.task) },
-    events: settlements.map((settlement) => settlement.event),
-  };
+    return {
+      ok: true,
+      value: { settledTasks: settlements.map((settlement) => settlement.task) },
+      events: settlements.map((settlement) => settlement.event),
+    };
+  });
 }

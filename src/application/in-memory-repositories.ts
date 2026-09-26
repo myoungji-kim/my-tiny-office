@@ -3,7 +3,10 @@ import type { Employee } from "../domain/employee";
 import type { CompanyId, EmployeeId, TaskId } from "../domain/ids";
 import type { Task } from "../domain/task";
 
+import type { TransactionRunner } from "./context";
 import type { CompanyRepository, EmployeeRepository, TaskRepository } from "./repositories";
+
+export const withoutTransaction: TransactionRunner = (work) => work();
 
 export function createInMemoryCompanyRepository(): CompanyRepository {
   const companies = new Map<CompanyId, Company>();

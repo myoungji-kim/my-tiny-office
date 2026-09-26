@@ -5,6 +5,7 @@ import type { CompanyRepository, EmployeeRepository, TaskRepository } from "./re
 
 export type Clock = () => Timestamp;
 export type NewId = () => string;
+export type TransactionRunner = <T>(work: () => Promise<T>) => Promise<T>;
 
 export interface AppContext {
   readonly companies: CompanyRepository;
@@ -12,6 +13,7 @@ export interface AppContext {
   readonly tasks: TaskRepository;
   readonly now: Clock;
   readonly newId: NewId;
+  readonly withTransaction: TransactionRunner;
 }
 
 export type UseCaseResult<TValue, TFailure extends string> =

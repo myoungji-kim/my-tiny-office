@@ -9,6 +9,7 @@ import {
   createInMemoryCompanyRepository,
   createInMemoryEmployeeRepository,
   createInMemoryTaskRepository,
+  withoutTransaction,
 } from "./in-memory-repositories";
 
 const now = 1_700_000_000_000;
@@ -22,6 +23,7 @@ function createContext(): AppContext {
     tasks: createInMemoryTaskRepository(),
     now: () => now,
     newId: () => `id-${(counter += 1)}`,
+    withTransaction: withoutTransaction,
   };
 }
 

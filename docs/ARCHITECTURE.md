@@ -429,9 +429,7 @@ Adding a runtime should not require changing Company, Employee, Task, PR, or Off
 
 ## 15. Local Storage
 
-Start with SQLite.
-
-Suggested layers:
+Persistence is local SQLite through Drizzle.
 
 ```text
 UI
@@ -440,7 +438,9 @@ Application Services
  ↓
 Domain
  ↓
-Repositories
+Repositories          ← interfaces owned by the application layer
+ ↓
+SQLite adapters       ← Drizzle lives here and nowhere else
  ↓
 SQLite
 ```
@@ -449,12 +449,65 @@ Runtime adapters remain outside the persistence/domain core.
 
 Store identifiers and configuration references, not secret credentials.
 
+### Database location
+
+Each user has their own database. The default location is the operating
+system's per-user data directory, not the project folder, so switching
+branches or deleting the checkout never destroys a player's company.
+
+```text
+Windows   %LOCALAPPDATA%\my-tiny-office\my-tiny-office.db
+macOS     ~/Library/Application Support/my-tiny-office/my-tiny-office.db
+Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/my-tiny-office.db
+```
+
+`MY_TINY_OFFICE_DB_PATH` overrides the location.
+
+### Initialization
+
+Opening the database creates the file and its directory if they are missing,
+sets `journal_mode = WAL`, `foreign_keys = ON`, and `busy_timeout`, then applies
+pending migrations. SQLite disables foreign key enforcement per connection by
+default, so that pragma is required rather than optional.
+
+Existing data is never dropped or recreated. A second launch applies nothing.
+
+The connection is a lazy singleton cached on `globalThis` so that development
+hot reloads do not accumulate connections.
+
+### Migrations
+
+Schema changes are generated with `npm run db:generate` and the resulting SQL
+is committed under `drizzle/`. It is the only reproducible record of the
+schema, so a fresh clone can build the same database. `drizzle-kit push` is not
+used.
+
+### Mapping
+
+Repository adapters translate between rows and domain entities:
+
+- Branded identifiers are plain `TEXT`; they are re-branded when read.
+- `NULL` in a column is `undefined` in the domain.
+- Timestamps are `INTEGER` epoch milliseconds, matching the domain `Timestamp`
+  directly. No `Date` object crosses the boundary.
+- `save` is an upsert, because the repository contract does not distinguish
+  creating from updating.
+
+Database CHECK constraints mirror the domain unions and the status/timestamp
+invariants, so a mapping bug fails at write time instead of producing an
+invalid entity later.
+
 ### Transaction boundaries
 
-A use case is the intended transaction boundary, but transactions are not
-implemented yet. `settleDueTasks` may partially persist completed tasks if a
-repository write fails during the save loop. Atomic transaction semantics are
-deferred to the SQLite persistence layer.
+A use case is the transaction boundary. `AppContext` carries a
+`withTransaction` runner: a no-op for in-memory repositories, and explicit
+`BEGIN`/`COMMIT`/`ROLLBACK` for SQLite. `settleDueTasks` wraps its settlement
+and writes in it, so a failed write leaves no task completed.
+
+The runner issues the statements itself rather than using the driver's
+synchronous transaction helper, which would commit without awaiting async work.
+A single connection holds one transaction at a time, so concurrent callers are
+queued.
 
 ## 16. Security
 

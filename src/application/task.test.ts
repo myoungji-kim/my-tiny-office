@@ -11,6 +11,7 @@ import {
   createInMemoryCompanyRepository,
   createInMemoryEmployeeRepository,
   createInMemoryTaskRepository,
+  withoutTransaction,
 } from "./in-memory-repositories";
 import { assignTask, completeTask, createTask, settleDueTasks, startTask } from "./task";
 
@@ -38,6 +39,7 @@ function createContext(): TestContext {
       return current;
     },
     newId: () => `id-${(idCounter += 1)}`,
+    withTransaction: withoutTransaction,
   };
 
   return {
