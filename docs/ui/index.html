@@ -178,6 +178,11 @@
   <a href="connect.html" data-p="connect" data-ko="연결" data-en="Connect">연결</a>
   <a href="components.html" data-p="components" data-ko="컴포넌트" data-en="Components">컴포넌트</a>
   <a href="characters.html" data-p="characters" data-ko="캐릭터" data-en="Cast">캐릭터</a>
+  <span class="sep"></span>
+  <span class="lang" id="lang">
+    <button type="button" data-lang="ko">한국어</button>
+    <button type="button" data-lang="en">English</button>
+  </span>
 </nav>
 <div class="wrap">
   <header class="top">
@@ -323,6 +328,84 @@
       else if (l === "en") a.href += "?lang=en";
       if (a.dataset.p !== "index") a.textContent = a.dataset[l];
       else a.setAttribute("aria-label", a.dataset[l]);
+    }
+  }
+</script>
+<script>
+  // The front door translates too, or choosing English here is a one-way trip.
+  const EXAMPLES = {
+    "토큰 값·네이밍·i18n·접근성처럼 글로 적어야 하는 것은": "Everything that has to be written down — tokens, naming, i18n, accessibility — is in",
+    "에, 방향과 화면 구성은": ", and the direction and screen structure are in",
+    "에 있습니다.\n      지나간 방향은": ". Superseded directions sit in",
+    "에 비교용으로만 남아 있습니다 — 기준이 아닙니다.": " for comparison only. They are not the standard.",
+    "화면을 새로 만들거나 고칠 때 먼저 이 페이지들을 열어 봅니다. 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.": "Open these before building or changing a screen. A pattern that is not here gets added here first.",
+    "미리보기는 스크린샷이 아니라 실제 페이지예요": "These previews are the real pages, not screenshots",
+    "페이지를 고치면 이 카드의 그림도 같이 바뀌어요. 그래서 이 화면은 낡을 수가 없어요.": "Change a page and its picture here changes with it, so this screen cannot go stale.",
+    "규칙 문서": "The written rules",
+    "첫 실행": "First run",
+    "회사 만들기부터 첫 직원까지 3단계. 첫 화면부터 사무실을 보여주고, Claude Code 없이 끝납니다.": "Three steps from company to first hire. It shows the office on screen one and finishes without Claude Code.",
+    "단계 표시": "Steps",
+    "입력 필드": "Fields",
+    "사무실 미리보기": "Office preview",
+    "종족 고르기": "Species picker",
+    "사무실 화면": "Office screen",
+    "화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.": "The standard for a whole screen: sidebar, header, tabs, the tilemap and the employee cards, assembled.",
+    "레이아웃": "Layout",
+    "컬러 토큰": "Colour tokens",
+    "타일 엔진": "Tile engine",
+    "상태 표시": "Status",
+    "행동 팝오버": "Action popover",
+    "직원 화면": "People screen",
+    "목록·상세의 기준. 조직도와 함께, 직원에게 알려준 기억이 실제 업무에서 쓰인 기록까지 들어 있습니다.": "The standard for list and detail. The org chart, and the record of taught memory actually being used.",
+    "목록 · 상세": "List · detail",
+    "조직도": "Org chart",
+    "기억": "Memory",
+    "리뷰 분야": "Review areas",
+    "활동 기록": "Activity",
+    "에이전트 연결": "Agent connection",
+    "직원을 실제로 일하게 만드는 화면. 막힌 상태 셋과, 우리가 대신 해줄 수 없는 것을 말하는 방식이 들어 있습니다.": "Putting an employee to real work: the three blocked states, and how to say what we cannot do for you.",
+    "연결 모달": "Connect modal",
+    "준비 확인": "Readiness",
+    "막힌 상태": "Blocked states",
+    "에이전트 표식": "Agent mark",
+    "컴포넌트": "Components",
+    "버튼·메뉴 행·알림·빈 상태·확인 창의 기준. 하면 안 되는 예시가 짝으로 들어 있습니다.": "Buttons, menu rows, notices, empty states and dialogs — each paired with what not to do.",
+    "버튼": "Buttons",
+    "메뉴 행": "Menu rows",
+    "상태 칩": "Status chips",
+    "알림": "Notices",
+    "빈 상태": "Empty states",
+    "확인 창": "Dialogs",
+    "직원 캐릭터": "The cast",
+    "동물 캐스트 20종의 기준. 실루엣 계열, 배율별 가독성, 이름 규칙이 함께 있습니다.": "Twenty animals: the silhouette families, how they read at each scale, and the naming rules.",
+    "스프라이트 20종": "20 sprites",
+    "실루엣 계열": "Silhouette families",
+    "팔레트 키": "Palette keys",
+    "배율": "Scale",
+    "이름 규칙": "Naming",
+    "규칙은 문서에, 모양은 여기에": "Rules in the docs, shapes here"
+  };
+  {
+    const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+    document.documentElement.lang = lang;
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+    if (lang === "en") {
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const hits = [];
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (n.parentElement.closest(".devbar")) continue;
+        const k = n.nodeValue.trim();
+        if (k && EXAMPLES[k]) hits.push([n, EXAMPLES[k]]);
+      }
+      for (const [n, v] of hits) n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), v);
     }
   }
 </script>

@@ -872,7 +872,9 @@
 
   const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
 
-  let lang = "ko";
+  // Every other page reads the language from the URL; this one has to as
+  // well, or the bar's links quietly undo themselves.
+  let lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
   const t = () => TEXT[lang];
 
   /* ── state ───────────────────────────────────────────────────── */
@@ -957,11 +959,15 @@
   document.getElementById("lang").addEventListener("click", (e) => {
     const b = e.target.closest("[data-lang]");
     if (!b) return;
-    lang = b.dataset.lang;
-    for (const x of document.querySelectorAll("[data-lang]")) x.setAttribute("aria-pressed", String(x === b));
-    applyLang();
-    if (!panes[3].hasAttribute("hidden")) rerenderArrival();
+    const u = new URL(location.href);
+    u.searchParams.set("lang", b.dataset.lang);
+    location.href = u.toString();
   });
+
+  for (const b of document.querySelectorAll("[data-lang]")) {
+    b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+  }
+  applyLang();
 
   document.getElementById("restart").addEventListener("click", () => {
     chosen = null;
