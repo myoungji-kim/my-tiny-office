@@ -57,7 +57,7 @@
 
   /* ═══ the button system ═══ */
   .btn {
-    display: inline-flex; align-items: center; gap: 7px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     font: inherit; font-weight: 600; white-space: nowrap;
     border-radius: 999px; border: 1px solid transparent;
     cursor: pointer; transition: background .1s, border-color .1s;
@@ -77,7 +77,8 @@
   .btn-danger { background: var(--bad); color: #fff; }
   .btn-danger:hover { filter: brightness(1.06); }
   .btn:disabled { opacity: .45; cursor: default; }
-  .btn:focus-visible, .ibtn:focus-visible, .addcard:focus-visible, .mrow:focus-visible {
+  .btn:focus-visible, .ibtn:focus-visible, .addcard:focus-visible, .mrow:focus-visible,
+  .notice:focus-visible, .dlg:focus-visible {
     outline: 2px solid var(--brand); outline-offset: 2px;
   }
 
@@ -157,6 +158,68 @@
   .mrow:disabled { color: var(--faint); cursor: default; background: none; }
   .mrow:disabled svg { color: var(--faint); }
 
+
+  /* ═══ notices, empty states, dialogs ═══ */
+  .notice {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: var(--r-card, 12px); padding: 13px 14px;
+  }
+  .n-ic {
+    width: 22px; height: 22px; border-radius: 999px; flex: none; margin-top: 1px;
+    display: grid; place-items: center; background: var(--sunk); color: var(--muted);
+  }
+  .n-ic svg { width: 13px; height: 13px; }
+  .n-tx { min-width: 0; flex: 1; }
+  .n-tx b { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+  .n-tx span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
+  .notice-ok { border-color: #bfe6cf; }
+  .notice-ok .n-ic { background: var(--ok-soft); color: #1f7a48; }
+  .notice-warn { border-color: #f0d8a8; }
+  .notice-warn .n-ic { background: var(--warn-soft); color: #8a5c10; }
+  .notice-bad { border-color: #f4c2c3; }
+  .notice-bad .n-ic { background: var(--bad-soft); color: #a8322f; }
+
+  .locked {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--subtle); border: 1px dashed var(--line-2);
+    border-radius: var(--r-card, 12px); padding: 11px 13px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .locked svg { width: 14px; height: 14px; flex: none; }
+
+  .empty {
+    display: grid; justify-items: center; gap: 4px; text-align: center;
+    padding: 30px 20px; border-radius: var(--r-card, 12px);
+    border: 1px dashed var(--line-2); background: var(--subtle);
+  }
+  .e-ic {
+    width: 38px; height: 38px; border-radius: 999px; background: var(--sunk);
+    display: grid; place-items: center; color: var(--faint); margin-bottom: 5px;
+  }
+  .e-ic svg { width: 17px; height: 17px; }
+  .empty b { font-size: 14px; font-weight: 600; }
+  .empty p { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 42ch; }
+  .e-acts { display: flex; gap: 7px; margin-top: 11px; }
+
+  .dlg {
+    display: flex; align-items: flex-start; gap: 13px; width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 18px 48px rgb(20 20 25 / .17);
+  }
+  .d-ic {
+    width: 34px; height: 34px; border-radius: 999px; flex: none;
+    display: grid; place-items: center; background: var(--sunk); color: var(--muted);
+  }
+  .d-ic svg { width: 16px; height: 16px; }
+  .dlg-bad .d-ic { background: var(--bad-soft); color: #a8322f; }
+  .d-body { min-width: 0; flex: 1; }
+  .d-t { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.45; }
+  .d-d { margin: 5px 0 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .d-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
   .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
   .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
   .exlabel { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 10px; }
@@ -167,7 +230,7 @@
 
 <div class="wrap">
   <header class="top">
-    <h1>버튼과 메뉴 행</h1>
+    <h1>컴포넌트</h1>
     <p>
       크롬은 무채색으로 두고 컬러는 사무실과 데이터에만 씁니다. 그래서 주 버튼도
       브랜드 컬러가 아니라 <strong>니어블랙</strong>입니다. 팝오버 안에서는 버튼 대신
@@ -424,6 +487,136 @@
     </div>
   </section>
 
+
+  <section>
+    <h2>Notices</h2>
+    <p class="note">
+      화면 안에서 상황을 알리는 줄입니다. <strong>아이콘 · 제목 한 줄 · 설명 한 줄 · 오른쪽 행동</strong>
+      순서를 지킵니다. 설명은 무슨 일이 일어났는지 또는 무엇을 하면 되는지를 말하고,
+      상태 이름만 반복하지 않습니다.
+    </p>
+
+    <div class="sg-stack" style="display:flex;flex-direction:column;gap:10px">
+      <div class="notice">
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
+        <span class="n-tx"><b>어제 하던 업무가 남아 있어요</b><span>모카 · 결제 API 에러 응답 구조 변경 · 22/30분</span></span>
+        <span class="n-acts">
+          <button class="btn btn-ghost btn-sm" type="button">나중에</button>
+          <button class="btn btn-secondary btn-sm" type="button">이어서 하기</button>
+        </span>
+      </div>
+
+      <div class="notice notice-ok">
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg></span>
+        <span class="n-tx"><b>두부가 로그인 폼 구현을 끝냈어요</b><span>25분 걸렸어요 · PR이 리뷰를 기다리고 있어요</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">PR 보기</button></span>
+      </div>
+
+      <div class="notice notice-warn">
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
+        <span class="n-tx"><b>단풍이 30분째 같은 업무에 머물러 있어요</b><span>예상 20분짜리 업무예요. 막혔는지 한번 확인해 보세요.</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">업무 보기</button></span>
+      </div>
+
+      <div class="notice notice-bad">
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></span>
+        <span class="n-tx"><b>모카의 에이전트 연결이 끊어졌어요</b><span>진행 중이던 업무는 그대로 있어요. 다시 연결하면 이어서 해요.</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 연결</button></span>
+      </div>
+
+      <div class="locked"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg><span>직원을 고용하면 업무를 맡길 수 있어요. 방은 지금 만들어 둬도 돼요.</span></div>
+    </div>
+
+    <h3>언제 무엇을 쓰나</h3>
+    <div class="spec"><code>기본</code><span>알려만 주면 되는 일. 되돌릴 것도, 막힌 것도 없습니다.</span></div>
+    <div class="spec"><code>ok</code><span>방금 끝난 일. <strong>결과</strong>를 말합니다 — "완료됨"이 아니라 무엇이 끝났는지.</span></div>
+    <div class="spec"><code>warn</code><span>아직 고장은 아니지만 봐야 하는 일. 무엇을 확인하면 되는지 적습니다.</span></div>
+    <div class="spec"><code>bad</code><span>실패했거나 끊어진 일. <strong>데이터가 무사한지 먼저 말합니다.</strong></span></div>
+    <div class="spec"><code>.locked</code><span>아직 쓸 수 없는 영역. 왜 잠겼는지와 <strong>지금 할 수 있는 것</strong>을 같이 적습니다.</span></div>
+  </section>
+
+  <section>
+    <h2>Empty states</h2>
+    <p class="note">
+      비어 있는 것은 잘못된 상태가 아닙니다. <strong>무엇이 없는지 · 채우면 무슨 일이 생기는지 · 채우는 버튼</strong>
+      셋을 줍니다. 사과하지 않습니다.
+    </p>
+    <div class="grid2">
+      <div class="empty">
+        <span class="e-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="5.4" r="2.5"/><path d="M3 13.4c0-2.7 2.2-4.9 5-4.9s5 2.2 5 4.9"/></svg></span>
+        <b>아직 직원이 없어요</b>
+        <p>첫 직원을 고용하면 사무실에 자리를 잡고 바로 업무를 받을 수 있어요.</p>
+        <span class="e-acts"><button class="btn btn-primary btn-sm" type="button">직원 고용</button></span>
+      </div>
+      <div class="empty">
+        <span class="e-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.5M10 2v3.5M4.2 5.5h7.6v3a3.8 3.8 0 0 1-7.6 0z"/><path d="M8 12.3V14"/></svg></span>
+        <b>아직 연결된 에이전트가 없어요</b>
+        <p>직원에게 Claude Code를 연결하면 맡긴 업무를 실제로 처리해요. 연결 없이도 게임은 돌아가요.</p>
+        <span class="e-acts">
+          <button class="btn btn-secondary btn-sm" type="button">연결하기</button>
+          <button class="btn btn-ghost btn-sm" type="button">그냥 둘러보기</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Confirm dialogs</h2>
+    <p class="note">
+      브라우저 <code>confirm()</code> 대신 씁니다. 되돌리기 어려운 일은 위험 모양이고,
+      <strong>포커스가 취소 쪽에 먼저 갑니다.</strong> 확인 버튼 라벨은 "확인"이 아니라
+      <strong>무슨 일이 일어나는지</strong>를 말합니다.
+    </p>
+    <div class="sg-stack" style="display:flex;flex-direction:column;gap:18px;align-items:center">
+      <div class="dlg dlg-bad">
+        <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
+        <div class="d-body">
+          <p class="d-t">모카를 내보낼까요?</p>
+          <p class="d-d">진행 중이던 업무는 대기 상태로 돌아가고 자리가 비워져요. 쌓은 능력치는 사라져요.</p>
+          <div class="d-acts">
+            <button class="btn btn-secondary btn-md" type="button" autofocus>계속 두기</button>
+            <button class="btn btn-danger btn-md" type="button">내보내기</button>
+          </div>
+        </div>
+      </div>
+      <div class="dlg">
+        <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
+        <div class="d-body">
+          <p class="d-t">백엔드팀 전체에 이 업무를 맡길까요?</p>
+          <p class="d-d">지금 대기 중인 직원 2명이 같은 업무를 나눠 받아요.</p>
+          <div class="d-acts">
+            <button class="btn btn-secondary btn-md" type="button">취소</button>
+            <button class="btn btn-primary btn-md" type="button">2명에게 맡기기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Do &amp; don&rsquo;t</h3>
+    <div class="grid2">
+      <div class="good-ex">
+        <div class="exlabel" style="color:#1f7a48">✓ DO</div>
+        <div style="font-size:15px;font-weight:600">모카를 내보낼까요?</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">진행 중이던 업무는 대기 상태로 돌아가요.</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" type="button">계속 두기</button>
+          <button class="btn btn-danger btn-sm" type="button">내보내기</button>
+        </div>
+        <div class="note" style="margin:10px 0 0">무슨 일이 일어나는지 쓰고, 버튼이 그 일을 말합니다.</div>
+      </div>
+      <div class="bad-ex">
+        <div class="exlabel" style="color:#a8322f">✕ DON&rsquo;T</div>
+        <div style="font-size:15px;font-weight:600">정말 삭제하시겠습니까?</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">이 작업은 되돌릴 수 없습니다.</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" type="button">취소</button>
+          <button class="btn btn-danger btn-sm" type="button">확인</button>
+        </div>
+        <div class="note" style="margin:10px 0 0">무엇이 지워지는지 말하지 않고, "확인"은 아무것도 알려주지 않습니다.</div>
+      </div>
+    </div>
+  </section>
+
   <section>
     <h2>Rules</h2>
     <ul style="margin:0;padding-left:20px;line-height:2">
@@ -438,6 +631,10 @@
       <li>진행 중에는 라벨을 바꾸고 폭을 유지해 레이아웃이 흔들리지 않게 합니다.</li>
       <li>포커스는 <code>:focus-visible</code> 2px 브랜드 아웃라인, 어디서도 제거하지 않습니다.</li>
       <li>라벨은 전부 i18n을 거칩니다. 한글에 자간·대문자 변환을 걸지 않습니다.</li>
+      <li>알림과 확인 창은 <strong>상태 이름이 아니라 무슨 일이 일어났는지</strong>를 씁니다.</li>
+      <li>실패 알림은 <strong>데이터가 무사한지 먼저</strong> 말합니다.</li>
+      <li>되돌릴 수 없는 확인 창은 위험 모양이고 <strong>포커스가 취소에 먼저</strong> 갑니다.</li>
+      <li>확인 버튼은 "확인"이 아니라 <strong>일어날 일</strong>을 라벨로 씁니다.</li>
     </ul>
   </section>
 </div>

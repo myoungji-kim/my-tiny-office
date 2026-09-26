@@ -138,7 +138,70 @@ A status is always accompanied by a text label somewhere in the same view.
 
 ---
 
-## 7. Pixel characters
+## 7. Notices, empty states and dialogs
+
+Shapes are in `ui/components.html`. The rules:
+
+### Notice
+
+`아이콘 · 제목 한 줄 · 설명 한 줄 · 오른쪽 행동`, in that order.
+
+| Variant | When | The description must say |
+| --- | --- | --- |
+| default | Something happened worth knowing | What happened |
+| `notice-ok` | Something finished | **What** finished, not that it finished |
+| `notice-warn` | Not broken, but worth a look | What to check |
+| `notice-bad` | Failed or disconnected | **Whether the data survived**, first |
+| `.locked` | An area is not usable yet | Why, and what *can* be done now |
+
+A failure notice that does not say what happened to the player's work is not
+finished. "에이전트 연결이 끊어졌어요" is half of it; "진행 중이던 업무는
+그대로 있어요" is the half that matters.
+
+### Empty state
+
+`아이콘 · 무엇이 없는지 · 채우면 무슨 일이 생기는지 · 채우는 버튼`.
+
+An empty state is not an error and does not apologise. Offer the action that
+fills it, and — where the feature is optional — an honest way to skip it.
+
+### Confirm dialog
+
+Replaces `confirm()`. Only for work that is hard to undo.
+
+- Destructive dialogs use the danger icon and a danger confirm button.
+- **Focus starts on cancel**, not on confirm.
+- `Escape` cancels.
+- The confirm button is labelled with **what will happen** — `내보내기`,
+  `2명에게 맡기기` — never `확인`.
+
+A long blocking operation would want a progress lock box. Nothing in the game
+blocks long enough yet, so it is not in the system; add it when starting an
+agent session proves slow.
+
+---
+
+## 8. Writing
+
+The interface talks about the player's office, not about itself.
+
+| Do | Don't |
+| --- | --- |
+| 모카를 내보낼까요? | 정말 삭제하시겠습니까? |
+| 진행 중이던 업무는 대기 상태로 돌아가요. | 이 작업은 되돌릴 수 없습니다. |
+| 두부가 로그인 폼 구현을 끝냈어요 | 작업 완료 |
+| 내보내기 | 확인 |
+| 직원을 고용하면 업무를 맡길 수 있어요 | 권한이 없습니다 |
+
+- Name the thing. `업무` and `직원` beat `항목` and `대상`.
+- Say the consequence before asking for the confirmation.
+- Never make a status name do the work of a sentence. `완료됨` tells the
+  player nothing they could not see.
+- Keep it plain. This is a cozy game, not a console.
+
+---
+
+## 9. Pixel characters
 
 Full cast and the silhouette test: `ui/characters.html`.
 
@@ -170,7 +233,7 @@ Rules for a new species:
 
 ---
 
-## 8. Naming
+## 10. Naming
 
 | Field | Rule |
 | --- | --- |
@@ -184,7 +247,7 @@ Rules for a new species:
 
 ---
 
-## 9. Localization
+## 11. Localization
 
 - All game text goes through i18n. Player input does not.
 - **Never bake text into canvas, SVG or any other asset.** Names and labels are
@@ -195,7 +258,7 @@ Rules for a new species:
 
 ---
 
-## 10. Accessibility
+## 12. Accessibility
 
 - The office canvas is `aria-hidden`. The `<button>`s in the overlay carry the
   names and the interaction.
@@ -210,7 +273,7 @@ Rules for a new species:
 
 ---
 
-## 11. Do and don't
+## 13. Do and don't
 
 | Do | Don't |
 | --- | --- |
@@ -222,3 +285,6 @@ Rules for a new species:
 | Colour plus shape for status | Colour alone |
 | Add the pattern to `ui/` first | Invent a pattern in a feature branch |
 | Let the sprite say the species | Write the species next to the name |
+| Say what happened | Say only the status name |
+| Label a confirm button with its effect | Label it `확인` |
+| Focus cancel first in a destructive dialog | Focus the destructive action |
