@@ -449,6 +449,13 @@ Runtime adapters remain outside the persistence/domain core.
 
 Store identifiers and configuration references, not secret credentials.
 
+### Transaction boundaries
+
+A use case is the intended transaction boundary, but transactions are not
+implemented yet. `settleDueTasks` may partially persist completed tasks if a
+repository write fails during the save loop. Atomic transaction semantics are
+deferred to the SQLite persistence layer.
+
 ## 16. Security
 
 Never:
