@@ -307,6 +307,84 @@ Claude Code authentication remains the responsibility of Claude Code.
 
 My Tiny Office should integrate through supported Claude Code mechanisms rather than reading private credential stores or extracting authentication tokens.
 
+### What the CLI actually gives us
+
+Measured against `claude 2.1.283`. Every mapping below is a supported command,
+not a guess.
+
+| `AgentRuntime` | Claude Code |
+| --- | --- |
+| availability | `claude auth status --json` |
+| `launch` | `claude --bg <prompt>` → prints a short id |
+| `attach` | `claude attach <id>` |
+| `getStatus` | `claude agents --json` (also `--cwd <path>`) |
+| events / output | `claude logs <id>`, or `--print --output-format stream-json` |
+| `detach` | `claude stop <id>` — conversation is kept |
+| `dispose` | `claude rm <id>` |
+| resume | `claude --resume <session-id>` |
+
+A `--print` run returns JSON carrying `session_id`, `result`, `is_error`,
+`subtype`, `num_turns`, `permission_denials` and full `usage` with
+`total_cost_usd`. That is the whole `AgentStatus` surface without parsing
+terminal output.
+
+### Memory reaches the model through the system prompt
+
+`--append-system-prompt` (and `--append-system-prompt-file`) is the mechanism.
+Verified in an empty directory, so the repository's own `CLAUDE.md` could not
+account for the answer:
+
+```text
+--append-system-prompt "너의 기억: 복합 인덱스는 컬럼 순서가 중요하다. …"
+-p "네 기억에 있는 인덱스 규칙을 한 문장으로만 말해줘."
+→ "복합 인덱스는 컬럼 순서가 중요하며, (a,b)와 (b,a)는 다른 인덱스다."
+```
+
+This is what the employees screen assumes: **the memories in the task's area are
+selected and carried into that task**, not dumped wholesale. Company memory can
+take the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
+
+### Two things happen outside the app
+
+Neither can be done for the player, and both need a screen that says so.
+
+1. **Login.** `claude auth login` opens a browser; `--claudeai`, `--console`
+   and `--sso` skip the interactive choice. The game may spawn this command —
+   that is invoking the vendor's own flow, not implementing authentication —
+   but it must never collect a token itself.
+2. **Workspace trust.** A background session in an untrusted folder refuses:
+   *"Workspace not trusted. Run `claude` in <dir> once and accept the trust
+   prompt."* **There is no non-interactive flag for this.** `-p` skips the
+   dialog instead of satisfying it, which is why a print run succeeds where
+   `--bg` does not.
+
+So connecting an employee needs one interactive `claude` run in their
+workspace, whatever we do about login. One honest instruction beats two partial
+automations.
+
+### `--bare` is not available to us
+
+It cuts the per-session overhead but states that auth is "strictly
+ANTHROPIC_API_KEY or apiKeyHelper — OAuth and keychain are never read". The MVP
+authenticates through a Claude subscription, so `--bare` is out.
+
+### Sessions are global; ownership is ours
+
+`claude agents --json` lists every background session on the machine — the test
+run saw nine across three unrelated folders. This is exactly why a session is
+owned through `Company → Employee → Agent`: the game stores the session ids it
+launched and shows only those. `--cwd` is a recovery signal, never identity.
+
+### Cost has a floor
+
+A one-sentence Haiku answer cost **$0.029**, because the request carried ~13k
+cache-creation and ~16k cache-read tokens of system prompt and tool definitions
+before the 10-token question. Per-task cost is therefore dominated by a fixed
+overhead, not by the prompt.
+
+Two consequences: memory length matters less than the number of tasks, and
+`--max-budget-usd` belongs on every launch.
+
 ### API integration is separate
 
 An eventual Anthropic API runtime is a different integration:

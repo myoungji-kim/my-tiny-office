@@ -298,8 +298,13 @@ The second row is the one that matters. The fix happens somewhere the game
 cannot reach, so the screen has to say so plainly. **Never add a token field.**
 Never read a credential store. This is where that temptation appears.
 
-*Open:* how to check "logged in" without spending tokens. `claude -p` bills a
-request. Settle this by experiment before designing the connection screen.
+`claude auth status --json` answers this for free and follows account changes
+live. See ARCHITECTURE.md for the rest of the measured runtime surface.
+
+Connecting also needs the workspace to be trusted, and **that has no
+non-interactive path** — one `claude` run in the folder, accepted by the
+player. The connection screen has to ask for it as plainly as it asks for
+login.
 
 ## Localization
 
