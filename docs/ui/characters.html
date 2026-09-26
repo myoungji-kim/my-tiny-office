@@ -724,7 +724,7 @@
   for (const family of FAMILIES) {
     const group = CAST.filter((c) => c.family === family);
     const wrap = document.createElement("div");
-    wrap.className = "family";
+    wrap.className = "js-family";
     wrap.innerHTML = `<div class="grp"><h3>${family}</h3><span class="cnt">${group.length}</span></div>`;
     const grid = document.createElement("div");
     grid.className = "famgrid";

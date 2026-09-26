@@ -557,7 +557,7 @@
       상태 이름만 반복하지 않습니다.
     </p>
 
-    <div class="sg-stack" style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:10px">
       <div class="notice">
         <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
         <span class="n-tx"><b>어제 하던 업무가 남아 있어요</b><span>모카 · 결제 API 에러 응답 구조 변경 · 22/30분</span></span>
@@ -628,13 +628,13 @@
       <strong>포커스가 취소 쪽에 먼저 갑니다.</strong> 확인 버튼 라벨은 "확인"이 아니라
       <strong>무슨 일이 일어나는지</strong>를 말합니다.
     </p>
-    <div class="sg-stack" style="display:flex;flex-direction:column;gap:18px;align-items:center">
+    <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
       <div class="dlg dlg-bad">
         <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
         <div class="d-body">
           <p class="d-t">모카를 내보낼까요?</p>
           <p class="d-d">진행 중이던 업무는 대기 상태로 돌아가고 자리가 비워져요. 쌓은 능력치는 사라져요.</p>
-          <div class="d-acts">
+          <div class="dlg-acts">
             <button class="btn btn-secondary btn-md" type="button" autofocus>계속 두기</button>
             <button class="btn btn-danger btn-md" type="button">내보내기</button>
           </div>
@@ -645,7 +645,7 @@
         <div class="d-body">
           <p class="d-t">백엔드팀 전체에 이 업무를 맡길까요?</p>
           <p class="d-d">지금 대기 중인 직원 2명이 같은 업무를 나눠 받아요.</p>
-          <div class="d-acts">
+          <div class="dlg-acts">
             <button class="btn btn-secondary btn-md" type="button">취소</button>
             <button class="btn btn-primary btn-md" type="button">2명에게 맡기기</button>
           </div>
