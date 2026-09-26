@@ -71,6 +71,21 @@
   * { box-sizing: border-box; }
   button { font: inherit; color: inherit; }
 
+  .lang {
+    position: fixed; bottom: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(20 20 25 / .14);
+    opacity: .5; transition: opacity .12s;
+  }
+  .lang:hover, .lang:focus-within { opacity: 1; }
+  .lang button {
+    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
+    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   .app {
     max-width: 1240px; margin: 0 auto;
     background: var(--surface);
@@ -389,6 +404,11 @@
   .pick-new .pick-t { font-weight: 400; }
 </style>
 
+<div class="lang" id="lang">
+  <button type="button" data-lang="ko">한국어</button>
+  <button type="button" data-lang="en">English</button>
+</div>
+
 <div class="app">
   <nav class="side">
     <div class="side-top">
@@ -400,21 +420,21 @@
     </div>
 
     <div class="nav">
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="2"/></svg><span>홈</span></a>
-      <a href="office.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span>사무실</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span>프로젝트</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="4.5" cy="4.5" r="1.8"/><circle cx="4.5" cy="13.5" r="1.8"/><circle cx="13.5" cy="9" r="1.8"/><path d="M4.5 6.3v5.4M6.3 13.5h3.2a2 2 0 0 0 2-2v-.8"/></svg><span>PR · 코드리뷰</span><span class="badge">3</span></a>
-      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span>직원</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="2"/></svg><span data-t="nav.home">홈</span></a>
+      <a href="office.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span data-t="nav.office">사무실</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span data-t="nav.projects">프로젝트</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="4.5" cy="4.5" r="1.8"/><circle cx="4.5" cy="13.5" r="1.8"/><circle cx="13.5" cy="9" r="1.8"/><path d="M4.5 6.3v5.4M6.3 13.5h3.2a2 2 0 0 0 2-2v-.8"/></svg><span data-t="nav.prs">PR · 코드리뷰</span><span class="badge">3</span></a>
+      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span data-t="nav.people">직원</span></a>
     </div>
 
     <div class="rule"></div>
-    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
+    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
     <div id="members"></div>
 
     <div class="side-foot">
       <div class="rule" style="margin:0 4px 8px"></div>
       <div class="nav">
-        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span>설정</span></a>
+        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span data-t="nav.settings">설정</span></a>
       </div>
     </div>
   </nav>
@@ -423,18 +443,18 @@
     <div class="head">
       <div class="head-row">
         <span>
-          <h1>직원</h1>
+          <h1 data-t="title">직원</h1>
           <span class="sub" id="headSub"></span>
         </span>
         <div class="head-right">
-          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>직원 고용</button>
+          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="hire">직원 고용</span></button>
         </div>
       </div>
 
       <div class="tabs" id="tabs">
-        <button class="tab" data-view="list" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg>목록<span class="n" id="nList"></span></button>
-        <button class="tab" data-view="org"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="3.6" rx=".8"/><rect x="1.6" y="10.6" width="5" height="3.6" rx=".8"/><rect x="9.4" y="10.6" width="5" height="3.6" rx=".8"/><path d="M8 5.4v2.6M4.1 10.6V8h7.8v2.6"/></svg>조직도</button>
-        <button class="tab" data-view="memory"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg>기억<span class="n" id="nMem"></span></button>
+        <button class="tab" data-view="list" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg><span data-t="tabs.list">목록</span><span class="n" id="nList"></span></button>
+        <button class="tab" data-view="org"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="3.6" rx=".8"/><rect x="1.6" y="10.6" width="5" height="3.6" rx=".8"/><rect x="9.4" y="10.6" width="5" height="3.6" rx=".8"/><path d="M8 5.4v2.6M4.1 10.6V8h7.8v2.6"/></svg><span data-t="tabs.org">조직도</span></button>
+        <button class="tab" data-view="memory"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg><span data-t="tabs.memory">기억</span><span class="n" id="nMem"></span></button>
       </div>
     </div>
 
@@ -454,8 +474,8 @@
         <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
         <div class="panel" style="margin-bottom:16px">
           <div class="panel-hd">
-            <h2>분야</h2>
-            <p>회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.</p>
+            <h2 data-t="areasTitle">분야</h2>
+            <p data-t="areasSub">회사가 정하는 목록이에요.</p>
           </div>
           <div class="panel-bd" id="areaTable"></div>
         </div>
@@ -463,15 +483,15 @@
         <div class="mem-cols">
           <div class="panel">
             <div class="panel-hd">
-              <h2>최근에 쓰인 기억</h2>
-              <p>알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
+              <h2 data-t="feedTitle">최근에 쓰인 기억</h2>
+              <p data-t="feedSub">알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
             </div>
             <div class="panel-bd" id="feed"></div>
           </div>
           <div class="panel">
             <div class="panel-hd">
-              <h2>회사 기억</h2>
-              <p>모든 직원이 함께 알고 있어요.</p>
+              <h2 data-t="companyTitle">회사 기억</h2>
+              <p data-t="companySub">모든 직원이 함께 알고 있어요.</p>
             </div>
             <div class="panel-bd" id="companyMem"></div>
           </div>
@@ -482,7 +502,7 @@
 </div>
 
 <div class="scrim" id="scrim" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-label="업무 맡기기" id="modal"></div>
+  <div class="modal" role="dialog" aria-modal="true" data-a="giveWork" aria-label="업무 맡기기" id="modal"></div>
 </div>
 
 <script>
@@ -924,101 +944,217 @@
     return el;
   }
 
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Employee nicknames are absent: the player wrote them.
+  const TEXT = {
+    ko: {
+      nav: { home: "홈", office: "사무실", projects: "프로젝트", prs: "PR · 코드리뷰", people: "직원", settings: "설정" },
+      title: "직원", hire: "직원 고용",
+      headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
+      tabs: { list: "목록", org: "조직도", memory: "기억" },
+      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
+      depts: { dev: "개발본부", product: "프로덕트" },
+      teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
+      memory: "기억", memCount: (n) => "기억 " + n, memCountShort: (n) => "<b>" + n + "</b>개 기억",
+      currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
+      doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
+      timesUsed: "기억이 쓰인 횟수", times: (n) => n + "회",
+      canReview: "리뷰할 수 있는 분야",
+      canReviewWhy: "이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.",
+      noReviewYet: "아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.",
+      carried: "업무마다 함께 들고 가요", chars: (n) => n + "자",
+      archivedLine: (n) => "보관함 " + n + "개 — 남겨 두지만 업무에 들고 가지 않아요",
+      showMore: (n) => n + "개 더 보기", fold: "접기",
+      fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
+      neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
+      howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
+      giveWork: "업무 맡기기", nobodyYet: "아직 아무도 없어요",
+      areasTitle: "분야", areasSub: "회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.",
+      reviewArea: "리뷰 분야", noReview: "리뷰 없음", nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
+      feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
+      companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
+      referenced: (who, mem) => josa2(who, "이", "가") + " <q>" + mem + "</q>" + (josaNeeds(mem) ? "을" : "를") + " 참고했어요",
+      assignTitle: (n) => n + (josaNeeds(n) ? "이" : "가") + " 맡을 업무",
+      backlog: "대기 중인 업무", newTask: "새 업무 만들기", minutes: (m) => m + "분",
+      broughtAlong: "이 업무에 들고 갈 기억",
+      noAreaMemory: (a) => a + " 기억이 없어요",
+      noAreaMemoryWhy: (n) => n + (josaNeeds(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
+      tellNow: "지금 알려주기", cancel: "취소", assignThis: "이 업무 맡기기", createAndAssign: "업무 만들고 맡기기",
+      nobodyKnowsArea: (list) => list.join(" · ") + (josaNeeds(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
+      nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
+      pickSomeone: "알려줄 직원 고르기",
+      coldTitle: (n) => "한 번도 쓰이지 않은 기억이 " + n + "개 있어요",
+      coldExample: (who, mem) => who + "의 “" + mem + "”",
+      coldWhy: " — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.",
+      review: "확인하기",
+    },
+    en: {
+      nav: { home: "Home", office: "Office", projects: "Projects", prs: "PRs · Review", people: "People", settings: "Settings" },
+      title: "People", hire: "Hire",
+      headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
+      tabs: { list: "List", org: "Org chart", memory: "Memory" },
+      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
+      depts: { dev: "Engineering", product: "Product" },
+      teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
+      memory: "Memory", memCount: (n) => n + " memories", memCountShort: (n) => "<b>" + n + "</b> memories",
+      currentTask: "Current task", onLeave: "On leave", lastFinished: "Last finished", joined: "Joined",
+      doneAndReviews: "Tasks · reviews", counts: (a, b) => a + " · " + b,
+      timesUsed: "Memories referenced", times: (n) => n + "×",
+      canReview: "Can review",
+      canReviewWhy: "They hold memory here, so they can be named a reviewer.",
+      noReviewYet: "No review areas yet. Teach them anything and they can take that seat.",
+      carried: "Carried into every task", chars: (n) => n + " chars",
+      archivedLine: (n) => "Archived " + n + " — kept, but not carried into work",
+      showMore: (n) => n + " more", fold: "Fold",
+      fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
+      neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
+      howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
+      giveWork: "Give them work", nobodyYet: "Nobody here yet",
+      areasTitle: "Areas", areasSub: "The company owns this list. A PR asks for one of them.",
+      reviewArea: "Review seat", noReview: "No seat", nobodyKnows: "Nobody knows this", addArea: "Add an area",
+      feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
+      companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
+      referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
+      assignTitle: (n) => "Work for " + n,
+      backlog: "Waiting", newTask: "Create a task", minutes: (m) => m + " min",
+      broughtAlong: "What they bring to this",
+      noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
+      noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
+      tellNow: "Teach them now", cancel: "Cancel", assignThis: "Assign this", createAndAssign: "Create and assign",
+      nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
+      nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
+      pickSomeone: "Pick someone to teach",
+      coldTitle: (n) => n + " memory has never been used",
+      coldExample: (who, mem) => who + "'s “" + mem + "”",
+      coldWhy: " — either no task has needed it yet, or it went to the wrong person.",
+      review: "Take a look",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  document.documentElement.lang = lang;
+  {
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+  }
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+  applyStatic();
+
   /* ── data ────────────────────────────────────────────────────── */
   const STATUS = {
-    working:   { label: "업무 중", color: "var(--warn)" },
-    ready:     { label: "준비됨",  color: "var(--info)" },
-    available: { label: "대기 중", color: "var(--ok)" },
-    vacation:  { label: "휴가 중", color: "var(--faint)" },
+    working:   { color: "var(--warn)" },
+    ready:     { color: "var(--info)" },
+    available: { color: "var(--ok)" },
+    vacation:  { color: "var(--faint)" },
   };
 
   // The company owns this list. A review seat is an area a PR can ask for;
   // 프로세스 is worth knowing but nobody reviews for it.
   const AREAS = [
-    { name: "아키텍처", seat: true },
-    { name: "타입 안정성", seat: true },
-    { name: "데이터베이스", seat: true },
-    { name: "보안", seat: true },
-    { name: "로컬라이제이션", seat: true },
-    { name: "기획", seat: true },
-    { name: "품질", seat: true },
-    { name: "프로세스", seat: false },
+    { name: "arch", seat: true },
+    { name: "types", seat: true },
+    { name: "db", seat: true },
+    { name: "security", seat: true },
+    { name: "l10n", seat: true },
+    { name: "product", seat: true },
+    { name: "quality", seat: true },
+    { name: "process", seat: false },
   ];
   const REVIEW_AREAS = AREAS.filter((a) => a.seat).map((a) => a.name);
 
   const backlog = [
-    { id: "t1", title: "결제 내역 페이지네이션", area: "데이터베이스", minutes: 25 },
-    { id: "t2", title: "주문 취소 API 추가", area: "아키텍처", minutes: 30 },
-    { id: "t3", title: "에러 메시지 영문 번역", area: "로컬라이제이션", minutes: 20 },
-    { id: "t4", title: "결제 웹훅 서명 검증", area: "보안", minutes: 35 },
+    { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
+    { id: "t2", title: { ko: "주문 취소 API 추가", en: "Add an order cancellation API" }, area: "arch", minutes: 30 },
+    { id: "t3", title: { ko: "에러 메시지 영문 번역", en: "Translate the error messages" }, area: "l10n", minutes: 20 },
+    { id: "t4", title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, area: "security", minutes: 35 },
   ];
 
   const people = [
     { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
-      dept: "개발본부", team: "백엔드팀", status: "working", joined: "2026. 3. 2.",
-      task: "결제 API 에러 응답 구조 변경", done: 41, reviews: 18,
-      style: ["설명은 짧게, 코드로 보여줘", "테스트를 먼저 써"],
+      dept: "dev", team: "backend", status: "working", joined: "2026. 3. 2.",
+      task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
+      style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }],
       memories: [
-        { area: "데이터베이스", text: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", from: "결제 조회가 느린 이슈", used: 14 },
-        { area: "데이터베이스", text: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", from: null, used: 9 },
-        { area: "아키텍처", text: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", from: "PR #4102", used: 22 },
-        { area: "타입 안정성", text: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", from: null, used: 11 },
-        { area: "프로세스", text: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", from: null, used: 7 },
-        { area: "프로세스", text: "예전 결제 모듈은 v1 스키마를 썼어요.", from: "v1 마이그레이션", used: 2, archived: true },
+        { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
+        { area: "db", text: { ko: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", en: "The payments table is partitioned by month. Never write a full scan." }, from: null, used: 9 },
+        { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", en: "No Date.now() in the domain layer. The current time arrives as an argument." }, from: { ko: "PR #4102", en: "PR #4102" }, used: 22 },
+        { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 },
+        { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 },
+        { area: "process", text: { ko: "예전 결제 모듈은 v1 스키마를 썼어요.", en: "The old payments module used the v1 schema." }, from: { ko: "v1 마이그레이션", en: "the v1 migration" }, used: 2, archived: true },
       ] },
     { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
-      dept: "개발본부", team: "프론트엔드팀", status: "working", joined: "2026. 4. 15.",
-      task: "로그인 폼 구현", done: 33, reviews: 9,
-      style: ["완성 전에 스크린샷을 남겨"],
+      dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
+      task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
+      style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }],
       memories: [
-        { area: "로컬라이제이션", text: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", from: "사이드바 자간이 깨진 이슈", used: 18 },
-        { area: "로컬라이제이션", text: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", from: "PR #4180", used: 6 },
-        { area: "프로세스", text: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", from: null, used: 12 },
+        { area: "l10n", text: { ko: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", en: "Never track Hangul. It pulls the jamo of a syllable apart." }, from: { ko: "사이드바 자간이 깨진 이슈", en: "the broken sidebar tracking" }, used: 18 },
+        { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
+        { area: "process", text: { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }, from: null, used: 12 },
       ] },
     { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
-      dept: "프로덕트", team: "기획팀", status: "ready", joined: "2026. 2. 20.",
-      task: "API 문서 작성", done: 27, reviews: 22,
-      style: ["막히면 30분 안에 물어봐"],
+      dept: "product", team: "planning", status: "ready", joined: "2026. 2. 20.",
+      task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
+      style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }],
       memories: [
-        { area: "기획", text: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", from: null, used: 15 },
-        { area: "기획", text: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", from: null, used: 8 },
-        { area: "프로세스", text: "금요일 오후에는 배포하지 않아요.", from: "금요일 배포가 말썽이던 주", used: 3 },
+        { area: "product", text: { ko: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", en: "Keep a task under 30 minutes. Longer means it is really two." }, from: null, used: 15 },
+        { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
+        { area: "process", text: { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }, from: { ko: "금요일 배포가 말썽이던 주", en: "the week Friday deploys went wrong" }, used: 3 },
       ] },
     { id: "p4", name: "삐약", species: "chick", role: "DBA",
-      dept: "개발본부", team: "백엔드팀", status: "available", joined: "2026. 5. 8.",
-      last: "인덱스 튜닝 완료", done: 19, reviews: 6,
-      style: ["마이그레이션은 두 번 확인해"],
+      dept: "dev", team: "backend", status: "available", joined: "2026. 5. 8.",
+      last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" }, done: 19, reviews: 6,
+      style: [{ ko: "마이그레이션은 두 번 확인해", en: "Check migrations twice" }],
       memories: [
-        { area: "데이터베이스", text: "마이그레이션은 항상 되돌릴 수 있게 써요.", from: "스키마 롤백이 안 된 사고", used: 11 },
-        { area: "데이터베이스", text: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", from: null, used: 5 },
-        { area: "데이터베이스", text: "NULL과 undefined를 오갈 때는 CHECK 제약을 같이 걸어요.", from: "결제 상태가 뒤집힌 버그", used: 8 },
-        { area: "데이터베이스", text: "외래 키에는 항상 인덱스를 같이 만들어요. 삭제가 느려져요.", from: null, used: 6 },
-        { area: "데이터베이스", text: "트랜잭션 안에서 외부 API를 호출하지 않아요.", from: "결제 타임아웃 장애", used: 13 },
-        { area: "데이터베이스", text: "집계 쿼리는 읽기 전용 커넥션으로 보내요.", from: null, used: 3 },
-        { area: "보안", text: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", from: null, used: 0 },
+        { area: "db", text: { ko: "마이그레이션은 항상 되돌릴 수 있게 써요.", en: "Always write a migration you can roll back." }, from: { ko: "스키마 롤백이 안 된 사고", en: "the rollback that would not roll back" }, used: 11 },
+        { area: "db", text: { ko: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", en: "Store time as epoch ms INTEGER. Never a date string." }, from: null, used: 5 },
+        { area: "db", text: { ko: "NULL과 undefined를 오갈 때는 CHECK 제약을 같이 걸어요.", en: "Mapping NULL to undefined needs a CHECK constraint beside it." }, from: { ko: "결제 상태가 뒤집힌 버그", en: "the flipped payment status" }, used: 8 },
+        { area: "db", text: { ko: "외래 키에는 항상 인덱스를 같이 만들어요. 삭제가 느려져요.", en: "Index every foreign key, or deletes crawl." }, from: null, used: 6 },
+        { area: "db", text: { ko: "트랜잭션 안에서 외부 API를 호출하지 않아요.", en: "Never call an external API inside a transaction." }, from: { ko: "결제 타임아웃 장애", en: "the payment timeout outage" }, used: 13 },
+        { area: "db", text: { ko: "집계 쿼리는 읽기 전용 커넥션으로 보내요.", en: "Send aggregate queries to the read-only connection." }, from: null, used: 3 },
+        { area: "security", text: { ko: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", en: "Never concatenate user input into a query." }, from: null, used: 0 },
       ] },
     { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
-      dept: "개발본부", team: "프론트엔드팀", status: "vacation", joined: "2026. 1. 12.",
-      back: "3일 후 복귀", done: 52, reviews: 14,
-      style: ["두 번 할 일이면 자동화해"],
+      dept: "dev", team: "frontend", status: "vacation", joined: "2026. 1. 12.",
+      back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
+      style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }],
       memories: [
-        { area: "보안", text: "비밀값은 .env에 두고 절대 커밋하지 않아요.", from: null, used: 9 },
-        { area: "프로세스", text: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", from: "배포가 한 번 깨진 날", used: 21 },
+        { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },
+        { area: "process", text: { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }, from: { ko: "배포가 한 번 깨진 날", en: "the day a deploy broke" }, used: 21 },
       ] },
   ];
 
   const companyMemories = [
-    { text: "커밋 메시지는 conventional prefix로 시작해요.", from: null, used: 34 },
-    { text: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", from: null, used: 28 },
-    { text: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", from: "스타일 가이드가 낡았던 주", used: 12 },
+    { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
+    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", en: "Player-facing text goes through i18n. Names the player typed do not." }, from: null, used: 28 },
+    { text: { ko: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", en: "When the docs and the code disagree, fix the docs." }, from: { ko: "스타일 가이드가 낡았던 주", en: "the week the style guide went stale" }, used: 12 },
   ];
 
   const feed = [
-    { who: "p1", mem: "도메인 레이어에서 Date.now()를 쓰지 않아요", on: "결제 API 에러 응답 구조 변경", when: "12분 전" },
-    { who: "p2", mem: "한글에는 letter-spacing을 걸지 않아요", on: "로그인 폼 구현", when: "34분 전" },
-    { who: "p1", mem: "복합 인덱스는 컬럼 순서가 중요해요", on: "결제 API 에러 응답 구조 변경", when: "1시간 전" },
-    { who: "p5", mem: "배포 전에 세 개를 모두 돌려요", on: "배포 파이프라인 정리", when: "2시간 전" },
-    { who: "p3", mem: "PR 설명에는 왜 했는지를 적어요", on: "API 문서 작성", when: "어제" },
+    { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "12분 전", en: "12 min ago" } },
+    { who: "p2", mem: { ko: "한글에는 letter-spacing을 걸지 않아요", en: "Never track Hangul" }, on: { ko: "로그인 폼 구현", en: "Build the login form" }, when: { ko: "34분 전", en: "34 min ago" } },
+    { who: "p1", mem: { ko: "복합 인덱스는 컬럼 순서가 중요해요", en: "Composite indexes care about column order" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "1시간 전", en: "1 hour ago" } },
+    { who: "p5", mem: { ko: "배포 전에 세 개를 모두 돌려요", en: "Run all three before a deploy" }, on: { ko: "배포 파이프라인 정리", en: "Tidy the deploy pipeline" }, when: { ko: "2시간 전", en: "2 hours ago" } },
+    { who: "p3", mem: { ko: "PR 설명에는 왜 했는지를 적어요", en: "A PR description says why" }, on: { ko: "API 문서 작성", en: "Write the API docs" }, when: { ko: "어제", en: "Yesterday" } },
   ];
 
   const ICON = {
@@ -1029,6 +1165,9 @@
     hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
   };
 
+  const josaNeeds = (w) => hasBatchim(w);
+  const josa2 = (w, withFinal, without) => w + (hasBatchim(w) ? withFinal : without);
+
   const hasBatchim = (word) => {
     const c = word.charCodeAt(word.length - 1);
     return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
@@ -1037,11 +1176,15 @@
 
   // Archived memory is kept but not carried into the work, so it counts for
   // neither coverage nor context size.
+  // Prose lives beside the data it belongs to, which keeps a memory and its
+  // translation from drifting apart.
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+
   const liveOf = (p) => p.memories.filter((m) => !m.archived);
   const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
   const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
   const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
-  const charsOf = (p) => liveOf(p).reduce((n, m) => n + m.text.length, 0);
+  const charsOf = (p) => liveOf(p).reduce((n, m) => n + tx(m.text).length, 0);
   const knowersOf = (area) => people.filter((p) => areasOf(p).includes(area));
 
   /* ── sidebar roster ──────────────────────────────────────────── */
@@ -1063,7 +1206,7 @@
   document.getElementById("nList").textContent = people.length;
   document.getElementById("nMem").textContent = totalMem;
   document.getElementById("headSub").textContent =
-    `${people.length}명 · 개발본부 ${people.filter((p) => p.dept === "개발본부").length} · 프로덕트 ${people.filter((p) => p.dept === "프로덕트").length}`;
+    t().headSub(people.length, people.filter((p) => p.dept === "dev").length, people.filter((p) => p.dept === "product").length);
 
   /* ── roster ──────────────────────────────────────────────────── */
   const roster = document.getElementById("roster");
@@ -1078,7 +1221,7 @@
       <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
       <span class="r-dept">${p.dept} · ${p.team}</span>
       <span class="areas">${areas.map((a) => `<span class="area-chip">${a}</span>`).join("")}</span>
-      <span class="r-mem"><b>${liveOf(p).length}</b>개 기억</span>`;
+      <span class="r-mem">${t().memCountShort(liveOf(p).length)}</span>`;
     b.querySelector(".r-av").prepend(avatar(p.species, 40));
     b.addEventListener("click", () => select(p.id));
     roster.appendChild(b);
@@ -1090,11 +1233,11 @@
   const memCard = (m) => {
     const cls = m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
     return `<div class="mem${m.used === 0 && !m.archived ? " cold-mem" : ""}">
-      <span class="mem-t">${m.text}</span>
+      <span class="mem-t">${tx(m.text)}</span>
       <span class="mem-m">
         ${m.from ? ICON.task : ICON.hand}
-        <span class="src">${m.from ? m.from + "에서" : "직접 알려줌"}</span>
-        <span class="used ${cls}">${m.used === 0 ? "아직 안 쓰임" : m.used + "회 참조"}</span>
+        <span class="src">${m.from ? t().fromWhere(tx(m.from)) : t().toldDirectly}</span>
+        <span class="used ${cls}">${m.used === 0 ? t().neverUsed : t().usedTimes(m.used)}</span>
       </span>
     </div>`;
   };
@@ -1126,7 +1269,7 @@
           ${
             rest.length
               ? `<div class="mem-rest" hidden>${rest.map(memCard).join("")}</div>
-                 <button class="mem-more" type="button" data-rest>${rest.length}개 더 보기</button>`
+                 <button class="mem-more" type="button" data-rest>${t().showMore(rest.length)}</button>`
               : ""
           }
         </div>`;
@@ -1136,10 +1279,10 @@
     const archived = p.memories.filter((m) => m.archived);
 
     const now = p.task
-      ? `<div class="kv"><span>현재 업무</span><b>${p.task}</b></div>`
+      ? `<div class="kv"><span>${t().currentTask}</span><b>${tx(p.task)}</b></div>`
       : p.back
-      ? `<div class="kv"><span>휴가</span><b>${p.back}</b></div>`
-      : `<div class="kv"><span>최근 완료</span><b>${p.last}</b></div>`;
+      ? `<div class="kv"><span>${t().onLeave}</span><b>${tx(p.back)}</b></div>`
+      : `<div class="kv"><span>${t().lastFinished}</span><b>${tx(p.last)}</b></div>`;
 
     const seats = reviewAreasOf(p);
 
@@ -1150,54 +1293,54 @@
           <span class="d-name">${p.name}</span>
           <span class="d-role">${p.role} · ${p.team}</span>
         </span>
-        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${STATUS[p.status].label}</span>
+        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${t().status[p.status]}</span>
       </div>
 
       <div class="d-sec">
         ${now}
-        <div class="kv"><span>입사</span><b>${p.joined}</b></div>
-        <div class="kv"><span>완료한 업무 · 리뷰</span><b>${p.done}건 · ${p.reviews}건</b></div>
-        <div class="kv"><span>기억이 쓰인 횟수</span><b>${usedOf(p)}회</b></div>
+        <div class="kv"><span>${t().joined}</span><b>${p.joined}</b></div>
+        <div class="kv"><span>${t().doneAndReviews}</span><b>${t().counts(p.done, p.reviews)}</b></div>
+        <div class="kv"><span>${t().timesUsed}</span><b>${t().times(usedOf(p))}</b></div>
       </div>
 
       <div class="d-sec">
-        <span class="k">리뷰할 수 있는 분야</span>
+        <span class="k">${t().canReview}</span>
         ${
           seats.length
             ? `<span class="areas">${seats
-                .map((a) => `<span class="area-chip">${a} ${p.memories.filter((m) => m.area === a).length}</span>`)
+                .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
                 .join("")}</span>
-               <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.</p>`
-            : `<p style="margin:0;font-size:12.5px;color:var(--muted)">아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.</p>`
+               <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">${t().canReviewWhy}</p>`
+            : `<p style="margin:0;font-size:12.5px;color:var(--muted)">${t().noReviewYet}</p>`
         }
       </div>
 
       <div class="d-sec">
-        <span class="k">기억 <span class="kn">${liveOf(p).length}</span></span>
+        <span class="k">${t().memory} <span class="kn">${liveOf(p).length}</span></span>
         <div class="budget">
-          <span>업무마다 함께 들고 가요</span>
-          <span>${charsOf(p)}자</span>
+          <span>${t().carried}</span>
+          <span>${t().chars(charsOf(p))}</span>
         </div>
         ${grouped}
         ${
           archived.length
             ? `<details class="archived">
-                 <summary>보관함 ${archived.length}개 — 남겨 두지만 업무에 들고 가지 않아요</summary>
+                 <summary>${t().archivedLine(archived.length)}</summary>
                  ${archived.map(memCard).join("")}
                </details>`
             : ""
         }
-        <button class="mem-add" type="button">${ICON.plus}이 직원에게 알려주기</button>
+        <button class="mem-add" type="button">${ICON.plus}${t().tellThem}</button>
       </div>
 
       <div class="d-sec">
-        <span class="k">일하는 방식</span>
-        ${p.style.map((s) => `<div class="style-line">${ICON.hand}<span>${s}</span></div>`).join("")}
-        <button class="mem-add" type="button">${ICON.plus}방식 하나 더 정하기</button>
+        <span class="k">${t().howTheyWork}</span>
+        ${p.style.map((x) => `<div class="style-line">${ICON.hand}<span>${tx(x)}</span></div>`).join("")}
+        <button class="mem-add" type="button">${ICON.plus}${t().addStyle}</button>
       </div>
 
       <div class="d-acts">
-        <button class="btn btn-secondary btn-md" data-assign>업무 맡기기</button>
+        <button class="btn btn-secondary btn-md" data-assign>${t().giveWork}</button>
       </div>`;
     detail.querySelector(".d-av").prepend(avatar(p.species, 52));
 
@@ -1206,7 +1349,7 @@
         const rest = b.previousElementSibling;
         const open = !rest.hasAttribute("hidden");
         rest.toggleAttribute("hidden", open);
-        b.textContent = open ? rest.children.length + "개 더 보기" : "접기";
+        b.textContent = open ? t().showMore(rest.children.length) : t().fold;
       });
     });
     detail.querySelector("[data-assign]").addEventListener("click", () => openAssign(p));
@@ -1215,20 +1358,20 @@
   /* ── org chart ───────────────────────────────────────────────── */
   const org = document.getElementById("org");
   const DEPTS = [
-    { name: "개발본부", teams: ["백엔드팀", "프론트엔드팀"] },
-    { name: "프로덕트", teams: ["기획팀", "디자인팀"] },
+    { name: "dev", teams: ["backend", "frontend"] },
+    { name: "product", teams: ["planning", "design"] },
   ];
   for (const d of DEPTS) {
     const inDept = people.filter((p) => p.dept === d.name);
     const box = document.createElement("div");
     box.className = "dept";
-    box.innerHTML = `<div class="dept-hd"><h2>${d.name}</h2><span class="cnt">${inDept.length}</span></div>`;
+    box.innerHTML = `<div class="dept-hd"><h2>${t().depts[d.name]}</h2><span class="cnt">${inDept.length}</span></div>`;
     const teams = document.createElement("div");
     teams.className = "teams";
-    for (const t of d.teams) {
-      const inTeam = inDept.filter((p) => p.team === t);
+    for (const team of d.teams) {
+      const inTeam = inDept.filter((p) => p.team === team);
       const wrap = document.createElement("div");
-      wrap.innerHTML = `<div class="team-hd"><h3>${t}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
+      wrap.innerHTML = `<div class="team-hd"><h3>${t().teams[team]}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
       const grid = document.createElement("div");
       grid.className = "tgrid";
       for (const p of inTeam) {
@@ -1236,7 +1379,7 @@
         c.className = "tcard";
         c.type = "button";
         c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · 기억 ${liveOf(p).length}</span></span>`;
+          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(liveOf(p).length)}</span></span>`;
         c.querySelector(".t-av").prepend(avatar(p.species, 36));
         c.addEventListener("click", () => { show("list"); select(p.id); });
         grid.appendChild(c);
@@ -1245,7 +1388,7 @@
         const v = document.createElement("button");
         v.className = "vacant";
         v.type = "button";
-        v.innerHTML = `${ICON.plus}<span>아직 아무도 없어요</span>`;
+        v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
         grid.appendChild(v);
       }
       wrap.appendChild(grid);
@@ -1267,10 +1410,10 @@
     n.innerHTML = `
       <span class="n-ic">${ICON.alert}</span>
       <span class="n-tx">
-        <b>${uncovered.join(" · ")}${josa(uncovered.at(-1), "을", "를")} 아는 직원이 없어요</b>
-        <span>이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.</span>
+        <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
+        <span>${t().nobodyKnowsWhy}</span>
       </span>
-      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">알려줄 직원 고르기</button></span>`;
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().pickSomeone}</button></span>`;
     notices.appendChild(n);
   }
 
@@ -1281,10 +1424,10 @@
     n.innerHTML = `
       <span class="n-ic">${ICON.x}</span>
       <span class="n-tx">
-        <b>한 번도 쓰이지 않은 기억이 ${cold.length}개 있어요</b>
-        <span>${cold[0].p.name}의 “${cold[0].m.text}” — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.</span>
+        <b>${t().coldTitle(cold.length)}</b>
+        <span>${t().coldExample(cold[0].p.name, tx(cold[0].m.text))} ${t().coldWhy}</span>
       </span>
-      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">확인하기</button></span>`;
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().review}</button></span>`;
     notices.appendChild(n);
   }
 
@@ -1295,20 +1438,20 @@
     const row = document.createElement("div");
     row.className = "area-row";
     row.innerHTML = `
-      <span class="area-name">${a.name}</span>
-      <span class="seat${a.seat ? "" : " no"}">${a.seat ? "리뷰 분야" : "리뷰 없음"}</span>
+      <span class="area-name">${t().areas[a.name]}</span>
+      <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
       <span class="knows">${
         knowers.length
           ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
-          : '<span class="nobody">아무도 몰라요</span>'
+          : '<span class="nobody">' + t().nobodyKnows + '</span>'
       }</span>
-      <span class="area-n">기억 ${count}</span>`;
+      <span class="area-n">${t().memCount(count)}</span>`;
     row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
     areaTable.appendChild(row);
   }
   areaTable.insertAdjacentHTML(
     "beforeend",
-    `<button class="mem-add" type="button">${ICON.plus}분야 추가하기</button>`,
+    `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`,
   );
 
   const feedBox = document.getElementById("feed");
@@ -1318,15 +1461,15 @@
     el.className = "feed-row";
     el.innerHTML = `
       <span class="f-av"></span>
-      <span class="f-tx">${p.name}${josa(p.name, "이", "가")} <q>${f.mem}</q>${josa(f.mem, "을", "를")} 참고했어요<span class="f-meta">${f.on}</span></span>
-      <span class="f-time">${f.when}</span>`;
+      <span class="f-tx">${t().referenced(p.name, tx(f.mem))}<span class="f-meta">${tx(f.on)}</span></span>
+      <span class="f-time">${tx(f.when)}</span>`;
     el.querySelector(".f-av").appendChild(avatar(p.species, 28));
     feedBox.appendChild(el);
   }
 
   document.getElementById("companyMem").innerHTML =
     companyMemories.map(memCard).join("") +
-    `<button class="mem-add" type="button">${ICON.plus}회사 전체에 알려주기</button>`;
+    `<button class="mem-add" type="button">${ICON.plus}${t().tellCompany}</button>`;
 
   /* ── assign ──────────────────────────────────────────────────── */
   const scrim = document.getElementById("scrim");
@@ -1344,27 +1487,27 @@
       <div class="m-hd">
         <span class="m-av"></span>
         <span style="flex:1;min-width:0">
-          <span class="m-t">${p.name}${josa(p.name, "이", "가")} 맡을 업무</span>
+          <span class="m-t">${t().assignTitle(p.name)}</span>
           <span class="m-s">${p.role} · ${p.team}</span>
         </span>
       </div>
 
       <div class="m-sec">
-        <span class="k">대기 중인 업무</span>
+        <span class="k">${t().backlog}</span>
         ${backlog
           .map(
-            (t) => `<button class="pick" type="button" role="radio" data-task="${t.id}"
-                      aria-checked="${t.id === picked}">
+            (task_) => `<button class="pick" type="button" role="radio" data-task="${task_.id}"
+                      aria-checked="${task_.id === picked}">
                 <span class="radio"></span>
-                <span class="pick-t">${t.title}</span>
-                <span class="area-chip">${t.area}</span>
-                <span class="pick-m">${t.minutes}분</span>
+                <span class="pick-t">${tx(task_.title)}</span>
+                <span class="area-chip">${t().areas[task_.area]}</span>
+                <span class="pick-m">${t().minutes(task_.minutes)}</span>
               </button>`,
           )
           .join("")}
         <button class="pick pick-new" type="button" role="radio" data-task="new" aria-checked="${picked === "new"}">
           <span class="radio"></span>
-          <span class="pick-t">새 업무 만들기</span>
+          <span class="pick-t">${t().newTask}</span>
           <span></span><span></span>
         </button>
       </div>
@@ -1372,17 +1515,17 @@
       ${
         task
           ? `<div class="m-sec">
-               <span class="k">이 업무에 들고 갈 기억 <span class="kn">${useful.length}</span></span>
+               <span class="k">${t().broughtAlong} <span class="kn">${useful.length}</span></span>
                ${
                  useful.length
                    ? useful.map(memCard).join("")
                    : `<div class="notice notice-warn">
                         <span class="n-ic">${ICON.alert}</span>
                         <span class="n-tx">
-                          <b>${task.area} 기억이 없어요</b>
-                          <span>${p.name}${josa(p.name, "은", "는")} 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.</span>
+                          <b>${t().noAreaMemory(t().areas[task.area])}</b>
+                          <span>${t().noAreaMemoryWhy(p.name)}</span>
                         </span>
-                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">지금 알려주기</button></span>
+                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().tellNow}</button></span>
                       </div>`
                }
              </div>`
@@ -1390,8 +1533,8 @@
       }
 
       <div class="m-foot">
-        <button class="btn btn-secondary btn-md" type="button" data-close>취소</button>
-        <button class="btn btn-primary btn-md" type="button">${task ? "이 업무 맡기기" : "업무 만들고 맡기기"}</button>
+        <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
+        <button class="btn btn-primary btn-md" type="button">${task ? t().assignThis : t().createAndAssign}</button>
       </div>`;
 
     modal.querySelector(".m-av").appendChild(avatar(p.species, 44));

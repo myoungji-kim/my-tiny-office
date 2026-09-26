@@ -98,6 +98,21 @@
   .btn:disabled { opacity: .45; cursor: default; }
   .btn:focus-visible, .pick:focus-visible, .copy:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
+  .lang {
+    position: fixed; bottom: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(20 20 25 / .14);
+    opacity: .5; transition: opacity .12s;
+  }
+  .lang:hover, .lang:focus-within { opacity: 1; }
+  .lang button {
+    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
+    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   /* ═══ modal ═══ */
   .modal {
     width: 100%; max-width: 486px; max-height: 100%; overflow: auto;
@@ -226,6 +241,11 @@
   .notice-bad { border-color: var(--bad-line); }
   .notice-bad .n-ic { background: var(--bad-soft); color: var(--bad-ink); }
 </style>
+
+<div class="lang" id="lang">
+  <button type="button" data-lang="ko">한국어</button>
+  <button type="button" data-lang="en">English</button>
+</div>
 
 <div class="wrap">
   <header class="top">
@@ -764,31 +784,112 @@
     refresh: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 7A5.2 5.2 0 1 0 12 11.2"/><path d="M13.4 3.4v3.8h-3.8"/></svg>',
   };
 
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // The mock's own strings. The prose around it explains the design to whoever
+  // is building it, so it stays as written.
+  const TEXT = {
+    ko: {
+      modalTitle: (n) => n + "를 실제로 일하게 하기",
+      runtime: "런타임", available: "사용 가능", needsCheck: "확인 필요", notYet: "아직 없어요",
+      workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", change: "바꾸기", choose: "고르기",
+      checks: "확인", recheck: "다시 확인", copy: "복사", later: "나중에", connect: "연결하기",
+      installed: "Claude Code 설치됨", missing: "Claude Code가 없어요",
+      missingWhy: "설치하지 않아도 사무실은 그대로 돌아가요. 설치하면 이 직원이 실제로 일해요.",
+      loggedIn: "로그인됨", loggedOut: "아직 로그인하지 않았어요",
+      loggedOutWhy: "터미널에서 한 번 로그인해 주세요. 브라우저가 열려요.",
+      trusted: "이 폴더를 신뢰함", untrusted: "이 폴더가 아직 신뢰되지 않았어요",
+      untrustedWhy: "폴더에서 claude를 한 번 실행하고 신뢰를 허용해 주세요. 이건 건너뛸 방법이 없어요.",
+      afterAbove: "앞 단계를 끝내면 확인해요.", loginStep: "로그인", trustStep: "폴더 신뢰",
+      stateMissing: "Claude Code가 없음", stateLoggedOut: "로그인 안 됨", stateUntrusted: "폴더가 신뢰되지 않음",
+      noteMissing: "없어도 게임은 돌아갑니다. 그 사실을 먼저 말하고 나서 설치를 권합니다.",
+      noteLoggedOut: "브라우저가 열리는 건 Claude Code의 흐름입니다. 우리는 이메일도 토큰도 받지 않습니다.",
+      noteUntrusted: "비대화형 방법이 아예 없습니다. 로그인을 앱에서 해결해도 이 단계는 남습니다.",
+      agent: "에이전트", connected: "연결됨", lost: "연결 끊김",
+      session: "세션", costThisMonth: "이번 달 비용",
+      viewLogs: "로그 보기", disconnect: "연결 끊기", reconnect: "다시 연결",
+      sessionDropped: "세션이 끊어졌어요",
+      sessionDroppedWhy: "진행 중이던 업무와 기억은 그대로 있어요. 다시 연결하면 이어서 해요.",
+      noteCost: "비용을 숨기지 않습니다. 업무 하나에 고정 오버헤드가 붙는 구조라 플레이어가 알아야 합니다.",
+      noteSafe: "런타임 실패가 회사 데이터를 건드리지 않는다는 걸 문장으로 말합니다.",
+      reallyWorking: "실제로 일하는 중", simulated: "시뮬레이션", greenMeansWhat: "초록이면 연결됨?",
+      status: { working: "업무 중" },
+    },
+    en: {
+      modalTitle: (n) => "Put " + n + " to real work",
+      runtime: "Runtime", available: "Available", needsCheck: "Needs a check", notYet: "Not yet",
+      workspace: "Workspace", noFolder: "Nothing chosen yet", change: "Change", choose: "Choose",
+      checks: "Checks", recheck: "Check again", copy: "Copy", later: "Later", connect: "Connect",
+      installed: "Claude Code installed", missing: "Claude Code is not installed",
+      missingWhy: "The office runs fine without it. Installing it lets this employee do real work.",
+      loggedIn: "Signed in", loggedOut: "Not signed in yet",
+      loggedOutWhy: "Sign in once from a terminal. A browser will open.",
+      trusted: "This folder is trusted", untrusted: "This folder is not trusted yet",
+      untrustedWhy: "Run claude once in the folder and accept the trust prompt. There is no way around this one.",
+      afterAbove: "Checked once the step above is done.", loginStep: "Sign-in", trustStep: "Folder trust",
+      stateMissing: "Claude Code missing", stateLoggedOut: "Not signed in", stateUntrusted: "Folder not trusted",
+      noteMissing: "The game runs without it. Say that first, then suggest installing.",
+      noteLoggedOut: "The browser opening is Claude Code's own flow. We take neither an email nor a token.",
+      noteUntrusted: "There is no non-interactive path. Solving sign-in in the app leaves this step standing.",
+      agent: "Agent", connected: "Connected", lost: "Disconnected",
+      session: "Session", costThisMonth: "Cost this month",
+      viewLogs: "View logs", disconnect: "Disconnect", reconnect: "Reconnect",
+      sessionDropped: "The session dropped",
+      sessionDroppedWhy: "The task in progress and everything they remember are untouched. Reconnect and they pick it up.",
+      noteCost: "Cost is not hidden. A fixed overhead rides on every task, so the player has to see it.",
+      noteSafe: "Say in a sentence that a runtime failure does not touch company data.",
+      reallyWorking: "Working for real", simulated: "Simulated", greenMeansWhat: "Green means connected?",
+      status: { working: "Working" },
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  document.documentElement.lang = lang;
+  {
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+  }
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+
   const EMP = { name: "모카", species: "cat", role: "Backend Engineer", team: "백엔드팀" };
 
   /* ── the connection modal, in one state ──────────────────────── */
   const CHECKS = {
-    installed: (v) => ({ icon: "ok", title: "Claude Code 설치됨", value: v }),
+    installed: (v) => ({ icon: "ok", title: t().installed, value: v }),
     missing: () => ({
       icon: "bad",
-      title: "Claude Code가 없어요",
-      detail: "설치하지 않아도 사무실은 그대로 돌아가요. 설치하면 이 직원이 실제로 일해요.",
+      title: t().missing, detail: t().missingWhy,
     }),
-    loggedIn: (v) => ({ icon: "ok", title: "로그인됨", value: v }),
+    loggedIn: (v) => ({ icon: "ok", title: t().loggedIn, value: v }),
     loggedOut: () => ({
       icon: "bad",
-      title: "아직 로그인하지 않았어요",
-      detail: "터미널에서 한 번 로그인해 주세요. 브라우저가 열려요.",
+      title: t().loggedOut, detail: t().loggedOutWhy,
       cmd: ["claude auth login"],
     }),
-    trusted: () => ({ icon: "ok", title: "이 폴더를 신뢰함" }),
+    trusted: () => ({ icon: "ok", title: t().trusted }),
     untrusted: (dir) => ({
       icon: "bad",
-      title: "이 폴더가 아직 신뢰되지 않았어요",
-      detail: "폴더에서 claude를 한 번 실행하고 신뢰를 허용해 주세요. 이건 건너뛸 방법이 없어요.",
+      title: t().untrusted, detail: t().untrustedWhy,
       cmd: ["cd " + dir, "claude"],
     }),
-    waiting: (title) => ({ icon: "wait", title, detail: "앞 단계를 끝내면 확인해요." }),
+    waiting: (title) => ({ icon: "wait", title, detail: t().afterAbove }),
   };
 
   function checkRow(c) {
@@ -806,7 +907,7 @@
         c.cmd
           ? `<div class="cmd">
                <pre>${c.cmd.map((l) => `<span class="p">$</span> ${l}`).join("\n")}</pre>
-               <button class="copy" type="button">복사</button>
+               <button class="copy" type="button">${t().copy}</button>
              </div>`
           : ""
       }`;
@@ -819,47 +920,47 @@
       <div class="m-hd">
         <span class="m-av"></span>
         <span style="flex:1;min-width:0">
-          <span class="m-t">${EMP.name}를 실제로 일하게 하기</span>
+          <span class="m-t">${t().modalTitle(EMP.name)}</span>
           <span class="m-s">${EMP.role} · ${EMP.team}</span>
         </span>
       </div>
 
       <div class="m-sec">
-        <span class="k">런타임</span>
+        <span class="k">${t().runtime}</span>
         <button class="pick" type="button" role="radio" aria-checked="true">
           <span class="radio"></span>
           <span class="pick-t">Claude Code</span>
-          <span></span><span class="pick-m">${runtimeReady ? "사용 가능" : "확인 필요"}</span>
+          <span></span><span class="pick-m">${runtimeReady ? t().available : t().needsCheck}</span>
         </button>
         <button class="pick" type="button" role="radio" aria-checked="false" disabled>
           <span class="radio"></span>
           <span class="pick-t">Local AI</span>
-          <span></span><span class="pick-m">아직 없어요</span>
+          <span></span><span class="pick-m">${t().notYet}</span>
         </button>
       </div>
 
       <div class="m-sec">
-        <span class="k">작업 폴더</span>
+        <span class="k">${t().workspace}</span>
         <div class="folder">
           ${I.folder}
-          <span class="path${dir ? "" : " empty"}">${dir ?? "아직 고르지 않았어요"}</span>
-          <button class="btn btn-secondary btn-sm" type="button">${dir ? "바꾸기" : "고르기"}</button>
+          <span class="path${dir ? "" : " empty"}">${dir ?? t().noFolder}</span>
+          <button class="btn btn-secondary btn-sm" type="button">${dir ? t().change : t().choose}</button>
         </div>
       </div>
 
       <div class="m-sec">
-        <span class="k">확인</span>
+        <span class="k">${t().checks}</span>
         ${checks.map(checkRow).join("")}
         ${
           ready
             ? ""
-            : `<div class="recheck"><button class="btn btn-secondary btn-sm" type="button">${I.refresh}다시 확인</button></div>`
+            : `<div class="recheck"><button class="btn btn-secondary btn-sm" type="button">${I.refresh}${t().recheck}</button></div>`
         }
       </div>
 
       <div class="m-foot">
-        <button class="btn btn-secondary btn-md" type="button">나중에</button>
-        <button class="btn btn-primary btn-md" type="button"${ready ? "" : " disabled"}>연결하기</button>
+        <button class="btn btn-secondary btn-md" type="button">${t().later}</button>
+        <button class="btn btn-primary btn-md" type="button"${ready ? "" : " disabled"}>${t().connect}</button>
       </div>`;
     el.querySelector(".m-av").appendChild(avatar(EMP.species, 44));
     return el;
@@ -878,34 +979,34 @@
   const blocked = document.getElementById("blocked");
   const states = [
     {
-      label: "Claude Code가 없음",
+      label: t().stateMissing,
       m: modal({
         dir: "~/Projects/tinysoft",
         runtimeReady: false,
         ready: false,
-        checks: [CHECKS.missing(), CHECKS.waiting("로그인"), CHECKS.waiting("폴더 신뢰")],
+        checks: [CHECKS.missing(), CHECKS.waiting(t().loginStep), CHECKS.waiting(t().trustStep)],
       }),
-      note: "없어도 게임은 돌아갑니다. 그 사실을 먼저 말하고 나서 설치를 권합니다.",
+      note: t().noteMissing,
     },
     {
-      label: "로그인 안 됨",
+      label: t().stateLoggedOut,
       m: modal({
         dir: "~/Projects/tinysoft",
         runtimeReady: true,
         ready: false,
-        checks: [CHECKS.installed("2.1.283"), CHECKS.loggedOut(), CHECKS.waiting("폴더 신뢰")],
+        checks: [CHECKS.installed("2.1.283"), CHECKS.loggedOut(), CHECKS.waiting(t().trustStep)],
       }),
-      note: "브라우저가 열리는 건 Claude Code의 흐름입니다. 우리는 이메일도 토큰도 받지 않습니다.",
+      note: t().noteLoggedOut,
     },
     {
-      label: "폴더가 신뢰되지 않음",
+      label: t().stateUntrusted,
       m: modal({
         dir: "~/Projects/tinysoft",
         runtimeReady: true,
         ready: false,
         checks: [CHECKS.installed("2.1.283"), CHECKS.loggedIn("pro"), CHECKS.untrusted("~/Projects/tinysoft")],
       }),
-      note: "비대화형 방법이 아예 없습니다. 로그인을 앱에서 해결해도 이 단계는 남습니다.",
+      note: t().noteUntrusted,
     },
   ];
   for (const st of states) {
@@ -924,42 +1025,42 @@
     el.className = "rt";
     el.innerHTML = `
       <div class="rt-hd">
-        <h4>에이전트</h4>
-        <span class="chip ${live ? "live" : "lost"}">${live ? "연결됨" : "연결 끊김"}</span>
+        <h4>${t().agent}</h4>
+        <span class="chip ${live ? "live" : "lost"}">${live ? t().connected : t().lost}</span>
       </div>
       <div class="rt-bd">
-        <div class="kv"><span>런타임</span><b>Claude Code 2.1.283</b></div>
-        <div class="kv"><span>작업 폴더</span><b class="mono">~/Projects/tinysoft</b></div>
-        <div class="kv"><span>세션</span><b class="mono">434e0703</b></div>
-        <div class="kv"><span>이번 달 비용</span><b>$1.42</b></div>
+        <div class="kv"><span>${t().runtime}</span><b>Claude Code 2.1.283</b></div>
+        <div class="kv"><span>${t().workspace}</span><b class="mono">~/Projects/tinysoft</b></div>
+        <div class="kv"><span>${t().session}</span><b class="mono">434e0703</b></div>
+        <div class="kv"><span>${t().costThisMonth}</span><b>$1.42</b></div>
       </div>
       ${
         live
           ? `<div class="rt-acts">
-               <button class="btn btn-secondary btn-sm" type="button">로그 보기</button>
-               <button class="btn btn-ghost btn-sm" type="button">연결 끊기</button>
+               <button class="btn btn-secondary btn-sm" type="button">${t().viewLogs}</button>
+               <button class="btn btn-ghost btn-sm" type="button">${t().disconnect}</button>
              </div>`
           : `<div style="padding:0 14px 13px">
                <div class="notice notice-bad">
                  <span class="n-ic">${I.x}</span>
                  <span class="n-tx">
-                   <b>세션이 끊어졌어요</b>
-                   <span>진행 중이던 업무와 기억은 그대로 있어요. 다시 연결하면 이어서 해요.</span>
+                   <b>${t().sessionDropped}</b>
+                   <span>${t().sessionDroppedWhy}</span>
                  </span>
-                 <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 연결</button></span>
+                 <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().reconnect}</button></span>
                </div>
              </div>`
       }`;
     return el;
   };
   for (const [label, state, note] of [
-    ["연결됨", "live", "비용을 숨기지 않습니다. 업무 하나에 고정 오버헤드가 붙는 구조라 플레이어가 알아야 합니다."],
-    ["연결 끊김", "lost", "런타임 실패가 회사 데이터를 건드리지 않는다는 걸 문장으로 말합니다."],
+    [() => t().connected, "live", () => t().noteCost],
+    [() => t().lost, "lost", () => t().noteSafe],
   ]) {
     const box = document.createElement("div");
-    box.innerHTML = `<h3 style="margin-top:0">${label}</h3>`;
+    box.innerHTML = `<h3 style="margin-top:0">${label()}</h3>`;
     box.appendChild(runtimeBlock(state));
-    box.insertAdjacentHTML("beforeend", `<p class="note" style="margin:11px 0 0">${note}</p>`);
+    box.insertAdjacentHTML("beforeend", `<p class="note" style="margin:11px 0 0">${note()}</p>`);
     connected.appendChild(box);
   }
 
@@ -982,16 +1083,16 @@
   };
 
   const marks = document.getElementById("marks");
-  marks.appendChild(demoCell({ name: "모카", species: "cat", role: "업무 중", mark: true, chip: "live", chipText: "실제로 일하는 중" }));
-  marks.appendChild(demoCell({ name: "두부", species: "bunny", role: "업무 중", mark: false, chip: "sim", chipText: "시뮬레이션" }));
-  marks.appendChild(demoCell({ name: "삐약", species: "chick", role: "업무 중", mark: true, lost: true, chip: "lost", chipText: "연결 끊김" }));
+  marks.appendChild(demoCell({ name: "모카", species: "cat", role: t().status.working, mark: true, chip: "live", chipText: t().reallyWorking }));
+  marks.appendChild(demoCell({ name: "두부", species: "bunny", role: t().status.working, mark: false, chip: "sim", chipText: t().simulated }));
+  marks.appendChild(demoCell({ name: "삐약", species: "chick", role: t().status.working, mark: true, lost: true, chip: "lost", chipText: t().lost }));
 
   const bubbles = document.getElementById("bubbles");
   for (const [species, connectedNow] of [["cat", true], ["bunny", false]]) {
     const wrap = document.createElement("span");
     wrap.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:7px";
     wrap.innerHTML = `<span class="bubble">
-        <span class="dot working"></span>업무 중${connectedNow ? `<span class="live-ic">${I.plug}</span>` : ""}
+        <span class="dot working"></span>${t().status.working}${connectedNow ? `<span class="live-ic">${I.plug}</span>` : ""}
       </span>`;
     const c = avatar(species, 48);
     c.style.imageRendering = "pixelated";
@@ -1000,10 +1101,10 @@
   }
 
   const doMark = document.getElementById("doMark");
-  doMark.appendChild(demoCell({ name: "모카", species: "cat", role: "업무 중", mark: true, chip: "live", chipText: "실제로 일하는 중" }));
+  doMark.appendChild(demoCell({ name: "모카", species: "cat", role: t().status.working, mark: true, chip: "live", chipText: t().reallyWorking }));
 
   const dontMark = document.getElementById("dontMark");
   dontMark.appendChild(
-    demoCell({ name: "모카", species: "cat", role: "업무 중", mark: false, statusColor: "var(--ok)", chip: "sim", chipText: "초록이면 연결됨?" }),
+    demoCell({ name: "모카", species: "cat", role: t().status.working, mark: false, statusColor: "var(--ok)", chip: "sim", chipText: t().greenMeansWhat }),
   );
 </script>
