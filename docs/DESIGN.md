@@ -2,7 +2,7 @@
 
 ## The standard lives in `docs/ui/`
 
-Three pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
+Six pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
 before building or changing a screen.
 
 | Page | Authoritative for |
@@ -13,6 +13,15 @@ before building or changing a screen.
 | `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
+
+Every page loads two shared files and keeps only what is its own:
+
+| File | Holds |
+| --- | --- |
+| `ui/system.css` | The token block and every rule more than one page uses |
+| `ui/system.js` | The palette, the sprites, the tile painter, the cast, the sample bar |
+
+A page opens by double-clicking it; nothing here needs a server.
 
 This document holds the direction and the screen structure. Written rules —
 token values, typography, i18n, accessibility — are in

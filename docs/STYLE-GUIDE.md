@@ -421,31 +421,42 @@ Rules for a new species:
 
 ## 13. Keeping the pages honest
 
-Seven pages each carry their own copy of the system, which is what makes them
-openable on their own — and what lets them drift. Measured: 172 CSS rules exist
-on more than one page, the token block exists seven times, and the cast and the
-tile engine five times each. Nothing but these checks keeps those copies equal.
+The shared half of the pages lives in two files that every page loads:
+
+- `docs/ui/system.css` — the token block and every rule more than one page uses
+- `docs/ui/system.js` — the palette, the twenty sprites, the tile painter, the
+  cast, and the sample-page bar, which builds itself
+
+A page keeps only what is its own. Both are plain, relative `<link>` and
+`<script>`, never modules, so a page still opens by double-clicking it.
+
+This replaced a worse arrangement. Each page used to carry its own copy of the
+system: 172 rules existed on more than one page, the token block seven times,
+the cast and the tile engine five times each, and nothing but a check kept the
+copies equal. They did not stay equal.
+
+Three checks run over what is left:
 
 - **parity** — the rules a page shares with `components.html` must be identical
-- **audit** — every selector defined on more than one page must agree, no raw
-  colour may appear outside `:root`, button heights must be 42/36/30, every
-  radius must come from the set, a page with controls must define
-  `:focus-visible`, no Korean may be tracked, no class may be left without a
-  rule, `office` and `employees` must build the same sidebar and the same header
-  frame, anything living on more than one page must be byte-identical, a token
-  may be left out where unused but must never disagree in value, every `id` a
-  script reaches for must exist, and a page's title must be the name the sample
-  bar gives it
-- **verify-docs** — the token table here must match what the pages define
+- **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
+  the documented set, `:focus-visible` wherever there are controls, no tracked
+  Korean, no class without a rule, the same sidebar and header frame on `office`
+  and `employees`, every `id` a script reaches for, a title that matches the
+  name the bar gives the page, and — the point of the two shared files — no page
+  redefining a selector, redeclaring a name, or declaring a token of its own
+- **verify-docs** — the token table here must match `system.css`, and the cast
+  claims must match `system.js`
 
 They have caught, among others: a 44px `btn-lg`, a chip with its own padding, a
 `.notice` carrying an outer margin, three different components all called
 `.card`, one sidebar built with a wrapper class and one without, a page whose
-script looked up an element it no longer had, and a page still titled after an
-early draft.
+script looked up an element it no longer had, a page still titled after an early
+draft, and two pages using `var(--r-card)` without ever defining it, so their
+cards had square corners.
 
-A check reports drift; it does not prevent it. When a shared part drifts twice,
-move it out of the pages instead of adding a check for it.
+A check reports drift; it does not prevent it. When something is shared, move it
+into `system.css` or `system.js` rather than adding a check that the copies
+still agree.
 
 ## 14. Do and don't
 

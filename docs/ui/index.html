@@ -6,6 +6,7 @@
   href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
 />
 <link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
 <style>
   body {
     margin: 0; padding: 30px 20px 70px;
@@ -104,24 +105,6 @@
   .foot a { color: var(--ink); }
 </style>
 
-<nav class="devbar" id="devbar" aria-label="샘플 페이지">
-  <a class="home" href="index.html" data-p="index" data-ko="Design System" data-en="Design System" aria-label="Design System"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></a>
-  <span class="sep"></span>
-  <span class="grouplabel" data-ko="화면" data-en="Screens">화면</span>
-  <a href="first-run.html" data-p="first-run" data-ko="첫 실행" data-en="First run">첫 실행</a>
-  <a href="office.html" data-p="office" data-ko="사무실" data-en="Office">사무실</a>
-  <a href="employees.html" data-p="employees" data-ko="직원" data-en="People">직원</a>
-  <span class="sep"></span>
-  <span class="grouplabel" data-ko="문서" data-en="Reference">문서</span>
-  <a href="connect.html" data-p="connect" data-ko="연결" data-en="Connect">연결</a>
-  <a href="components.html" data-p="components" data-ko="컴포넌트" data-en="Components">컴포넌트</a>
-  <a href="characters.html" data-p="characters" data-ko="캐릭터" data-en="Cast">캐릭터</a>
-  <span class="sep"></span>
-  <span class="lang" id="lang">
-    <button type="button" data-lang="ko">한국어</button>
-    <button type="button" data-lang="en">English</button>
-  </span>
-</nav>
 <div class="wrap">
   <header class="top">
     <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
@@ -256,27 +239,6 @@
   </div>
 </div>
 <script>
-  // The bar marks where you are and carries ?lang= across pages, so switching
-  // screens does not silently switch you back to Korean. In-app links in the
-  // samples carry it too, for the same reason.
-  {
-    const here = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
-    const l = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
-    for (const el of document.querySelectorAll(".devbar [data-ko]")) {
-      if (el.dataset.p === here) el.setAttribute("aria-current", "page");
-      if (el.tagName === "A" && el.dataset.p === "index") el.setAttribute("aria-label", el.dataset[l]);
-      else el.textContent = el.dataset[l];
-    }
-    if (l === "en") {
-      for (const a of document.querySelectorAll('a[href$=".html"]')) {
-        // keep the link relative: reading .href would absolutise it
-        const h = a.getAttribute("href");
-        if (!a.hasAttribute("aria-current") && !h.includes("?")) a.setAttribute("href", h + "?lang=en");
-      }
-    }
-  }
-</script>
-<script>
   // The front door translates too, or choosing English here is a one-way trip.
   const EXAMPLES = {
     "토큰 값·네이밍·i18n·접근성처럼 글로 적어야 하는 것은": "Everything that has to be written down — tokens, naming, i18n, accessibility — is in",
@@ -332,16 +294,6 @@
   };
   {
     const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
-    document.documentElement.lang = lang;
-    const box = document.getElementById("lang");
-    for (const b of box.querySelectorAll("[data-lang]")) {
-      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
-      b.addEventListener("click", () => {
-        const u = new URL(location.href);
-        u.searchParams.set("lang", b.dataset.lang);
-        location.href = u.toString();
-      });
-    }
     if (lang === "en") {
       const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       const hits = [];
