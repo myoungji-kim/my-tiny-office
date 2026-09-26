@@ -1,0 +1,829 @@
+<meta charset="utf-8" />
+<title>Tiny Office Cast</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #edecee;
+    --surface: #ffffff;
+    --subtle: #f6f6f7;
+    --sunk: #eeeef0;
+    --line: #ebebed;
+    --line-2: #e0e0e3;
+
+    --ink: #1b1b1f;
+    --solid: #17171c;
+    --muted: #86868d;
+    --faint: #b2b2b9;
+
+    --brand: #5b5bd6;
+    --ok: #2fae62;
+    --ok-soft: #e4f6ec;
+    --info: #3b82f6;
+    --warn: #eaa221;
+    --warn-soft: #fdf1dd;
+    --bad: #e5484d;
+    --bad-soft: #fdeaea;
+
+    --sans: "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+  body {
+    margin: 0; padding: 26px 20px 70px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  }
+  * { box-sizing: border-box; }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+
+  header.top { margin-bottom: 26px; }
+  header.top h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+  header.top p { margin: 4px 0 0; color: var(--muted); max-width: 66ch; }
+
+  section { background: var(--surface); border-radius: 16px; padding: 22px; margin-bottom: 16px; box-shadow: 0 1px 2px rgb(20 20 25 / .05); }
+  section > h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+  section > .note { margin: 0 0 18px; color: var(--muted); font-size: 13px; max-width: 72ch; }
+  h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 24px 0 10px; }
+  h3:first-of-type { margin-top: 0; }
+  canvas { image-rendering: pixelated; display: block; }
+
+  .sheet { display: flex; flex-direction: column; gap: 18px; }
+  .famgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+  .grp { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .grp h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink); }
+  .grp .cnt { font-size: 12px; color: var(--muted); background: var(--subtle); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+  .silgroup {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: 10px; padding: 6px 10px 6px 6px;
+  }
+  .silname { font-size: 12px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+  .cast {
+    border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .cast .pad { background: var(--subtle); border-radius: 10px; padding: 8px 14px; margin-bottom: 8px; }
+  .cast b { font-size: 15px; font-weight: 600; }
+  .cast .sp { font-size: 12px; color: var(--faint); }
+  .cast .rl { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .scales { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+  .scales figure { margin: 0; text-align: center; }
+  .scales figcaption { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
+  .scales .pad { background: var(--subtle); border-radius: 10px; padding: 10px; display: inline-block; }
+
+  .stage { background: var(--subtle); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow: auto; }
+  .room-wrap { position: relative; width: max-content; margin: 0 auto; }
+  .overlay { position: absolute; inset: 0; }
+  .bub {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    background: #fff; border-radius: 8px; padding: 3px 9px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+    box-shadow: 0 1px 3px rgb(20 20 25 / .2);
+  }
+  .tag {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap;
+    text-shadow: 0 1px 2px rgb(0 0 0 / .55);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+  .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
+  .dot.ready { background: transparent; border: 2px solid var(--info); }
+  .dot.available { background: var(--ok); }
+  .dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
+
+  .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); }
+  .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .c-av { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; }
+  .c-live { position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px; border-radius: 999px; border: 3px solid var(--surface); }
+  .c-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; margin-top: 11px; }
+  .c-role { display: block; font-size: 13px; color: var(--faint); line-height: 1.35; }
+  .c-rule { display: block; height: 1px; background: var(--line); margin: 13px 0; }
+  .c-k { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); }
+  .c-task { display: block; font-size: 13.5px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .meter { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 11px; }
+  .meter i { display: block; height: 100%; border-radius: 999px; }
+  .c-nums { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+  .c-nums b { font-weight: 600; color: var(--ink); }
+
+  .grid2 { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
+  .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
+  .exlabel { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+  .spec { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .spec:last-child { border-bottom: none; }
+  .spec code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>직원 캐릭터</h1>
+    <p>
+      사람 대신 동물로 갑니다. 16×16에서는 실루엣이 정보를 나릅니다 —
+      귀 모양만으로 누가 누군지 구분되고, 같은 얼굴 틀에 머리색만 바꾸는 것보다
+      훨씬 멀리서도 읽힙니다.
+    </p>
+  </header>
+
+  <section>
+    <h2>Cast</h2>
+    <p class="note">
+      스무 종이 몸통 하나를 공유합니다. 머리와 몸이 끊기지 않은 둥근 덩어리이고,
+      팔은 따로 붙인 부속이 아니라 실루엣이 볼록해진 부분입니다.
+      머리 일곱 줄만 바뀌니 스무 종이어도 한 가족으로 보입니다.
+      이름은 닉네임, 직무는 그대로 영어로 둡니다. 진지한 직함이 농담을 살립니다.
+    </p>
+    <div class="sheet" id="sheet"></div>
+  </section>
+
+  <section>
+    <h2>Silhouette test</h2>
+    <p class="note">
+      색을 빼고 실루엣만 남겼습니다. 16×16에서 머리에 쓸 수 있는 줄은 일곱 개뿐이라
+      <strong>스무 개의 서로 다른 실루엣은 나오지 않습니다</strong>. 대신 여덟 계열로 묶었습니다.
+      <strong>계열끼리는 실루엣으로 갈리고, 같은 계열 안에서는 색과 무늬로 갈립니다.</strong>
+      아래 묶음이 그 경계입니다 — 한 묶음 안의 종끼리는 회색에서 비슷하게 보이는 것이 정상입니다.
+    </p>
+    <div class="rowline" id="silhouette" style="background:var(--subtle);border-radius:12px;padding:14px;gap:12px"></div>
+  </section>
+
+  <section>
+    <h2>Scale</h2>
+    <p class="note">
+      사무실은 3×(48px), 카드 아바타는 2×(32px), 사이드바는 1.5×(24px)입니다.
+      계열마다 하나씩만 올렸습니다. 가장 작은 크기에서 살아남는 것만 씁니다.
+    </p>
+    <div class="scales" id="scales"></div>
+  </section>
+
+  <section>
+    <h2>In the office</h2>
+    <p class="note">실제로 책상에 앉혀 본 모습입니다. 판단은 여기서 하시면 됩니다.</p>
+    <div class="stage">
+      <div class="room-wrap">
+        <canvas id="room" width="864" height="384" aria-hidden="true"></canvas>
+        <div class="overlay" id="overlay"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>In the cards</h2>
+    <p class="note">카드 아바타와 사이드바에서도 같은 스프라이트를 씁니다.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>Naming</h2>
+    <p class="note">
+      닉네임은 한글·영문 각각 짧게 둡니다. 직무는 기술 용어라 영어로 남깁니다.
+    </p>
+    <div class="grid2">
+      <div class="good-ex">
+        <div class="exlabel" style="color:#1f7a48">✓ DO</div>
+        <div style="font-size:15px;font-weight:600">모카</div>
+        <div style="font-size:13px;color:var(--muted)">Backend Engineer</div>
+        <div class="note" style="margin:10px 0 0">
+          닉네임 한 단어 + 진지한 직함. 한글 2–3자, 영문 6자 이내로 카드가 흔들리지 않습니다.
+        </div>
+      </div>
+      <div class="bad-ex">
+        <div class="exlabel" style="color:#a8322f">✕ DON&rsquo;T</div>
+        <div style="font-size:15px;font-weight:600">모카냥이 🐱</div>
+        <div style="font-size:13px;color:var(--muted)">백엔드 개발 담당 고양이</div>
+        <div class="note" style="margin:10px 0 0">
+          이모지와 종족 설명을 이름에 넣지 않습니다. 종족은 스프라이트가 이미 말하고 있습니다.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px">
+      <div class="spec"><code>name</code><span>플레이어가 정하는 닉네임. <strong>i18n을 거치지 않습니다</strong> — 사용자 입력이기 때문입니다.</span></div>
+      <div class="spec"><code>species</code><span>스프라이트를 고르는 값. 이름이 아니라 외형입니다.</span></div>
+      <div class="spec"><code>role</code><span>도메인 값. 표시 문자열만 i18n을 거칩니다.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rules</h2>
+    <ul style="margin:0;padding-left:20px;line-height:2">
+      <li>새 종은 먼저 <strong>계열</strong>을 정합니다. 계열이 같으면 색과 무늬가 그 계열 안에서 유일해야 합니다.</li>
+      <li>새 계열을 만들 수 있으면 그쪽이 낫습니다. 머리 일곱 줄로 만들 수 있는 계열은 한정되어 있습니다.</li>
+      <li>같은 계열에서 <strong>색만 다른 종</strong>은 추가하지 않습니다. 무늬나 귀 크기 중 하나는 달라야 합니다.</li>
+      <li>모든 스프라이트는 16×16, 공유 팔레트, <strong>정수 배율</strong>로만 그립니다.</li>
+      <li>윤곽선은 한 가지 색(<code>#2f2a3d</code>)으로 통일합니다. 사무실 가구와 같은 값이라 한 장면으로 보입니다.</li>
+      <li>스프라이트 안에 <strong>글자를 넣지 않습니다</strong>. 이름은 캔버스 밖 DOM에 둡니다.</li>
+      <li>상태(업무 중·휴가 중)는 스프라이트가 아니라 <strong>말풍선과 점</strong>이 나타냅니다.</li>
+      <li>종족은 능력치에 영향을 주지 않습니다. 외형일 뿐입니다.</li>
+      <li>몸통은 스무 종이 공유합니다. 종을 추가할 때 건드리는 것은 <strong>머리 일곱 줄</strong>뿐입니다.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  /* ── palette ─────────────────────────────────────────────────── */
+  const OUTLINE = "#2f2a3d";
+  const P = {
+    ".": null, K: OUTLINE, E: OUTLINE,
+    w: "#c9a06a", W: "#d8b17c", d: "#b0854f",
+    a: "#e9dcc4", A: "#f4ead7", b: "#c2b195",
+    g: "#8ec3e8", G: "#bcdcf2",
+    s: "#c9964f", S: "#dcae6c", t: "#9c6f3a",
+    m: "#454b63", M: "#6f9fd8", o: "#99a3b8",
+    c: "#5d6480", C: "#767ea0",
+    p: "#b5674a", n: "#4f8f55", N: "#6fae6e",
+    f: "#8a6240", r: "#d8574f", u: "#5b8de0", v: "#e0a93c",
+  };
+
+  /* ── the cast ────────────────────────────────────────────────── */
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+  const CAT = [
+    "...KK......KK...",
+    "..KBBK....KBBK..",
+    "..KBBBKKKKBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FOX = [
+    "..KK........KK..",
+    "..KAK......KAK..",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SQUIRREL = [
+    "....K......K....",
+    "...KAK....KAK...",
+    "..KBAKKKKKKABK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BUNNY = [
+    "...KKK....KKK...",
+    "...KAK....KAK...",
+    "...KAK....KAK...",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DOG = [
+    "...KKKKKKKKKK...",
+    "..KAABBBBBBAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAAEBEEBEAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAABBNNBBAAK..",
+    "..KHBBBBBBBBHK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BEAR = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PANDA = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBAABBBBAABK..",
+    "..KHAEBEEBEAHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const MOUSE = [
+    ".KKK........KKK.",
+    ".KAAK......KAAK.",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HAMSTER = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KHBBEBEEBEBBHK.",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const KOALA = [
+    "................",
+    ".KK..........KK.",
+    "KAAK........KAAK",
+    "KAAKKKKKKKKKKAAK",
+    ".KKBBBBBBBBBBKK.",
+    "..KHBEBEEBEBHK..",
+    "..KBBBNNNNBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const CHICK = [
+    "................",
+    ".......KK.......",
+    "......KAAK......",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBNNBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DUCK = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBKNNNNNNKBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const OWL = [
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBOOBBBBOOBK..",
+    "..KBOEBBBBEOBK..",
+    "..KHOOBNNBOOHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PENGUIN = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KBLLLLLLLLBK..",
+    "..KHLELNNLELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FROG = [
+    "...KKK....KKK...",
+    "..KOOOK..KOOOK..",
+    "..KOEOK..KOEOK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHHBBEEBBHHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const COW = [
+    "KK............KK",
+    ".KAK........KAK.",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KNNNBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DEER = [
+    "...K.K....K.K...",
+    "...KKK....KKK...",
+    "....KKKKKKKK....",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SHEEP = [
+    "..KK.KKKKKK.KK..",
+    ".KAAKAAAAAAKAAK.",
+    ".KAAAAAAAAAAAAK.",
+    ".KAAAAAAAAAAAAK.",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HEDGEHOG = [
+    "...K.K.KK.K.K...",
+    "..KAKAKAAKAKAK..",
+    "..KAAAAAAAAAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PIG = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+
+  const CAST = [
+    { key: "cat", sprite: CAT, ko: "모카", en: "Mocha", species: "고양이", family: "뾰족 귀",
+      B: "#f3e0c8", L: "#fdf3e2", A: "#e3bfa0", H: "#f4a7b0", N: "#e3bfa0" },
+    { key: "fox", sprite: FOX, ko: "여우", en: "Fennec", species: "여우", family: "뾰족 귀",
+      B: "#e89055", L: "#fdf2e6", A: "#a85f34", H: "#f4a7b0", N: "#a85f34" },
+    { key: "squirrel", sprite: SQUIRREL, ko: "도토", en: "Acorn", species: "다람쥐", family: "뾰족 귀",
+      B: "#c97f4a", L: "#f7e6cf", A: "#a8663a", H: "#f4a7b0", N: "#a8663a" },
+    { key: "bunny", sprite: BUNNY, ko: "두부", en: "Tofu", species: "토끼", family: "긴 귀",
+      B: "#fbfafb", L: "#fff1f4", A: "#f6c6d0", H: "#f4a7b0", N: "#f6c6d0" },
+    { key: "dog", sprite: DOG, ko: "콩이", en: "Bean", species: "강아지", family: "처진 귀",
+      B: "#d9b083", L: "#f3e2c9", A: "#a87f55", H: "#f4a7b0", N: "#6b4c33" },
+    { key: "bear", sprite: BEAR, ko: "코코", en: "Coco", species: "곰", family: "둥근 귀",
+      B: "#b79070", L: "#d2ad8c", A: "#96704f", H: "#e2929c", N: "#96704f" },
+    { key: "panda", sprite: PANDA, ko: "반달", en: "Moon", species: "판다", family: "둥근 귀",
+      B: "#fafafb", L: "#ffffff", A: "#3f3a44", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "mouse", sprite: MOUSE, ko: "치즈", en: "Cheese", species: "생쥐", family: "둥근 귀",
+      B: "#b9b4bd", L: "#d8d4dc", A: "#f2c0cb", H: "#f4a7b0", N: "#f2c0cb" },
+    { key: "hamster", sprite: HAMSTER, ko: "밤톨", en: "Nut", species: "햄스터", family: "둥근 귀",
+      B: "#f0cf9a", L: "#fdf0d8", A: "#d9a86a", H: "#f4a7b0", N: "#d9a86a" },
+    { key: "koala", sprite: KOALA, ko: "유칼", en: "Euca", species: "코알라", family: "둥근 귀",
+      B: "#a8adb8", L: "#ccd0d8", A: "#8b909c", H: "#f4a7b0", N: "#5d6470" },
+    { key: "chick", sprite: CHICK, ko: "삐약", en: "Pip", species: "병아리", family: "머리 장식",
+      B: "#f9da80", L: "#fdecb2", A: "#eda93c", H: "#f4a7b0", N: "#eda93c" },
+    { key: "owl", sprite: OWL, ko: "야간", en: "Nox", species: "부엉이", family: "머리 장식",
+      B: "#a3845f", L: "#c9ac86", A: "#7d6244", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "sheep", sprite: SHEEP, ko: "구름", en: "Cloud", species: "양", family: "머리 장식",
+      B: "#e6d6bf", L: "#fff8ee", A: "#fdfbf6", H: "#f4a7b0", N: "#c9bda8" },
+    { key: "hedgehog", sprite: HEDGEHOG, ko: "가시", en: "Quill", species: "고슴도치", family: "머리 장식",
+      B: "#e6d3b8", L: "#f6ecdc", A: "#8a6a4a", H: "#f4a7b0", N: "#8a6a4a" },
+    { key: "duck", sprite: DUCK, ko: "꽥꽥", en: "Quack", species: "오리", family: "부리·코",
+      B: "#fbfbfc", L: "#ffffff", A: "#f0a63c", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "penguin", sprite: PENGUIN, ko: "별", en: "Star", species: "펭귄", family: "부리·코",
+      B: "#61708f", L: "#fafbfd", A: "#495470", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "pig", sprite: PIG, ko: "분홍", en: "Rosy", species: "돼지", family: "부리·코",
+      B: "#f4b8c0", L: "#fbd9de", A: "#e295a2", H: "#e87f90", N: "#e08e9c" },
+    { key: "cow", sprite: COW, ko: "얼룩", en: "Patch", species: "소", family: "뿔",
+      B: "#fafafb", L: "#ffffff", A: "#e8dfc8", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "deer", sprite: DEER, ko: "단풍", en: "Maple", species: "사슴", family: "뿔",
+      B: "#cfa274", L: "#ecd7ba", A: "#8a6b49", H: "#f4a7b0", N: "#8a6b49" },
+    { key: "frog", sprite: FROG, ko: "완두", en: "Pea", species: "개구리", family: "솟은 눈",
+      B: "#a6d988", L: "#c4e8aa", A: "#7ab863", H: "#f2a0b8", N: "#7ab863" },
+  ];
+  const skin = (c) => ({ B: c.B, L: c.L, O: "#ffffff", A: c.A, H: c.H, N: c.N });
+  const FLAT = { B: "#c9c9ce", L: "#d6d6db", O: "#f0f0f2", A: "#b3b3ba", H: "#c9c9ce", N: "#b3b3ba" };
+
+  /* ── tiles ───────────────────────────────────────────────────── */
+  const TILES = {
+    floor: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw"],
+    wall: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","bbbbbbbbbbbbbbbb","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    window: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKGGGGGGGGGGGGKa","aKGgggggggggggKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    shelf: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKfffffffffffKKa","aKfrrfuuvvfrrfKa","aKfrrfuuvvfrrfKa","aKfffffffffffKKa","aKfuuvvfrrfuufKa","aKfuuvvfrrfuufKa","aKfffffffffffKKa","bKKKKKKKKKKKKKKb","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    board: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKAAAAAAAAAAAAKa","aKAoooooooAAAAKa","aKAAAAAAAAAAAAKa","aKAooooooooooAKa","aKAAAAAAAAAAAAKa","aKAooooooAAAAAKa","aKAAAAAAAAAAAAKa","aKKKKKKKKKKKKKKa","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    deskL: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","wwKKKKKKKKKKKKKK","wKSSSSSSSSSSSSSS","wKSsssssssssssss","wKSsssssssssssss","wKSsssssssssssss","wKtttttttttttttt","wKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwKKwwwwwwwwwwww","wwKKwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    deskR: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","KKKKKKKKKKKKKKww","SSSSSSSSSSSSSSKw","ssssssssssssssKw","ssssssssssssssKw","ssssssssssssssKw","ttttttttttttttKw","KKKKKKKKKKKKKKKw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwKKww","wwwwwwwwwwwwKKww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    plant: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwKKKKwwwwwww","wwwKKnnnnKKwwwww","wwKnNNnnnnNKwwww","wwKnnnnnnnnKwwww","wwKNnnnKnnnNKwww","wwwKnnnKnnnKwwww","wwwwKnnKnnKwwwww","wwwwwKKKKKwwwwww","wwwwKKpppKKwwwww","wwwwKppppppKwwww","wwwwKppppppKwwww","wwwwwKKKKKKwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+  };
+  const MONITOR = ["................","..KKKKKKKKKKKK..","..KmmmmmmmmmmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmmmmmmmmmmK..","..KKKKKKKKKKKK..",".....KmmmmK.....",".....KmmmmK.....","...KKKKKKKKKK...","...KmmmmmmmmK...","....KKKKKKKK....","................"];
+  const CHAIR = ["................","................","....KKKKKKKK....","...KCCCCCCCCK...","...KcccccccCK...","...KcccccccCK...","...KcccccccCK...","....KKKKKKKK....","................","..KKKKKKKKKKKK..","..KCcccccccccK..","..KKKKKKKKKKKK..",".......KK.......",".......KK.......","....KKKKKKKK....","................"];
+
+  function paint(ctx, rows, scale, ox, oy, extra) {
+    const pal = extra ? { ...P, ...extra } : P;
+    for (let y = 0; y < rows.length; y++) {
+      const row = rows[y];
+      let x = 0;
+      while (x < row.length) {
+        const ch = row[x];
+        let run = 1;
+        while (x + run < row.length && row[x + run] === ch) run++;
+        const color = pal[ch];
+        if (color) { ctx.fillStyle = color; ctx.fillRect(ox + x * scale, oy + y * scale, run * scale, scale); }
+        x += run;
+      }
+    }
+  }
+  function sprite(c, scale, extra) {
+    const el = document.createElement("canvas");
+    el.width = el.height = 16 * scale;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    paint(g, c.sprite, scale, 0, 0, extra ?? skin(c));
+    return el;
+  }
+
+  /* ── cast sheet ──────────────────────────────────────────────── */
+  const ROLES = ["Backend Engineer", "Frontend Engineer", "Product Manager", "DBA", "DevOps Engineer", "QA Engineer"];
+  const byKey = new Map(CAST.map((c) => [c.key, c]));
+  const pick = (key) => byKey.get(key);
+
+  const FAMILIES = [...new Set(CAST.map((c) => c.family))];
+  const sheet = document.getElementById("sheet");
+  for (const family of FAMILIES) {
+    const group = CAST.filter((c) => c.family === family);
+    const wrap = document.createElement("div");
+    wrap.className = "family";
+    wrap.innerHTML = `<div class="grp"><h3>${family}</h3><span class="cnt">${group.length}</span></div>`;
+    const grid = document.createElement("div");
+    grid.className = "famgrid";
+    for (const c of group) {
+      const el = document.createElement("div");
+      el.className = "cast";
+      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="sp">${c.en} · ${c.species}</span>`;
+      el.querySelector(".pad").appendChild(sprite(c, 4));
+      grid.appendChild(el);
+    }
+    wrap.appendChild(grid);
+    sheet.appendChild(wrap);
+  }
+
+  const sil = document.getElementById("silhouette");
+  for (const family of FAMILIES) {
+    const group = CAST.filter((c) => c.family === family);
+    const wrap = document.createElement("div");
+    wrap.className = "silgroup";
+    for (const c of group) wrap.appendChild(sprite(c, 3, FLAT));
+    wrap.insertAdjacentHTML("beforeend", `<span class="silname">${family}</span>`);
+    sil.appendChild(wrap);
+  }
+
+  const scales = document.getElementById("scales");
+  for (const s of [4, 3, 2, 1.5]) {
+    const f = document.createElement("figure");
+    const pad = document.createElement("div");
+    pad.className = "pad";
+    for (const c of FAMILIES.map((f) => CAST.find((c) => c.family === f))) {
+      const el = sprite(c, Math.max(1, Math.round(s)));
+      el.style.display = "inline-block";
+      el.style.width = 16 * s + "px";
+      el.style.height = 16 * s + "px";
+      el.style.marginRight = "6px";
+      pad.appendChild(el);
+    }
+    f.appendChild(pad);
+    f.insertAdjacentHTML("beforeend", `<figcaption>${s}× · ${16 * s}px</figcaption>`);
+    scales.appendChild(f);
+  }
+
+  /* ── the room ────────────────────────────────────────────────── */
+  const STATUS = {
+    working:   { label: "업무 중", color: "var(--warn)" },
+    ready:     { label: "준비됨",  color: "var(--info)" },
+    available: { label: "대기 중", color: "var(--ok)" },
+    vacation:  { label: "휴가 중", color: "var(--faint)" },
+  };
+  const seats = [
+    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: "결제 API 에러 응답 구조 변경", spent: 22, total: 30 },
+    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: "로그인 폼 구현",              spent: 12, total: 25 },
+    { c: pick("deer"),    col: 13, row: 3, status: "ready",     task: "API 문서 작성",               spent: 0,  total: 20 },
+    { c: pick("chick"),   col: 3,  row: 6, status: "available", last: "인덱스 튜닝 완료" },
+    { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  back: "3일 후 복귀" },
+    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: "회귀 테스트 작성",            spent: 7,  total: 18 },
+  ];
+
+  const S = 3, T = 48;
+  const room = document.getElementById("room");
+  const ctx = room.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 18; x++) paint(ctx, TILES.floor, S, x * T, y * T);
+  for (let x = 0; x < 18; x++) paint(ctx, TILES.wall, S, x * T, 0);
+  for (const [t, x, y] of [["window",2,0],["window",3,0],["board",8,0],["board",9,0],["shelf",14,0],["plant",0,7],["plant",17,7]])
+    paint(ctx, TILES[t], S, x * T, y * T);
+  for (const s of seats) {
+    const dx = s.col * T, dy = s.row * T;
+    paint(ctx, CHAIR, S, dx, dy - T);
+    paint(ctx, s.c.sprite, S, dx, dy - T, skin(s.c));
+    paint(ctx, TILES.deskL, S, dx, dy);
+    paint(ctx, TILES.deskR, S, dx + T, dy);
+    paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: s.status === "working" ? P.M : P.o });
+  }
+
+  const overlay = document.getElementById("overlay");
+  for (const s of seats) {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.style.left = s.col * T + T + "px";
+    tag.style.top = s.row * T + T + 4 + "px";
+    tag.textContent = s.c.ko;
+    overlay.appendChild(tag);
+
+    const bub = document.createElement("span");
+    bub.className = "bub";
+    bub.style.left = s.col * T + T + "px";
+    bub.style.top = s.row * T - T - 24 + "px";
+    bub.innerHTML = `<span class="dot ${s.status}"></span>${STATUS[s.status].label}`;
+    overlay.appendChild(bub);
+  }
+
+  /* ── cards ───────────────────────────────────────────────────── */
+  const cards = document.getElementById("cards");
+  seats.forEach((s, i) => {
+    const v = s.total ? Math.round((s.spent / s.total) * 100) : 0;
+    const bar =
+      s.status === "working" ? `<i style="width:${v}%;background:var(--warn)"></i>`
+      : s.status === "ready" ? `<i style="width:3%;background:var(--info)"></i>`
+      : s.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
+      : "";
+    const nums =
+      s.status === "working" ? `<span>${s.spent}/${s.total}분</span><b>${v}%</b>`
+      : s.status === "ready" ? `<span>예상 ${s.total}분</span><b>시작 전</b>`
+      : s.status === "available" ? `<span>${s.last}</span><b>대기</b>`
+      : `<span>${s.back}</span><b>휴가</b>`;
+    const line =
+      s.status === "working" || s.status === "ready" ? s.task
+      : s.status === "available" ? "할당된 업무 없음" : "자리 비움";
+
+    const el = document.createElement("div");
+    el.className = "card";
+    if (s.status === "vacation") el.style.opacity = ".72";
+    el.innerHTML = `
+      <span class="c-av"><span class="c-live" style="background:${STATUS[s.status].color}"></span></span>
+      <span class="c-name">${s.c.ko}</span>
+      <span class="c-role">${ROLES[i]}</span>
+      <span class="c-rule"></span>
+      <span class="c-k">업무</span>
+      <span class="c-task">${line}</span>
+      <span class="meter">${bar}</span>
+      <span class="c-nums">${nums}</span>`;
+    el.querySelector(".c-av").prepend(sprite(s.c, 2));
+    cards.appendChild(el);
+  });
+</script>

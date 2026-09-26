@@ -1,0 +1,1100 @@
+<meta charset="utf-8" />
+<title>Tiny Office · Clean</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<style>
+  :root {
+    color-scheme: light;
+
+    --page: #edecee;
+    --surface: #ffffff;
+    --subtle: #f6f6f7;
+    --sunk: #eeeef0;
+    --line: #ebebed;
+    --line-2: #e0e0e3;
+
+    --ink: #1b1b1f;
+    --solid: #17171c;
+    --muted: #86868d;
+    --faint: #b2b2b9;
+
+    --brand: #5b5bd6;
+    --ok: #2fae62;
+    --ok-soft: #e4f6ec;
+    --info: #3b82f6;
+    --info-soft: #e8f0fe;
+    --warn: #eaa221;
+    --warn-soft: #fdf1dd;
+    --bad: #e5484d;
+    --bad-soft: #fdeaea;
+
+    --r-ctl: 10px;
+    --r-card: 12px;
+    --r-app: 18px;
+
+    --sans: "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 22px 18px 40px;
+  }
+  * { box-sizing: border-box; }
+  button { font: inherit; color: inherit; }
+
+  .app {
+    max-width: 1240px; margin: 0 auto;
+    background: var(--surface);
+    border-radius: var(--r-app);
+    box-shadow: 0 1px 2px rgb(20 20 25 / .05), 0 12px 40px rgb(20 20 25 / .08);
+    overflow: hidden;
+    display: grid; grid-template-columns: 236px 1fr;
+    min-height: 720px;
+  }
+
+  /* ═══ buttons ═══ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font: inherit; font-weight: 600; white-space: nowrap;
+    border-radius: 999px; border: 1px solid transparent; cursor: pointer;
+    transition: background .1s, border-color .1s;
+  }
+  .btn svg { width: 15px; height: 15px; flex: none; }
+  .btn-lg { height: 42px; padding-inline: 22px; font-size: 14px; }
+  .btn-md { height: 36px; padding-inline: 16px; font-size: 14px; }
+  .btn-sm { height: 30px; padding-inline: 13px; font-size: 13px; }
+  .btn-primary { background: var(--solid); color: #fff; }
+  .btn-primary:hover { background: #2a2a31; }
+  .btn-secondary { background: var(--surface); border-color: var(--line-2); color: var(--ink); }
+  .btn-secondary:hover { background: var(--subtle); }
+  .btn-ghost { background: none; color: var(--muted); }
+  .btn-ghost:hover { background: var(--subtle); color: var(--ink); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn:focus-visible, .ibtn:focus-visible, .desk:focus-visible, .mrow:focus-visible,
+  .c-menu:focus-visible, .mem:focus-visible,
+  .tab:focus-visible, .nav a:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 2px;
+  }
+  .ibtn {
+    width: 32px; height: 32px; border-radius: 999px; border: none;
+    background: var(--subtle); color: var(--muted);
+    display: inline-grid; place-items: center; cursor: pointer;
+  }
+  .ibtn:hover { background: var(--sunk); color: var(--ink); }
+  .ibtn svg { width: 15px; height: 15px; }
+
+  /* ═══ sidebar ═══ */
+  .side { background: var(--subtle); padding: 14px 12px; display: flex; flex-direction: column; }
+  .side-top { display: flex; align-items: center; gap: 10px; padding: 2px 4px 14px; }
+  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
+  .logo svg { width: 14px; height: 14px; color: #fff; }
+  .side-id { line-height: 1.25; }
+  .side-name { display: block; font-size: 13px; font-weight: 700; letter-spacing: .03em; }
+  .side-ver { display: block; font-size: 11px; color: var(--faint); }
+
+  .nav { display: flex; flex-direction: column; gap: 1px; }
+  .nav a {
+    display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px;
+    height: 34px; padding-inline: 8px; border-radius: var(--r-ctl);
+    font-size: 14px; color: var(--muted); text-decoration: none;
+  }
+  .nav a:hover { background: var(--sunk); color: var(--ink); }
+  .nav a[aria-current] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgb(20 20 25 / .06); }
+  .nav svg { width: 17px; height: 17px; }
+  .badge {
+    min-width: 19px; height: 19px; padding-inline: 6px; border-radius: 999px;
+    background: var(--bad); color: #fff; font-size: 11px; font-weight: 700;
+    display: grid; place-items: center; font-variant-numeric: tabular-nums;
+  }
+
+  .rule { height: 1px; background: var(--line-2); margin: 14px 4px; }
+  .ws-hd { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; margin-bottom: 4px; }
+  .ws-hd span { font-size: 13px; color: var(--muted); }
+
+  .mem {
+    display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 9px;
+    height: 32px; padding-inline: 8px; border-radius: 8px; font-size: 13px;
+    width: 100%; background: none; border: none; text-align: left; cursor: pointer;
+  }
+  .mem:hover { background: var(--sunk); }
+  .mem[aria-expanded="true"] { background: var(--surface); box-shadow: 0 1px 2px rgb(20 20 25 / .06); font-weight: 600; }
+  .mem .av { width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); display: grid; place-items: center; }
+  .side-foot { margin-top: auto; padding-top: 12px; }
+
+  /* ═══ main ═══ */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .head { padding: 16px 22px 0; }
+  .head-row { display: flex; align-items: flex-start; gap: 12px; }
+  h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
+  .sub { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+  .head-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .ghost-note { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .tabs { display: flex; align-items: center; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tab {
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+    height: 38px; padding-inline: 11px; border: none; background: none;
+    font-size: 14px; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+  .tab svg { width: 16px; height: 16px; }
+  .tab .n { font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .body { padding: 16px 22px 24px; display: flex; flex-direction: column; gap: 18px; overflow: auto; }
+
+  /* ═══ office ═══ */
+  .stage {
+    border-radius: var(--r-card); background: var(--subtle);
+    border: 1px solid var(--line); padding: 12px; overflow: auto; position: relative;
+  }
+  .room-wrap { position: relative; width: max-content; margin: 0 auto; }
+  .room { display: block; border-radius: 6px; image-rendering: pixelated; }
+  .overlay { position: absolute; inset: 0; }
+  .desk { position: absolute; padding: 0; background: none; border: 2px solid transparent; border-radius: 7px; cursor: pointer; }
+  .desk:hover { border-color: rgb(255 255 255 / .9); }
+  .desk[aria-expanded="true"] { border-color: #fff; background: rgb(255 255 255 / .18); }
+  .bub {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    background: #fff; border-radius: 8px; padding: 3px 9px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+    box-shadow: 0 1px 3px rgb(20 20 25 / .2);
+  }
+  .tag {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap;
+    text-shadow: 0 1px 2px rgb(0 0 0 / .55);
+  }
+
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+  .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
+  .dot.ready { background: transparent; border: 2px solid var(--info); }
+  .dot.available { background: var(--ok); }
+  .dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
+
+  /* ═══ team cards ═══ */
+  .grp { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .grp h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .grp .cnt { font-size: 12px; color: var(--muted); background: var(--subtle); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+
+  .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); }
+  .card {
+    position: relative; background: var(--surface);
+    border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px;
+    cursor: pointer; transition: border-color .1s, box-shadow .1s;
+  }
+  .card:hover { box-shadow: 0 2px 10px rgb(20 20 25 / .07); }
+  .card:has([aria-expanded="true"]) { border-color: var(--line-2); box-shadow: 0 4px 18px rgb(20 20 25 / .11); }
+  .c-av { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; overflow: visible; }
+  .c-av canvas { border-radius: 10px; }
+  .c-live {
+    position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px;
+    border-radius: 999px; border: 3px solid var(--surface);
+  }
+  .c-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; margin-top: 11px; }
+  .c-role { display: block; font-size: 13px; color: var(--faint); line-height: 1.35; }
+  .c-rule { display: block; height: 1px; background: var(--line); margin: 13px 0; }
+  .c-k { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); }
+  .c-task { display: block; font-size: 13.5px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .meter { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 11px; }
+  .meter i { display: block; height: 100%; border-radius: 999px; }
+  .c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+  .c-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .c-nums b { font-weight: 600; color: var(--ink); flex: none; }
+  .c-menu {
+    position: absolute; top: 11px; right: 9px;
+    width: 26px; height: 26px; border: none; border-radius: 7px;
+    background: none; color: var(--faint); cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .c-menu:hover, .c-menu[aria-expanded="true"] { background: var(--subtle); color: var(--ink); }
+  .c-menu svg { width: 15px; height: 15px; }
+
+  .addcard {
+    display: grid; place-items: center; align-content: center; gap: 9px; min-height: 190px;
+    border-radius: var(--r-card); border: 1px dashed var(--line-2); background: var(--subtle);
+    color: var(--faint); font-size: 13px; cursor: pointer;
+  }
+  .addcard:hover { border-color: var(--muted); color: var(--muted); background: var(--surface); }
+  .addcard .plus { width: 34px; height: 34px; border-radius: 999px; background: var(--sunk); display: grid; place-items: center; }
+  .addcard svg { width: 16px; height: 16px; }
+
+  /* ═══ anchored popover ═══ */
+  .pop {
+    position: fixed; z-index: 40; width: 292px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 6px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 18px 48px rgb(20 20 25 / .17);
+    opacity: 0; transform: scale(.97) translateY(-4px); transform-origin: top left;
+    transition: opacity .11s ease, transform .11s ease;
+    pointer-events: none; visibility: hidden;
+  }
+  .pop[data-open] { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+  .p-hd { display: flex; align-items: center; gap: 11px; padding: 9px 10px 11px; }
+  .p-av { position: relative; width: 38px; height: 38px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .p-av canvas { border-radius: 9px; }
+  .p-name { display: block; font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .p-role { display: block; font-size: 12.5px; color: var(--faint); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p-rule { height: 1px; background: var(--line); margin: 0 10px; }
+  .p-state { padding: 11px 10px; }
+  .p-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+  .p-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p-nums b { font-weight: 600; color: var(--ink); flex: none; }
+  .p-acts { padding-top: 5px; }
+  .p-why { margin: 0; font-size: 12px; color: var(--muted); padding: 1px 10px 7px; }
+
+  /* Menu rows replace buttons inside the popover: a card never carries a
+     near-black primary. The first row is the one the player came for. */
+  .mrow {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    height: 36px; padding-inline: 10px; border: none; border-radius: 9px;
+    background: none; text-align: left; font: inherit; font-size: 13.5px; color: var(--ink);
+    cursor: pointer;
+  }
+  .mrow:hover { background: var(--subtle); }
+  .mrow svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+  .mrow-key { font-weight: 600; }
+  .mrow-key svg { color: var(--ink); }
+  .mrow-bad { color: var(--bad); }
+  .mrow-bad svg { color: var(--bad); }
+  .mrow-bad:hover { background: var(--bad-soft); }
+  .mrow:disabled { color: var(--faint); cursor: default; background: none; }
+  .mrow:disabled svg { color: var(--faint); }
+
+  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 600; flex: none; }
+  .chip.working { background: var(--warn-soft); color: #8a5c10; }
+  .chip.ready { background: var(--info-soft); color: #2557b5; }
+  .chip.available { background: var(--ok-soft); color: #1f7a48; }
+  .chip.vacation { background: var(--sunk); color: var(--muted); }
+  .track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
+  .track i { display: block; height: 100%; border-radius: 999px; }
+
+  @media (max-width: 960px) {
+    .app { grid-template-columns: 1fr; }
+    .side { border-bottom: 1px solid var(--line-2); }
+  }
+</style>
+
+<div class="app">
+  <!-- ═══ sidebar ═══ -->
+  <nav class="side">
+    <div class="side-top">
+      <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+      <span class="side-id">
+        <span class="side-name">MY TINY OFFICE</span>
+        <span class="side-ver">v0.1.0</span>
+      </span>
+    </div>
+
+    <div class="nav">
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="2"/></svg><span>홈</span></a>
+      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span>사무실</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span>프로젝트</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="4.5" cy="4.5" r="1.8"/><circle cx="4.5" cy="13.5" r="1.8"/><circle cx="13.5" cy="9" r="1.8"/><path d="M4.5 6.3v5.4M6.3 13.5h3.2a2 2 0 0 0 2-2v-.8"/></svg><span>PR · 코드리뷰</span><span class="badge">3</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span>직원</span></a>
+    </div>
+
+    <div class="rule"></div>
+    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
+    <div id="members"></div>
+
+    <div class="side-foot">
+      <div class="rule" style="margin:0 4px 8px"></div>
+      <div class="nav">
+        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span>설정</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ main ═══ -->
+  <div class="main">
+    <div class="head">
+      <div class="head-row">
+        <span>
+          <h1>사무실</h1>
+          <span class="sub">백엔드팀 · 책상 6석 중 5석 사용</span>
+        </span>
+        <div class="head-right">
+          <span class="ghost-note">2026. 9. 26. (토) 10:24</span>
+          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>직원 고용</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.4"/></svg>전체<span class="n">5</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h7"/></svg>백엔드팀<span class="n">3</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2.5" width="12" height="11" rx="1.4"/><path d="M2 6h12"/></svg>프론트엔드팀<span class="n">2</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>휴게실<span class="n">0</span></button>
+        <button class="tab" aria-label="방 추가" style="color:var(--faint)">+</button>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="stage">
+        <div class="room-wrap">
+          <canvas class="room" aria-hidden="true" id="room" width="864" height="384"></canvas>
+          <div class="overlay" id="overlay"></div>
+        </div>
+      </div>
+      <div id="teams"></div>
+    </div>
+  </div>
+</div>
+
+<div class="pop" id="pop" role="dialog" aria-label="직원 행동"></div>
+
+<script>
+  /* ── pixel tiles ─────────────────────────────────────────────── */
+  const P = {
+    ".": null, K: "#2f2a3d", E: "#2f2a3d",
+    w: "#c9a06a", W: "#d8b17c", d: "#b0854f",
+    a: "#e9dcc4", A: "#f4ead7", b: "#c2b195",
+    g: "#8ec3e8", G: "#bcdcf2",
+    s: "#c9964f", S: "#dcae6c", t: "#9c6f3a",
+    m: "#454b63", M: "#6f9fd8", o: "#99a3b8",
+    c: "#5d6480", C: "#767ea0",
+    p: "#b5674a", n: "#4f8f55", N: "#6fae6e",
+    f: "#8a6240", r: "#d8574f", u: "#5b8de0", v: "#e0a93c",
+  };
+  const TILES = {
+    floor: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw"],
+    wall: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","bbbbbbbbbbbbbbbb","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    window: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKGGGGGGGGGGGGKa","aKGgggggggggggKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    shelf: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKfffffffffffKKa","aKfrrfuuvvfrrfKa","aKfrrfuuvvfrrfKa","aKfffffffffffKKa","aKfuuvvfrrfuufKa","aKfuuvvfrrfuufKa","aKfffffffffffKKa","bKKKKKKKKKKKKKKb","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    board: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aKKKKKKKKKKKKKKa","aKAAAAAAAAAAAAKa","aKAoooooooAAAAKa","aKAAAAAAAAAAAAKa","aKAooooooooooAKa","aKAAAAAAAAAAAAKa","aKAooooooAAAAAKa","aKAAAAAAAAAAAAKa","aKKKKKKKKKKKKKKa","KKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    deskL: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","wwKKKKKKKKKKKKKK","wKSSSSSSSSSSSSSS","wKSsssssssssssss","wKSsssssssssssss","wKSsssssssssssss","wKtttttttttttttt","wKKKKKKKKKKKKKKK","wwwwwwwwwwwwwwww","wwKKwwwwwwwwwwww","wwKKwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    deskR: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","KKKKKKKKKKKKKKww","SSSSSSSSSSSSSSKw","ssssssssssssssKw","ssssssssssssssKw","ssssssssssssssKw","ttttttttttttttKw","KKKKKKKKKKKKKKKw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwKKww","wwwwwwwwwwwwKKww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+    plant: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwKKKKwwwwwww","wwwKKnnnnKKwwwww","wwKnNNnnnnNKwwww","wwKnnnnnnnnKwwww","wwKNnnnKnnnNKwww","wwwKnnnKnnnKwwww","wwwwKnnKnnKwwwww","wwwwwKKKKKwwwwww","wwwwKKpppKKwwwww","wwwwKppppppKwwww","wwwwKppppppKwwww","wwwwwKKKKKKwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+  };
+  const MONITOR = ["................","..KKKKKKKKKKKK..","..KmmmmmmmmmmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmMMMMMMMMmK..","..KmmmmmmmmmmK..","..KKKKKKKKKKKK..",".....KmmmmK.....",".....KmmmmK.....","...KKKKKKKKKK...","...KmmmmmmmmK...","....KKKKKKKK....","................"];
+  const CHAIR = ["................","................","....KKKKKKKK....","...KCCCCCCCCK...","...KcccccccCK...","...KcccccccCK...","...KcccccccCK...","....KKKKKKKK....","................","..KKKKKKKKKKKK..","..KCcccccccccK..","..KKKKKKKKKKKK..",".......KK.......",".......KK.......","....KKKKKKKK....","................"];
+
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+  const CAT = [
+    "...KK......KK...",
+    "..KBBK....KBBK..",
+    "..KBBBKKKKBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FOX = [
+    "..KK........KK..",
+    "..KAK......KAK..",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SQUIRREL = [
+    "....K......K....",
+    "...KAK....KAK...",
+    "..KBAKKKKKKABK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHLEBEEBELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BUNNY = [
+    "...KKK....KKK...",
+    "...KAK....KAK...",
+    "...KAK....KAK...",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DOG = [
+    "...KKKKKKKKKK...",
+    "..KAABBBBBBAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAAEBEEBEAAK..",
+    "..KAABBBBBBAAK..",
+    "..KAABBNNBBAAK..",
+    "..KHBBBBBBBBHK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const BEAR = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PANDA = [
+    "..KKKK....KKKK..",
+    "..KAAK....KAAK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KBAABBBBAABK..",
+    "..KHAEBEEBEAHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const MOUSE = [
+    ".KKK........KKK.",
+    ".KAAK......KAAK.",
+    "..KAAKKKKKKAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HAMSTER = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KHBBEBEEBEBBHK.",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const KOALA = [
+    "................",
+    ".KK..........KK.",
+    "KAAK........KAAK",
+    "KAAKKKKKKKKKKAAK",
+    ".KKBBBBBBBBBBKK.",
+    "..KHBEBEEBEBHK..",
+    "..KBBBNNNNBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const CHICK = [
+    "................",
+    ".......KK.......",
+    "......KAAK......",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBNNBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DUCK = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBKNNNNNNKBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const OWL = [
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBOOBBBBOOBK..",
+    "..KBOEBBBBEOBK..",
+    "..KHOOBNNBOOHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PENGUIN = [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KBBBBBBBBBBK..",
+    "..KBLLLLLLLLBK..",
+    "..KHLELNNLELHK..",
+    "..KBLLLLLLLLBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const FROG = [
+    "...KKK....KKK...",
+    "..KOOOK..KOOOK..",
+    "..KOEOK..KOEOK..",
+    "..KBBKKKKKKBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHHBBEEBBHHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const COW = [
+    "KK............KK",
+    ".KAK........KAK.",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KNNNBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const DEER = [
+    "...K.K....K.K...",
+    "...KKK....KKK...",
+    "....KKKKKKKK....",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const SHEEP = [
+    "..KK.KKKKKK.KK..",
+    ".KAAKAAAAAAKAAK.",
+    ".KAAAAAAAAAAAAK.",
+    ".KAAAAAAAAAAAAK.",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const HEDGEHOG = [
+    "...K.K.KK.K.K...",
+    "..KAKAKAAKAKAK..",
+    "..KAAAAAAAAAAK..",
+    "..KBBBBBBBBBBK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBEEBEBHK..",
+    "..KBBBBNNBBBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+  const PIG = [
+    "................",
+    "..KK........KK..",
+    "..KAKKKKKKKKAK..",
+    "..KBBBBBBBBBBK..",
+    "..KHBEBBBBEBHK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBNNNNNNBBK..",
+    "..KBBBBBBBBBBK..",
+    ".KBBBBBBBBBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    ".KBBBBLLLLBBBBK.",
+    "..KBBBLLLLBBBK..",
+    "..KBBBBLLBBBBK..",
+    "...KBBBBBBBBK...",
+    "....KKKKKKKK....",
+    "................",
+  ];
+
+  const CAST = [
+    { key: "cat", sprite: CAT, ko: "모카", en: "Mocha", species: "고양이", family: "뾰족 귀",
+      B: "#f3e0c8", L: "#fdf3e2", A: "#e3bfa0", H: "#f4a7b0", N: "#e3bfa0" },
+    { key: "fox", sprite: FOX, ko: "여우", en: "Fennec", species: "여우", family: "뾰족 귀",
+      B: "#e89055", L: "#fdf2e6", A: "#a85f34", H: "#f4a7b0", N: "#a85f34" },
+    { key: "squirrel", sprite: SQUIRREL, ko: "도토", en: "Acorn", species: "다람쥐", family: "뾰족 귀",
+      B: "#c97f4a", L: "#f7e6cf", A: "#a8663a", H: "#f4a7b0", N: "#a8663a" },
+    { key: "bunny", sprite: BUNNY, ko: "두부", en: "Tofu", species: "토끼", family: "긴 귀",
+      B: "#fbfafb", L: "#fff1f4", A: "#f6c6d0", H: "#f4a7b0", N: "#f6c6d0" },
+    { key: "dog", sprite: DOG, ko: "콩이", en: "Bean", species: "강아지", family: "처진 귀",
+      B: "#d9b083", L: "#f3e2c9", A: "#a87f55", H: "#f4a7b0", N: "#6b4c33" },
+    { key: "bear", sprite: BEAR, ko: "코코", en: "Coco", species: "곰", family: "둥근 귀",
+      B: "#b79070", L: "#d2ad8c", A: "#96704f", H: "#e2929c", N: "#96704f" },
+    { key: "panda", sprite: PANDA, ko: "반달", en: "Moon", species: "판다", family: "둥근 귀",
+      B: "#fafafb", L: "#ffffff", A: "#3f3a44", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "mouse", sprite: MOUSE, ko: "치즈", en: "Cheese", species: "생쥐", family: "둥근 귀",
+      B: "#b9b4bd", L: "#d8d4dc", A: "#f2c0cb", H: "#f4a7b0", N: "#f2c0cb" },
+    { key: "hamster", sprite: HAMSTER, ko: "밤톨", en: "Nut", species: "햄스터", family: "둥근 귀",
+      B: "#f0cf9a", L: "#fdf0d8", A: "#d9a86a", H: "#f4a7b0", N: "#d9a86a" },
+    { key: "koala", sprite: KOALA, ko: "유칼", en: "Euca", species: "코알라", family: "둥근 귀",
+      B: "#a8adb8", L: "#ccd0d8", A: "#8b909c", H: "#f4a7b0", N: "#5d6470" },
+    { key: "chick", sprite: CHICK, ko: "삐약", en: "Pip", species: "병아리", family: "머리 장식",
+      B: "#f9da80", L: "#fdecb2", A: "#eda93c", H: "#f4a7b0", N: "#eda93c" },
+    { key: "owl", sprite: OWL, ko: "야간", en: "Nox", species: "부엉이", family: "머리 장식",
+      B: "#a3845f", L: "#c9ac86", A: "#7d6244", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "sheep", sprite: SHEEP, ko: "구름", en: "Cloud", species: "양", family: "머리 장식",
+      B: "#e6d6bf", L: "#fff8ee", A: "#fdfbf6", H: "#f4a7b0", N: "#c9bda8" },
+    { key: "hedgehog", sprite: HEDGEHOG, ko: "가시", en: "Quill", species: "고슴도치", family: "머리 장식",
+      B: "#e6d3b8", L: "#f6ecdc", A: "#8a6a4a", H: "#f4a7b0", N: "#8a6a4a" },
+    { key: "duck", sprite: DUCK, ko: "꽥꽥", en: "Quack", species: "오리", family: "부리·코",
+      B: "#fbfbfc", L: "#ffffff", A: "#f0a63c", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "penguin", sprite: PENGUIN, ko: "별", en: "Star", species: "펭귄", family: "부리·코",
+      B: "#61708f", L: "#fafbfd", A: "#495470", H: "#f4a7b0", N: "#f0a63c" },
+    { key: "pig", sprite: PIG, ko: "분홍", en: "Rosy", species: "돼지", family: "부리·코",
+      B: "#f4b8c0", L: "#fbd9de", A: "#e295a2", H: "#e87f90", N: "#e08e9c" },
+    { key: "cow", sprite: COW, ko: "얼룩", en: "Patch", species: "소", family: "뿔",
+      B: "#fafafb", L: "#ffffff", A: "#e8dfc8", H: "#f4a7b0", N: "#3f3a44" },
+    { key: "deer", sprite: DEER, ko: "단풍", en: "Maple", species: "사슴", family: "뿔",
+      B: "#cfa274", L: "#ecd7ba", A: "#8a6b49", H: "#f4a7b0", N: "#8a6b49" },
+    { key: "frog", sprite: FROG, ko: "완두", en: "Pea", species: "개구리", family: "솟은 눈",
+      B: "#a6d988", L: "#c4e8aa", A: "#7ab863", H: "#f2a0b8", N: "#7ab863" },
+  ];
+  const skin = (c) => ({ B: c.B, L: c.L, O: "#ffffff", A: c.A, H: c.H, N: c.N });
+
+  function paint(ctx, rows, scale, ox, oy, extra) {
+    const pal = extra ? { ...P, ...extra } : P;
+    for (let y = 0; y < rows.length; y++) {
+      const row = rows[y];
+      let x = 0;
+      while (x < row.length) {
+        const ch = row[x];
+        let run = 1;
+        while (x + run < row.length && row[x + run] === ch) run++;
+        const color = pal[ch];
+        if (color) { ctx.fillStyle = color; ctx.fillRect(ox + x * scale, oy + y * scale, run * scale, scale); }
+        x += run;
+      }
+    }
+  }
+  const SPECIES = new Map(CAST.map((c) => [c.key, c]));
+
+  function drawAvatar(el, species) {
+    const c = el.getContext("2d");
+    c.clearRect(0, 0, el.width, el.height);
+    c.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(species);
+    const scale = Math.max(1, Math.floor(el.width / 16));
+    const pad = Math.floor((el.width - 16 * scale) / 2);
+    paint(c, sp.sprite, scale, pad, pad, skin(sp));
+  }
+
+  /* ── data ────────────────────────────────────────────────────── */
+  // Status mirrors the domain: a task is working or ready, an employee is
+  // available or on vacation. The actions offered follow from that alone.
+  const STATUS = {
+    working:   { label: "업무 중", color: "var(--warn)" },
+    ready:     { label: "준비됨",  color: "var(--info)" },
+    available: { label: "대기 중", color: "var(--ok)" },
+    vacation:  { label: "휴가 중", color: "var(--faint)" },
+  };
+
+  // The nickname is the player's; the species only picks a sprite.
+  const people = [
+    { id: "p1", name: "모카", species: "cat", role: "Backend Engineer", team: "백엔드팀", col: 3, row: 3,
+      status: "working", task: { title: "결제 API 에러 응답 구조 변경", spent: 22, total: 30 } },
+    { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer", team: "프론트엔드팀", col: 8, row: 3,
+      status: "working", task: { title: "로그인 폼 구현", spent: 12, total: 25 } },
+    { id: "p3", name: "단풍", species: "deer", role: "Product Manager", team: "백엔드팀", col: 13, row: 3,
+      status: "ready", task: { title: "API 문서 작성", spent: 0, total: 20 } },
+    { id: "p4", name: "삐약", species: "chick", role: "DBA", team: "백엔드팀", col: 3, row: 6,
+      status: "available", last: "인덱스 튜닝 완료" },
+    { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer", team: "프론트엔드팀", col: 8, row: 6,
+      status: "vacation", back: "3일 후 복귀" },
+    { id: null, col: 13, row: 6 },
+  ];
+  const staffed = people.filter((p) => p.id);
+  const byId = new Map(staffed.map((p) => [p.id, p]));
+  const pct = (p) => (p.task ? Math.round((p.task.spent / p.task.total) * 100) : 0);
+
+  /* ── the room ────────────────────────────────────────────────── */
+  const S = 3, T = 48;
+  const room = document.getElementById("room");
+  const ctx = room.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 18; x++) paint(ctx, TILES.floor, S, x * T, y * T);
+  for (let x = 0; x < 18; x++) paint(ctx, TILES.wall, S, x * T, 0);
+  for (const [t, x, y] of [["window",2,0],["window",3,0],["board",8,0],["board",9,0],["shelf",14,0],["plant",0,7],["plant",17,7]])
+    paint(ctx, TILES[t], S, x * T, y * T);
+  for (const p of people) {
+    const dx = p.col * T, dy = p.row * T;
+    paint(ctx, CHAIR, S, dx, dy - T);
+    if (p.id) paint(ctx, SPECIES.get(p.species).sprite, S, dx, dy - T, skin(SPECIES.get(p.species)));
+    paint(ctx, TILES.deskL, S, dx, dy);
+    paint(ctx, TILES.deskR, S, dx + T, dy);
+    paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: p.status === "working" ? P.M : P.o });
+  }
+
+  const overlay = document.getElementById("overlay");
+  for (const p of people) {
+    const btn = document.createElement("button");
+    btn.className = "desk";
+    btn.type = "button";
+    if (p.id) btn.dataset.id = p.id;
+    btn.style.left = p.col * T - 4 + "px";
+    btn.style.top = p.row * T - T - 6 + "px";
+    btn.style.width = 2 * T + 8 + "px";
+    btn.style.height = 2 * T + 10 + "px";
+    btn.setAttribute("aria-label", p.id ? p.name : "빈 책상");
+    if (p.id) btn.addEventListener("click", (e) => open(p.id, btn, e.detail === 0));
+    overlay.appendChild(btn);
+
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.style.left = p.col * T + T + "px";
+    tag.style.top = p.row * T + T + 4 + "px";
+    tag.textContent = p.id ? p.name : "빈 자리";
+    if (!p.id) tag.style.opacity = ".7";
+    overlay.appendChild(tag);
+    if (!p.id) continue;
+
+    const bub = document.createElement("span");
+    bub.className = "bub";
+    bub.style.left = p.col * T + T + "px";
+    bub.style.top = p.row * T - T - 24 + "px";
+    bub.innerHTML = '<span class="dot ' + p.status + '"></span>' + STATUS[p.status].label;
+    overlay.appendChild(bub);
+  }
+
+  /* ── sidebar members ─────────────────────────────────────────── */
+  const members = document.getElementById("members");
+  for (const p of staffed) {
+    const b = document.createElement("button");
+    b.className = "mem";
+    b.type = "button";
+    b.dataset.id = p.id;
+    b.innerHTML =
+      '<span class="av"><canvas aria-hidden="true" width="22" height="22"></canvas></span>' +
+      "<span>" + p.name + "</span>" +
+      '<span class="dot ' + p.status + '"></span>';
+    b.addEventListener("click", (e) => open(p.id, b, e.detail === 0));
+    members.appendChild(b);
+    drawAvatar(b.querySelector("canvas"), p.species);
+  }
+
+  /* ── team cards ──────────────────────────────────────────────── */
+  function cardInner(p) {
+    const v = pct(p);
+    const bar =
+      p.status === "working" ? `<i style="width:${v}%;background:var(--warn)"></i>`
+      : p.status === "ready" ? `<i style="width:3%;background:var(--info)"></i>`
+      : p.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
+      : "";
+    const nums =
+      p.status === "working" ? `<span>${p.task.spent}/${p.task.total}분</span><b>${v}%</b>`
+      : p.status === "ready" ? `<span>예상 ${p.task.total}분</span><b>시작 전</b>`
+      : p.status === "available" ? `<span>${p.last}</span><b>대기</b>`
+      : `<span>${p.back}</span><b>휴가</b>`;
+    const line =
+      p.status === "working" || p.status === "ready" ? p.task.title
+      : p.status === "available" ? "할당된 업무 없음"
+      : "자리 비움";
+    return `
+      <button class="c-menu" type="button" data-id="${p.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${p.name} 행동"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.2" r="1.35"/><circle cx="8" cy="8" r="1.35"/><circle cx="8" cy="12.8" r="1.35"/></svg></button>
+      <span class="c-av">
+        <canvas aria-hidden="true" width="34" height="34"></canvas>
+        <span class="c-live" style="background:${STATUS[p.status].color}"></span>
+      </span>
+      <span class="c-name">${p.name}</span>
+      <span class="c-role">${p.role}</span>
+      <span class="c-rule"></span>
+      <span class="c-k">업무</span>
+      <span class="c-task">${line}</span>
+      <span class="meter">${bar}</span>
+      <span class="c-nums">${nums}</span>`;
+  }
+
+  const teams = document.getElementById("teams");
+  for (const team of ["백엔드팀", "프론트엔드팀"]) {
+    const group = staffed.filter((p) => p.team === team);
+    const wrap = document.createElement("div");
+    wrap.style.marginBottom = "18px";
+    wrap.innerHTML = `<div class="grp"><h2>${team}</h2><span class="cnt">${group.length}</span></div>`;
+    const grid = document.createElement("div");
+    grid.className = "cards";
+    for (const p of group) {
+      const c = document.createElement("div");
+      c.className = "card";
+      if (p.status === "vacation") c.style.opacity = ".72";
+      c.innerHTML = cardInner(p);
+      c.addEventListener("click", (e) => open(p.id, c, e.detail === 0));
+      grid.appendChild(c);
+      drawAvatar(c.querySelector("canvas"), p.species);
+    }
+    if (team === "백엔드팀") {
+      const add = document.createElement("button");
+      add.className = "addcard";
+      add.type = "button";
+      add.innerHTML =
+        '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>빈 책상에 직원 채우기';
+      grid.appendChild(add);
+    }
+    wrap.appendChild(grid);
+    teams.appendChild(wrap);
+  }
+
+  /* ── anchored popover ────────────────────────────────────────── */
+  const I = {
+    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>',
+    play: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.4l7.6 4.6L5 12.6z"/></svg>',
+    plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
+    swap: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>',
+    book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.8 3.2h3.6A1.8 1.8 0 0 1 8 5v8a1.6 1.6 0 0 0-1.6-1.4H2.8zM13.2 3.2H9.6A1.8 1.8 0 0 0 8 5v8a1.6 1.6 0 0 1 1.6-1.4h3.6z"/></svg>',
+    info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>',
+    sun: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.6"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1"/></svg>',
+    undo: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 3.8v3.4h3.4"/><path d="M4 7.2a4.6 4.6 0 1 1 .8 4.4"/></svg>',
+  };
+
+  // Only transitions the domain allows from this state. The first row is the
+  // one the player came here for.
+  const ACTIONS = {
+    working: [
+      { icon: I.check, label: "완료 처리", key: true },
+      { icon: I.info, label: "업무 상세" },
+      { icon: I.swap, label: "담당 변경" },
+    ],
+    ready: [
+      { icon: I.play, label: "업무 시작", key: true },
+      { icon: I.swap, label: "다른 업무로 교체" },
+      { icon: I.undo, label: "할당 취소", bad: true },
+    ],
+    available: [
+      { icon: I.plus, label: "업무 할당", key: true },
+      { icon: I.book, label: "교육 보내기" },
+      { icon: I.sun, label: "휴가 보내기" },
+    ],
+    vacation: [
+      { icon: I.plus, label: "업무 할당", key: true, off: "휴가 중에는 업무를 맡길 수 없습니다." },
+      { icon: I.undo, label: "복귀 처리" },
+    ],
+  };
+
+  const pop = document.getElementById("pop");
+  let anchor = null;
+
+  function stateBlock(p) {
+    const v = pct(p);
+    if (p.status === "working")
+      return `<span class="c-k">진행 중</span><span class="c-task">${p.task.title}</span>
+        <span class="track" style="margin-top:9px"><i style="width:${v}%;background:var(--warn)"></i></span>
+        <span class="p-nums"><span>${p.task.spent}/${p.task.total}분</span><b>${v}%</b></span>`;
+    if (p.status === "ready")
+      return `<span class="c-k">할당된 업무</span><span class="c-task">${p.task.title}</span>
+        <span class="p-nums"><span>예상 ${p.task.total}분</span><b>시작 전</b></span>`;
+    if (p.status === "available")
+      return `<span class="c-k">최근 완료</span><span class="c-task">${p.last}</span>
+        <span class="p-nums"><span>지금은 비어 있습니다</span><b>대기</b></span>`;
+    return `<span class="c-k">휴가</span><span class="c-task">${p.back}</span>`;
+  }
+
+  function open(id, el, viaKey) {
+    const p = byId.get(id);
+    if (!p) return;
+    if (anchor === el && pop.hasAttribute("data-open")) { close(); return; }
+
+    document.querySelectorAll("[data-id]").forEach((n) => {
+      n.setAttribute("aria-expanded", String(n.dataset.id === id));
+    });
+
+    const rows = ACTIONS[p.status]
+      .map((a) => {
+        const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");
+        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}>${a.icon}${a.label}</button>`;
+        return a.off ? row + `<p class="p-why">${a.off}</p>` : row;
+      })
+      .join("");
+
+    pop.innerHTML = `
+      <div class="p-hd">
+        <span class="p-av">
+          <canvas aria-hidden="true" width="32" height="32"></canvas>
+          <span class="c-live" style="background:${STATUS[p.status].color}"></span>
+        </span>
+        <span style="flex:1;min-width:0">
+          <span class="p-name">${p.name}</span>
+          <span class="p-role">${p.role}</span>
+        </span>
+        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${STATUS[p.status].label}</span>
+      </div>
+      <div class="p-rule"></div>
+      <div class="p-state">${stateBlock(p)}</div>
+      <div class="p-rule"></div>
+      <div class="p-acts">${rows}</div>`;
+    drawAvatar(pop.querySelector("canvas"), p.species);
+
+    anchor = el;
+    pop.setAttribute("data-open", "");
+    place(el);
+    if (viaKey) {
+      const first = pop.querySelector(".mrow:not(:disabled)");
+      if (first) first.focus({ preventScroll: true });
+    }
+  }
+
+  function place(el) {
+    const r = el.getBoundingClientRect();
+    const w = pop.offsetWidth, h = pop.offsetHeight, gap = 8, edge = 12;
+    let left = r.right + gap;
+    if (left + w > innerWidth - edge) left = r.left - w - gap;
+    if (left < edge) left = Math.min(Math.max(edge, r.left), innerWidth - w - edge);
+    let top = Math.min(r.top, innerHeight - h - edge);
+    pop.style.left = Math.round(left) + "px";
+    pop.style.top = Math.round(Math.max(edge, top)) + "px";
+  }
+
+  function close() {
+    pop.removeAttribute("data-open");
+    document.querySelectorAll("[data-id]").forEach((n) => n.setAttribute("aria-expanded", "false"));
+    anchor = null;
+  }
+
+  document.addEventListener("pointerdown", (e) => {
+    if (anchor && !pop.contains(e.target) && !e.target.closest("[data-id]")) close();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !anchor) return;
+    // A card is a plain container, so focus returns to its kebab button.
+    const back = anchor.matches("[data-id]") ? anchor : anchor.querySelector("[data-id]");
+    close();
+    if (back) back.focus({ preventScroll: true });
+  });
+  addEventListener("resize", () => { if (anchor) place(anchor); });
+  addEventListener("scroll", () => { if (anchor) place(anchor); }, true);
+</script>

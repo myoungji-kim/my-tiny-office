@@ -1,0 +1,160 @@
+<meta charset="utf-8" />
+<title>Tiny Office UI</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #edecee;
+    --surface: #ffffff;
+    --subtle: #f6f6f7;
+    --sunk: #eeeef0;
+    --line: #ebebed;
+    --line-2: #e0e0e3;
+
+    --ink: #1b1b1f;
+    --solid: #17171c;
+    --muted: #86868d;
+    --faint: #b2b2b9;
+
+    --brand: #5b5bd6;
+    --ok: #2fae62;
+    --ok-soft: #e4f6ec;
+
+    --sans: "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+  body {
+    margin: 0; padding: 30px 20px 70px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  }
+  * { box-sizing: border-box; }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+
+  header.top { margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; }
+  .logo { width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: grid; place-items: center; flex: none; margin-top: 3px; }
+  .logo svg { width: 16px; height: 16px; color: #fff; }
+  header.top h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
+  header.top p { margin: 3px 0 0; color: var(--muted); max-width: 66ch; }
+  .canon {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--ok-soft); color: #1f7a48;
+    border-radius: 999px; padding: 3px 11px; font-size: 12px; font-weight: 600;
+    margin-bottom: 22px;
+  }
+  .canon .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--ok); }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .item {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 1px 2px rgb(20 20 25 / .05);
+    transition: box-shadow .12s, border-color .12s, transform .12s;
+  }
+  .item:hover { border-color: var(--line-2); box-shadow: 0 6px 22px rgb(20 20 25 / .1); transform: translateY(-2px); }
+  .item:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .shot { height: 188px; background: var(--subtle); border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .shot iframe {
+    position: absolute; top: 0; left: 0; border: 0;
+    width: 1400px; height: 1400px;
+    transform: scale(.268); transform-origin: top left;
+    pointer-events: none;
+  }
+  .shot .fallback {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--faint); font-size: 13px;
+  }
+
+  .meta { padding: 16px 18px 18px; }
+  .meta h2 { margin: 0; font-size: 16px; font-weight: 600; }
+  .meta code { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .meta p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+  .owns { margin: 11px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 5px; }
+  .owns li { font-size: 12px; background: var(--subtle); border-radius: 999px; padding: 2px 9px; color: var(--ink); }
+
+  .note {
+    margin-top: 22px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 18px;
+  }
+  .note h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+  .note p { margin: 0; color: var(--muted); font-size: 13px; }
+  .note a { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+    <span>
+      <h1>UI 정본</h1>
+      <p>
+        지금 My Tiny Office의 UI는 이 세 페이지를 기준으로 갑니다. 화면을 새로 만들거나
+        고칠 때 먼저 여기를 열어 보고, 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.
+      </p>
+    </span>
+  </header>
+  <span class="canon"><span class="dot"></span>열어서 직접 확인하는 기준입니다</span>
+
+  <div class="grid">
+    <a class="item" href="office.html">
+      <div class="shot">
+        <div class="fallback">office.html</div>
+        <iframe src="office.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+      </div>
+      <div class="meta">
+        <h2>사무실 화면</h2>
+        <code>ui/office.html</code>
+        <p>화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.</p>
+        <ul class="owns">
+          <li>레이아웃</li><li>컬러 토큰</li><li>타일 엔진</li><li>상태 표시</li><li>행동 팝오버</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="components.html">
+      <div class="shot">
+        <div class="fallback">components.html</div>
+        <iframe src="components.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+      </div>
+      <div class="meta">
+        <h2>컴포넌트</h2>
+        <code>ui/components.html</code>
+        <p>버튼과 메뉴 행의 기준. 크기·변형·상태 칩과 함께 하면 안 되는 예시가 짝으로 들어 있습니다.</p>
+        <ul class="owns">
+          <li>버튼</li><li>메뉴 행</li><li>상태 칩</li><li>추가 어포던스</li><li>Do &amp; don't</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="characters.html">
+      <div class="shot">
+        <div class="fallback">characters.html</div>
+        <iframe src="characters.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+      </div>
+      <div class="meta">
+        <h2>직원 캐릭터</h2>
+        <code>ui/characters.html</code>
+        <p>동물 캐스트 20종의 기준. 실루엣 계열, 배율별 가독성, 이름 규칙이 함께 있습니다.</p>
+        <ul class="owns">
+          <li>스프라이트 20종</li><li>실루엣 계열</li><li>팔레트 키</li><li>배율</li><li>이름 규칙</li>
+        </ul>
+      </div>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>규칙은 문서에, 모양은 여기에</h3>
+    <p>
+      토큰 값·네이밍·i18n·접근성처럼 글로 적어야 하는 것은
+      <a href="../STYLE-GUIDE.md">STYLE-GUIDE.md</a>에, 방향과 화면 구성은
+      <a href="../DESIGN.md">DESIGN.md</a>에 있습니다.
+      지나간 방향은 <a href="../archive/">archive/</a>에 비교용으로만 남아 있습니다 — 기준이 아닙니다.
+    </p>
+  </div>
+</div>
