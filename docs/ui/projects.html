@@ -31,14 +31,19 @@
   .work:focus-visible, .mrow:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
   /* ═══ the board ═══ */
+  /* A column is a status a task rests in, ordered the way work moves. Columns
+     are wide enough to read a title without breaking it into scraps, so the
+     board scrolls sideways rather than squeezing five of them into the panel. */
 
-  .board { display: grid; gap: 10px; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; }
+  .board { display: grid; grid-auto-flow: column; grid-auto-columns: 274px; gap: 14px; align-items: start; overflow-x: auto; padding-bottom: 6px; }
 
   .col { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
 
   .col-hd { display: flex; align-items: center; gap: 7px; padding: 0 2px 2px; }
 
-  .col-hd h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: -.01em; }
+  .col-dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+
+  .col-hd h2 { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; }
 
   .col-n {
     font-size: 11px; font-weight: 600; color: var(--faint);
@@ -48,16 +53,11 @@
 
   .col-line { flex: 1; height: 1px; background: var(--line); }
 
-  /* The review column is the one that waits on the player, so it reads as a
-     place with something in it rather than another column of cards. */
-  .col.review .col-hd h2 { color: var(--warn-ink); }
-  .col.review .col-n { background: var(--warn-soft); color: var(--warn-ink); }
-
   .work {
     text-align: left; width: 100%; font: inherit; color: inherit;
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--r-ctl); padding: 11px 12px; cursor: pointer;
-    display: flex; flex-direction: column; gap: 7px;
+    border-radius: var(--r-card); padding: 0; cursor: pointer;
+    display: flex; flex-direction: column; overflow: hidden;
     transition: border-color .1s, box-shadow .1s;
   }
 
@@ -65,11 +65,25 @@
 
   .work[aria-expanded="true"] { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
+  /* where the task came from, set apart the way a header is */
+  .w-from {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11.5px; color: var(--faint);
+    padding: 8px 12px; border-bottom: 1px solid var(--line);
+    background: var(--subtle);
+  }
+
+  .w-from svg { width: 13px; height: 13px; flex: none; }
+
+  .w-from b { font-weight: 600; color: var(--muted); }
+
+  .w-bd { display: flex; flex-direction: column; gap: 8px; padding: 11px 12px 12px; }
+
   .w-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 
-  .w-title { font-size: 13.5px; font-weight: 500; line-height: 1.4; }
+  .w-title { font-size: 13.5px; font-weight: 500; line-height: 1.45; }
 
-  .w-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; color: var(--faint); }
+  .w-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 11.5px; color: var(--faint); }
 
   .w-who { display: flex; align-items: center; gap: 5px; min-width: 0; }
 
@@ -77,10 +91,17 @@
 
   .w-av { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .prio { font-size: 11px; font-weight: 600; flex: none; white-space: nowrap; }
+  /* the numbers a card can carry, in one row along the bottom */
+  .w-foot { display: flex; align-items: center; gap: 11px; font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .w-foot span { display: flex; align-items: center; gap: 4px; }
+
+  .w-foot svg { width: 12px; height: 12px; }
+
+  /* The word carries the priority; colour only lifts the one that is urgent.
+     --line-2 is a border colour and never text. */
+  .prio { font-size: 11px; font-weight: 600; flex: none; white-space: nowrap; color: var(--faint); }
   .prio.high { color: var(--bad-ink); }
-  .prio.normal { color: var(--faint); }
-  .prio.low { color: var(--line-2); }
 
   .col-add {
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -101,11 +122,18 @@
 
   .r-line.pending { color: var(--warn-ink); }
   .r-line.changes { color: var(--bad-ink); }
-  .r-line.stuck { color: var(--faint); }
+  .r-line.blocked { color: var(--bad-ink); }
 
   .r-line svg { width: 13px; height: 13px; flex: none; }
 
-  /* ═══ the popover's review section ═══ */
+  /* Blocked is not a column: a task is always blocked out of some status, so
+     it is a mark on the card rather than a place of its own. */
+  .work.is-blocked { border-color: var(--bad-line); }
+
+  .w-block { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--bad-ink); background: var(--bad-soft); border-radius: 999px; padding: 2px 8px; align-self: flex-start; }
+
+  .w-block svg { width: 11px; height: 11px; }
+  /* ═══ what a review said, and who may give one ═══ */
 
   .p-said {
     display: block; font-size: 12.5px; line-height: 1.5; color: var(--muted);
@@ -118,12 +146,8 @@
 
   .seat-why { font-size: 11px; color: var(--faint); }
 
-  @media (max-width: 1180px) {
-    .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  }
-
-  @media (max-width: 820px) {
-    .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 900px) {
+    .board { grid-auto-columns: 84vw; }
   }
 </style>
 
@@ -191,31 +215,39 @@
   const TASKS = [
     { id: "t1", project: "pay", area: "db", priority: "high", status: "working", who: "p1", minutes: 25, done: 12,
       title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" } },
-    { id: "t2", project: "pay", area: "arch", priority: "normal", status: "review", who: "p1",
+    { id: "t2", project: "pay", area: "arch", priority: "normal", minutes: 30, done: 30, status: "review", who: "p1",
       title: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" },
       review: { by: "p4", state: "changes",
         said: { ko: "재시도 가능한 실패와 영구 실패를 같은 코드로 내려주고 있어요. 나눠 주세요.", en: "Retryable and permanent failures come back under one code. Split them." } } },
-    { id: "t3", project: "pay", area: "security", priority: "high", status: "review", who: "p5",
+    { id: "t3", project: "pay", area: "security", priority: "high", minutes: 35, done: 35, status: "review", who: "p5",
       title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" },
       review: { by: null, state: "pending" } },
-    { id: "t4", project: "order", area: "types", priority: "normal", status: "review", who: "p2",
+    { id: "t4", project: "order", area: "types", priority: "normal", minutes: 20, done: 20, status: "review", who: "p2",
       title: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" },
       review: { by: "p2", state: "reviewing" } },
-    { id: "t5", project: "order", area: "arch", priority: "normal", status: "ready", who: "p1",
+    { id: "t5", project: "order", area: "arch", priority: "normal", minutes: 30, done: 0, status: "ready", who: "p1",
       title: { ko: "주문 취소 API 추가", en: "Add an order cancellation API" } },
-    { id: "t6", project: "order", area: "quality", priority: "low", status: "review", who: "p3",
+    { id: "t6", project: "order", area: "quality", priority: "low", minutes: 45, done: 45, status: "review", who: "p3",
       title: { ko: "주문 회귀 테스트 작성", en: "Write the order regression tests" },
       review: { by: null, state: "pending" } },
-    { id: "t7", project: "pay", area: "l10n", priority: "low", status: "backlog", who: null,
+    { id: "t7", project: "pay", area: "l10n", priority: "low", minutes: 20, done: 0, status: "backlog", who: null,
       title: { ko: "결제 에러 메시지 영문 번역", en: "Translate the payment error messages" } },
-    { id: "t8", project: "order", area: "db", priority: "normal", status: "done", who: "p4",
+    { id: "t8", project: "order", area: "db", priority: "normal", minutes: 25, done: 25, status: "done", who: "p4",
       title: { ko: "주문 테이블 인덱스 정리", en: "Tidy the order table indexes" } },
-    { id: "t9", project: "pay", area: "product", priority: "normal", status: "done", who: "p3",
+    { id: "t9", project: "pay", area: "product", priority: "normal", minutes: 40, done: 40, status: "done", who: "p3",
       title: { ko: "환불 정책 문서화", en: "Write down the refund policy" } },
   ];
 
-  const COLUMNS = ["backlog", "ready", "working", "review", "done"];
-
+  // A column is a status a task rests in, in the order work moves through
+  // them. Blocked is not among them: a task is blocked out of whichever
+  // status it is in, so it rides on the card instead of taking a place.
+  const COLUMNS = [
+    { status: "backlog", color: "var(--faint)" },
+    { status: "ready", color: "var(--info)" },
+    { status: "working", color: "var(--warn)" },
+    { status: "review", color: "var(--brand)" },
+    { status: "done", color: "var(--ok)" },
+  ];
   /* ── i18n ────────────────────────────────────────────────────── */
   // Employee nicknames are absent on purpose: the player wrote them, so they
   // never go through a dictionary.
@@ -229,6 +261,7 @@
       areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
       priority: { low: "낮음", normal: "보통", high: "높음" },
       unassigned: "담당자 없음", addTask: "업무 추가", empty: "없음",
+      blocked: "막힘", estimateless: "예상 시간 없음",
       minutes: (a, b) => a + "/" + b + "분",
       reviewPending: "리뷰어를 기다려요", reviewing: (n) => n + " 검토 중", changesBy: (n) => n + subjectParticle(n) + " 변경을 요청했어요",
       nobodyKnows: (a) => a + " 아는 사람이 없어요",
@@ -246,6 +279,7 @@
       areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
       priority: { low: "Low", normal: "Normal", high: "High" },
       unassigned: "Unassigned", addTask: "Add a task", empty: "Nothing here",
+      blocked: "Blocked", estimateless: "No estimate",
       minutes: (a, b) => a + "/" + b + " min",
       reviewPending: "Waiting for a reviewer", reviewing: (n) => n + " is reviewing", changesBy: (n) => n + " asked for changes",
       nobodyKnows: (a) => "Nobody knows " + a,
@@ -320,6 +354,8 @@
     eye: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
     back: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6.5 3.5L3 7l3.5 3.5M3 7h6.5a3.5 3.5 0 0 1 0 7H7"/></svg>',
     none: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.6"/><path d="M5.6 8h4.8"/></svg>',
+    folder: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.8 4.2h4L7 5.8h7.2v6.4H1.8z"/></svg>',
+    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
     plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
   };
 
@@ -329,31 +365,42 @@
     if (r.state === "reviewing") return { cls: "pending", svg: icon.eye, text: t().reviewing(byId.get(r.by).name) };
     return reviewersFor(task.area).length
       ? { cls: "pending", svg: icon.clock, text: t().reviewPending }
-      : { cls: "stuck", svg: icon.none, text: t().nobodyKnows(areaObject(task.area)) };
+      : { cls: "blocked", svg: icon.none, text: t().nobodyKnows(areaObject(task.area)) };
   }
+
+  const isBlocked = (task) =>
+    task.status === "review" && task.review.state === "pending" && !reviewersFor(task.area).length;
 
   function taskCard(task) {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "work";
+    b.className = "work" + (isBlocked(task) ? " is-blocked" : "");
     b.dataset.id = task.id;
     b.setAttribute("aria-expanded", "false");
 
     const who = task.who ? byId.get(task.who) : null;
     const line = task.status === "review" ? reviewLine(task) : null;
+    const project = PROJECTS.find((p) => p.id === task.project);
 
     b.innerHTML = `
-      <span class="w-top">
-        <span class="w-title">${tx(task.title)}</span>
-        <span class="prio ${task.priority}">${t().priority[task.priority]}</span>
-      </span>
-      <span class="w-meta">
-        <span class="area-chip">${areaLabel(task.area)}</span>
-        ${who ? `<span class="w-who"><span class="w-av"></span>${who.name}</span>` : `<span>${t().unassigned}</span>`}
-      </span>
-      ${task.status === "working" ? `<span class="meter"><i style="width:${Math.round((task.done / task.minutes) * 100)}%;background:var(--info)"></i></span>
-        <span class="w-meta">${t().minutes(task.done, task.minutes)}</span>` : ""}
-      ${line ? `<span class="r-line ${line.cls}">${line.svg}${line.text}</span>` : ""}`;
+      <span class="w-from">${icon.folder}<b>${tx(project.name)}</b></span>
+      <span class="w-bd">
+        <span class="w-top">
+          <span class="w-title">${tx(task.title)}</span>
+          <span class="prio ${task.priority}">${t().priority[task.priority]}</span>
+        </span>
+        <span class="w-meta">
+          <span class="area-chip">${areaLabel(task.area)}</span>
+          ${who ? `<span class="w-who"><span class="w-av"></span><span>${who.name}</span></span>` : `<span>${t().unassigned}</span>`}
+        </span>
+        ${isBlocked(task) ? `<span class="w-block">${icon.none}${t().blocked}</span>` : ""}
+        ${task.status === "working" ? `<span class="meter"><i style="width:${Math.round((task.done / task.minutes) * 100)}%;background:var(--info)"></i></span>` : ""}
+        ${line ? `<span class="r-line ${line.cls}">${line.svg}${line.text}</span>` : ""}
+        <span class="w-foot">
+          <span>${icon.clock}${task.minutes ? t().minutes(task.done ?? 0, task.minutes) : t().estimateless}</span>
+          ${task.status === "done" ? `<span>${icon.check}${t().columns.done}</span>` : ""}
+        </span>
+      </span>`;
 
     if (who) b.querySelector(".w-av").appendChild(avatar(who.species, 20));
     b.addEventListener("click", (e) => open(task, b, e.detail === 0));
@@ -379,11 +426,11 @@
     tabs.appendChild(add);
 
     board.innerHTML = "";
-    for (const status of COLUMNS) {
+    for (const { status, color } of COLUMNS) {
       const list = shown().filter((k) => k.status === status);
       const col = document.createElement("section");
-      col.className = "col" + (status === "review" ? " review" : "");
-      col.innerHTML = `<div class="col-hd"><h2>${t().columns[status]}</h2><span class="col-n">${list.length}</span><span class="col-line"></span></div>`;
+      col.className = "col";
+      col.innerHTML = `<div class="col-hd"><span class="col-dot" style="background:${color}"></span><h2>${t().columns[status]}</h2><span class="col-n">${list.length}</span><span class="col-line"></span></div>`;
       for (const task of list) col.appendChild(taskCard(task));
       if (!list.length) {
         const e = document.createElement("p");
@@ -403,7 +450,6 @@
     const waiting = TASKS.filter((k) => k.status === "review").length;
     document.getElementById("headSub").textContent = t().headSub(TASKS.length, waiting);
   }
-
   /* ── one task, and what the player can do about it ───────────── */
 
   function menu(label, kind) {
