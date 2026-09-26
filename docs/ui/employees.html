@@ -305,6 +305,71 @@
   .f-time { font-size: 11.5px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
 
   .stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ═══ area coverage ═══ */
+  .area-row {
+    display: grid; grid-template-columns: minmax(0, 170px) 76px minmax(0, 1fr) auto;
+    align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .area-row:last-of-type { border-bottom: none; }
+  .area-name { font-size: 13.5px; font-weight: 600; }
+  .seat { font-size: 11.5px; color: var(--muted); }
+  .seat.no { color: var(--faint); }
+  .knows { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .knows .who { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+  .knows .who span { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; overflow: hidden; }
+  .nobody { font-size: 12.5px; color: #a8322f; font-weight: 600; }
+  .area-n { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ═══ memory scaling ═══ */
+  .mem.cold-mem { border-color: #f4c2c3; background: #fffafa; }
+  .mem-more {
+    width: 100%; border: none; background: none; cursor: pointer;
+    font-size: 12px; color: var(--muted); padding: 5px 0 1px; text-align: left;
+  }
+  .mem-more:hover { color: var(--ink); }
+  .budget { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+  .archived { margin-top: 12px; border-top: 1px dashed var(--line-2); padding-top: 11px; }
+  .archived summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style: none; }
+  .archived summary::-webkit-details-marker { display: none; }
+  .archived summary::before { content: "▸ "; color: var(--faint); }
+  .archived[open] summary::before { content: "▾ "; }
+  .archived .mem { opacity: .62; margin-top: 7px; }
+
+  /* ═══ modal ═══ */
+  .scrim {
+    position: fixed; inset: 0; z-index: 60; background: rgb(20 20 25 / .34);
+    display: grid; place-items: center; padding: 24px;
+  }
+  .scrim[hidden] { display: none; }
+  .modal {
+    width: 100%; max-width: 486px; max-height: 100%; overflow: auto;
+    background: var(--surface); border-radius: 16px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .08), 0 22px 60px rgb(20 20 25 / .26);
+  }
+  .m-hd { display: flex; align-items: center; gap: 12px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
+  .m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .m-t { display: block; font-size: 16.5px; font-weight: 600; line-height: 1.35; }
+  .m-s { display: block; font-size: 12.5px; color: var(--muted); }
+  .m-sec { padding: 15px 20px; border-bottom: 1px solid var(--line); }
+  .m-sec:last-of-type { border-bottom: none; }
+  .m-foot { padding: 15px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+
+  .pick {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: center; gap: 11px;
+    width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); cursor: pointer; text-align: left; margin-bottom: 7px;
+  }
+  .pick:last-of-type { margin-bottom: 0; }
+  .pick:hover { border-color: var(--line-2); background: var(--subtle); }
+  .pick[aria-checked="true"] { border-color: var(--brand); background: var(--brand-soft); }
+  .radio { width: 16px; height: 16px; border-radius: 999px; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+  .pick[aria-checked="true"] .radio { border-color: var(--brand); }
+  .pick[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
+  .pick-t { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-m { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pick-new { border-style: dashed; color: var(--muted); }
+  .pick-new .pick-t { font-weight: 400; }
 </style>
 
 <div class="app">
@@ -370,6 +435,14 @@
 
       <div class="view" id="view-memory" hidden>
         <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-hd">
+            <h2>분야</h2>
+            <p>회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.</p>
+          </div>
+          <div class="panel-bd" id="areaTable"></div>
+        </div>
+
         <div class="mem-cols">
           <div class="panel">
             <div class="panel-hd">
@@ -389,6 +462,10 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="업무 맡기기" id="modal"></div>
 </div>
 
 <script>
@@ -838,9 +915,26 @@
     vacation:  { label: "휴가 중", color: "var(--faint)" },
   };
 
-  // The seven areas a PR can ask a reviewer for. 프로세스 is a memory area too
-  // but not a review seat — not everything worth knowing is reviewable.
-  const REVIEW_AREAS = ["아키텍처", "타입 안정성", "데이터베이스", "보안", "로컬라이제이션", "기획", "품질"];
+  // The company owns this list. A review seat is an area a PR can ask for;
+  // 프로세스 is worth knowing but nobody reviews for it.
+  const AREAS = [
+    { name: "아키텍처", seat: true },
+    { name: "타입 안정성", seat: true },
+    { name: "데이터베이스", seat: true },
+    { name: "보안", seat: true },
+    { name: "로컬라이제이션", seat: true },
+    { name: "기획", seat: true },
+    { name: "품질", seat: true },
+    { name: "프로세스", seat: false },
+  ];
+  const REVIEW_AREAS = AREAS.filter((a) => a.seat).map((a) => a.name);
+
+  const backlog = [
+    { id: "t1", title: "결제 내역 페이지네이션", area: "데이터베이스", minutes: 25 },
+    { id: "t2", title: "주문 취소 API 추가", area: "아키텍처", minutes: 30 },
+    { id: "t3", title: "에러 메시지 영문 번역", area: "로컬라이제이션", minutes: 20 },
+    { id: "t4", title: "결제 웹훅 서명 검증", area: "보안", minutes: 35 },
+  ];
 
   const people = [
     { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
@@ -853,6 +947,7 @@
         { area: "아키텍처", text: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", from: "PR #4102", used: 22 },
         { area: "타입 안정성", text: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", from: null, used: 11 },
         { area: "프로세스", text: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", from: null, used: 7 },
+        { area: "프로세스", text: "예전 결제 모듈은 v1 스키마를 썼어요.", from: "v1 마이그레이션", used: 2, archived: true },
       ] },
     { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
       dept: "개발본부", team: "프론트엔드팀", status: "working", joined: "2026. 4. 15.",
@@ -879,6 +974,10 @@
       memories: [
         { area: "데이터베이스", text: "마이그레이션은 항상 되돌릴 수 있게 써요.", from: "스키마 롤백이 안 된 사고", used: 11 },
         { area: "데이터베이스", text: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", from: null, used: 5 },
+        { area: "데이터베이스", text: "NULL과 undefined를 오갈 때는 CHECK 제약을 같이 걸어요.", from: "결제 상태가 뒤집힌 버그", used: 8 },
+        { area: "데이터베이스", text: "외래 키에는 항상 인덱스를 같이 만들어요. 삭제가 느려져요.", from: null, used: 6 },
+        { area: "데이터베이스", text: "트랜잭션 안에서 외부 API를 호출하지 않아요.", from: "결제 타임아웃 장애", used: 13 },
+        { area: "데이터베이스", text: "집계 쿼리는 읽기 전용 커넥션으로 보내요.", from: null, used: 3 },
         { area: "보안", text: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", from: null, used: 0 },
       ] },
     { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
@@ -919,9 +1018,14 @@
   };
   const josa = (word, withFinal, withoutFinal) => (hasBatchim(word) ? withFinal : withoutFinal);
 
-  const areasOf = (p) => [...new Set(p.memories.map((m) => m.area))];
+  // Archived memory is kept but not carried into the work, so it counts for
+  // neither coverage nor context size.
+  const liveOf = (p) => p.memories.filter((m) => !m.archived);
+  const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
   const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
-  const usedOf = (p) => p.memories.reduce((n, m) => n + m.used, 0);
+  const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
+  const charsOf = (p) => liveOf(p).reduce((n, m) => n + m.text.length, 0);
+  const knowersOf = (area) => people.filter((p) => areasOf(p).includes(area));
 
   /* ── sidebar roster ──────────────────────────────────────────── */
   const members = document.getElementById("members");
@@ -938,7 +1042,7 @@
   }
 
   /* ── header ──────────────────────────────────────────────────── */
-  const totalMem = people.reduce((n, p) => n + p.memories.length, 0) + companyMemories.length;
+  const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0) + companyMemories.length;
   document.getElementById("nList").textContent = people.length;
   document.getElementById("nMem").textContent = totalMem;
   document.getElementById("headSub").textContent =
@@ -957,7 +1061,7 @@
       <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
       <span class="r-dept">${p.dept} · ${p.team}</span>
       <span class="areas">${areas.map((a) => `<span class="area-chip">${a}</span>`).join("")}</span>
-      <span class="r-mem"><b>${p.memories.length}</b>개 기억</span>`;
+      <span class="r-mem"><b>${liveOf(p).length}</b>개 기억</span>`;
     b.querySelector(".r-av").prepend(avatar(p.species, 40));
     b.addEventListener("click", () => select(p.id));
     roster.appendChild(b);
@@ -968,7 +1072,7 @@
 
   const memCard = (m) => {
     const cls = m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
-    return `<div class="mem">
+    return `<div class="mem${m.used === 0 && !m.archived ? " cold-mem" : ""}">
       <span class="mem-t">${m.text}</span>
       <span class="mem-m">
         ${m.from ? ICON.task : ICON.hand}
@@ -983,21 +1087,36 @@
     if (!p) return;
     roster.querySelectorAll("[data-id]").forEach((n) => n.setAttribute("aria-selected", String(n.dataset.id === id)));
 
+    // Two per area is what fits before the panel stops being readable. The
+    // most-referenced ones are the ones worth seeing first.
+    const FOLD = 2;
     const grouped = areasOf(p)
       .map((a) => {
-        const list = p.memories.filter((m) => m.area === a);
+        const list = liveOf(p)
+          .filter((m) => m.area === a)
+          .sort((x, y) => y.used - x.used);
         const seat = REVIEW_AREAS.includes(a);
         const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
+        const head = list.slice(0, FOLD);
+        const rest = list.slice(FOLD);
         return `<div class="mem-group">
           <div class="mem-hd">
             <span class="area-chip"${style}>${a}</span>
             <span class="mem-line"></span>
             <span style="font-size:11.5px;color:var(--faint)">${list.length}</span>
           </div>
-          ${list.map(memCard).join("")}
+          ${head.map(memCard).join("")}
+          ${
+            rest.length
+              ? `<div class="mem-rest" hidden>${rest.map(memCard).join("")}</div>
+                 <button class="mem-more" type="button" data-rest>${rest.length}개 더 보기</button>`
+              : ""
+          }
         </div>`;
       })
       .join("");
+
+    const archived = p.memories.filter((m) => m.archived);
 
     const now = p.task
       ? `<div class="kv"><span>현재 업무</span><b>${p.task}</b></div>`
@@ -1037,8 +1156,20 @@
       </div>
 
       <div class="d-sec">
-        <span class="k">기억 <span class="kn">${p.memories.length}</span></span>
+        <span class="k">기억 <span class="kn">${liveOf(p).length}</span></span>
+        <div class="budget">
+          <span>업무마다 함께 들고 가요</span>
+          <span>${charsOf(p)}자</span>
+        </div>
         ${grouped}
+        ${
+          archived.length
+            ? `<details class="archived">
+                 <summary>보관함 ${archived.length}개 — 남겨 두지만 업무에 들고 가지 않아요</summary>
+                 ${archived.map(memCard).join("")}
+               </details>`
+            : ""
+        }
         <button class="mem-add" type="button">${ICON.plus}이 직원에게 알려주기</button>
       </div>
 
@@ -1049,9 +1180,19 @@
       </div>
 
       <div class="d-acts">
-        <button class="btn btn-secondary btn-md">업무 할당</button>
+        <button class="btn btn-secondary btn-md" data-assign>업무 맡기기</button>
       </div>`;
     detail.querySelector(".d-av").prepend(avatar(p.species, 52));
+
+    detail.querySelectorAll("[data-rest]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const rest = b.previousElementSibling;
+        const open = !rest.hasAttribute("hidden");
+        rest.toggleAttribute("hidden", open);
+        b.textContent = open ? rest.children.length + "개 더 보기" : "접기";
+      });
+    });
+    detail.querySelector("[data-assign]").addEventListener("click", () => openAssign(p));
   }
 
   /* ── org chart ───────────────────────────────────────────────── */
@@ -1078,7 +1219,7 @@
         c.className = "tcard";
         c.type = "button";
         c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · 기억 ${p.memories.length}</span></span>`;
+          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · 기억 ${liveOf(p).length}</span></span>`;
         c.querySelector(".t-av").prepend(avatar(p.species, 36));
         c.addEventListener("click", () => { show("list"); select(p.id); });
         grid.appendChild(c);
@@ -1130,6 +1271,29 @@
     notices.appendChild(n);
   }
 
+  const areaTable = document.getElementById("areaTable");
+  for (const a of AREAS) {
+    const knowers = knowersOf(a.name);
+    const count = people.reduce((n, p) => n + liveOf(p).filter((m) => m.area === a.name).length, 0);
+    const row = document.createElement("div");
+    row.className = "area-row";
+    row.innerHTML = `
+      <span class="area-name">${a.name}</span>
+      <span class="seat${a.seat ? "" : " no"}">${a.seat ? "리뷰 분야" : "리뷰 없음"}</span>
+      <span class="knows">${
+        knowers.length
+          ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
+          : '<span class="nobody">아무도 몰라요</span>'
+      }</span>
+      <span class="area-n">기억 ${count}</span>`;
+    row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
+    areaTable.appendChild(row);
+  }
+  areaTable.insertAdjacentHTML(
+    "beforeend",
+    `<button class="mem-add" type="button">${ICON.plus}분야 추가하기</button>`,
+  );
+
   const feedBox = document.getElementById("feed");
   for (const f of feed) {
     const p = people.find((x) => x.id === f.who);
@@ -1146,6 +1310,96 @@
   document.getElementById("companyMem").innerHTML =
     companyMemories.map(memCard).join("") +
     `<button class="mem-add" type="button">${ICON.plus}회사 전체에 알려주기</button>`;
+
+  /* ── assign ──────────────────────────────────────────────────── */
+  const scrim = document.getElementById("scrim");
+  const modal = document.getElementById("modal");
+  let assignee = null;
+  let picked = backlog[0].id;
+
+  function renderAssign() {
+    const p = assignee;
+    const task = backlog.find((t) => t.id === picked);
+    // The point of teaching shows up here: what this person brings to this task.
+    const useful = task ? liveOf(p).filter((m) => m.area === task.area).sort((x, y) => y.used - x.used) : [];
+
+    modal.innerHTML = `
+      <div class="m-hd">
+        <span class="m-av"></span>
+        <span style="flex:1;min-width:0">
+          <span class="m-t">${p.name}${josa(p.name, "이", "가")} 맡을 업무</span>
+          <span class="m-s">${p.role} · ${p.team}</span>
+        </span>
+      </div>
+
+      <div class="m-sec">
+        <span class="k">대기 중인 업무</span>
+        ${backlog
+          .map(
+            (t) => `<button class="pick" type="button" role="radio" data-task="${t.id}"
+                      aria-checked="${t.id === picked}">
+                <span class="radio"></span>
+                <span class="pick-t">${t.title}</span>
+                <span class="area-chip">${t.area}</span>
+                <span class="pick-m">${t.minutes}분</span>
+              </button>`,
+          )
+          .join("")}
+        <button class="pick pick-new" type="button" role="radio" data-task="new" aria-checked="${picked === "new"}">
+          <span class="radio"></span>
+          <span class="pick-t">새 업무 만들기</span>
+          <span></span><span></span>
+        </button>
+      </div>
+
+      ${
+        task
+          ? `<div class="m-sec">
+               <span class="k">이 업무에 들고 갈 기억 <span class="kn">${useful.length}</span></span>
+               ${
+                 useful.length
+                   ? useful.map(memCard).join("")
+                   : `<div class="notice notice-warn">
+                        <span class="n-ic">${ICON.alert}</span>
+                        <span class="n-tx">
+                          <b>${task.area} 기억이 없어요</b>
+                          <span>${p.name}${josa(p.name, "은", "는")} 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.</span>
+                        </span>
+                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">지금 알려주기</button></span>
+                      </div>`
+               }
+             </div>`
+          : ""
+      }
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-close>취소</button>
+        <button class="btn btn-primary btn-md" type="button">${task ? "이 업무 맡기기" : "업무 만들고 맡기기"}</button>
+      </div>`;
+
+    modal.querySelector(".m-av").appendChild(avatar(p.species, 44));
+    modal.querySelectorAll("[data-task]").forEach((b) =>
+      b.addEventListener("click", () => {
+        picked = b.dataset.task;
+        renderAssign();
+      }),
+    );
+    modal.querySelector("[data-close]").addEventListener("click", closeAssign);
+    modal.querySelector("[data-close]").focus({ preventScroll: true });
+  }
+
+  function openAssign(p) {
+    assignee = p;
+    picked = backlog[0].id;
+    scrim.hidden = false;
+    renderAssign();
+  }
+  function closeAssign() {
+    scrim.hidden = true;
+    assignee = null;
+  }
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeAssign(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeAssign(); });
 
   /* ── tabs ────────────────────────────────────────────────────── */
   function show(view) {

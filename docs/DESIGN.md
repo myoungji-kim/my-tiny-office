@@ -9,7 +9,7 @@ before building or changing a screen.
 | --- | --- |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/employees.html` | List and detail, org chart, memory, review areas |
-| `ui/components.html` | Buttons, menu rows, notices, empty states, confirm dialogs |
+| `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
 This document holds the direction and the screen structure. Written rules —
@@ -134,13 +134,49 @@ A memory belongs to one employee, or to the company when everyone should know
 it. Company-scoped, never global: this follows the same ownership chain as an
 agent session.
 
-Review eligibility falls out of it. A PR asks for one of seven areas; an
-employee who holds memory in that area can take the seat. Two things are worth
-saying out loud, and the memory tab leads with both:
+### Areas
+
+An area is the vocabulary that memory, tasks and PR review all share. **The
+company owns the list**, not the engine — a studio that cares about 게임 서버
+should be able to say so.
+
+The list lives on the memory tab as a coverage table rather than in settings,
+because the useful question is never "what areas exist" but "who knows this
+one". An area that is a *review seat* can be asked for by a PR; 프로세스 is
+worth knowing and nobody reviews for it.
+
+Review eligibility falls out of memory: an employee who holds memory in an area
+can take that seat. Two things are worth saying out loud, and the memory tab
+leads with both:
 
 - an area **no employee knows**, so that PR cannot be reviewed
 - a memory that has **never been referenced**, which is either wrong or was
   given to the wrong person
+
+### When memory gets long
+
+Memory is carried into the work, so a long list is not only hard to read — it
+is context the agent pays for on every task. The screen treats length as a
+thing to manage:
+
+| | |
+| --- | --- |
+| 분야별 묶기 | Two per area, **most-referenced first**, the rest behind 더 보기 |
+| 크기 | The detail panel shows how many characters go with every task |
+| 보관 | Kept, not carried. Excluded from counts, coverage and size |
+| 정리 | A memory referenced zero times is flagged where it sits and on the memory tab |
+
+Reference count is what makes this safe to automate later: the memory that
+earns its place is the one that keeps getting used.
+
+### Assigning work
+
+The assign modal exists to show **what this person brings to this task** before
+the work starts — the memories in the task's area, most-referenced first. It is
+the same loop seen from the other end.
+
+When they have none, the modal says so and offers to teach them right there.
+That is the moment the player actually has the context to teach.
 
 ## Status
 

@@ -178,6 +178,17 @@ finished. "에이전트 연결이 끊어졌어요" is half of it; "진행 중이
 An empty state is not an error and does not apologise. Offer the action that
 fills it, and — where the feature is optional — an honest way to skip it.
 
+### Modal
+
+Covering the screen is for a choice that has to be answered now. Anything
+reversible belongs in a popover.
+
+- A dialog is yes/no. A modal is for picking something.
+- Focus starts on **cancel**; closing returns focus to the trigger.
+- `Escape` and a click outside both close, and closing saves nothing.
+- The confirm button names the choice — `이 업무 맡기기`, never `확인`.
+- **Show the consequence of the choice in the same window**, before it is made.
+
 ### Confirm dialog
 
 Replaces `confirm()`. Only for work that is hard to undo.
@@ -301,6 +312,9 @@ Rules for a new species:
 | Show counts of real events | Invent a 0–100 bar |
 | Name the review area nobody knows | Show only what exists |
 | Show that a memory was used | Let teaching disappear into a notes field |
+| Fold a long list, most-used first | Scroll forever |
+| Let the company own its area list | Hard-code the vocabulary |
+| Preview the consequence in the modal | Ask to confirm a choice blind |
 | Compute the Korean particle | Concatenate 를 and hope |
 | Say what happened | Say only the status name |
 | Label a confirm button with its effect | Label it `확인` |

@@ -21,6 +21,7 @@
     --faint: #b2b2b9;
 
     --brand: #5b5bd6;
+    --brand-soft: #ecebfb;
     --ok: #2fae62;
     --ok-soft: #e4f6ec;
     --warn: #eaa221;
@@ -219,6 +220,46 @@
   .d-t { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.45; }
   .d-d { margin: 5px 0 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
   .d-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+
+  /* ═══ modal ═══ */
+  .scrim {
+    position: fixed; inset: 0; z-index: 60; background: rgb(20 20 25 / .34);
+    display: grid; place-items: center; padding: 24px;
+  }
+  .scrim[hidden] { display: none; }
+  .modal {
+    width: 100%; max-width: 486px; max-height: 100%; overflow: auto;
+    background: var(--surface); border-radius: 16px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .08), 0 22px 60px rgb(20 20 25 / .26);
+  }
+  .m-hd { display: flex; align-items: center; gap: 12px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
+  .m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .m-t { display: block; font-size: 16.5px; font-weight: 600; line-height: 1.35; }
+  .m-s { display: block; font-size: 12.5px; color: var(--muted); }
+  .m-sec { padding: 15px 20px; border-bottom: 1px solid var(--line); }
+  .m-sec:last-of-type { border-bottom: none; }
+  .m-foot { padding: 15px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+  .pick {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: center; gap: 11px;
+    width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); cursor: pointer; text-align: left; margin-bottom: 7px;
+  }
+  .pick:last-of-type { margin-bottom: 0; }
+  .pick:hover { border-color: var(--line-2); background: var(--subtle); }
+  .pick[aria-checked="true"] { border-color: var(--brand); background: var(--brand-soft); }
+  .radio { width: 16px; height: 16px; border-radius: 999px; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+  .pick[aria-checked="true"] .radio { border-color: var(--brand); }
+  .pick[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
+  .pick-t { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-m { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pick-new { border-style: dashed; color: var(--muted); }
+  .pick-new .pick-t { font-weight: 400; }
+  .scrim.inline { position: static; padding: 0; background: none; display: block; }
+  .scrim.inline .modal { max-width: 100%; box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14); }
+  .k { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); margin-bottom: 8px; }
+  .k .kn { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .area-chip { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: var(--brand-soft); color: #4342a6; white-space: nowrap; }
 
   .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
   .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
@@ -617,6 +658,59 @@
     </div>
   </section>
 
+
+  <section>
+    <h2>Modals</h2>
+    <p class="note">
+      화면을 덮는 것은 <strong>지금 답해야 끝나는 선택</strong>일 때만입니다. 되돌릴 수 있는 일은
+      팝오버로 충분합니다. 확인 창(<code>.dlg</code>)은 예/아니오이고, 모달(<code>.modal</code>)은
+      고를 것이 있을 때 씁니다.
+    </p>
+
+    <div class="scrim inline">
+      <div class="modal">
+        <div class="m-hd">
+          <span class="m-av"></span>
+          <span style="flex:1;min-width:0">
+            <span class="m-t">모카가 맡을 업무</span>
+            <span class="m-s">Backend Engineer · 백엔드팀</span>
+          </span>
+        </div>
+        <div class="m-sec">
+          <span class="k">대기 중인 업무</span>
+          <button class="pick" type="button" role="radio" aria-checked="true">
+            <span class="radio"></span>
+            <span class="pick-t">결제 내역 페이지네이션</span>
+            <span class="area-chip">데이터베이스</span>
+            <span class="pick-m">25분</span>
+          </button>
+          <button class="pick" type="button" role="radio" aria-checked="false">
+            <span class="radio"></span>
+            <span class="pick-t">주문 취소 API 추가</span>
+            <span class="area-chip">아키텍처</span>
+            <span class="pick-m">30분</span>
+          </button>
+          <button class="pick pick-new" type="button" role="radio" aria-checked="false">
+            <span class="radio"></span>
+            <span class="pick-t">새 업무 만들기</span>
+            <span></span><span></span>
+          </button>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-secondary btn-md" type="button">취소</button>
+          <button class="btn btn-primary btn-md" type="button">이 업무 맡기기</button>
+        </div>
+      </div>
+    </div>
+
+    <h3>규칙</h3>
+    <div class="spec"><code>언제</code><span>고를 것이 둘 이상이고, 고르기 전에는 다음으로 못 갈 때만.</span></div>
+    <div class="spec"><code>포커스</code><span>열리면 <strong>취소</strong>에 먼저 갑니다. 닫히면 열었던 버튼으로 돌아갑니다.</span></div>
+    <div class="spec"><code>닫기</code><span><code>Escape</code>와 바깥 클릭 둘 다 닫습니다. 닫기는 아무것도 저장하지 않습니다.</span></div>
+    <div class="spec"><code>확인 버튼</code><span>고른 것을 말합니다 — <code>이 업무 맡기기</code>. <code>확인</code>이 아닙니다.</span></div>
+    <div class="spec"><code>결과 미리보기</code><span>맡기기 전에 <strong>무엇이 달라지는지</strong> 같은 창에서 보여줍니다.</span></div>
+  </section>
+
   <section>
     <h2>Rules</h2>
     <ul style="margin:0;padding-left:20px;line-height:2">
@@ -635,6 +729,8 @@
       <li>실패 알림은 <strong>데이터가 무사한지 먼저</strong> 말합니다.</li>
       <li>되돌릴 수 없는 확인 창은 위험 모양이고 <strong>포커스가 취소에 먼저</strong> 갑니다.</li>
       <li>확인 버튼은 "확인"이 아니라 <strong>일어날 일</strong>을 라벨로 씁니다.</li>
+      <li>모달은 <strong>지금 골라야 하는 선택</strong>에만 씁니다. 되돌릴 수 있으면 팝오버로 충분합니다.</li>
+      <li>선택을 맡기기 전에 <strong>그 선택의 결과</strong>를 같은 창에서 보여줍니다.</li>
     </ul>
   </section>
 </div>
