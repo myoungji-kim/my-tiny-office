@@ -220,7 +220,7 @@
       status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
       minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
-      notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
+      notStarted: "시작 전", waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
       inProgress: "진행 중", assigned: "할당된 업무", lastDone: "최근 완료", vacationLabel: "휴가",
       actions: {
         complete: "완료 처리", detail: "업무 상세", reassign: "담당 변경",
@@ -242,7 +242,7 @@
       status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
       work: "WORK", noTask: "Nothing assigned", away: "Away",
       minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
-      notStarted: "Not started", waiting: "Free", onLeave: "Leave",
+      notStarted: "Not started", waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",
       inProgress: "In progress", assigned: "Assigned", lastDone: "Last finished", vacationLabel: "On leave",
       actions: {
         complete: "Mark done", detail: "Task details", reassign: "Reassign",
@@ -470,7 +470,7 @@
         <span class="p-nums"><span>${t().estimate(p.task.total)}</span><b>${t().notStarted}</b></span>`;
     if (p.status === "available")
       return `<span class="c-k">${t().lastDone}</span><span class="c-task">${t()[p.last]}</span>
-        <span class="p-nums"><span>지금은 비어 있습니다</span><b>대기</b></span>`;
+        <span class="p-nums"><span>${t().deskFree}</span><b>${t().waiting}</b></span>`;
     return `<span class="c-k">${t().vacationLabel}</span><span class="c-task">${t()[p.back]}</span>`;
   }
 

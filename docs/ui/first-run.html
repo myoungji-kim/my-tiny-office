@@ -404,7 +404,7 @@
       chosen = c;
       for (const x of grid.children) x.setAttribute("aria-pressed", String(x === b));
       picked.innerHTML = `<b>${tx(c.species)}</b><span>${tx(c.family)}</span>`;
-      if (!nameInput.value) nameInput.placeholder = c.ko;
+      if (!nameInput.value) nameInput.placeholder = tx(c);
       sync();
     });
     grid.appendChild(b);

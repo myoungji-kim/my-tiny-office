@@ -293,5 +293,37 @@ console.log("page titles");
 console.log("");
 
 
+/* ── 13. a page with a dictionary must go through it ── */
+// The bug this exists for reads the same way every time: one branch of a
+// template with Korean written into it while its siblings call t(). The page
+// then reads half-English with the toggle on English.
+console.log("korean past the dictionary");
+for (const p of PAGES) {
+  const text = src[p];
+  const dictionaryAt = text.indexOf("const TEXT = {");
+  if (dictionaryAt === -1) continue;
+
+  const end = text.indexOf("\n  };", dictionaryAt);
+  const outside = text.slice(0, dictionaryAt) + text.slice(end);
+
+  for (const block of outside.matchAll(/<script>[\s\S]*?<\/script>/g)) {
+    for (const line of block[0].split("\n")) {
+      // a ko/en pair, a player-written nickname and a line that already
+      // branches on the language are all doing the right thing
+      const code = line
+        .replace(/\/\/.*$/, "")
+        .replace(/\b"?ko"?:\s*"[^"]*"/g, "")
+        .replace(/data-ko="[^"]*"/g, "")
+        .replace(/aria-label="[^"]*"/g, "")
+        .replace(/\bname:\s*"[^"]*"/g, "");
+      if (/lang ===|lang ==/.test(code)) continue;
+      if (/[\uac00-\ud7a3]/.test(code)) {
+        flag(`${p}: Korean written past the dictionary\n      ${line.trim().slice(0, 88)}`);
+      }
+    }
+  }
+}
+console.log("");
+
 console.log(problems ? `\n${problems} problem(s)` : "\nno inconsistency found");
 process.exit(problems ? 1 : 0);

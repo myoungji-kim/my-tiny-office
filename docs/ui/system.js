@@ -585,10 +585,13 @@ const STATUS = {
     document.body.append(nav);
 
     if (lang === "en") {
-      for (const a of document.querySelectorAll('a[href$=".html"]')) {
-        // keep the link relative: reading .href would absolutise it
-        const h = a.getAttribute("href");
-        if (!a.hasAttribute("aria-current") && !h.includes("?")) a.setAttribute("href", h + "?lang=en");
+      // Anything that points at another page carries the language, including
+      // the link to the page you are on and the index's preview frames.
+      for (const el of document.querySelectorAll('a[href$=".html"], iframe[src$=".html"]')) {
+        const attr = el.tagName === "IFRAME" ? "src" : "href";
+        // keep it relative: reading .href would absolutise it
+        const value = el.getAttribute(attr);
+        if (!value.includes("?")) el.setAttribute(attr, value + "?lang=en");
       }
     }
   };

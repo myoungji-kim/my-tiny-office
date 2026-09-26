@@ -690,8 +690,8 @@
     b.innerHTML = `
       <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
       <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
-      <span class="r-dept">${p.dept} · ${p.team}</span>
-      <span class="areas">${areas.map((a) => `<span class="area-chip">${a}</span>`).join("")}</span>
+      <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
+      <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
       <span class="r-mem">${t().memCountShort(liveOf(p).length)}</span>`;
     b.querySelector(".r-av").prepend(avatar(p.species, 40));
     b.addEventListener("click", () => select(p.id));
@@ -732,7 +732,7 @@
         const rest = list.slice(FOLD);
         return `<div class="mem-group">
           <div class="mem-hd">
-            <span class="area-chip"${style}>${a}</span>
+            <span class="area-chip"${style}>${t().areas[a]}</span>
             <span class="mem-line"></span>
             <span style="font-size:11.5px;color:var(--faint)">${list.length}</span>
           </div>
