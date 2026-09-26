@@ -28,6 +28,15 @@ Avoid:
 └────────────────────────────────────────────────────────────┘
 ```
 
+## Implemented scope
+
+The first playable slice renders Office, People, Work and Company as sections of
+a single dashboard. Nav entries for PRs and Training appear once those systems
+exist.
+
+The office is a small SVG scene: one desk per employee, tinted by status. It is
+deliberately not a sprite engine yet.
+
 ## Agent Status
 
 Employee characters should communicate:

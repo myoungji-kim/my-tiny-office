@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+  --color-cream: #faf7f2;
+  --color-panel: #fffdfa;
+  --color-parchment: #f2ebe0;
+  --color-ink: #2e2a26;
+  --color-muted: #857a6e;
+  --color-line: #e5dcce;
+  --color-lavender: #b6afdd;
+  --color-blue: #7d9dc4;
+  --color-sage: #8fb996;
+  --color-amber: #dfa15c;
+  --color-clay: #c98c80;
+
+  --font-sans:
+    ui-sans-serif, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+}
