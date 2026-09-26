@@ -226,7 +226,7 @@ inventing its own vocabulary:
 Colour never carries status alone — **the dot shape differs too**.
 
 Further runtime states the agent layer can report (`blocked`, `disconnected`,
-`failed`, `training`, `reviewing`) get the same treatment when their systems
+`failed`, `reviewing`) get the same treatment when their systems
 exist: a distinct dot shape, a label, and no reliance on hue.
 
 ## Actions

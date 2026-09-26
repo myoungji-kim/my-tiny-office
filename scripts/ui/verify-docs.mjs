@@ -61,6 +61,17 @@ for (const p of ["office", "employees"]) {
   }
 }
 
+
+/* the areas GAMEPLAY.md names must be the ones the sample page offers */
+const gameplay = readFileSync("docs/GAMEPLAY.md", "utf8");
+const areaLabels = [...src.employees.matchAll(/areas: \{([^}]*)\}/g)]
+  .map((m) => [...m[1].matchAll(/: "([^"]+)"/g)].map((x) => x[1]));
+const english = areaLabels.find((set) => set.every((a) => /^[\x20-\x7e]+$/.test(a)));
+if (!english) fail("employees.html has no English area labels");
+else for (const a of english) {
+  if (!gameplay.includes(a)) fail(`GAMEPLAY.md does not name the area "${a}"`);
+}
+
 /* all four weights, on every page (system.css is not a page) */
 for (const page of PAGES) {
   const text = src[page];

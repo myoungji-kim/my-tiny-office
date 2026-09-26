@@ -53,7 +53,7 @@ Desktop packaging remains a natural long-term fit for local SQLite, local agent 
 
 ## 3. Simulation Time
 
-The MVP uses a real-time simulation. Progress on Tasks, Training, and other timed
+The MVP uses a real-time simulation. Progress on Tasks and other timed
 activities is derived from elapsed wall-clock time. There is no game tick loop.
 
 A timed activity stores:
@@ -87,18 +87,17 @@ startup rather than assume it observed every moment of their progress.
 │                                                            │
 │  Office UI                                                 │
 │  ├── Office Map                                            │
+│  ├── Projects                                              │
 │  ├── Employees                                             │
-│  ├── Work                                                  │
-│  ├── PRs                                                   │
-│  ├── Training                                              │
-│  └── Company                                               │
+│  ├── Company                                               │
+│  └── Settings                                              │
 │                                                            │
 │  Simulation / Domain                                       │
 │  ├── Company                                               │
 │  ├── Employee                                              │
 │  ├── Task / Project                                        │
 │  ├── PullRequest / Review                                  │
-│  ├── Training                                              │
+│  ├── Memory                                                │
 │  └── Domain Events                                         │
 │                                                            │
 │  Agent Runtime                                             │
@@ -120,7 +119,7 @@ Employee
 ├── identity
 ├── role
 ├── department
-├── skills
+├── memories
 ├── personality
 ├── availability
 ├── tasks
@@ -184,7 +183,7 @@ Company
 ├── projects
 ├── tasks
 ├── pullRequests
-├── training
+├── memories
 └── events
 
 Employee
@@ -193,7 +192,6 @@ Employee
 ├── name
 ├── role
 ├── departmentId
-├── skills
 ├── personality
 ├── availability
 └── agentId?
@@ -462,8 +460,9 @@ The simulation owns events such as:
 - TaskAssigned
 - TaskStarted
 - TaskCompleted
-- TrainingStarted
-- TrainingCompleted
+- MemoryTaught
+- MemoryUsed
+- MemoryArchived
 - PRCreated
 - ReviewStarted
 - ReviewApproved

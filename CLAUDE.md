@@ -31,7 +31,7 @@ Follow those documents unless the user explicitly changes a requirement.
 
 Build a game, not an AI monitoring dashboard.
 
-The office, employees, work, progression, training, collaboration, and company growth are the primary product experience.
+The office, employees, work, progression, teaching, collaboration, and company growth are the primary product experience.
 
 AI agent integration should support the game fantasy rather than replace it.
 
@@ -248,7 +248,7 @@ Domain
   ├── Task
   ├── PullRequest
   ├── Review
-  ├── Training
+  ├── Memory
   ├── Event
   └── Agent
 
@@ -279,8 +279,8 @@ Examples:
 - `TaskAssigned`
 - `TaskStarted`
 - `TaskCompleted`
-- `TrainingStarted`
-- `TrainingCompleted`
+- `MemoryTaught`
+- `MemoryUsed`
 - `PRCreated`
 - `ReviewStarted`
 - `ReviewApproved`
