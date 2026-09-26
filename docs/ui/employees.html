@@ -83,7 +83,7 @@
   .btn-ghost:hover { background: var(--subtle); color: var(--ink); }
   .btn:disabled { opacity: .45; cursor: default; }
   .btn:focus-visible, .ibtn:focus-visible, .row-item:focus-visible,
-  .tab:focus-visible, .nav a:focus-visible, .tcard:focus-visible {
+  .tab:focus-visible, .nav a:focus-visible, .tcard:focus-visible, .mem-add:focus-visible {
     outline: 2px solid var(--brand); outline-offset: 2px;
   }
   .ibtn {
@@ -149,7 +149,6 @@
   .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
   .dot.ready { background: transparent; border: 2px solid var(--info); }
   .dot.available { background: var(--ok); }
-  .dot.training { background: var(--brand); border-radius: 2px; }
   .dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
   .chip {
     display: inline-flex; align-items: center; gap: 5px; flex: none;
@@ -158,16 +157,15 @@
   .chip.working { background: var(--warn-soft); color: #8a5c10; }
   .chip.ready { background: var(--info-soft); color: #2557b5; }
   .chip.available { background: var(--ok-soft); color: #1f7a48; }
-  .chip.training { background: var(--brand-soft); color: #4342a6; }
   .chip.vacation { background: var(--sunk); color: var(--muted); }
 
   /* ═══ master / detail ═══ */
-  .split { display: grid; grid-template-columns: minmax(0, 1fr) 344px; gap: 16px; align-items: start; }
-  @media (max-width: 1100px) { .split { grid-template-columns: 1fr; } }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
+  @media (max-width: 1160px) { .split { grid-template-columns: 1fr; } }
 
   .list { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
   .row-item {
-    display: grid; grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1fr) auto auto;
+    display: grid; grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, auto) auto;
     align-items: center; gap: 12px; width: 100%;
     padding: 11px 14px; border: none; background: none; text-align: left; cursor: pointer;
     border-bottom: 1px solid var(--line);
@@ -178,41 +176,65 @@
   .r-av { position: relative; width: 40px; height: 40px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; }
   .r-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); }
   .row-item[aria-selected="true"] .r-live { border-color: var(--brand-soft); }
-  .row-item[aria-selected="true"] .spec-chip { background: var(--surface); }
-  .r-name { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.35; }
-  .r-role { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+  .r-name { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-role { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .r-dept { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .specs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
-  .spec-chip {
+  .r-mem { font-size: 12.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .r-mem b { color: var(--ink); font-weight: 600; }
+
+  .area-chip {
     font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 2px 8px;
     background: var(--brand-soft); color: #4342a6; white-space: nowrap;
   }
-  .spec-none { font-size: 11.5px; color: var(--faint); }
+  .areas { display: flex; gap: 4px; flex-wrap: wrap; }
+  .row-item[aria-selected="true"] .area-chip { background: var(--surface); }
 
   /* ═══ detail ═══ */
-  .detail { border: 1px solid var(--line); border-radius: var(--r-card); position: sticky; top: 0; }
+  .detail { border: 1px solid var(--line); border-radius: var(--r-card); }
   .d-hd { display: flex; align-items: center; gap: 12px; padding: 16px 16px 14px; border-bottom: 1px solid var(--line); }
   .d-av { position: relative; width: 52px; height: 52px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
   .d-name { display: block; font-size: 17px; font-weight: 600; line-height: 1.3; }
   .d-role { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; }
   .d-sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
   .d-sec:last-child { border-bottom: none; }
-  .k { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); margin-bottom: 7px; }
+  .k { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); margin-bottom: 8px; }
+  .k .kn { color: var(--ink); font-variant-numeric: tabular-nums; }
   .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 3px 0; }
-  .kv span:first-child { color: var(--muted); }
-  .kv b { font-weight: 600; }
+  .kv span:first-child { color: var(--muted); flex: none; }
+  .kv b { font-weight: 600; text-align: right; }
 
-  .skill { display: grid; grid-template-columns: 82px 1fr 26px; gap: 9px; align-items: center; margin-bottom: 7px; }
-  .skill:last-child { margin-bottom: 0; }
-  .skill > span:first-child { font-size: 12.5px; color: var(--muted); }
-  .skill b { font-size: 12.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-  .track { display: block; position: relative; height: 6px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
-  .track i { display: block; height: 100%; border-radius: 999px; background: var(--brand); }
-  .track.expert i { background: var(--ok); }
-  /* Where a skill becomes a specialty, and therefore a review seat. */
-  .track u { position: absolute; top: -2px; bottom: -2px; width: 2px; background: rgb(27 27 31 / .32); }
+  /* ═══ memory ═══ */
+  .mem-group { margin-bottom: 12px; }
+  .mem-group:last-of-type { margin-bottom: 0; }
+  .mem-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+  .mem-line { flex: 1; height: 1px; background: var(--line); }
+  .mem {
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; margin-bottom: 6px;
+    background: var(--surface);
+  }
+  .mem:last-child { margin-bottom: 0; }
+  .mem-t { display: block; font-size: 13px; line-height: 1.5; }
+  .mem-m { display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 11.5px; color: var(--faint); }
+  .mem-m svg { width: 12px; height: 12px; flex: none; }
+  .mem-m .src { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mem-m .used { margin-left: auto; flex: none; font-variant-numeric: tabular-nums; }
+  .mem-m .used.hot { color: #1f7a48; font-weight: 600; }
+  .mem-m .used.cold { color: #a8322f; font-weight: 600; }
+  .mem-add {
+    width: 100%; margin-top: 10px; border: 1px dashed var(--line-2); background: var(--subtle);
+    border-radius: 10px; padding: 9px; font-size: 12.5px; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .mem-add:hover { border-color: var(--muted); color: var(--ink); background: var(--surface); }
+  .mem-add svg { width: 14px; height: 14px; }
 
-  .trait { display: inline-flex; font-size: 12px; border-radius: 999px; padding: 2px 9px; background: var(--subtle); border: 1px solid var(--line); margin: 0 4px 4px 0; }
+  .style-line {
+    display: flex; align-items: flex-start; gap: 8px; font-size: 13px;
+    padding: 6px 0; border-bottom: 1px solid var(--line);
+  }
+  .style-line:last-of-type { border-bottom: none; }
+  .style-line svg { width: 14px; height: 14px; flex: none; margin-top: 5px; color: var(--faint); }
+
   .d-acts { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
   .d-acts .btn { width: 100%; }
 
@@ -226,7 +248,7 @@
   .team-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
   .team-hd h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
   .team-line { flex: 1; height: 1px; background: var(--line); }
-  .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); }
+  .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr)); }
   .tcard {
     display: flex; align-items: center; gap: 10px; text-align: left;
     border: 1px solid var(--line); border-radius: var(--r-card); padding: 10px 12px;
@@ -261,32 +283,28 @@
   .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
   .notice-warn { border-color: #f0d8a8; }
   .notice-warn .n-ic { background: var(--warn-soft); color: #8a5c10; }
+  .notice-bad { border-color: #f4c2c3; }
+  .notice-bad .n-ic { background: var(--bad-soft); color: #a8322f; }
 
-  /* ═══ training ═══ */
-  .tr-now { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .tr-live {
-    display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center;
-    border: 1px solid var(--line-2); border-radius: var(--r-card); padding: 12px 14px;
-  }
-  .tr-t { display: block; font-size: 14px; font-weight: 600; }
-  .tr-s { display: block; font-size: 12.5px; color: var(--muted); }
-  .tr-nums { text-align: right; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tr-nums b { display: block; font-size: 14px; color: var(--ink); }
+  /* ═══ memory tab ═══ */
+  .mem-cols { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
+  @media (max-width: 1160px) { .mem-cols { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid var(--line); border-radius: var(--r-card); }
+  .panel-hd { padding: 12px 15px; border-bottom: 1px solid var(--line); }
+  .panel-hd h2 { margin: 0; font-size: 14.5px; font-weight: 600; }
+  .panel-hd p { margin: 1px 0 0; font-size: 12.5px; color: var(--muted); }
+  .panel-bd { padding: 13px 15px; }
 
-  .cat { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(244px, 1fr)); }
-  .course { border: 1px solid var(--line); border-radius: var(--r-card); padding: 15px; display: flex; flex-direction: column; }
-  .course:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgb(20 20 25 / .06); }
-  .c-top { display: flex; align-items: flex-start; gap: 10px; }
-  .c-ic { width: 34px; height: 34px; border-radius: 10px; background: var(--brand-soft); color: #4342a6; display: grid; place-items: center; flex: none; }
-  .c-ic svg { width: 16px; height: 16px; }
-  .c-name { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; }
-  .c-gain { display: block; font-size: 12.5px; color: var(--muted); }
-  .c-meta { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
-  .c-act { margin-top: 11px; }
-  .c-act .btn { width: 100%; }
+  .feed-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .feed-row:last-child { border-bottom: none; }
+  .f-av { width: 28px; height: 28px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .f-tx { min-width: 0; flex: 1; font-size: 13px; line-height: 1.5; }
+  .f-tx q { font-style: normal; background: var(--brand-soft); color: #4342a6; border-radius: 5px; padding: 1px 5px; }
+  .f-tx q::before, .f-tx q::after { content: ""; }
+  .f-meta { display: block; font-size: 11.5px; color: var(--faint); margin-top: 1px; }
+  .f-time { font-size: 11.5px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
 
-  .sec-hd { display: flex; align-items: center; gap: 8px; margin: 0 0 11px; }
-  .sec-hd h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
 </style>
 
 <div class="app">
@@ -334,7 +352,7 @@
       <div class="tabs" id="tabs">
         <button class="tab" data-view="list" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg>목록<span class="n" id="nList"></span></button>
         <button class="tab" data-view="org"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="3.6" rx=".8"/><rect x="1.6" y="10.6" width="5" height="3.6" rx=".8"/><rect x="9.4" y="10.6" width="5" height="3.6" rx=".8"/><path d="M8 5.4v2.6M4.1 10.6V8h7.8v2.6"/></svg>조직도</button>
-        <button class="tab" data-view="training"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.8 5L8 2.2 14.2 5 8 7.8z"/><path d="M4.2 6.2v3.4c0 1 1.7 1.8 3.8 1.8s3.8-.8 3.8-1.8V6.2"/></svg>학습<span class="n" id="nTraining"></span></button>
+        <button class="tab" data-view="memory"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg>기억<span class="n" id="nMem"></span></button>
       </div>
     </div>
 
@@ -350,10 +368,24 @@
         <div class="org" id="org"></div>
       </div>
 
-      <div class="view" id="view-training" hidden>
-        <div class="tr-now" id="trNow"></div>
-        <div class="sec-hd"><h2>학습 과정</h2></div>
-        <div class="cat" id="courses"></div>
+      <div class="view" id="view-memory" hidden>
+        <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
+        <div class="mem-cols">
+          <div class="panel">
+            <div class="panel-hd">
+              <h2>최근에 쓰인 기억</h2>
+              <p>알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
+            </div>
+            <div class="panel-bd" id="feed"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
+              <h2>회사 기억</h2>
+              <p>모든 직원이 함께 알고 있어요.</p>
+            </div>
+            <div class="panel-bd" id="companyMem"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -803,61 +835,93 @@
     working:   { label: "업무 중", color: "var(--warn)" },
     ready:     { label: "준비됨",  color: "var(--info)" },
     available: { label: "대기 중", color: "var(--ok)" },
-    training:  { label: "학습 중", color: "var(--brand)" },
     vacation:  { label: "휴가 중", color: "var(--faint)" },
   };
 
-  // The seven skills are the seven reviewer seats a PR can ask for.
-  // Crossing EXPERT turns a skill into a specialty, which is what makes an
-  // employee eligible to review that kind of work.
-  const EXPERT = 80;
-  const SKILLS = ["아키텍처", "타입 안정성", "데이터베이스", "보안", "로컬라이제이션", "기획", "품질"];
+  // The seven areas a PR can ask a reviewer for. 프로세스 is a memory area too
+  // but not a review seat — not everything worth knowing is reviewable.
+  const REVIEW_AREAS = ["아키텍처", "타입 안정성", "데이터베이스", "보안", "로컬라이제이션", "기획", "품질"];
 
   const people = [
     { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
       dept: "개발본부", team: "백엔드팀", status: "working", joined: "2026. 3. 2.",
-      task: "결제 API 에러 응답 구조 변경", traits: ["꼼꼼함", "야행성"],
-      skills: [84, 88, 62, 45, 30, 35, 58], done: 41, reviews: 18 },
+      task: "결제 API 에러 응답 구조 변경", done: 41, reviews: 18,
+      style: ["설명은 짧게, 코드로 보여줘", "테스트를 먼저 써"],
+      memories: [
+        { area: "데이터베이스", text: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", from: "결제 조회가 느린 이슈", used: 14 },
+        { area: "데이터베이스", text: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", from: null, used: 9 },
+        { area: "아키텍처", text: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", from: "PR #4102", used: 22 },
+        { area: "타입 안정성", text: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", from: null, used: 11 },
+        { area: "프로세스", text: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", from: null, used: 7 },
+      ] },
     { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
       dept: "개발본부", team: "프론트엔드팀", status: "working", joined: "2026. 4. 15.",
-      task: "로그인 폼 구현", traits: ["빠른 손", "완벽주의"],
-      skills: [61, 72, 28, 40, 83, 44, 66], done: 33, reviews: 9 },
+      task: "로그인 폼 구현", done: 33, reviews: 9,
+      style: ["완성 전에 스크린샷을 남겨"],
+      memories: [
+        { area: "로컬라이제이션", text: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", from: "사이드바 자간이 깨진 이슈", used: 18 },
+        { area: "로컬라이제이션", text: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", from: "PR #4180", used: 6 },
+        { area: "프로세스", text: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", from: null, used: 12 },
+      ] },
     { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
       dept: "프로덕트", team: "기획팀", status: "ready", joined: "2026. 2. 20.",
-      task: "API 문서 작성", traits: ["질문 많음", "회의 선호"],
-      skills: [45, 20, 25, 38, 55, 91, 70], done: 27, reviews: 22 },
+      task: "API 문서 작성", done: 27, reviews: 22,
+      style: ["막히면 30분 안에 물어봐"],
+      memories: [
+        { area: "기획", text: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", from: null, used: 15 },
+        { area: "기획", text: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", from: null, used: 8 },
+        { area: "프로세스", text: "금요일 오후에는 배포하지 않아요.", from: "금요일 배포가 말썽이던 주", used: 3 },
+      ] },
     { id: "p4", name: "삐약", species: "chick", role: "DBA",
-      dept: "개발본부", team: "백엔드팀", status: "training", joined: "2026. 5. 8.",
-      training: { course: "Testing Strategies", gain: "품질", spent: 12, total: 40 },
-      traits: ["조용함", "커피 중독"],
-      skills: [58, 44, 93, 71, 18, 30, 52], done: 19, reviews: 6 },
+      dept: "개발본부", team: "백엔드팀", status: "available", joined: "2026. 5. 8.",
+      last: "인덱스 튜닝 완료", done: 19, reviews: 6,
+      style: ["마이그레이션은 두 번 확인해"],
+      memories: [
+        { area: "데이터베이스", text: "마이그레이션은 항상 되돌릴 수 있게 써요.", from: "스키마 롤백이 안 된 사고", used: 11 },
+        { area: "데이터베이스", text: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", from: null, used: 5 },
+        { area: "보안", text: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", from: null, used: 0 },
+      ] },
     { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
       dept: "개발본부", team: "프론트엔드팀", status: "vacation", joined: "2026. 1. 12.",
-      back: "3일 후 복귀", traits: ["느긋함", "자동화 신봉"],
-      skills: [66, 40, 55, 86, 22, 33, 74], done: 52, reviews: 14 },
+      back: "3일 후 복귀", done: 52, reviews: 14,
+      style: ["두 번 할 일이면 자동화해"],
+      memories: [
+        { area: "보안", text: "비밀값은 .env에 두고 절대 커밋하지 않아요.", from: null, used: 9 },
+        { area: "프로세스", text: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", from: "배포가 한 번 깨진 날", used: 21 },
+      ] },
   ];
 
-  const COURSES = [
-    { name: "Clean Architecture", gain: "아키텍처", minutes: 45, icon: "layers" },
-    { name: "TypeScript Type System", gain: "타입 안정성", minutes: 35, icon: "type" },
-    { name: "PostgreSQL Query Optimization", gain: "데이터베이스", minutes: 50, icon: "db" },
-    { name: "Security Fundamentals", gain: "보안", minutes: 40, icon: "shield" },
-    { name: "Testing Strategies", gain: "품질", minutes: 40, icon: "check" },
+  const companyMemories = [
+    { text: "커밋 메시지는 conventional prefix로 시작해요.", from: null, used: 34 },
+    { text: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", from: null, used: 28 },
+    { text: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", from: "스타일 가이드가 낡았던 주", used: 12 },
+  ];
+
+  const feed = [
+    { who: "p1", mem: "도메인 레이어에서 Date.now()를 쓰지 않아요", on: "결제 API 에러 응답 구조 변경", when: "12분 전" },
+    { who: "p2", mem: "한글에는 letter-spacing을 걸지 않아요", on: "로그인 폼 구현", when: "34분 전" },
+    { who: "p1", mem: "복합 인덱스는 컬럼 순서가 중요해요", on: "결제 API 에러 응답 구조 변경", when: "1시간 전" },
+    { who: "p5", mem: "배포 전에 세 개를 모두 돌려요", on: "배포 파이프라인 정리", when: "2시간 전" },
+    { who: "p3", mem: "PR 설명에는 왜 했는지를 적어요", on: "API 문서 작성", when: "어제" },
   ];
 
   const ICON = {
-    layers: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 1.8L14.2 5 8 8.2 1.8 5z"/><path d="M1.8 8L8 11.2 14.2 8"/><path d="M1.8 11L8 14.2 14.2 11"/></svg>',
-    type: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 3.5h10M8 3.5v9"/></svg>',
-    db: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="8" cy="4" rx="5" ry="2.2"/><path d="M3 4v8c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2V4"/><path d="M3 8c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2"/></svg>',
-    shield: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 1.8l5 2v4c0 3-2.2 5.3-5 6.4-2.8-1.1-5-3.4-5-6.4v-4z"/><path d="M5.8 8l1.6 1.6 3-3.2"/></svg>',
-    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg>',
-    book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.8 5L8 2.2 14.2 5 8 7.8z"/><path d="M4.2 6.2v3.4c0 1 1.7 1.8 3.8 1.8s3.8-.8 3.8-1.8V6.2"/></svg>',
-    info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg>',
-    alert: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>',
     plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
+    alert: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>',
+    x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+    task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
+    hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
   };
 
-  const specialtiesOf = (p) => SKILLS.filter((_, i) => p.skills[i] >= EXPERT);
+  const hasBatchim = (word) => {
+    const c = word.charCodeAt(word.length - 1);
+    return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  };
+  const josa = (word, withFinal, withoutFinal) => (hasBatchim(word) ? withFinal : withoutFinal);
+
+  const areasOf = (p) => [...new Set(p.memories.map((m) => m.area))];
+  const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
+  const usedOf = (p) => p.memories.reduce((n, m) => n + m.used, 0);
 
   /* ── sidebar roster ──────────────────────────────────────────── */
   const members = document.getElementById("members");
@@ -873,17 +937,17 @@
     members.appendChild(b);
   }
 
-  /* ── header counts ───────────────────────────────────────────── */
-  const trainingCount = people.filter((p) => p.status === "training").length;
+  /* ── header ──────────────────────────────────────────────────── */
+  const totalMem = people.reduce((n, p) => n + p.memories.length, 0) + companyMemories.length;
   document.getElementById("nList").textContent = people.length;
-  document.getElementById("nTraining").textContent = trainingCount;
+  document.getElementById("nMem").textContent = totalMem;
   document.getElementById("headSub").textContent =
     `${people.length}명 · 개발본부 ${people.filter((p) => p.dept === "개발본부").length} · 프로덕트 ${people.filter((p) => p.dept === "프로덕트").length}`;
 
   /* ── roster ──────────────────────────────────────────────────── */
   const roster = document.getElementById("roster");
   for (const p of people) {
-    const specs = specialtiesOf(p);
+    const areas = reviewAreasOf(p);
     const b = document.createElement("button");
     b.className = "row-item";
     b.type = "button";
@@ -892,12 +956,8 @@
       <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
       <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
       <span class="r-dept">${p.dept} · ${p.team}</span>
-      <span class="specs">${
-        specs.length
-          ? specs.map((s) => `<span class="spec-chip">${s}</span>`).join("")
-          : '<span class="spec-none">전문성 없음</span>'
-      }</span>
-      <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${STATUS[p.status].label}</span>`;
+      <span class="areas">${areas.map((a) => `<span class="area-chip">${a}</span>`).join("")}</span>
+      <span class="r-mem"><b>${p.memories.length}</b>개 기억</span>`;
     b.querySelector(".r-av").prepend(avatar(p.species, 40));
     b.addEventListener("click", () => select(p.id));
     roster.appendChild(b);
@@ -905,80 +965,92 @@
 
   /* ── detail ──────────────────────────────────────────────────── */
   const detail = document.getElementById("detail");
-  let selected = null;
+
+  const memCard = (m) => {
+    const cls = m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
+    return `<div class="mem">
+      <span class="mem-t">${m.text}</span>
+      <span class="mem-m">
+        ${m.from ? ICON.task : ICON.hand}
+        <span class="src">${m.from ? m.from + "에서" : "직접 알려줌"}</span>
+        <span class="used ${cls}">${m.used === 0 ? "아직 안 쓰임" : m.used + "회 참조"}</span>
+      </span>
+    </div>`;
+  };
 
   function select(id) {
     const p = people.find((x) => x.id === id);
     if (!p) return;
-    selected = id;
     roster.querySelectorAll("[data-id]").forEach((n) => n.setAttribute("aria-selected", String(n.dataset.id === id)));
 
-    const specs = specialtiesOf(p);
-    const now =
-      p.status === "training"
-        ? `<div class="d-sec">
-             <span class="k">학습 중</span>
-             <div class="kv"><span>${p.training.course}</span><b>${p.training.gain} +</b></div>
-             <span class="track" style="margin-top:8px"><i style="width:${Math.round((p.training.spent / p.training.total) * 100)}%"></i></span>
-             <div class="kv" style="margin-top:6px"><span>${p.training.spent}/${p.training.total}분</span><b>${p.training.total - p.training.spent}분 남음</b></div>
-           </div>`
-        : p.task
-        ? `<div class="d-sec"><span class="k">현재 업무</span><div class="kv"><span>${p.task}</span></div></div>`
-        : p.back
-        ? `<div class="d-sec"><span class="k">휴가</span><div class="kv"><span>${p.back}</span></div></div>`
-        : `<div class="d-sec"><span class="k">현재 업무</span><div class="kv"><span>할당된 업무 없음</span></div></div>`;
+    const grouped = areasOf(p)
+      .map((a) => {
+        const list = p.memories.filter((m) => m.area === a);
+        const seat = REVIEW_AREAS.includes(a);
+        const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
+        return `<div class="mem-group">
+          <div class="mem-hd">
+            <span class="area-chip"${style}>${a}</span>
+            <span class="mem-line"></span>
+            <span style="font-size:11.5px;color:var(--faint)">${list.length}</span>
+          </div>
+          ${list.map(memCard).join("")}
+        </div>`;
+      })
+      .join("");
 
-    const actions =
-      p.status === "training"
-        ? `<button class="btn btn-secondary btn-md">학습 중단</button>`
-        : p.status === "vacation"
-        ? `<button class="btn btn-secondary btn-md" disabled>학습 보내기</button>
-           <p style="margin:0;font-size:12px;color:var(--muted);text-align:center">휴가 중에는 학습을 보낼 수 없어요.</p>`
-        : `<button class="btn btn-secondary btn-md">학습 보내기</button>
-           <button class="btn btn-ghost btn-md">업무 할당</button>`;
+    const now = p.task
+      ? `<div class="kv"><span>현재 업무</span><b>${p.task}</b></div>`
+      : p.back
+      ? `<div class="kv"><span>휴가</span><b>${p.back}</b></div>`
+      : `<div class="kv"><span>최근 완료</span><b>${p.last}</b></div>`;
+
+    const seats = reviewAreasOf(p);
 
     detail.innerHTML = `
       <div class="d-hd">
         <span class="d-av"></span>
         <span style="flex:1;min-width:0">
           <span class="d-name">${p.name}</span>
-          <span class="d-role">${p.role}</span>
+          <span class="d-role">${p.role} · ${p.team}</span>
         </span>
         <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${STATUS[p.status].label}</span>
       </div>
+
       <div class="d-sec">
-        <div class="kv"><span>소속</span><b>${p.dept} · ${p.team}</b></div>
+        ${now}
         <div class="kv"><span>입사</span><b>${p.joined}</b></div>
-        <div class="kv"><span>완료한 업무</span><b>${p.done}건</b></div>
-        <div class="kv"><span>리뷰한 PR</span><b>${p.reviews}건</b></div>
+        <div class="kv"><span>완료한 업무 · 리뷰</span><b>${p.done}건 · ${p.reviews}건</b></div>
+        <div class="kv"><span>기억이 쓰인 횟수</span><b>${usedOf(p)}회</b></div>
       </div>
+
       <div class="d-sec">
-        <span class="k">전문성</span>
+        <span class="k">리뷰할 수 있는 분야</span>
         ${
-          specs.length
-            ? `<span class="specs" style="justify-content:flex-start">${specs.map((s) => `<span class="spec-chip">${s}</span>`).join("")}</span>
-               <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">이 분야 PR의 리뷰어로 지정할 수 있어요.</p>`
-            : `<p style="margin:0;font-size:12.5px;color:var(--muted)">아직 ${EXPERT}을 넘긴 스킬이 없어요. 학습으로 올릴 수 있어요.</p>`
+          seats.length
+            ? `<span class="areas">${seats
+                .map((a) => `<span class="area-chip">${a} ${p.memories.filter((m) => m.area === a).length}</span>`)
+                .join("")}</span>
+               <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.</p>`
+            : `<p style="margin:0;font-size:12.5px;color:var(--muted)">아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.</p>`
         }
       </div>
+
       <div class="d-sec">
-        <span class="k">스킬</span>
-        ${SKILLS.map((s, i) => {
-          const v = p.skills[i];
-          return `<div class="skill">
-            <span>${s}</span>
-            <span class="track${v >= EXPERT ? " expert" : ""}"><i style="width:${v}%"></i><u style="left:${EXPERT}%"></u></span>
-            <b>${v}</b>
-          </div>`;
-        }).join("")}
-        <p style="margin:9px 0 0;font-size:12px;color:var(--faint)">눈금은 ${EXPERT} — 전문성이 되는 지점이에요.</p>
+        <span class="k">기억 <span class="kn">${p.memories.length}</span></span>
+        ${grouped}
+        <button class="mem-add" type="button">${ICON.plus}이 직원에게 알려주기</button>
       </div>
-      ${now}
+
       <div class="d-sec">
-        <span class="k">성향</span>
-        ${p.traits.map((t) => `<span class="trait">${t}</span>`).join("")}
+        <span class="k">일하는 방식</span>
+        ${p.style.map((s) => `<div class="style-line">${ICON.hand}<span>${s}</span></div>`).join("")}
+        <button class="mem-add" type="button">${ICON.plus}방식 하나 더 정하기</button>
       </div>
-      <div class="d-acts">${actions}</div>`;
+
+      <div class="d-acts">
+        <button class="btn btn-secondary btn-md">업무 할당</button>
+      </div>`;
     detail.querySelector(".d-av").prepend(avatar(p.species, 52));
   }
 
@@ -1006,7 +1078,7 @@
         c.className = "tcard";
         c.type = "button";
         c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role}</span></span>`;
+          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · 기억 ${p.memories.length}</span></span>`;
         c.querySelector(".t-av").prepend(avatar(p.species, 36));
         c.addEventListener("click", () => { show("list"); select(p.id); });
         grid.appendChild(c);
@@ -1025,60 +1097,55 @@
     org.appendChild(box);
   }
 
-  /* ── training ────────────────────────────────────────────────── */
-  const trNow = document.getElementById("trNow");
-  const learners = people.filter((p) => p.status === "training");
-  for (const p of learners) {
-    const pct = Math.round((p.training.spent / p.training.total) * 100);
-    const el = document.createElement("div");
-    el.className = "tr-live";
-    el.innerHTML = `
-      <span class="r-av" style="width:40px;height:40px"></span>
-      <span style="min-width:0">
-        <span class="tr-t">${p.name} · ${p.training.course}</span>
-        <span class="tr-s">${p.training.gain} 스킬이 올라요</span>
-        <span class="track" style="margin-top:7px"><i style="width:${pct}%"></i></span>
-      </span>
-      <span class="tr-nums"><b>${pct}%</b>${p.training.total - p.training.spent}분 남음</span>`;
-    el.querySelector(".r-av").prepend(avatar(p.species, 40));
-    trNow.appendChild(el);
-  }
+  /* ── memory tab ──────────────────────────────────────────────── */
+  const notices = document.getElementById("memNotices");
 
-  // A seat no employee can fill is the most useful thing this screen can say.
-  const uncovered = SKILLS.filter((s, i) => !people.some((p) => p.skills[i] >= EXPERT));
+  // A review seat nobody can take, and memory nobody ever used, are the two
+  // things this screen knows that the player cannot see anywhere else.
+  const uncovered = REVIEW_AREAS.filter((a) => !people.some((p) => areasOf(p).includes(a)));
   if (uncovered.length) {
     const n = document.createElement("div");
     n.className = "notice notice-warn";
     n.innerHTML = `
       <span class="n-ic">${ICON.alert}</span>
       <span class="n-tx">
-        <b>${uncovered.join(" · ")} 리뷰를 맡을 사람이 없어요</b>
-        <span>이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 가장 가까운 직원을 학습에 보내 보세요.</span>
-      </span>`;
-    trNow.prepend(n);
+        <b>${uncovered.join(" · ")}${josa(uncovered.at(-1), "을", "를")} 아는 직원이 없어요</b>
+        <span>이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.</span>
+      </span>
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">알려줄 직원 고르기</button></span>`;
+    notices.appendChild(n);
   }
 
-  const courses = document.getElementById("courses");
-  for (const c of COURSES) {
-    const i = SKILLS.indexOf(c.gain);
-    const best = [...people].sort((a, b) => b.skills[i] - a.skills[i])[0];
-    const covered = people.some((p) => p.skills[i] >= EXPERT);
-    const el = document.createElement("div");
-    el.className = "course";
-    el.innerHTML = `
-      <div class="c-top">
-        <span class="c-ic">${ICON[c.icon]}</span>
-        <span style="min-width:0">
-          <span class="c-name">${c.name}</span>
-          <span class="c-gain">${c.gain} 스킬</span>
-        </span>
-      </div>
-      <div class="c-meta"><span>${c.minutes}분</span><span>${
-        covered ? "전문가 있음" : `최고 ${best.name} ${best.skills[i]}`
-      }</span></div>
-      <div class="c-act"><button class="btn btn-secondary btn-sm" type="button">보낼 직원 고르기</button></div>`;
-    courses.appendChild(el);
+  const cold = people.flatMap((p) => p.memories.filter((m) => m.used === 0).map((m) => ({ p, m })));
+  if (cold.length) {
+    const n = document.createElement("div");
+    n.className = "notice notice-bad";
+    n.innerHTML = `
+      <span class="n-ic">${ICON.x}</span>
+      <span class="n-tx">
+        <b>한 번도 쓰이지 않은 기억이 ${cold.length}개 있어요</b>
+        <span>${cold[0].p.name}의 “${cold[0].m.text}” — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.</span>
+      </span>
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">확인하기</button></span>`;
+    notices.appendChild(n);
   }
+
+  const feedBox = document.getElementById("feed");
+  for (const f of feed) {
+    const p = people.find((x) => x.id === f.who);
+    const el = document.createElement("div");
+    el.className = "feed-row";
+    el.innerHTML = `
+      <span class="f-av"></span>
+      <span class="f-tx">${p.name}${josa(p.name, "이", "가")} <q>${f.mem}</q>${josa(f.mem, "을", "를")} 참고했어요<span class="f-meta">${f.on}</span></span>
+      <span class="f-time">${f.when}</span>`;
+    el.querySelector(".f-av").appendChild(avatar(p.species, 28));
+    feedBox.appendChild(el);
+  }
+
+  document.getElementById("companyMem").innerHTML =
+    companyMemories.map(memCard).join("") +
+    `<button class="mem-add" type="button">${ICON.plus}회사 전체에 알려주기</button>`;
 
   /* ── tabs ────────────────────────────────────────────────────── */
   function show(view) {

@@ -52,8 +52,8 @@ value is missing, add a token.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--brand` | `#5b5bd6` | Focus rings, skill bars, `training`. **Not** buttons |
-| `--brand-soft` | `#ecebfb` | Specialty chips, selected rows, `training` chip |
+| `--brand` | `#5b5bd6` | Focus rings. **Not** buttons |
+| `--brand-soft` | `#ecebfb` | Area chips, quoted memory, selected rows |
 | `--ok` / `--ok-soft` | `#2fae62` / `#e4f6ec` | `available`, completed |
 | `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | `ready` |
 | `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
@@ -106,6 +106,10 @@ layout does not twitch.
 
 - **Never `letter-spacing` or `text-transform: uppercase` on Korean.** Both
   break Hangul. Casing belongs in the dictionary, not in CSS.
+- **Never concatenate a Korean particle.** 을/를 and 이/가 depend on whether the
+  preceding syllable carries a final consonant, so `name + "가"` produces 단풍가
+  and `area + "를"` produces 품질를. Compute it:
+  `(code - 0xac00) % 28 !== 0` means the syllable has one.
 - A Latin wordmark may be tracked. Nothing else.
 - Do not assume Korean and English are the same length. Test both.
 
@@ -131,22 +135,19 @@ and greyscale.
 | Status | Colour | Dot |
 | --- | --- | --- |
 | `working` | `--warn` | Filled, with a ring |
-| `training` | `--brand` | Square |
 | `ready` | `--info` | Hollow |
 | `available` | `--ok` | Filled |
 | `vacation` | `--faint` | Short dash |
 
 A status is always accompanied by a text label somewhere in the same view.
 
-`training` is the one status allowed to use `--brand`, because a skill bar is
-already indigo and the two mean the same thing.
+### Numbers
 
-### Progress with a threshold
+**Every number shown to the player is a count of something that happened** —
+memories, references, tasks, reviews, minutes. A 0–100 bar whose value nobody
+can explain is worse than no number: it looks like information and is not.
 
-A bar that has a meaningful cut-off draws the cut-off. A skill bar carries a
-tick at the specialty threshold and turns green past it, so "how far from a
-review seat" is readable without arithmetic. Never rely on the fill colour
-alone — the tick has to read against both the empty track and a filled bar.
+If a figure cannot be traced to events, it does not go on the screen.
 
 ---
 
@@ -297,8 +298,10 @@ Rules for a new species:
 | Colour plus shape for status | Colour alone |
 | Add the pattern to `ui/` first | Invent a pattern in a feature branch |
 | Let the sprite say the species | Write the species next to the name |
-| Draw the threshold on a bar that has one | Leave the player to do the arithmetic |
-| Name the review seat nobody can fill | Show only the skills that exist |
+| Show counts of real events | Invent a 0–100 bar |
+| Name the review area nobody knows | Show only what exists |
+| Show that a memory was used | Let teaching disappear into a notes field |
+| Compute the Korean particle | Concatenate 를 and hope |
 | Say what happened | Say only the status name |
 | Label a confirm button with its effect | Label it `확인` |
 | Focus cancel first in a destructive dialog | Focus the destructive action |

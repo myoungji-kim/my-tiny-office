@@ -8,7 +8,7 @@ before building or changing a screen.
 | Page | Authoritative for |
 | --- | --- |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
-| `ui/employees.html` | List and detail, org chart, skill bars, specialties, training |
+| `ui/employees.html` | List and detail, org chart, memory, review areas |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, confirm dialogs |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
@@ -99,23 +99,48 @@ The species is shown by the sprite, never spelled out next to the name.
 
 See `ui/characters.html` for the twenty species and the silhouette-family rule.
 
-### Skills, specialty and training
+### Expertise is taught, not grown
 
-`GAMEPLAY.md` gives an employee *skills*, a *specialty*, and training that
-"consumes time and improves skills". It also lists the reviewer seats a PR can
-ask for. `ui/employees.html` draws them as one loop:
+An employee's expertise is not a number that fills up over time. It is **what
+the player has told them**, and under the Claude Code runtime that is not a
+metaphor: an employee's memory is what their agent actually carries into the
+work.
 
 ```text
-업무 → 학습(시간 소모) → 스킬 상승 → 임계치 돌파 → 전문성 → PR 리뷰 자격
+업무나 PR에서 문제가 나옴
+  → 그 자리에서 "이거 기억해둬"
+  → 그 직원의 기억에 추가 (출처 = 그 업무)
+  → 다음 업무에서 참조됨
+  → "모카가 [인덱스 규칙]을 참고했어요"   ← 루프가 닫히는 지점
 ```
 
-The seven skills are the seven reviewer seats. A skill above the threshold
-becomes a specialty, and a specialty is what makes an employee eligible to
-review that kind of work. The employees screen shows the threshold as a tick on
-every skill bar, so the player can see how far a teammate is from a review seat.
+The last step is the one that makes the system legible. Without visible
+evidence that a memory was used, teaching is just a notes field.
 
-A seat no employee can fill is worth saying out loud — the training tab leads
-with it.
+An employee therefore carries:
+
+| | | |
+| --- | --- | --- |
+| 역할 | assigned by the player | "너는 DBA 담당" |
+| 기억 | told by the player | what they know |
+| 일하는 방식 | told by the player | how they work |
+| 실적 | counted | what they actually did |
+
+**Every number on this screen is a count of something real** — memories,
+references, tasks, reviews. There are no invented 0–100 bars, because a number
+nobody can explain teaches the player nothing.
+
+A memory belongs to one employee, or to the company when everyone should know
+it. Company-scoped, never global: this follows the same ownership chain as an
+agent session.
+
+Review eligibility falls out of it. A PR asks for one of seven areas; an
+employee who holds memory in that area can take the seat. Two things are worth
+saying out loud, and the memory tab leads with both:
+
+- an area **no employee knows**, so that PR cannot be reviewed
+- a memory that has **never been referenced**, which is either wrong or was
+  given to the wrong person
 
 ## Status
 
@@ -127,18 +152,13 @@ inventing its own vocabulary:
 | `working` | A task is in progress | Amber dot with ring, live progress |
 | `ready` | A task is assigned, not started | Hollow blue dot |
 | `available` | No task assigned | Solid green dot |
-| `training` | Employee is learning | Indigo square, progress to completion |
 | `vacation` | Employee is away | Grey dash |
 
 Colour never carries status alone — **the dot shape differs too**.
 
-`training` is the one status that borrows `--brand`, because indigo is already
-the colour of a skill bar — a learning employee and a rising skill are the same
-event.
-
 Further runtime states the agent layer can report (`blocked`, `disconnected`,
-`failed`, `reviewing`) get the same treatment when their systems exist: a
-distinct dot shape, a label, and no reliance on hue.
+`failed`, `training`, `reviewing`) get the same treatment when their systems
+exist: a distinct dot shape, a label, and no reliance on hue.
 
 ## Actions
 
