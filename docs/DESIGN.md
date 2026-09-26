@@ -31,6 +31,28 @@ patterns yet: add them to `ui/` first.
 Superseded directions sit in [`archive/`](archive/README.md) for comparison
 only.
 
+## Navigation
+
+Five places, and the office is the first:
+
+```text
+사무실 · 프로젝트 · 직원 · 회사        설정
+Office · Projects · People · Company   Settings
+```
+
+Navigation names where something lives, not what state it is in. Review is a
+phase a task passes through, so it has no place of its own: it shows up on the
+office floor, where the player can already see who is reviewing and what is
+blocked, and in the activity feed. A menu called PR would also be the only word
+in the sidebar that assumes the company writes software.
+
+The company's own `PullRequest` entity and its review events are unaffected.
+This is a decision about navigation, not about the domain.
+
+If reviews turn out to be easy to miss, the answer is a "내 차례 / Needs you"
+inbox that also holds blocked employees and lost agent connections — not a list
+of PRs.
+
 ## Visual Direction
 
 Cozy Scandinavian office + simple pixel-art illustration + developer dashboard

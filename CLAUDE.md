@@ -263,11 +263,10 @@ Application
 
 UI
   ├── Office
+  ├── Projects
   ├── Employees
-  ├── Work
-  ├── PRs
-  ├── Training
-  └── Company
+  ├── Company
+  └── Settings
 ```
 
 Do not allow UI components to become the source of truth for domain state.

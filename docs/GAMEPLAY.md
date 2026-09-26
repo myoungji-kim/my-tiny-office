@@ -73,6 +73,10 @@ progress inside the company.
 
 A PR is an activity card, not just a record.
 
+It is a card because `review` is one of a task's statuses, not a place of
+its own. Reviews surface on the office floor and in the activity feed; there
+is no PR menu.
+
 Example:
 
 PR #4821 — Payment API error response change
