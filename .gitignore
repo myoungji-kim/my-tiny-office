@@ -18,5 +18,8 @@ coverage/
 .vscode/
 .idea/
 
+# scratch output from browser tooling
+.playwright-mcp/
+
 *.tsbuildinfo
 next-env.d.ts

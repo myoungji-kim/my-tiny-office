@@ -23,8 +23,8 @@ Create company
 → People work
 → Collaboration / PR / reviews
 → Complete work
-→ Train people
-→ Improve skills
+→ Teach what they should remember
+→ Expertise deepens
 → Grow company
 → Expand office
 → Repeat
@@ -81,7 +81,7 @@ exists yet to choose between.
 - assign tasks
 - create project
 - create/review PR
-- training
+- teach a memory
 - expand office
 - configure agent runtime
 
@@ -103,7 +103,7 @@ AI should enhance the simulation, not replace it.
 For example:
 - A task can exist before an Agent is connected.
 - A player can complete early gameplay without AI.
-- An employee can have skills/personality independent of model choice.
+- An employee can have memories and personality independent of model choice.
 - Runtime status can influence employee status without becoming the only source of truth.
 
 ## Localization

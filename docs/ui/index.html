@@ -1,0 +1,308 @@
+<meta charset="utf-8" />
+<title>Tiny Office · Design System</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
+<style>
+  body {
+    margin: 0; padding: 30px 20px 70px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  header.top { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 13px; }
+
+  .logo { width: 32px; height: 32px; border-radius: 9px; background: var(--ink); display: grid; place-items: center; flex: none; margin-top: 4px; }
+
+  .logo svg { width: 17px; height: 17px; color: #fff; }
+
+  header.top h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
+
+  header.top .sub { display: block; font-size: 13px; color: var(--faint); margin-top: 1px; }
+
+  header.top p { margin: 9px 0 0; color: var(--muted); }
+
+  /* ═══ buttons ═══ */
+
+  .btn:focus-visible, .item:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* ═══ notice ═══ */
+
+  .notice {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: var(--r-card); padding: 13px 14px;
+  }
+
+  /* ═══ the three pages ═══ */
+
+  .grid { display: grid; gap: 16px; margin-top: 20px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+
+  .item {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 1px 2px rgb(20 20 25 / .05);
+    transition: box-shadow .12s, border-color .12s, transform .12s;
+  }
+
+  .item:hover { border-color: var(--hairline-hover); box-shadow: 0 6px 22px rgb(20 20 25 / .1); transform: translateY(-2px); }
+
+  /* The preview shows a page whose own background is --page, so without a
+     recessed frame its edge disappears into the page behind the card. */
+
+  .shot {
+    height: 196px; padding: 10px;
+    background: var(--sunk); border-bottom: 1px solid var(--line-2);
+  }
+
+  .frame {
+    position: relative; height: 100%; overflow: hidden;
+    border-radius: 8px; background: var(--surface);
+    box-shadow: 0 0 0 1px rgb(20 20 25 / .1), 0 1px 4px rgb(20 20 25 / .12);
+  }
+
+  .frame iframe {
+    position: absolute; top: 0; left: 0; border: 0;
+    width: 1400px; height: 1400px;
+    transform: scale(.252); transform-origin: top left;
+    pointer-events: none;
+  }
+
+  .frame .fallback {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--faint); font-size: 13px; font-family: var(--mono);
+  }
+
+  .meta { padding: 16px 18px 18px; }
+
+  .meta h2 { margin: 0; font-size: 16px; font-weight: 600; }
+
+  .meta code { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+
+  .meta p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+
+  .owns { margin: 11px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .owns li { font-size: 12px; background: var(--subtle); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+
+  .foot {
+    margin-top: 20px; background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: 14px; padding: 16px 18px;
+  }
+
+  .foot h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+
+  .foot p { margin: 0; color: var(--muted); font-size: 13px; }
+
+  .foot a { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+    <span>
+      <h1>Design System</h1>
+      <span class="sub">My Tiny Office</span>
+      <p>화면을 새로 만들거나 고칠 때 먼저 이 페이지들을 열어 봅니다. 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.</p>
+    </span>
+  </header>
+
+  <div class="notice">
+    <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
+    <span class="n-tx">
+      <b>미리보기는 스크린샷이 아니라 실제 페이지예요</b>
+      <span>페이지를 고치면 이 카드의 그림도 같이 바뀌어요. 그래서 이 화면은 낡을 수가 없어요.</span>
+    </span>
+    <span class="n-acts"><a class="btn btn-secondary btn-sm" href="../STYLE-GUIDE.md">규칙 문서</a></span>
+  </div>
+
+  <div class="grid">
+    <a class="item" href="first-run.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">first-run.html</div>
+          <iframe src="first-run.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>첫 실행</h2>
+        <code>ui/first-run.html</code>
+        <p>회사 만들기부터 첫 직원까지 3단계. 첫 화면부터 사무실을 보여주고, Claude Code 없이 끝납니다.</p>
+        <ul class="owns">
+          <li>단계 표시</li><li>입력 필드</li><li>사무실 미리보기</li><li>종족 고르기</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="office.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">office.html</div>
+          <iframe src="office.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>사무실 화면</h2>
+        <code>ui/office.html</code>
+        <p>화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.</p>
+        <ul class="owns">
+          <li>레이아웃</li><li>컬러 토큰</li><li>타일 엔진</li><li>상태 표시</li><li>행동 팝오버</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="employees.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">employees.html</div>
+          <iframe src="employees.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>직원 화면</h2>
+        <code>ui/employees.html</code>
+        <p>목록·상세의 기준. 조직도와 함께, 직원에게 알려준 기억이 실제 업무에서 쓰인 기록까지 들어 있습니다.</p>
+        <ul class="owns">
+          <li>목록 · 상세</li><li>조직도</li><li>기억</li><li>리뷰 분야</li><li>활동 기록</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="connect.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">connect.html</div>
+          <iframe src="connect.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>에이전트 연결</h2>
+        <code>ui/connect.html</code>
+        <p>직원을 실제로 일하게 만드는 화면. 막힌 상태 셋과, 우리가 대신 해줄 수 없는 것을 말하는 방식이 들어 있습니다.</p>
+        <ul class="owns">
+          <li>연결 모달</li><li>준비 확인</li><li>막힌 상태</li><li>에이전트 표식</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="components.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">components.html</div>
+          <iframe src="components.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>컴포넌트</h2>
+        <code>ui/components.html</code>
+        <p>버튼·메뉴 행·알림·빈 상태·확인 창의 기준. 하면 안 되는 예시가 짝으로 들어 있습니다.</p>
+        <ul class="owns">
+          <li>버튼</li><li>메뉴 행</li><li>상태 칩</li><li>알림</li><li>빈 상태</li><li>확인 창</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="characters.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">characters.html</div>
+          <iframe src="characters.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>직원 캐릭터</h2>
+        <code>ui/characters.html</code>
+        <p>동물 캐스트 20종의 기준. 실루엣 계열, 배율별 가독성, 이름 규칙이 함께 있습니다.</p>
+        <ul class="owns">
+          <li>스프라이트 20종</li><li>실루엣 계열</li><li>팔레트 키</li><li>배율</li><li>이름 규칙</li>
+        </ul>
+      </div>
+    </a>
+  </div>
+
+  <div class="foot">
+    <h3>규칙은 문서에, 모양은 여기에</h3>
+    <p>
+      토큰 값·네이밍·i18n·접근성처럼 글로 적어야 하는 것은
+      <a href="../STYLE-GUIDE.md">STYLE-GUIDE.md</a>에, 방향과 화면 구성은
+      <a href="../DESIGN.md">DESIGN.md</a>에 있습니다.
+      지나간 방향은 <a href="../archive/README.md">archive/</a>에 비교용으로만 남아 있습니다 — 기준이 아닙니다.
+    </p>
+  </div>
+</div>
+<script>
+  // The front door translates too, or choosing English here is a one-way trip.
+  const EXAMPLES = {
+    "토큰 값·네이밍·i18n·접근성처럼 글로 적어야 하는 것은": "Everything that has to be written down — tokens, naming, i18n, accessibility — is in",
+    "에, 방향과 화면 구성은": ", and the direction and screen structure are in",
+    "에 있습니다.\n      지나간 방향은": ". Superseded directions sit in",
+    "에 비교용으로만 남아 있습니다 — 기준이 아닙니다.": " for comparison only. They are not the standard.",
+    "화면을 새로 만들거나 고칠 때 먼저 이 페이지들을 열어 봅니다. 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.": "Open these before building or changing a screen. A pattern that is not here gets added here first.",
+    "미리보기는 스크린샷이 아니라 실제 페이지예요": "These previews are the real pages, not screenshots",
+    "페이지를 고치면 이 카드의 그림도 같이 바뀌어요. 그래서 이 화면은 낡을 수가 없어요.": "Change a page and its picture here changes with it, so this screen cannot go stale.",
+    "규칙 문서": "The written rules",
+    "첫 실행": "First run",
+    "회사 만들기부터 첫 직원까지 3단계. 첫 화면부터 사무실을 보여주고, Claude Code 없이 끝납니다.": "Three steps from company to first hire. It shows the office on screen one and finishes without Claude Code.",
+    "단계 표시": "Steps",
+    "입력 필드": "Fields",
+    "사무실 미리보기": "Office preview",
+    "종족 고르기": "Species picker",
+    "사무실 화면": "Office screen",
+    "화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.": "The standard for a whole screen: sidebar, header, tabs, the tilemap and the employee cards, assembled.",
+    "레이아웃": "Layout",
+    "컬러 토큰": "Colour tokens",
+    "타일 엔진": "Tile engine",
+    "상태 표시": "Status",
+    "행동 팝오버": "Action popover",
+    "직원 화면": "People screen",
+    "목록·상세의 기준. 조직도와 함께, 직원에게 알려준 기억이 실제 업무에서 쓰인 기록까지 들어 있습니다.": "The standard for list and detail. The org chart, and the record of taught memory actually being used.",
+    "목록 · 상세": "List · detail",
+    "조직도": "Org chart",
+    "기억": "Memory",
+    "리뷰 분야": "Review areas",
+    "활동 기록": "Activity",
+    "에이전트 연결": "Agent connection",
+    "직원을 실제로 일하게 만드는 화면. 막힌 상태 셋과, 우리가 대신 해줄 수 없는 것을 말하는 방식이 들어 있습니다.": "Putting an employee to real work: the three blocked states, and how to say what we cannot do for you.",
+    "연결 모달": "Connect modal",
+    "준비 확인": "Readiness",
+    "막힌 상태": "Blocked states",
+    "에이전트 표식": "Agent mark",
+    "컴포넌트": "Components",
+    "버튼·메뉴 행·알림·빈 상태·확인 창의 기준. 하면 안 되는 예시가 짝으로 들어 있습니다.": "Buttons, menu rows, notices, empty states and dialogs — each paired with what not to do.",
+    "버튼": "Buttons",
+    "메뉴 행": "Menu rows",
+    "상태 칩": "Status chips",
+    "알림": "Notices",
+    "빈 상태": "Empty states",
+    "확인 창": "Dialogs",
+    "직원 캐릭터": "The cast",
+    "동물 캐스트 20종의 기준. 실루엣 계열, 배율별 가독성, 이름 규칙이 함께 있습니다.": "Twenty animals: the silhouette families, how they read at each scale, and the naming rules.",
+    "스프라이트 20종": "20 sprites",
+    "실루엣 계열": "Silhouette families",
+    "팔레트 키": "Palette keys",
+    "배율": "Scale",
+    "이름 규칙": "Naming",
+    "규칙은 문서에, 모양은 여기에": "Rules in the docs, shapes here"
+  };
+  {
+    const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+    if (lang === "en") {
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const hits = [];
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (n.parentElement.closest(".devbar")) continue;
+        const k = n.nodeValue.trim();
+        if (k && EXAMPLES[k]) hits.push([n, EXAMPLES[k]]);
+      }
+      for (const [n, v] of hits) n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), v);
+    }
+  }
+</script>

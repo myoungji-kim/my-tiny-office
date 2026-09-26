@@ -9,7 +9,7 @@ Each employee has:
 - role
 - department
 - specialty
-- skills
+- memories
 - personality
 - availability
 - current tasks
@@ -73,6 +73,10 @@ progress inside the company.
 
 A PR is an activity card, not just a record.
 
+It is a card because `review` is one of a task's statuses, not a place of
+its own. Reviews surface on the office floor and in the activity feed; there
+is no PR menu.
+
 Example:
 
 PR #4821 — Payment API error response change
@@ -93,23 +97,33 @@ Review statuses:
 - changes requested
 - blocked
 
-## Training
+## Memory
 
-Training consumes time and improves skills.
+Expertise is taught, not grown. An employee does not fill a skill bar; the
+player tells them something worth keeping, and it stays with them.
 
-Examples:
-- TypeScript Type System
-- Clean Architecture
-- PostgreSQL Query Optimization
-- Testing Strategies
-- Security Fundamentals
+A memory has an area, the text itself, and the work it came from:
+
+- Database — "복합 인덱스는 컬럼 순서가 중요해요" — from the slow payment lookup
+- Process — "PR은 리뷰 하나만 받아도 머지해요" — from the payment webhook task
+
+The areas are the ones an employee can be given a review seat in: Architecture,
+Type safety, Database, Security, Localization, Product, Quality — and Process,
+which everyone can hold but no one reviews for.
+
+A memory is used, not just stored: when an employee references one, the
+activity feed says so. Without that, teaching is only a notes field.
+
+Memory has no cap, but it does have a cost: everything live is carried into
+the work. Memories that stop being referenced can be archived, which keeps
+them readable without keeping them loaded.
 
 ## Activity Feed
 
 Examples:
 - "Min-su started reviewing PR #4821."
 - "Security requested changes."
-- "Ji-eun started TypeScript training."
+- "Ji-eun referenced [index rules] while working."
 - "The Backend team finished Payment API."
 - "Someone scheduled a meeting."
 - "Coffee is running low."
@@ -141,7 +155,7 @@ Mid game:
 - teams
 - projects
 - PR reviews
-- training
+- teaching memory
 
 Late game:
 - multiple rooms

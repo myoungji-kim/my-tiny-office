@@ -31,7 +31,7 @@ Follow those documents unless the user explicitly changes a requirement.
 
 Build a game, not an AI monitoring dashboard.
 
-The office, employees, work, progression, training, collaboration, and company growth are the primary product experience.
+The office, employees, work, progression, teaching, collaboration, and company growth are the primary product experience.
 
 AI agent integration should support the game fantasy rather than replace it.
 
@@ -248,7 +248,7 @@ Domain
   ├── Task
   ├── PullRequest
   ├── Review
-  ├── Training
+  ├── Memory
   ├── Event
   └── Agent
 
@@ -263,11 +263,10 @@ Application
 
 UI
   ├── Office
+  ├── Projects
   ├── Employees
-  ├── Work
-  ├── PRs
-  ├── Training
-  └── Company
+  ├── Company
+  └── Settings
 ```
 
 Do not allow UI components to become the source of truth for domain state.
@@ -280,8 +279,8 @@ Examples:
 - `TaskAssigned`
 - `TaskStarted`
 - `TaskCompleted`
-- `TrainingStarted`
-- `TrainingCompleted`
+- `MemoryTaught`
+- `MemoryUsed`
 - `PRCreated`
 - `ReviewStarted`
 - `ReviewApproved`
@@ -443,3 +442,13 @@ For larger tasks, briefly explain the implementation plan before making broad ch
 For small, straightforward tasks, proceed directly.
 
 Always preserve the project's core principles while implementing the requested change.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

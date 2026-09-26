@@ -1,0 +1,378 @@
+<meta charset="utf-8" />
+<title>Tiny Office · Cast</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
+<style>
+  body {
+    margin: 0; padding: 26px 20px 70px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  }
+
+  .wrap { max-width: 1060px; margin: 0 auto; }
+
+  header.top { margin-bottom: 26px; }
+
+  header.top h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+
+  header.top p { margin: 4px 0 0; color: var(--muted); max-width: 66ch; }
+
+  section > .note { margin: 0 0 18px; color: var(--muted); font-size: 13px; max-width: 72ch; }
+
+  h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 24px 0 10px; }
+
+  h3:first-of-type { margin-top: 0; }
+
+  canvas { image-rendering: pixelated; display: block; }
+
+  .sheet { display: flex; flex-direction: column; gap: 18px; }
+
+  .famgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+
+  .grp { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+
+  .grp h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink); }
+
+  .silgroup {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: 10px; padding: 6px 10px 6px 6px;
+  }
+
+  .silname { font-size: 12px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+
+  .cast {
+    border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+
+  .cast .pad { background: var(--subtle); border-radius: 10px; padding: 8px 14px; margin-bottom: 8px; }
+
+  .cast b { font-size: 15px; font-weight: 600; }
+
+  .cast .sp { font-size: 12px; color: var(--faint); }
+
+  .cast .rl { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .scales { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+
+  .scales figure { margin: 0; text-align: center; }
+
+  .scales figcaption { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
+
+  .scales .pad { background: var(--subtle); border-radius: 10px; padding: 10px; display: inline-block; }
+
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .spec { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line); }
+
+  .rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>직원 캐릭터</h1>
+    <p>
+      사람 대신 동물로 갑니다. 16×16에서는 실루엣이 정보를 나릅니다 —
+      귀 모양만으로 누가 누군지 구분되고, 같은 얼굴 틀에 머리색만 바꾸는 것보다
+      훨씬 멀리서도 읽힙니다.
+    </p>
+  </header>
+
+  <p class="langscope">
+    <span>예시는 한국어·영어 둘 다 있고, 설명은 한국어로만 적혀 있습니다.</span>
+    <span lang="en">Examples come in both languages; the commentary explaining them is Korean only.</span>
+  </p>
+
+  <section>
+    <h2>Cast</h2>
+    <p class="note">
+      스무 종이 몸통 하나를 공유합니다. 머리와 몸이 끊기지 않은 둥근 덩어리이고,
+      팔은 따로 붙인 부속이 아니라 실루엣이 볼록해진 부분입니다.
+      머리 일곱 줄만 바뀌니 스무 종이어도 한 가족으로 보입니다.
+      이름은 닉네임, 직무는 그대로 영어로 둡니다. 진지한 직함이 농담을 살립니다.
+    </p>
+    <div class="sheet" id="sheet"></div>
+  </section>
+
+  <section>
+    <h2>Silhouette test</h2>
+    <p class="note">
+      색을 빼고 실루엣만 남겼습니다. 16×16에서 머리에 쓸 수 있는 줄은 일곱 개뿐이라
+      <strong>스무 개의 서로 다른 실루엣은 나오지 않습니다</strong>. 대신 여덟 계열로 묶었습니다.
+      <strong>계열끼리는 실루엣으로 갈리고, 같은 계열 안에서는 색과 무늬로 갈립니다.</strong>
+      아래 묶음이 그 경계입니다 — 한 묶음 안의 종끼리는 회색에서 비슷하게 보이는 것이 정상입니다.
+    </p>
+    <div class="rowline" id="silhouette" style="background:var(--subtle);border-radius:12px;padding:14px;gap:12px"></div>
+  </section>
+
+  <section>
+    <h2>Scale</h2>
+    <p class="note">
+      사무실은 3×(48px), 카드 아바타는 2×(32px), 사이드바는 1.5×(24px)입니다.
+      계열마다 하나씩만 올렸습니다. 가장 작은 크기에서 살아남는 것만 씁니다.
+    </p>
+    <div class="scales" id="scales"></div>
+  </section>
+
+  <section>
+    <h2>In the office</h2>
+    <p class="note">실제로 책상에 앉혀 본 모습입니다. 판단은 여기서 하시면 됩니다.</p>
+    <div class="stage">
+      <div class="room-wrap">
+        <canvas id="room" width="864" height="384" aria-hidden="true"></canvas>
+        <div class="overlay" id="overlay"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>In the cards</h2>
+    <p class="note">카드 아바타와 사이드바에서도 같은 스프라이트를 씁니다.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>Naming</h2>
+    <p class="note">
+      닉네임은 한글·영문 각각 짧게 둡니다. 직무는 기술 용어라 영어로 남깁니다.
+    </p>
+    <div class="grid2">
+      <div class="good-ex">
+        <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
+        <div style="font-size:15px;font-weight:600" data-t="goodName">모카</div>
+        <div style="font-size:13px;color:var(--muted)">Backend Engineer</div>
+        <div class="note" style="margin:10px 0 0">
+          닉네임 한 단어 + 진지한 직함. 한글 2–3자, 영문 6자 이내로 카드가 흔들리지 않습니다.
+        </div>
+      </div>
+      <div class="bad-ex">
+        <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
+        <div style="font-size:15px;font-weight:600" data-t="badName">모카냥이 🐱</div>
+        <div style="font-size:13px;color:var(--muted)" data-t="badRole">백엔드 개발 담당 고양이</div>
+        <div class="note" style="margin:10px 0 0">
+          이모지와 종족 설명을 이름에 넣지 않습니다. 종족은 스프라이트가 이미 말하고 있습니다.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px">
+      <div class="spec"><code>name</code><span>플레이어가 정하는 닉네임. <strong>i18n을 거치지 않습니다</strong> — 사용자 입력이기 때문입니다.</span></div>
+      <div class="spec"><code>species</code><span>스프라이트를 고르는 값. 이름이 아니라 외형입니다.</span></div>
+      <div class="spec"><code>role</code><span>도메인 값. 표시 문자열만 i18n을 거칩니다.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rules</h2>
+    <ul style="margin:0;padding-left:20px;line-height:2">
+      <li>새 종은 먼저 <strong>계열</strong>을 정합니다. 계열이 같으면 색과 무늬가 그 계열 안에서 유일해야 합니다.</li>
+      <li>새 계열을 만들 수 있으면 그쪽이 낫습니다. 머리 일곱 줄로 만들 수 있는 계열은 한정되어 있습니다.</li>
+      <li>같은 계열에서 <strong>색만 다른 종</strong>은 추가하지 않습니다. 무늬나 귀 크기 중 하나는 달라야 합니다.</li>
+      <li>모든 스프라이트는 16×16, 공유 팔레트, <strong>정수 배율</strong>로만 그립니다.</li>
+      <li>윤곽선은 한 가지 색(<code>#2f2a3d</code>)으로 통일합니다. 사무실 가구와 같은 값이라 한 장면으로 보입니다.</li>
+      <li>스프라이트 안에 <strong>글자를 넣지 않습니다</strong>. 이름은 캔버스 밖 DOM에 둡니다.</li>
+      <li>상태(업무 중·휴가 중)는 스프라이트가 아니라 <strong>말풍선과 점</strong>이 나타냅니다.</li>
+      <li>종족은 능력치에 영향을 주지 않습니다. 외형일 뿐입니다.</li>
+      <li>몸통은 스무 종이 공유합니다. 종을 추가할 때 건드리는 것은 <strong>머리 일곱 줄</strong>뿐입니다.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  /* ── palette ─────────────────────────────────────────────────── */
+  const OUTLINE = "#2f2a3d";
+
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Only the examples: the prose around them explains the system to whoever
+  // is building it.
+  const TEXT = {
+    ko: {
+      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
+      minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
+      notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
+      goodName: "모카", badName: "모카냥이 🐱", badRole: "백엔드 개발 담당 고양이",
+    },
+    en: {
+      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      work: "WORK", noTask: "Nothing assigned", away: "Away",
+      minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
+      notStarted: "Not started", waiting: "Free", onLeave: "Leave",
+      goodName: "Mocha", badName: "Mocha the Cat 🐱", badRole: "Cat in charge of backend work",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+  const famLabel = (ko) => tx(CAST.find((c) => c.family.ko === ko).family);
+  applyStatic();
+
+  /* ── the cast ────────────────────────────────────────────────── */
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+
+  const FLAT = { B: "var(--faint)", L: "#d6d6db", O: "#f0f0f2", A: "#b3b3ba", H: "var(--faint)", N: "#b3b3ba" };
+
+  /* ── tiles ───────────────────────────────────────────────────── */
+
+  function sprite(c, scale, extra) {
+    const el = document.createElement("canvas");
+    el.width = el.height = 16 * scale;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    paint(g, c.sprite, scale, 0, 0, extra ?? skin(c));
+    return el;
+  }
+
+  /* ── cast sheet ──────────────────────────────────────────────── */
+  const ROLES = ["Backend Engineer", "Frontend Engineer", "Product Manager", "DBA", "DevOps Engineer", "QA Engineer"];
+  const byKey = new Map(CAST.map((c) => [c.key, c]));
+  const pick = (key) => byKey.get(key);
+
+  const FAMILIES = [...new Set(CAST.map((c) => c.family.ko))];
+  const sheet = document.getElementById("sheet");
+  for (const family of FAMILIES) {
+    const group = CAST.filter((c) => c.family.ko === family);
+    const wrap = document.createElement("div");
+    wrap.className = "js-family";
+    wrap.innerHTML = `<div class="grp"><h3>${famLabel(family)}</h3><span class="cnt">${group.length}</span></div>`;
+    const grid = document.createElement("div");
+    grid.className = "famgrid";
+    for (const c of group) {
+      const el = document.createElement("div");
+      el.className = "cast";
+      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="sp">${c.en} · ${tx(c.species)}</span>`;
+      el.querySelector(".pad").appendChild(sprite(c, 4));
+      grid.appendChild(el);
+    }
+    wrap.appendChild(grid);
+    sheet.appendChild(wrap);
+  }
+
+  const sil = document.getElementById("silhouette");
+  for (const family of FAMILIES) {
+    const group = CAST.filter((c) => c.family.ko === family);
+    const wrap = document.createElement("div");
+    wrap.className = "silgroup";
+    for (const c of group) wrap.appendChild(sprite(c, 3, FLAT));
+    wrap.insertAdjacentHTML("beforeend", `<span class="silname">${famLabel(family)}</span>`);
+    sil.appendChild(wrap);
+  }
+
+  const scales = document.getElementById("scales");
+  for (const s of [4, 3, 2, 1.5]) {
+    const f = document.createElement("figure");
+    const pad = document.createElement("div");
+    pad.className = "pad";
+    for (const c of FAMILIES.map((f) => CAST.find((c) => c.family.ko === f))) {
+      const el = sprite(c, Math.max(1, Math.round(s)));
+      el.style.display = "inline-block";
+      el.style.width = 16 * s + "px";
+      el.style.height = 16 * s + "px";
+      el.style.marginRight = "6px";
+      pad.appendChild(el);
+    }
+    f.appendChild(pad);
+    f.insertAdjacentHTML("beforeend", `<figcaption>${s}× · ${16 * s}px</figcaption>`);
+    scales.appendChild(f);
+  }
+
+  /* ── the room ────────────────────────────────────────────────── */
+  const seats = [
+    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, spent: 22, total: 30 },
+    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: { ko: "로그인 폼 구현", en: "Build the login form" },              spent: 12, total: 25 },
+    { c: pick("deer"),    col: 13, row: 3, status: "ready",     task: { ko: "API 문서 작성", en: "Write the API docs" },               spent: 0,  total: 20 },
+    { c: pick("chick"),   col: 3,  row: 6, status: "available", last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" } },
+    { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  back: { ko: "3일 후 복귀", en: "Back in 3 days" } },
+    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: { ko: "회귀 테스트 작성", en: "Write the regression tests" },            spent: 7,  total: 18 },
+  ];
+
+  const S = 3, T = 48;
+  const room = document.getElementById("room");
+  const ctx = room.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 18; x++) paint(ctx, TILES.floor, S, x * T, y * T);
+  for (let x = 0; x < 18; x++) paint(ctx, TILES.wall, S, x * T, 0);
+  for (const [t, x, y] of [["window",2,0],["window",3,0],["board",8,0],["board",9,0],["shelf",14,0],["plant",0,7],["plant",17,7]])
+    paint(ctx, TILES[t], S, x * T, y * T);
+  for (const s of seats) {
+    const dx = s.col * T, dy = s.row * T;
+    paint(ctx, CHAIR, S, dx, dy - T);
+    paint(ctx, s.c.sprite, S, dx, dy - T, skin(s.c));
+    paint(ctx, TILES.deskL, S, dx, dy);
+    paint(ctx, TILES.deskR, S, dx + T, dy);
+    paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: s.status === "working" ? P.M : P.o });
+  }
+
+  const overlay = document.getElementById("overlay");
+  for (const s of seats) {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.style.left = s.col * T + T + "px";
+    tag.style.top = s.row * T + T + 4 + "px";
+    tag.textContent = s.c.ko;
+    overlay.appendChild(tag);
+
+    const bub = document.createElement("span");
+    bub.className = "bub";
+    bub.style.left = s.col * T + T + "px";
+    bub.style.top = s.row * T - T - 24 + "px";
+    bub.innerHTML = `<span class="dot ${s.status}"></span>${t().status[s.status]}`;
+    overlay.appendChild(bub);
+  }
+
+  /* ── cards ───────────────────────────────────────────────────── */
+  const cards = document.getElementById("cards");
+  seats.forEach((s, i) => {
+    const v = s.total ? Math.round((s.spent / s.total) * 100) : 0;
+    const bar =
+      s.status === "working" ? `<i style="width:${v}%;background:var(--warn)"></i>`
+      : s.status === "ready" ? `<i style="width:3%;background:var(--info)"></i>`
+      : s.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
+      : "";
+    const nums =
+      s.status === "working" ? `<span>${t().minutes(s.spent, s.total)}</span><b>${v}%</b>`
+      : s.status === "ready" ? `<span>${t().estimate(s.total)}</span><b>${t().notStarted}</b>`
+      : s.status === "available" ? `<span>${tx(s.last)}</span><b>${t().waiting}</b>`
+      : `<span>${tx(s.back)}</span><b>${t().onLeave}</b>`;
+    const line =
+      s.status === "working" || s.status === "ready" ? tx(s.task)
+      : s.status === "available" ? t().noTask : t().away;
+
+    const el = document.createElement("div");
+    el.className = "card";
+    if (s.status === "vacation") el.style.opacity = ".72";
+    el.innerHTML = `
+      <span class="c-av"><span class="c-live" style="background:${STATUS[s.status].color}"></span></span>
+      <span class="c-name">${s.c.ko}</span>
+      <span class="c-role">${ROLES[i]}</span>
+      <span class="c-rule"></span>
+      <span class="c-k">${t().work}</span>
+      <span class="c-task">${line}</span>
+      <span class="meter">${bar}</span>
+      <span class="c-nums">${nums}</span>`;
+    el.querySelector(".c-av").prepend(sprite(s.c, 2));
+    cards.appendChild(el);
+  });
+</script>

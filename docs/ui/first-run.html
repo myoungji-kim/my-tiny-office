@@ -1,0 +1,463 @@
+<meta charset="utf-8" />
+<title>Tiny Office · First run</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
+<style>
+  body {
+    margin: 0; min-height: 100vh; padding: 40px 20px;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+    display: grid; place-items: start center;
+  }
+
+  button { font: inherit; color: inherit; }
+
+  .wizard {
+    width: 100%; max-width: 480px;
+    background: var(--surface); border-radius: 18px;
+    box-shadow: 0 1px 2px rgb(20 20 25 / .05), 0 12px 40px rgb(20 20 25 / .08);
+    overflow: hidden;
+  }
+
+  /* ═══ steps ═══ */
+
+  .steps { display: flex; gap: 5px; padding: 16px 24px 0; }
+
+  .steps i { flex: 1; height: 3px; border-radius: 999px; background: var(--sunk); }
+
+  .steps i.on { background: var(--ink); }
+
+  .steps i.done { background: var(--line-2); }
+
+  .pane { padding: 22px 24px 24px; }
+
+  .pane[hidden] { display: none; }
+
+  .brand { display: flex; flex-direction: column; align-items: center; gap: 11px; padding: 6px 0 4px; }
+
+  .peek {
+    margin: 16px 0 0; border-radius: var(--r-card); overflow: hidden;
+    background: var(--subtle); border: 1px solid var(--line);
+    display: grid; place-items: center; padding: 10px;
+  }
+
+  .peek canvas { display: block; image-rendering: pixelated; border-radius: 6px; }
+
+  .logo { width: 44px; height: 44px; border-radius: 13px; background: var(--ink); display: grid; place-items: center; }
+
+  .logo svg { width: 22px; height: 22px; color: #fff; }
+
+  .wordmark { font-size: 13px; font-weight: 700; letter-spacing: .12em; }
+
+  h1 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.01em; text-align: center; }
+
+  .lede { margin: 7px 0 0; color: var(--muted); font-size: 13.5px; text-align: center; }
+
+  h2 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+
+  .sub { display: block; margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+
+  /* ═══ fields ═══ */
+
+  .field { margin-top: 18px; }
+
+  .label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+
+  .input, .select {
+    width: 100%; height: 44px; padding-inline: 13px;
+    border: 1px solid var(--line-2); border-radius: var(--r-ctl);
+    background: var(--surface); font: inherit; font-size: 14.5px; color: var(--ink);
+  }
+
+  .input::placeholder { color: var(--faint); }
+
+  .input:focus-visible, .select:focus-visible, .btn:focus-visible, .sp:focus-visible, .link:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 2px;
+  }
+
+  .hint { display: block; font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+  /* ═══ species picker ═══ */
+
+  .species {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px;
+    max-height: 196px; overflow: auto; padding: 4px;
+    border: 1px solid var(--line); border-radius: var(--r-card); background: var(--subtle);
+  }
+
+  .sp {
+    aspect-ratio: 1; border: 1px solid transparent; border-radius: 10px;
+    background: var(--surface); cursor: pointer; display: grid; place-items: center; padding: 0;
+  }
+
+  .sp:hover { border-color: var(--line-2); }
+
+  .sp[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); }
+
+  .picked { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: 13px; color: var(--muted); }
+
+  .picked b { color: var(--ink); font-weight: 600; }
+
+  /* ═══ buttons ═══ */
+
+  .acts { display: flex; gap: 8px; margin-top: 22px; }
+
+  .acts .btn-primary { flex: 1; }
+
+  /* ═══ arrival ═══ */
+
+  .hired {
+    display: flex; align-items: center; gap: 13px; margin: 18px 0 14px;
+    border: 1px solid var(--line); border-radius: var(--r-card); padding: 14px;
+  }
+
+  .h-av { position: relative; width: 52px; height: 52px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+
+  .h-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); background: var(--ok); }
+
+  .h-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
+
+  .h-role { display: block; font-size: 13px; color: var(--muted); }
+
+  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 600; flex: none; }
+
+  /* ═══ notice ═══ */
+
+  .notice {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: var(--r-card); padding: 13px 14px;
+  }
+
+  .link { color: var(--muted); font-size: 12.5px; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0; }
+
+  .link:hover { color: var(--ink); }
+
+  .foot-note { text-align: center; margin-top: 16px; }
+
+  /* ═══ the page that documents this flow ═══ */
+
+  .doc { max-width: 480px; width: 100%; margin-top: 18px; }
+
+  .doc h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px; }
+
+  .doc ul { margin: 0; padding-left: 19px; font-size: 13px; color: var(--muted); line-height: 1.85; }
+
+  .doc strong { color: var(--ink); }
+
+  .restart { display: block; margin: 14px auto 0; }
+</style>
+
+<div class="wizard">
+  <div class="steps" id="steps"><i class="on"></i><i></i><i></i></div>
+
+  <!-- ── 1. 회사 ─────────────────────────────────────────────── -->
+  <div class="pane" id="p1">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+      <span class="wordmark" data-t="wordmark">MY TINY OFFICE</span>
+    </div>
+    <h1 data-t="title">작은 소프트웨어 회사를 만들어요</h1>
+    <p class="lede" data-t="lede">직원을 뽑고, 업무를 맡기고, 일하는 걸 지켜보세요.</p>
+
+    <div class="peek"><canvas id="peek" width="408" height="216" aria-hidden="true"></canvas></div>
+
+    <div class="field">
+      <label class="label" for="co" data-t="companyLabel">회사 이름</label>
+      <input class="input" id="co" value="Acme Tiny Software" autocomplete="off" />
+      <span class="hint" data-t="companyHint">나중에 바꿀 수 있어요.</span>
+    </div>
+
+    <div class="acts">
+      <button class="btn btn-primary btn-lg" id="toHire" data-t="next">다음</button>
+    </div>
+  </div>
+
+  <!-- ── 2. 첫 직원 ──────────────────────────────────────────── -->
+  <div class="pane" id="p2" hidden>
+    <h2 data-t="hireTitle">첫 직원을 뽑아요</h2>
+    <p class="sub" data-t="hireSub">한 명이면 충분해요. 나중에 더 뽑을 수 있어요.</p>
+
+    <div class="field">
+      <span class="label" data-t="speciesLabel">어떤 친구인가요</span>
+      <div class="species" id="species"></div>
+      <div class="picked" id="picked"></div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="nm" data-t="nameLabel">이름</label>
+      <input class="input" id="nm" placeholder="모카" autocomplete="off" />
+      <span class="hint" data-t="nameHint">짧을수록 좋아요. 나중에 바꿀 수 있어요.</span>
+    </div>
+
+    <div class="field">
+      <label class="label" for="rl" data-t="roleLabel">역할</label>
+      <select class="select" id="rl">
+        <option>Backend Engineer</option>
+        <option>Frontend Engineer</option>
+        <option>Product Manager</option>
+        <option>DBA</option>
+        <option>DevOps Engineer</option>
+        <option>QA Engineer</option>
+      </select>
+    </div>
+
+    <div class="acts">
+      <button class="btn btn-ghost btn-lg" id="back1" data-t="back">뒤로</button>
+      <button class="btn btn-primary btn-lg" id="hire" disabled data-t="hire">고용하기</button>
+    </div>
+  </div>
+
+  <!-- ── 3. 도착 ─────────────────────────────────────────────── -->
+  <div class="pane" id="p3" hidden>
+    <h2 id="openLine" data-t="opened">사무실이 열렸어요</h2>
+    <p class="sub" id="openSub"></p>
+
+    <div class="hired" id="hired"></div>
+
+    <div class="notice">
+      <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
+      <span class="n-tx">
+        <b data-t="noticeTitle">지금은 시뮬레이션으로 돌아가요</b>
+        <span data-t="noticeBody">업무를 맡기면 시간이 흐르면서 끝나요. 직원에게 Claude Code를 연결하면 그때부터 진짜로 일해요.</span>
+      </span>
+    </div>
+
+    <div class="acts">
+      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
+    </div>
+    <p class="foot-note"><button class="link" type="button" data-t="whatIsAgent">에이전트 연결이 뭔가요?</button></p>
+  </div>
+</div>
+
+<div class="doc">
+  <h3>이 화면이 지키는 것</h3>
+  <p class="langscope">
+    <span>예시는 한국어·영어 둘 다 있고, 설명은 한국어로만 적혀 있습니다.</span>
+    <span lang="en">Examples come in both languages; the commentary explaining them is Korean only.</span>
+  </p>
+  <ul>
+    <li><strong>로그인으로 시작하지 않습니다.</strong> Claude Code 없이 3단계가 전부 끝납니다.</li>
+    <li>런타임은 <strong>알림 한 줄</strong>로만 언급합니다. 직원이 없는 시점에 런타임을 고르라고 묻지 않습니다.</li>
+    <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다.</li>
+    <li>이름은 플레이어가 짓습니다 — <strong>i18n을 거치지 않는 유일한 텍스트</strong>입니다.</li>
+    <li>종족은 외형일 뿐이라 <strong>능력치에 영향이 없습니다.</strong> 그래서 고민 없이 고를 수 있습니다.</li>
+    <li>세 칸 모두 <strong>나중에 바꿀 수 있다</strong>고 적습니다. 첫 결정이 무겁지 않아야 합니다.</li>
+  </ul>
+  <button class="btn btn-secondary btn-sm restart" id="restart">처음부터 다시 보기</button>
+</div>
+
+<script>
+  /* ── sprites ─────────────────────────────────────────────────── */
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+
+  function avatar(sp, px) {
+    const el = document.createElement("canvas");
+    el.width = el.height = px;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const scale = Math.max(1, Math.floor(px / 16));
+    const pad = Math.floor((px - 16 * scale) / 2);
+    paint(g, sp.sprite, scale, pad, pad, skin(sp));
+    return el;
+  }
+
+  /* ── a glance at what this is ────────────────────────────────── */
+
+  // Three of the cast at desks, so the first screen shows the game instead of
+  // describing it.
+  (() => {
+    const el = document.getElementById("peek");
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const S = 3, T = 48, COLS = el.width / T, ROWS = el.height / T;
+    const byKey = new Map(CAST.map((c) => [c.key, c]));
+    const seats = [
+      { c: byKey.get("cat"), col: 0.25 },
+      { c: byKey.get("bunny"), col: 3.25 },
+      { c: byKey.get("chick"), col: 6.25 },
+    ];
+    let tick = 0;
+
+    const draw = () => {
+      for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) paint(g, TILES.floor, S, x * T, y * T);
+      for (let x = 0; x < COLS; x++) paint(g, TILES.wall, S, x * T, 0);
+      paint(g, TILES.window, S, T, 0);
+      paint(g, TILES.board, S, 3 * T, 0);
+      paint(g, TILES.shelf, S, 6 * T, 0);
+      seats.forEach((s, i) => {
+        const dx = s.col * T, dy = 3 * T;
+        // a one-pixel idle bob is enough to say these are alive
+        const lift = (tick + i) % 4 === 0 ? -S : 0;
+        paint(g, CHAIR, S, dx, dy - T);
+        paint(g, s.c.sprite, S, dx, dy - T + lift, skin(s.c));
+        paint(g, TILES.deskL, S, dx, dy);
+        paint(g, TILES.deskR, S, dx + T, dy);
+        paint(g, MONITOR, S, dx + T / 2, dy - 2 * S, { M: P.M });
+      });
+    };
+    draw();
+    setInterval(() => { tick = (tick + 1) % 4; draw(); }, 820);
+  })();
+
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Every string the player reads. The samples carry both languages because a
+  // layout that only survives one of them has not been designed yet.
+  const TEXT = {
+    ko: {
+      wordmark: "MY TINY OFFICE",
+      title: "작은 소프트웨어 회사를 만들어요",
+      lede: "직원을 뽑고, 업무를 맡기고, 일하는 걸 지켜보세요.",
+      companyLabel: "회사 이름",
+      companyHint: "나중에 바꿀 수 있어요.",
+      next: "다음",
+      hireTitle: "첫 직원을 뽑아요",
+      hireSub: "한 명이면 충분해요. 나중에 더 뽑을 수 있어요.",
+      speciesLabel: "어떤 친구인가요",
+      nameLabel: "이름",
+      nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
+      roleLabel: "역할",
+      back: "뒤로",
+      hire: "고용하기",
+      opened: "사무실이 열렸어요",
+      headcount: (n) => `직원 ${n}명`,
+      simulated: "시뮬레이션",
+      noticeTitle: "지금은 시뮬레이션으로 돌아가요",
+      noticeBody:
+        "업무를 맡기면 시간이 흐르면서 끝나요. 직원에게 Claude Code를 연결하면 그때부터 진짜로 일해요.",
+      toOffice: "사무실로 가기",
+      whatIsAgent: "에이전트 연결이 뭔가요?",
+      companyFallback: "내 회사",
+    },
+    en: {
+      wordmark: "MY TINY OFFICE",
+      title: "Start a tiny software company",
+      lede: "Hire people, give them work, and watch them get it done.",
+      companyLabel: "Company name",
+      companyHint: "You can change this later.",
+      next: "Next",
+      hireTitle: "Hire your first employee",
+      hireSub: "One is enough. You can hire more later.",
+      speciesLabel: "Who are they?",
+      nameLabel: "Name",
+      nameHint: "Shorter is better. You can change it later.",
+      roleLabel: "Role",
+      back: "Back",
+      hire: "Hire",
+      opened: "Your office is open",
+      headcount: (n) => `${n} employee${n === 1 ? "" : "s"}`,
+      simulated: "Simulated",
+      noticeTitle: "Everything is simulated for now",
+      noticeBody:
+        "Assign work and it finishes as time passes. Connect Claude Code to an employee and they start doing it for real.",
+      toOffice: "Go to the office",
+      whatIsAgent: "What does connecting an agent do?",
+      companyFallback: "My company",
+    },
+  };
+
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+
+  // Every other page reads the language from the URL; this one has to as
+  // well, or the bar's links quietly undo themselves.
+  let lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+
+  /* ── state ───────────────────────────────────────────────────── */
+  let step = 1;
+  let chosen = null;
+
+  const steps = document.getElementById("steps").children;
+  const panes = [null, document.getElementById("p1"), document.getElementById("p2"), document.getElementById("p3")];
+
+  function go(n) {
+    step = n;
+    for (let i = 1; i <= 3; i++) panes[i].toggleAttribute("hidden", i !== n);
+    for (let i = 0; i < 3; i++) {
+      steps[i].className = i + 1 === n ? "on" : i + 1 < n ? "done" : "";
+    }
+    scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ── 2. species picker ───────────────────────────────────────── */
+  const grid = document.getElementById("species");
+  const picked = document.getElementById("picked");
+  const hireBtn = document.getElementById("hire");
+  const nameInput = document.getElementById("nm");
+
+  for (const c of CAST) {
+    const b = document.createElement("button");
+    b.className = "sp";
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", tx(c.species));
+    b.appendChild(avatar(c, 34));
+    b.addEventListener("click", () => {
+      chosen = c;
+      for (const x of grid.children) x.setAttribute("aria-pressed", String(x === b));
+      picked.innerHTML = `<b>${tx(c.species)}</b><span>${tx(c.family)}</span>`;
+      if (!nameInput.value) nameInput.placeholder = tx(c);
+      sync();
+    });
+    grid.appendChild(b);
+  }
+
+  // A nickname the player did not write is not their employee, so the button
+  // waits for both.
+  const sync = () => { hireBtn.disabled = !(chosen && nameInput.value.trim()); };
+  nameInput.addEventListener("input", sync);
+
+  /* ── 3. arrival ──────────────────────────────────────────────── */
+  document.getElementById("toHire").addEventListener("click", () => go(2));
+  document.getElementById("back1").addEventListener("click", () => go(1));
+
+  function rerenderArrival() {
+    const name = nameInput.value.trim();
+    const role = document.getElementById("rl").value;
+    const co = document.getElementById("co").value.trim() || t().companyFallback;
+
+    document.getElementById("openSub").textContent = `${co} · ${t().headcount(1)}`;
+    const box = document.getElementById("hired");
+    box.innerHTML = `
+      <span class="h-av"><span class="h-live"></span></span>
+      <span style="flex:1;min-width:0">
+        <span class="h-name">${name}</span>
+        <span class="h-role">${role}</span>
+      </span>
+      <span class="chip sim">${t().simulated}</span>`;
+    box.querySelector(".h-av").prepend(avatar(chosen, 52));
+  }
+
+  hireBtn.addEventListener("click", () => {
+    rerenderArrival();
+    go(3);
+  });
+
+  function applyLang() {
+    for (const el of document.querySelectorAll("[data-t]")) el.textContent = t()[el.dataset.t];
+    const co = document.getElementById("co");
+    if (!co.value) co.value = "Acme Tiny Software";
+    document.getElementById("nm").placeholder = chosen ? chosen[lang === "ko" ? "ko" : "en"] : lang === "ko" ? "모카" : "Mocha";
+    if (chosen) picked.innerHTML = `<b>${tx(chosen.species)}</b><span>${tx(chosen.family)}</span>`;
+    }
+
+  applyLang();
+
+  document.getElementById("restart").addEventListener("click", () => {
+    chosen = null;
+    nameInput.value = "";
+    nameInput.placeholder = lang === "ko" ? "모카" : "Mocha";
+    picked.innerHTML = "";
+    for (const x of grid.children) x.setAttribute("aria-pressed", "false");
+    sync();
+    go(1);
+  });
+</script>

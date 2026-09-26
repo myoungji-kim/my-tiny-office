@@ -1,0 +1,1057 @@
+<meta charset="utf-8" />
+<title>Tiny Office · People</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
+<style>
+  body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 22px 18px 40px;
+  }
+
+  button { font: inherit; color: inherit; }
+
+  /* ═══ buttons ═══ */
+
+  .btn:focus-visible, .ibtn:focus-visible, .row-item:focus-visible,
+  .tab:focus-visible, .nav a:focus-visible, .tcard:focus-visible, .mem-add:focus-visible {
+    outline: 2px solid var(--brand); outline-offset: 2px;
+  }
+
+  .ibtn {
+    width: 32px; height: 32px; border-radius: 999px; border: none;
+    background: var(--subtle); color: var(--muted);
+    display: inline-grid; place-items: center; cursor: pointer;
+  }
+
+  .ibtn svg { width: 15px; height: 15px; }
+
+  /* ═══ sidebar ═══ */
+
+  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
+
+  .logo svg { width: 14px; height: 14px; color: #fff; }
+
+  /* ═══ main ═══ */
+
+  h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
+
+  .sub { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+
+  .view[hidden] { display: none; }
+
+  /* ═══ status ═══ */
+
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; flex: none;
+    border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 600;
+  }
+
+  /* ═══ master / detail ═══ */
+
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
+
+  @media (max-width: 1160px) { .split { grid-template-columns: 1fr; } }
+
+  .list { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+
+  .row-item {
+    display: grid; grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, auto) auto;
+    align-items: center; gap: 12px; width: 100%;
+    padding: 11px 14px; border: none; background: none; text-align: left; cursor: pointer;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row-item:last-child { border-bottom: none; }
+
+  .row-item:hover { background: var(--subtle); }
+
+  .row-item[aria-selected="true"] { background: var(--brand-soft); }
+
+  .r-av { position: relative; width: 40px; height: 40px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; }
+
+  .r-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); }
+
+  .row-item[aria-selected="true"] .r-live { border-color: var(--brand-soft); }
+
+  .r-name { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .r-role { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .r-dept { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .r-mem { font-size: 12.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .r-mem b { color: var(--ink); font-weight: 600; }
+
+  .areas { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .row-item[aria-selected="true"] .area-chip { background: var(--surface); }
+
+  /* ═══ detail ═══ */
+
+  .detail { border: 1px solid var(--line); border-radius: var(--r-card); }
+
+  .d-hd { display: flex; align-items: center; gap: 12px; padding: 16px 16px 14px; border-bottom: 1px solid var(--line); }
+
+  .d-av { position: relative; width: 52px; height: 52px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+
+  .d-name { display: block; font-size: 17px; font-weight: 600; line-height: 1.3; }
+
+  .d-role { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; }
+
+  .d-sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+
+  .d-sec:last-child { border-bottom: none; }
+
+  .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 3px 0; }
+
+  /* ═══ memory ═══ */
+
+  .mem-group { margin-bottom: 12px; }
+
+  .mem-group:last-of-type { margin-bottom: 0; }
+
+  .mem-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+
+  .mem-line { flex: 1; height: 1px; background: var(--line); }
+
+  .mem {
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; margin-bottom: 6px;
+    background: var(--surface);
+  }
+
+  .mem:last-child { margin-bottom: 0; }
+
+  .mem-t { display: block; font-size: 13px; line-height: 1.5; }
+
+  .mem-m { display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 11.5px; color: var(--faint); }
+
+  .mem-m svg { width: 12px; height: 12px; flex: none; }
+
+  .mem-m .src { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .mem-m .used { margin-left: auto; flex: none; font-variant-numeric: tabular-nums; }
+
+  .mem-m .used.hot { color: var(--ok-ink); font-weight: 600; }
+
+  .mem-m .used.cold { color: var(--bad-ink); font-weight: 600; }
+
+  .mem-add {
+    width: 100%; margin-top: 10px; border: 1px dashed var(--line-2); background: var(--subtle);
+    border-radius: 10px; padding: 9px; font-size: 12.5px; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+
+  .mem-add:hover { border-color: var(--muted); color: var(--ink); background: var(--surface); }
+
+  .mem-add svg { width: 14px; height: 14px; }
+
+  .style-line {
+    display: flex; align-items: flex-start; gap: 8px; font-size: 13px;
+    padding: 6px 0; border-bottom: 1px solid var(--line);
+  }
+
+  .style-line:last-of-type { border-bottom: none; }
+
+  .style-line svg { width: 14px; height: 14px; flex: none; margin-top: 5px; color: var(--faint); }
+
+  .d-acts { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .d-acts .btn { width: 100%; }
+
+  /* ═══ org chart ═══ */
+
+  .org { display: flex; flex-direction: column; gap: 18px; }
+
+  .dept { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+
+  .dept-hd { display: flex; align-items: center; gap: 9px; padding: 12px 15px; background: var(--subtle); border-bottom: 1px solid var(--line); }
+
+  .dept-hd h2 { margin: 0; font-size: 14.5px; font-weight: 600; }
+
+  .cnt { font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+
+  .teams { padding: 14px 15px; display: flex; flex-direction: column; gap: 14px; }
+
+  .team-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+
+  .team-hd h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  .team-line { flex: 1; height: 1px; background: var(--line); }
+
+  .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr)); }
+
+  .tcard {
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    border: 1px solid var(--line); border-radius: var(--r-card); padding: 10px 12px;
+    background: var(--surface); cursor: pointer; width: 100%;
+  }
+
+  .tcard:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgb(20 20 25 / .06); }
+
+  .t-av { position: relative; width: 36px; height: 36px; border-radius: 10px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+
+  .t-name { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.35; }
+
+  .t-role { display: block; font-size: 12px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .vacant {
+    display: grid; place-items: center; align-content: center; gap: 7px; min-height: 60px;
+    border: 1px dashed var(--line-2); border-radius: var(--r-card); background: var(--subtle);
+    color: var(--faint); font-size: 12.5px; cursor: pointer;
+  }
+
+  .vacant svg { width: 16px; height: 16px; }
+
+  .vacant:hover { border-color: var(--muted); color: var(--muted); background: var(--surface); }
+
+  /* ═══ notice ═══ */
+
+  .notice {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--surface); border: 1px solid var(--line-2);
+    border-radius: var(--r-card); padding: 13px 14px;
+  }
+
+  .notice-warn { border-color: var(--warn-line); }
+
+  .notice-bad { border-color: var(--bad-line); }
+
+  /* ═══ memory tab ═══ */
+
+  .mem-cols { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
+
+  @media (max-width: 1160px) { .mem-cols { grid-template-columns: 1fr; } }
+
+  .panel { border: 1px solid var(--line); border-radius: var(--r-card); }
+
+  .panel-hd { padding: 12px 15px; border-bottom: 1px solid var(--line); }
+
+  .panel-hd h2 { margin: 0; font-size: 14.5px; font-weight: 600; }
+
+  .panel-hd p { margin: 1px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .panel-bd { padding: 13px 15px; }
+
+  .feed-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+
+  .feed-row:last-child { border-bottom: none; }
+
+  .f-av { width: 28px; height: 28px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+
+  .f-tx { min-width: 0; flex: 1; font-size: 13px; line-height: 1.5; }
+
+  .f-tx q { font-style: normal; background: var(--brand-soft); color: var(--brand-ink); border-radius: 5px; padding: 1px 5px; }
+
+  .f-tx q::before, .f-tx q::after { content: ""; }
+
+  .f-meta { display: block; font-size: 11.5px; color: var(--faint); margin-top: 1px; }
+
+  .f-time { font-size: 11.5px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
+
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ═══ area coverage ═══ */
+
+  .area-row {
+    display: grid; grid-template-columns: minmax(0, 170px) 76px minmax(0, 1fr) auto;
+    align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+
+  .area-row:last-of-type { border-bottom: none; }
+
+  .area-name { font-size: 13.5px; font-weight: 600; }
+
+  .seat { font-size: 11.5px; color: var(--muted); }
+
+  .seat.no { color: var(--faint); }
+
+  .knows { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+
+  .knows .who { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+
+  .knows .who span { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; overflow: hidden; }
+
+  .nobody { font-size: 12.5px; color: var(--bad-ink); font-weight: 600; }
+
+  .area-n { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ═══ memory scaling ═══ */
+
+  .mem.cold-mem { border-color: var(--bad-line); background: var(--bad-wash); }
+
+  .mem-more {
+    width: 100%; border: none; background: none; cursor: pointer;
+    font-size: 12px; color: var(--muted); padding: 5px 0 1px; text-align: left;
+  }
+
+  .mem-more:hover { color: var(--ink); }
+
+  .budget { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+
+  .archived { margin-top: 12px; border-top: 1px dashed var(--line-2); padding-top: 11px; }
+
+  .archived summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style: none; }
+
+  .archived summary::-webkit-details-marker { display: none; }
+
+  .archived summary::before { content: "▸ "; color: var(--faint); }
+
+  .archived[open] summary::before { content: "▾ "; }
+
+  .archived .mem { opacity: .62; margin-top: 7px; }
+
+  /* ═══ modal ═══ */
+
+  .m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+</style>
+
+<div class="app">
+  <nav class="side">
+    <div class="side-top">
+      <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+      <span class="side-id">
+        <span class="side-name">MY TINY OFFICE</span>
+        <span class="side-ver">v0.1.0</span>
+      </span>
+    </div>
+
+    <div class="nav">
+      <a href="office.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span data-t="nav.office">사무실</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span data-t="nav.projects">프로젝트</span></a>
+      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span data-t="nav.people">직원</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 14.5v-3.5M9 14.5v-7M14.5 14.5v-10.5"/></svg><span data-t="nav.company">회사</span></a>
+    </div>
+
+    <div class="rule"></div>
+    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
+    <div id="members"></div>
+
+    <div class="side-foot">
+      <div class="rule" style="margin:0 4px 8px"></div>
+      <div class="nav">
+        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span data-t="nav.settings">설정</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="head">
+      <div class="head-row">
+        <span>
+          <h1 data-t="title">직원</h1>
+          <span class="sub" id="headSub"></span>
+        </span>
+        <div class="head-right">
+          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="hire">직원 고용</span></button>
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button class="tab" data-view="list" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h7"/></svg><span data-t="tabs.list">목록</span><span class="n" id="nList"></span></button>
+        <button class="tab" data-view="org"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="3.6" rx=".8"/><rect x="1.6" y="10.6" width="5" height="3.6" rx=".8"/><rect x="9.4" y="10.6" width="5" height="3.6" rx=".8"/><path d="M8 5.4v2.6M4.1 10.6V8h7.8v2.6"/></svg><span data-t="tabs.org">조직도</span></button>
+        <button class="tab" data-view="memory"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg><span data-t="tabs.memory">기억</span><span class="n" id="nMem"></span></button>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="view" id="view-list">
+        <div class="split">
+          <div class="list" id="roster"></div>
+          <div class="detail" id="detail"></div>
+        </div>
+      </div>
+
+      <div class="view" id="view-org" hidden>
+        <div class="org" id="org"></div>
+      </div>
+
+      <div class="view" id="view-memory" hidden>
+        <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-hd">
+            <h2 data-t="areasTitle">분야</h2>
+            <p data-t="areasSub">회사가 정하는 목록이에요.</p>
+          </div>
+          <div class="panel-bd" id="areaTable"></div>
+        </div>
+
+        <div class="mem-cols">
+          <div class="panel">
+            <div class="panel-hd">
+              <h2 data-t="feedTitle">최근에 쓰인 기억</h2>
+              <p data-t="feedSub">알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
+            </div>
+            <div class="panel-bd" id="feed"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
+              <h2 data-t="companyTitle">회사 기억</h2>
+              <p data-t="companySub">모든 직원이 함께 알고 있어요.</p>
+            </div>
+            <div class="panel-bd" id="companyMem"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" data-a="giveWork" aria-label="업무 맡기기" id="modal"></div>
+</div>
+
+<script>
+  /* ── palette and sprites ─────────────────────────────────────── */
+  // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
+  // Every sprite shares one body. Only the seven head rows change, so twenty
+  // species still read as one family.
+
+  function avatar(species, px) {
+    const el = document.createElement("canvas");
+    el.width = el.height = px;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(species);
+    const scale = Math.max(1, Math.floor(px / 16));
+    const pad = Math.floor((px - 16 * scale) / 2);
+    paint(g, sp.sprite, scale, pad, pad, skin(sp));
+    return el;
+  }
+
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Employee nicknames are absent: the player wrote them.
+  const TEXT = {
+    ko: {
+      nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+      title: "직원", hire: "직원 고용",
+      headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
+      tabs: { list: "목록", org: "조직도", memory: "기억" },
+      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
+      depts: { dev: "개발본부", product: "프로덕트" },
+      teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
+      memory: "기억", memCount: (n) => "기억 " + n, memCountShort: (n) => "<b>" + n + "</b>개 기억",
+      currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
+      doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
+      timesUsed: "기억이 쓰인 횟수", times: (n) => n + "회",
+      canReview: "리뷰할 수 있는 분야",
+      canReviewWhy: "이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.",
+      noReviewYet: "아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.",
+      carried: "업무마다 함께 들고 가요", chars: (n) => n + "자",
+      archivedLine: (n) => "보관함 " + n + "개 — 남겨 두지만 업무에 들고 가지 않아요",
+      showMore: (n) => n + "개 더 보기", fold: "접기",
+      fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
+      neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
+      howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
+      giveWork: "업무 맡기기", nobodyYet: "아직 아무도 없어요",
+      areasTitle: "분야", areasSub: "회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.",
+      reviewArea: "리뷰 분야", noReview: "리뷰 없음", nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
+      feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
+      companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
+      referenced: (who, mem) => josa2(who, "이", "가") + " <q>" + mem + "</q>" + (josaNeeds(mem) ? "을" : "를") + " 참고했어요",
+      assignTitle: (n) => n + (josaNeeds(n) ? "이" : "가") + " 맡을 업무",
+      backlog: "대기 중인 업무", newTask: "새 업무 만들기", minutes: (m) => m + "분",
+      broughtAlong: "이 업무에 들고 갈 기억",
+      noAreaMemory: (a) => a + " 기억이 없어요",
+      noAreaMemoryWhy: (n) => n + (josaNeeds(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
+      tellNow: "지금 알려주기", cancel: "취소", assignThis: "이 업무 맡기기", createAndAssign: "업무 만들고 맡기기",
+      nobodyKnowsArea: (list) => list.join(" · ") + (josaNeeds(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
+      nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
+      pickSomeone: "알려줄 직원 고르기",
+      coldTitle: (n) => "한 번도 쓰이지 않은 기억이 " + n + "개 있어요",
+      coldExample: (who, mem) => who + "의 “" + mem + "”",
+      coldWhy: " — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.",
+      review: "확인하기",
+    },
+    en: {
+      nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+      title: "People", hire: "Hire",
+      headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
+      tabs: { list: "List", org: "Org chart", memory: "Memory" },
+      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
+      depts: { dev: "Engineering", product: "Product" },
+      teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
+      memory: "Memory", memCount: (n) => n + " memories", memCountShort: (n) => "<b>" + n + "</b> memories",
+      currentTask: "Current task", onLeave: "On leave", lastFinished: "Last finished", joined: "Joined",
+      doneAndReviews: "Tasks · reviews", counts: (a, b) => a + " · " + b,
+      timesUsed: "Memories referenced", times: (n) => n + "×",
+      canReview: "Can review",
+      canReviewWhy: "They hold memory here, so they can be named a reviewer.",
+      noReviewYet: "No review areas yet. Teach them anything and they can take that seat.",
+      carried: "Carried into every task", chars: (n) => n + " chars",
+      archivedLine: (n) => "Archived " + n + " — kept, but not carried into work",
+      showMore: (n) => n + " more", fold: "Fold",
+      fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
+      neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
+      howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
+      giveWork: "Give them work", nobodyYet: "Nobody here yet",
+      areasTitle: "Areas", areasSub: "The company owns this list. A PR asks for one of them.",
+      reviewArea: "Review seat", noReview: "No seat", nobodyKnows: "Nobody knows this", addArea: "Add an area",
+      feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
+      companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
+      referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
+      assignTitle: (n) => "Work for " + n,
+      backlog: "Waiting", newTask: "Create a task", minutes: (m) => m + " min",
+      broughtAlong: "What they bring to this",
+      noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
+      noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
+      tellNow: "Teach them now", cancel: "Cancel", assignThis: "Assign this", createAndAssign: "Create and assign",
+      nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
+      nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
+      pickSomeone: "Pick someone to teach",
+      coldTitle: (n) => n + " memory has never been used",
+      coldExample: (who, mem) => who + "'s “" + mem + "”",
+      coldWhy: " — either no task has needed it yet, or it went to the wrong person.",
+      review: "Take a look",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+  applyStatic();
+
+  /* ── data ────────────────────────────────────────────────────── */
+
+  // The company owns this list. A review seat is an area a PR can ask for;
+  // 프로세스 is worth knowing but nobody reviews for it.
+  const AREAS = [
+    { name: "arch", seat: true },
+    { name: "types", seat: true },
+    { name: "db", seat: true },
+    { name: "security", seat: true },
+    { name: "l10n", seat: true },
+    { name: "product", seat: true },
+    { name: "quality", seat: true },
+    { name: "process", seat: false },
+  ];
+  const REVIEW_AREAS = AREAS.filter((a) => a.seat).map((a) => a.name);
+
+  const backlog = [
+    { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
+    { id: "t2", title: { ko: "주문 취소 API 추가", en: "Add an order cancellation API" }, area: "arch", minutes: 30 },
+    { id: "t3", title: { ko: "에러 메시지 영문 번역", en: "Translate the error messages" }, area: "l10n", minutes: 20 },
+    { id: "t4", title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, area: "security", minutes: 35 },
+  ];
+
+  const people = [
+    { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
+      dept: "dev", team: "backend", status: "working", joined: "2026. 3. 2.",
+      task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
+      style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }],
+      memories: [
+        { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
+        { area: "db", text: { ko: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", en: "The payments table is partitioned by month. Never write a full scan." }, from: null, used: 9 },
+        { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", en: "No Date.now() in the domain layer. The current time arrives as an argument." }, from: { ko: "PR #4102", en: "PR #4102" }, used: 22 },
+        { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 },
+        { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 },
+        { area: "process", text: { ko: "예전 결제 모듈은 v1 스키마를 썼어요.", en: "The old payments module used the v1 schema." }, from: { ko: "v1 마이그레이션", en: "the v1 migration" }, used: 2, archived: true },
+      ] },
+    { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
+      dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
+      task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
+      style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }],
+      memories: [
+        { area: "l10n", text: { ko: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", en: "Never track Hangul. It pulls the jamo of a syllable apart." }, from: { ko: "사이드바 자간이 깨진 이슈", en: "the broken sidebar tracking" }, used: 18 },
+        { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
+        { area: "process", text: { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }, from: null, used: 12 },
+      ] },
+    { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
+      dept: "product", team: "planning", status: "ready", joined: "2026. 2. 20.",
+      task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
+      style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }],
+      memories: [
+        { area: "product", text: { ko: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", en: "Keep a task under 30 minutes. Longer means it is really two." }, from: null, used: 15 },
+        { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
+        { area: "process", text: { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }, from: { ko: "금요일 배포가 말썽이던 주", en: "the week Friday deploys went wrong" }, used: 3 },
+      ] },
+    { id: "p4", name: "삐약", species: "chick", role: "DBA",
+      dept: "dev", team: "backend", status: "available", joined: "2026. 5. 8.",
+      last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" }, done: 19, reviews: 6,
+      style: [{ ko: "마이그레이션은 두 번 확인해", en: "Check migrations twice" }],
+      memories: [
+        { area: "db", text: { ko: "마이그레이션은 항상 되돌릴 수 있게 써요.", en: "Always write a migration you can roll back." }, from: { ko: "스키마 롤백이 안 된 사고", en: "the rollback that would not roll back" }, used: 11 },
+        { area: "db", text: { ko: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", en: "Store time as epoch ms INTEGER. Never a date string." }, from: null, used: 5 },
+        { area: "db", text: { ko: "NULL과 undefined를 오갈 때는 CHECK 제약을 같이 걸어요.", en: "Mapping NULL to undefined needs a CHECK constraint beside it." }, from: { ko: "결제 상태가 뒤집힌 버그", en: "the flipped payment status" }, used: 8 },
+        { area: "db", text: { ko: "외래 키에는 항상 인덱스를 같이 만들어요. 삭제가 느려져요.", en: "Index every foreign key, or deletes crawl." }, from: null, used: 6 },
+        { area: "db", text: { ko: "트랜잭션 안에서 외부 API를 호출하지 않아요.", en: "Never call an external API inside a transaction." }, from: { ko: "결제 타임아웃 장애", en: "the payment timeout outage" }, used: 13 },
+        { area: "db", text: { ko: "집계 쿼리는 읽기 전용 커넥션으로 보내요.", en: "Send aggregate queries to the read-only connection." }, from: null, used: 3 },
+        { area: "security", text: { ko: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", en: "Never concatenate user input into a query." }, from: null, used: 0 },
+      ] },
+    { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
+      dept: "dev", team: "frontend", status: "vacation", joined: "2026. 1. 12.",
+      back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
+      style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }],
+      memories: [
+        { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },
+        { area: "process", text: { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }, from: { ko: "배포가 한 번 깨진 날", en: "the day a deploy broke" }, used: 21 },
+      ] },
+  ];
+
+  const companyMemories = [
+    { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
+    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", en: "Player-facing text goes through i18n. Names the player typed do not." }, from: null, used: 28 },
+    { text: { ko: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", en: "When the docs and the code disagree, fix the docs." }, from: { ko: "스타일 가이드가 낡았던 주", en: "the week the style guide went stale" }, used: 12 },
+  ];
+
+  const feed = [
+    { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "12분 전", en: "12 min ago" } },
+    { who: "p2", mem: { ko: "한글에는 letter-spacing을 걸지 않아요", en: "Never track Hangul" }, on: { ko: "로그인 폼 구현", en: "Build the login form" }, when: { ko: "34분 전", en: "34 min ago" } },
+    { who: "p1", mem: { ko: "복합 인덱스는 컬럼 순서가 중요해요", en: "Composite indexes care about column order" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "1시간 전", en: "1 hour ago" } },
+    { who: "p5", mem: { ko: "배포 전에 세 개를 모두 돌려요", en: "Run all three before a deploy" }, on: { ko: "배포 파이프라인 정리", en: "Tidy the deploy pipeline" }, when: { ko: "2시간 전", en: "2 hours ago" } },
+    { who: "p3", mem: { ko: "PR 설명에는 왜 했는지를 적어요", en: "A PR description says why" }, on: { ko: "API 문서 작성", en: "Write the API docs" }, when: { ko: "어제", en: "Yesterday" } },
+  ];
+
+  const ICON = {
+    plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
+    alert: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>',
+    x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+    task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
+    hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
+  };
+
+  const josaNeeds = (w) => hasBatchim(w);
+  const josa2 = (w, withFinal, without) => w + (hasBatchim(w) ? withFinal : without);
+
+  const hasBatchim = (word) => {
+    const c = word.charCodeAt(word.length - 1);
+    return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  };
+  const josa = (word, withFinal, withoutFinal) => (hasBatchim(word) ? withFinal : withoutFinal);
+
+  // Archived memory is kept but not carried into the work, so it counts for
+  // neither coverage nor context size.
+  // Prose lives beside the data it belongs to, which keeps a memory and its
+  // translation from drifting apart.
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+
+  const liveOf = (p) => p.memories.filter((m) => !m.archived);
+  const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
+  const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
+  const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
+  const charsOf = (p) => liveOf(p).reduce((n, m) => n + tx(m.text).length, 0);
+  const knowersOf = (area) => people.filter((p) => areasOf(p).includes(area));
+
+  /* ── sidebar roster ──────────────────────────────────────────── */
+  const members = document.getElementById("members");
+  for (const p of people) {
+    const b = document.createElement("button");
+    b.className = "row-item";
+    b.type = "button";
+    b.style.cssText = "grid-template-columns:22px 1fr auto;padding:5px 8px;border-bottom:none;border-radius:8px;gap:9px";
+    b.innerHTML = `<span style="width:22px;height:22px;border-radius:6px;overflow:hidden;background:var(--sunk);display:grid;place-items:center"></span>
+      <span style="font-size:13px">${p.name}</span><span class="dot ${p.status}"></span>`;
+    b.firstElementChild.appendChild(avatar(p.species, 22));
+    b.addEventListener("click", () => { show("list"); select(p.id); });
+    members.appendChild(b);
+  }
+
+  /* ── header ──────────────────────────────────────────────────── */
+  const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0) + companyMemories.length;
+  document.getElementById("nList").textContent = people.length;
+  document.getElementById("nMem").textContent = totalMem;
+  document.getElementById("headSub").textContent =
+    t().headSub(people.length, people.filter((p) => p.dept === "dev").length, people.filter((p) => p.dept === "product").length);
+
+  /* ── roster ──────────────────────────────────────────────────── */
+  const roster = document.getElementById("roster");
+  for (const p of people) {
+    const areas = reviewAreasOf(p);
+    const b = document.createElement("button");
+    b.className = "row-item";
+    b.type = "button";
+    b.dataset.id = p.id;
+    b.innerHTML = `
+      <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+      <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
+      <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
+      <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
+      <span class="r-mem">${t().memCountShort(liveOf(p).length)}</span>`;
+    b.querySelector(".r-av").prepend(avatar(p.species, 40));
+    b.addEventListener("click", () => select(p.id));
+    roster.appendChild(b);
+  }
+
+  /* ── detail ──────────────────────────────────────────────────── */
+  const detail = document.getElementById("detail");
+
+  const memCard = (m) => {
+    const cls = m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
+    return `<div class="mem${m.used === 0 && !m.archived ? " cold-mem" : ""}">
+      <span class="mem-t">${tx(m.text)}</span>
+      <span class="mem-m">
+        ${m.from ? ICON.task : ICON.hand}
+        <span class="src">${m.from ? t().fromWhere(tx(m.from)) : t().toldDirectly}</span>
+        <span class="used ${cls}">${m.used === 0 ? t().neverUsed : t().usedTimes(m.used)}</span>
+      </span>
+    </div>`;
+  };
+
+  function select(id) {
+    const p = people.find((x) => x.id === id);
+    if (!p) return;
+    roster.querySelectorAll("[data-id]").forEach((n) => n.setAttribute("aria-selected", String(n.dataset.id === id)));
+
+    // Two per area is what fits before the panel stops being readable. The
+    // most-referenced ones are the ones worth seeing first.
+    const FOLD = 2;
+    const grouped = areasOf(p)
+      .map((a) => {
+        const list = liveOf(p)
+          .filter((m) => m.area === a)
+          .sort((x, y) => y.used - x.used);
+        const seat = REVIEW_AREAS.includes(a);
+        const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
+        const head = list.slice(0, FOLD);
+        const rest = list.slice(FOLD);
+        return `<div class="mem-group">
+          <div class="mem-hd">
+            <span class="area-chip"${style}>${t().areas[a]}</span>
+            <span class="mem-line"></span>
+            <span style="font-size:11.5px;color:var(--faint)">${list.length}</span>
+          </div>
+          ${head.map(memCard).join("")}
+          ${
+            rest.length
+              ? `<div class="js-mem-rest" hidden>${rest.map(memCard).join("")}</div>
+                 <button class="mem-more" type="button" data-rest>${t().showMore(rest.length)}</button>`
+              : ""
+          }
+        </div>`;
+      })
+      .join("");
+
+    const archived = p.memories.filter((m) => m.archived);
+
+    const now = p.task
+      ? `<div class="kv"><span>${t().currentTask}</span><b>${tx(p.task)}</b></div>`
+      : p.back
+      ? `<div class="kv"><span>${t().onLeave}</span><b>${tx(p.back)}</b></div>`
+      : `<div class="kv"><span>${t().lastFinished}</span><b>${tx(p.last)}</b></div>`;
+
+    const seats = reviewAreasOf(p);
+
+    detail.innerHTML = `
+      <div class="d-hd">
+        <span class="d-av"></span>
+        <span style="flex:1;min-width:0">
+          <span class="d-name">${p.name}</span>
+          <span class="d-role">${p.role} · ${t().teams[p.team]}</span>
+        </span>
+        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${t().status[p.status]}</span>
+      </div>
+
+      <div class="d-sec">
+        ${now}
+        <div class="kv"><span>${t().joined}</span><b>${p.joined}</b></div>
+        <div class="kv"><span>${t().doneAndReviews}</span><b>${t().counts(p.done, p.reviews)}</b></div>
+        <div class="kv"><span>${t().timesUsed}</span><b>${t().times(usedOf(p))}</b></div>
+      </div>
+
+      <div class="d-sec">
+        <span class="k">${t().canReview}</span>
+        ${
+          seats.length
+            ? `<span class="areas">${seats
+                .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
+                .join("")}</span>
+               <p style="margin:8px 0 0;font-size:12px;color:var(--muted)">${t().canReviewWhy}</p>`
+            : `<p style="margin:0;font-size:12.5px;color:var(--muted)">${t().noReviewYet}</p>`
+        }
+      </div>
+
+      <div class="d-sec">
+        <span class="k">${t().memory} <span class="kn">${liveOf(p).length}</span></span>
+        <div class="budget">
+          <span>${t().carried}</span>
+          <span>${t().chars(charsOf(p))}</span>
+        </div>
+        ${grouped}
+        ${
+          archived.length
+            ? `<details class="archived">
+                 <summary>${t().archivedLine(archived.length)}</summary>
+                 ${archived.map(memCard).join("")}
+               </details>`
+            : ""
+        }
+        <button class="mem-add" type="button">${ICON.plus}${t().tellThem}</button>
+      </div>
+
+      <div class="d-sec">
+        <span class="k">${t().howTheyWork}</span>
+        ${p.style.map((x) => `<div class="style-line">${ICON.hand}<span>${tx(x)}</span></div>`).join("")}
+        <button class="mem-add" type="button">${ICON.plus}${t().addStyle}</button>
+      </div>
+
+      <div class="d-acts">
+        <button class="btn btn-secondary btn-md" data-assign>${t().giveWork}</button>
+      </div>`;
+    detail.querySelector(".d-av").prepend(avatar(p.species, 52));
+
+    detail.querySelectorAll("[data-rest]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const rest = b.previousElementSibling;
+        const open = !rest.hasAttribute("hidden");
+        rest.toggleAttribute("hidden", open);
+        b.textContent = open ? t().showMore(rest.children.length) : t().fold;
+      });
+    });
+    detail.querySelector("[data-assign]").addEventListener("click", () => openAssign(p));
+  }
+
+  /* ── org chart ───────────────────────────────────────────────── */
+  const org = document.getElementById("org");
+  const DEPTS = [
+    { name: "dev", teams: ["backend", "frontend"] },
+    { name: "product", teams: ["planning", "design"] },
+  ];
+  for (const d of DEPTS) {
+    const inDept = people.filter((p) => p.dept === d.name);
+    const box = document.createElement("div");
+    box.className = "dept";
+    box.innerHTML = `<div class="dept-hd"><h2>${t().depts[d.name]}</h2><span class="cnt">${inDept.length}</span></div>`;
+    const teams = document.createElement("div");
+    teams.className = "teams";
+    for (const team of d.teams) {
+      const inTeam = inDept.filter((p) => p.team === team);
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `<div class="team-hd"><h3>${t().teams[team]}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
+      const grid = document.createElement("div");
+      grid.className = "tgrid";
+      for (const p of inTeam) {
+        const c = document.createElement("button");
+        c.className = "tcard";
+        c.type = "button";
+        c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(liveOf(p).length)}</span></span>`;
+        c.querySelector(".t-av").prepend(avatar(p.species, 36));
+        c.addEventListener("click", () => { show("list"); select(p.id); });
+        grid.appendChild(c);
+      }
+      if (!inTeam.length) {
+        const v = document.createElement("button");
+        v.className = "vacant";
+        v.type = "button";
+        v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
+        grid.appendChild(v);
+      }
+      wrap.appendChild(grid);
+      teams.appendChild(wrap);
+    }
+    box.appendChild(teams);
+    org.appendChild(box);
+  }
+
+  /* ── memory tab ──────────────────────────────────────────────── */
+  const notices = document.getElementById("memNotices");
+
+  // A review seat nobody can take, and memory nobody ever used, are the two
+  // things this screen knows that the player cannot see anywhere else.
+  const uncovered = REVIEW_AREAS.filter((a) => !people.some((p) => areasOf(p).includes(a)));
+  if (uncovered.length) {
+    const n = document.createElement("div");
+    n.className = "notice notice-warn";
+    n.innerHTML = `
+      <span class="n-ic">${ICON.alert}</span>
+      <span class="n-tx">
+        <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
+        <span>${t().nobodyKnowsWhy}</span>
+      </span>
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().pickSomeone}</button></span>`;
+    notices.appendChild(n);
+  }
+
+  const cold = people.flatMap((p) => p.memories.filter((m) => m.used === 0).map((m) => ({ p, m })));
+  if (cold.length) {
+    const n = document.createElement("div");
+    n.className = "notice notice-bad";
+    n.innerHTML = `
+      <span class="n-ic">${ICON.x}</span>
+      <span class="n-tx">
+        <b>${t().coldTitle(cold.length)}</b>
+        <span>${t().coldExample(cold[0].p.name, tx(cold[0].m.text))} ${t().coldWhy}</span>
+      </span>
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().review}</button></span>`;
+    notices.appendChild(n);
+  }
+
+  const areaTable = document.getElementById("areaTable");
+  for (const a of AREAS) {
+    const knowers = knowersOf(a.name);
+    const count = people.reduce((n, p) => n + liveOf(p).filter((m) => m.area === a.name).length, 0);
+    const row = document.createElement("div");
+    row.className = "area-row";
+    row.innerHTML = `
+      <span class="area-name">${t().areas[a.name]}</span>
+      <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
+      <span class="knows">${
+        knowers.length
+          ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
+          : '<span class="nobody">' + t().nobodyKnows + '</span>'
+      }</span>
+      <span class="area-n">${t().memCount(count)}</span>`;
+    row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
+    areaTable.appendChild(row);
+  }
+  areaTable.insertAdjacentHTML(
+    "beforeend",
+    `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`,
+  );
+
+  const feedBox = document.getElementById("feed");
+  for (const f of feed) {
+    const p = people.find((x) => x.id === f.who);
+    const el = document.createElement("div");
+    el.className = "feed-row";
+    el.innerHTML = `
+      <span class="f-av"></span>
+      <span class="f-tx">${t().referenced(p.name, tx(f.mem))}<span class="f-meta">${tx(f.on)}</span></span>
+      <span class="f-time">${tx(f.when)}</span>`;
+    el.querySelector(".f-av").appendChild(avatar(p.species, 28));
+    feedBox.appendChild(el);
+  }
+
+  document.getElementById("companyMem").innerHTML =
+    companyMemories.map(memCard).join("") +
+    `<button class="mem-add" type="button">${ICON.plus}${t().tellCompany}</button>`;
+
+  /* ── assign ──────────────────────────────────────────────────── */
+  const scrim = document.getElementById("scrim");
+  const modal = document.getElementById("modal");
+  let assignee = null;
+  let picked = backlog[0].id;
+
+  let firstPaint = true;
+
+  function renderAssign() {
+    const p = assignee;
+    const task = backlog.find((t) => t.id === picked);
+    // The point of teaching shows up here: what this person brings to this task.
+    const useful = task ? liveOf(p).filter((m) => m.area === task.area).sort((x, y) => y.used - x.used) : [];
+
+    modal.innerHTML = `
+      <div class="m-hd">
+        <span class="m-av"></span>
+        <span style="flex:1;min-width:0">
+          <span class="m-t">${t().assignTitle(p.name)}</span>
+          <span class="m-s">${p.role} · ${t().teams[p.team]}</span>
+        </span>
+      </div>
+
+      <div class="m-sec">
+        <span class="k">${t().backlog}</span>
+        ${backlog
+          .map(
+            (task_) => `<button class="pick" type="button" role="radio" data-task="${task_.id}"
+                      aria-checked="${task_.id === picked}">
+                <span class="radio"></span>
+                <span class="pick-t">${tx(task_.title)}</span>
+                <span class="area-chip">${t().areas[task_.area]}</span>
+                <span class="pick-m">${t().minutes(task_.minutes)}</span>
+              </button>`,
+          )
+          .join("")}
+        <button class="pick pick-new" type="button" role="radio" data-task="new" aria-checked="${picked === "new"}">
+          <span class="radio"></span>
+          <span class="pick-t">${t().newTask}</span>
+          <span></span><span></span>
+        </button>
+      </div>
+
+      ${
+        task
+          ? `<div class="m-sec">
+               <span class="k">${t().broughtAlong} <span class="kn">${useful.length}</span></span>
+               ${
+                 useful.length
+                   ? useful.map(memCard).join("")
+                   : `<div class="notice notice-warn">
+                        <span class="n-ic">${ICON.alert}</span>
+                        <span class="n-tx">
+                          <b>${t().noAreaMemory(t().areas[task.area])}</b>
+                          <span>${t().noAreaMemoryWhy(p.name)}</span>
+                        </span>
+                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().tellNow}</button></span>
+                      </div>`
+               }
+             </div>`
+          : ""
+      }
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
+        <button class="btn btn-primary btn-md" type="button">${task ? t().assignThis : t().createAndAssign}</button>
+      </div>`;
+
+    modal.querySelector(".m-av").appendChild(avatar(p.species, 44));
+    modal.querySelectorAll("[data-task]").forEach((b) =>
+      b.addEventListener("click", () => {
+        picked = b.dataset.task;
+        renderAssign();
+      }),
+    );
+    modal.querySelector("[data-close]").addEventListener("click", closeAssign);
+    // Re-rendering must not pull focus out of the list: only the first paint
+    // sends it to Cancel, afterwards it returns to the row just picked.
+    const back = modal.querySelector(`[data-task="${picked}"]`);
+    (firstPaint || !back ? modal.querySelector("[data-close]") : back).focus({ preventScroll: true });
+    firstPaint = false;
+  }
+
+  function openAssign(p) {
+    assignee = p;
+    picked = backlog[0].id;
+    firstPaint = true;
+    scrim.hidden = false;
+    renderAssign();
+  }
+  function closeAssign() {
+    scrim.hidden = true;
+    assignee = null;
+  }
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeAssign(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeAssign(); });
+
+  /* ── tabs ────────────────────────────────────────────────────── */
+  function show(view) {
+    for (const t of document.querySelectorAll(".tab")) {
+      t.setAttribute("aria-selected", String(t.dataset.view === view));
+    }
+    for (const v of document.querySelectorAll(".view")) {
+      v.toggleAttribute("hidden", v.id !== "view-" + view);
+    }
+  }
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const t = e.target.closest(".tab");
+    if (t) show(t.dataset.view);
+  });
+
+  select("p1");
+</script>
