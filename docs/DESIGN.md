@@ -7,6 +7,7 @@ before building or changing a screen.
 
 | Page | Authoritative for |
 | --- | --- |
+| `ui/first-run.html` | The three first-run steps, fields, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/employees.html` | List and detail, org chart, memory, review areas |
 | `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
@@ -245,6 +246,10 @@ started without an AI tool is an AI tool.
 First run mentions Claude Code once, as a notice, and moves on. It does not ask
 the player to choose a runtime before they have an employee to judge the choice
 with — that question belongs to the moment of connecting.
+
+It ends at the **first employee**, not at the company. A player dropped into an
+empty office has nothing to look at, and the office is the product. Every field
+says it can be changed later, because a first decision should not feel heavy.
 
 ## Simulated and connected employees
 
