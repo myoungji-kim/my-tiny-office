@@ -444,7 +444,7 @@
   function applyLang() {
     for (const el of document.querySelectorAll("[data-t]")) el.textContent = t()[el.dataset.t];
     const co = document.getElementById("co");
-    if (co.value === "Acme Tiny Software" || !co.value) co.value = "Acme Tiny Software";
+    if (!co.value) co.value = "Acme Tiny Software";
     document.getElementById("nm").placeholder = chosen ? chosen[lang === "ko" ? "ko" : "en"] : lang === "ko" ? "모카" : "Mocha";
     if (chosen) picked.innerHTML = `<b>${tx(chosen.species)}</b><span>${tx(chosen.family)}</span>`;
     }

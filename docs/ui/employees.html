@@ -762,7 +762,7 @@
         <span class="d-av"></span>
         <span style="flex:1;min-width:0">
           <span class="d-name">${p.name}</span>
-          <span class="d-role">${p.role} · ${p.team}</span>
+          <span class="d-role">${p.role} · ${t().teams[p.team]}</span>
         </span>
         <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${t().status[p.status]}</span>
       </div>
@@ -948,6 +948,8 @@
   let assignee = null;
   let picked = backlog[0].id;
 
+  let firstPaint = true;
+
   function renderAssign() {
     const p = assignee;
     const task = backlog.find((t) => t.id === picked);
@@ -959,7 +961,7 @@
         <span class="m-av"></span>
         <span style="flex:1;min-width:0">
           <span class="m-t">${t().assignTitle(p.name)}</span>
-          <span class="m-s">${p.role} · ${p.team}</span>
+          <span class="m-s">${p.role} · ${t().teams[p.team]}</span>
         </span>
       </div>
 
@@ -1016,12 +1018,17 @@
       }),
     );
     modal.querySelector("[data-close]").addEventListener("click", closeAssign);
-    modal.querySelector("[data-close]").focus({ preventScroll: true });
+    // Re-rendering must not pull focus out of the list: only the first paint
+    // sends it to Cancel, afterwards it returns to the row just picked.
+    const back = modal.querySelector(`[data-task="${picked}"]`);
+    (firstPaint || !back ? modal.querySelector("[data-close]") : back).focus({ preventScroll: true });
+    firstPaint = false;
   }
 
   function openAssign(p) {
     assignee = p;
     picked = backlog[0].id;
+    firstPaint = true;
     scrim.hidden = false;
     renderAssign();
   }
