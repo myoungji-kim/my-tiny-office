@@ -69,20 +69,6 @@
   h3:first-of-type { margin-top: 0; }
   canvas { image-rendering: pixelated; display: block; }
 
-  .lang {
-    position: fixed; bottom: 16px; right: 16px; z-index: 50;
-    display: flex; gap: 2px; padding: 3px;
-    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
-    box-shadow: 0 2px 10px rgb(20 20 25 / .14);
-    opacity: .5; transition: opacity .12s;
-  }
-  .lang:hover, .lang:focus-within { opacity: 1; }
-  .lang button {
-    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
-    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
-  }
-  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
   .sheet { display: flex; flex-direction: column; gap: 18px; }
   .famgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
@@ -160,13 +146,48 @@
   .spec:last-child { border-bottom: none; }
   .spec code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  /* ═══ sample-page bar ═══ */
+  /* Not part of the design. One bar rather than two floating pieces, faint
+     until wanted, so it never covers the screen it exists to show. */
+  .devbar {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 60;
+    display: flex; align-items: center; gap: 2px; padding: 5px 6px;
+    max-width: calc(100vw - 28px); overflow-x: auto;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 2px 14px rgb(20 20 25 / .16);
+    opacity: .42; transition: opacity .12s;
+  }
+  .devbar:hover, .devbar:focus-within { opacity: 1; }
+  .devbar a, .devbar button {
+    height: 26px; padding-inline: 11px; border: none; border-radius: 999px;
+    background: none; font: inherit; font-size: 12px; font-weight: 600;
+    color: var(--muted); cursor: pointer; text-decoration: none; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+  }
+  .devbar a:hover, .devbar button:hover { background: var(--subtle); color: var(--ink); }
+  .devbar [aria-current], .devbar [aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .devbar a:focus-visible, .devbar button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .devbar .sep { width: 1px; height: 18px; background: var(--line-2); flex: none; margin-inline: 4px; }
+  .devbar .home { padding-inline: 9px; }
+  .devbar svg { width: 14px; height: 14px; }
+  .lang { display: contents; }
 </style>
 
-<div class="lang" id="lang">
-  <button type="button" data-lang="ko">한국어</button>
-  <button type="button" data-lang="en">English</button>
-</div>
-
+<nav class="devbar" id="devbar" aria-label="샘플 페이지">
+  <a class="home" href="index.html" data-p="index" data-ko="Design System" data-en="Design System" aria-label="Design System"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></a>
+  <span class="sep"></span>
+  <a href="first-run.html" data-p="first-run" data-ko="첫 실행" data-en="First run">첫 실행</a>
+  <a href="office.html" data-p="office" data-ko="사무실" data-en="Office">사무실</a>
+  <a href="employees.html" data-p="employees" data-ko="직원" data-en="People">직원</a>
+  <a href="connect.html" data-p="connect" data-ko="연결" data-en="Connect">연결</a>
+  <a href="components.html" data-p="components" data-ko="컴포넌트" data-en="Components">컴포넌트</a>
+  <a href="characters.html" data-p="characters" data-ko="캐릭터" data-en="Cast">캐릭터</a>
+  <span class="sep"></span>
+  <span class="lang" id="lang">
+    <button type="button" data-lang="ko">한국어</button>
+    <button type="button" data-lang="en">English</button>
+  </span>
+</nav>
 <div class="wrap">
   <header class="top">
     <h1>직원 캐릭터</h1>
@@ -919,4 +940,18 @@
     el.querySelector(".c-av").prepend(sprite(s.c, 2));
     cards.appendChild(el);
   });
+</script>
+<script>
+  // The bar marks where you are and carries ?lang= across pages, so switching
+  // screens does not silently switch you back to Korean.
+  {
+    const here = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
+    const l = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+    for (const a of document.querySelectorAll(".devbar a")) {
+      if (a.dataset.p === here) a.setAttribute("aria-current", "page");
+      else if (l === "en") a.href += "?lang=en";
+      if (a.dataset.p !== "index") a.textContent = a.dataset[l];
+      else a.setAttribute("aria-label", a.dataset[l]);
+    }
+  }
 </script>
