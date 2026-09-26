@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "check:ui": "node scripts/ui/check.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

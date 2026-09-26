@@ -85,6 +85,7 @@ Do not combine unrelated features.
 - lint
 - tests
 - build
+- `npm run check:ui` when anything under `docs/ui/` changed
 - verify no secrets were committed
 - verify no unrelated Claude/agent sessions are imported
 - verify Korean/English strings for user-facing changes
