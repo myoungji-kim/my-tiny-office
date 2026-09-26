@@ -438,7 +438,6 @@ copies equal. They did not stay equal.
 `npm run check:ui` runs four checks over what is left:
 
 - **parse** — every inline script and `system.js` must still parse
-
 - **parity** — the rules a page shares with `components.html` must be identical
 - **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
   the documented set, `:focus-visible` wherever there are controls, no tracked
