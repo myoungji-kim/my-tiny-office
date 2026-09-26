@@ -189,7 +189,7 @@
 
 .head-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 
-.tabs { display: flex; align-items: center; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs { display: flex; align-items: center; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: hidden; }
 
 .tab {
     display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
@@ -299,6 +299,8 @@ section > h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
       transition: opacity .11s ease, transform .11s ease;
       pointer-events: none; visibility: hidden;
     }
+
+.pop[data-open] { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
 
 .p-hd { display: flex; align-items: center; gap: 11px; padding: 9px 10px 11px; }
 

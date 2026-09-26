@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 
-const PAGES = ["index", "first-run", "office", "employees", "connect", "components", "characters"];
+const PAGES = ["index", "first-run", "office", "projects", "employees", "connect", "components", "characters"];
 const src = Object.fromEntries(PAGES.map((p) => [p, readFileSync(`docs/ui/${p}.html`, "utf8")]));
 
 const stripMedia = (css) => {

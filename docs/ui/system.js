@@ -512,6 +512,65 @@ const STATUS = {
 };
 
 
+/* ═══ the sample company ═══ */
+// One company across the samples: the people screen and the project board
+// describe the same five, and review seats are derived from what each of them
+// has been taught, not stored separately.
+
+const STAFF = [
+  { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
+    dept: "dev", team: "backend", status: "working", joined: "2026. 3. 2.",
+    task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
+    style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }],
+    memories: [
+      { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
+      { area: "db", text: { ko: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", en: "The payments table is partitioned by month. Never write a full scan." }, from: null, used: 9 },
+      { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", en: "No Date.now() in the domain layer. The current time arrives as an argument." }, from: { ko: "PR #4102", en: "PR #4102" }, used: 22 },
+      { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 },
+      { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 },
+      { area: "process", text: { ko: "예전 결제 모듈은 v1 스키마를 썼어요.", en: "The old payments module used the v1 schema." }, from: { ko: "v1 마이그레이션", en: "the v1 migration" }, used: 2, archived: true },
+    ] },
+  { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
+    dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
+    task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
+    style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }],
+    memories: [
+      { area: "l10n", text: { ko: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", en: "Never track Hangul. It pulls the jamo of a syllable apart." }, from: { ko: "사이드바 자간이 깨진 이슈", en: "the broken sidebar tracking" }, used: 18 },
+      { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
+      { area: "process", text: { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }, from: null, used: 12 },
+    ] },
+  { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
+    dept: "product", team: "planning", status: "ready", joined: "2026. 2. 20.",
+    task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
+    style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }],
+    memories: [
+      { area: "product", text: { ko: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", en: "Keep a task under 30 minutes. Longer means it is really two." }, from: null, used: 15 },
+      { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
+      { area: "process", text: { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }, from: { ko: "금요일 배포가 말썽이던 주", en: "the week Friday deploys went wrong" }, used: 3 },
+    ] },
+  { id: "p4", name: "삐약", species: "chick", role: "DBA",
+    dept: "dev", team: "backend", status: "available", joined: "2026. 5. 8.",
+    last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" }, done: 19, reviews: 6,
+    style: [{ ko: "마이그레이션은 두 번 확인해", en: "Check migrations twice" }],
+    memories: [
+      { area: "db", text: { ko: "마이그레이션은 항상 되돌릴 수 있게 써요.", en: "Always write a migration you can roll back." }, from: { ko: "스키마 롤백이 안 된 사고", en: "the rollback that would not roll back" }, used: 11 },
+      { area: "db", text: { ko: "시각은 epoch ms INTEGER로 저장해요. 문자열 날짜를 쓰지 않아요.", en: "Store time as epoch ms INTEGER. Never a date string." }, from: null, used: 5 },
+      { area: "db", text: { ko: "NULL과 undefined를 오갈 때는 CHECK 제약을 같이 걸어요.", en: "Mapping NULL to undefined needs a CHECK constraint beside it." }, from: { ko: "결제 상태가 뒤집힌 버그", en: "the flipped payment status" }, used: 8 },
+      { area: "db", text: { ko: "외래 키에는 항상 인덱스를 같이 만들어요. 삭제가 느려져요.", en: "Index every foreign key, or deletes crawl." }, from: null, used: 6 },
+      { area: "db", text: { ko: "트랜잭션 안에서 외부 API를 호출하지 않아요.", en: "Never call an external API inside a transaction." }, from: { ko: "결제 타임아웃 장애", en: "the payment timeout outage" }, used: 13 },
+      { area: "db", text: { ko: "집계 쿼리는 읽기 전용 커넥션으로 보내요.", en: "Send aggregate queries to the read-only connection." }, from: null, used: 3 },
+      { area: "security", text: { ko: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", en: "Never concatenate user input into a query." }, from: null, used: 0 },
+    ] },
+  { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
+    dept: "dev", team: "frontend", status: "vacation", joined: "2026. 1. 12.",
+    back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
+    style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }],
+    memories: [
+      { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },
+      { area: "process", text: { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }, from: { ko: "배포가 한 번 깨진 날", en: "the day a deploy broke" }, used: 21 },
+    ] },
+];
+
 /* ═══ the sample-page bar ═══ */
 // Not part of the design: it only exists so the samples can be walked through.
 // It builds itself so the seven pages cannot drift apart again, and it carries
@@ -523,7 +582,7 @@ const STATUS = {
     '<path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>';
 
   const GROUPS = [
-    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["employees", "직원", "People"]]],
+    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["projects", "프로젝트", "Projects"], ["employees", "직원", "People"]]],
     ["문서", "Reference", [["connect", "연결", "Connect"], ["components", "컴포넌트", "Components"], ["characters", "캐릭터", "Cast"]]],
   ];
 

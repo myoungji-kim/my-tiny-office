@@ -2,13 +2,14 @@
 
 ## The standard lives in `docs/ui/`
 
-Six pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
+Seven pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
 before building or changing a screen.
 
 | Page | Authoritative for |
 | --- | --- |
 | `ui/first-run.html` | The three first-run steps, fields, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
+| `ui/projects.html` | The task board, the review queue, and choosing who reviews |
 | `ui/employees.html` | List and detail, org chart, memory, review areas |
 | `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
