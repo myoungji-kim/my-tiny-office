@@ -3,16 +3,14 @@ import type { Timestamp } from "../domain/time";
 
 import type { CompanyRepository, EmployeeRepository, TaskRepository } from "./repositories";
 
-export type Clock = () => Timestamp;
-export type NewId = () => string;
 export type TransactionRunner = <T>(work: () => Promise<T>) => Promise<T>;
 
 export interface AppContext {
   readonly companies: CompanyRepository;
   readonly employees: EmployeeRepository;
   readonly tasks: TaskRepository;
-  readonly now: Clock;
-  readonly newId: NewId;
+  readonly now: () => Timestamp;
+  readonly newId: () => string;
   readonly withTransaction: TransactionRunner;
 }
 

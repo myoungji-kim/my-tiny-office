@@ -217,7 +217,7 @@ export function taskProgress(task: Task, now: Timestamp): number {
       if (task.startedAt === undefined) {
         return 0;
       }
-      return clamp((now - task.startedAt) / task.estimatedDuration, 0, 1);
+      return Math.min(Math.max((now - task.startedAt) / task.estimatedDuration, 0), 1);
   }
 }
 
@@ -239,8 +239,4 @@ function taskCompletedEvent(
     employeeName: employee.name,
     completedAt,
   };
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
