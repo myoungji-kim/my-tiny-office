@@ -391,6 +391,9 @@ Rules for a new species:
 - **The sample pages carry both languages**, switched with `?lang=en`. A layout
   proved in one language is not proved. Employee nicknames stay untranslated in
   both, which is the rule made visible.
+- On the spec pages the **examples** switch and the surrounding prose does not:
+  the examples are the standard for copy, the prose explains the system to
+  whoever is building it.
 - **Never bake text into canvas, SVG or any other asset.** Names and labels are
   DOM elements positioned over the canvas.
 - No fixed widths, no hard-coded line breaks.

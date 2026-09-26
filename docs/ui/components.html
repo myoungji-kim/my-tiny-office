@@ -281,6 +281,21 @@
   .k .kn { color: var(--ink); font-variant-numeric: tabular-nums; }
   .area-chip { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: var(--brand-soft); color: var(--brand-ink); white-space: nowrap; }
 
+  .lang {
+    position: fixed; bottom: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(20 20 25 / .14);
+    opacity: .5; transition: opacity .12s;
+  }
+  .lang:hover, .lang:focus-within { opacity: 1; }
+  .lang button {
+    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
+    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
   .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
   .exlabel { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 10px; }
@@ -288,6 +303,11 @@
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   .demo-surface { background: var(--subtle); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
 </style>
+
+<div class="lang" id="lang">
+  <button type="button" data-lang="ko">한국어</button>
+  <button type="button" data-lang="en">English</button>
+</div>
 
 <div class="wrap">
   <header class="top">
@@ -378,7 +398,7 @@
         <div class="p-hd">
           <span class="p-av"></span>
           <span style="flex:1;min-width:0">
-            <span class="p-name">김민수</span>
+            <span class="p-name">모카</span>
             <span class="p-role">Backend Engineer</span>
           </span>
           <span class="chip warn"><span class="dot warn"></span>업무 중</span>
@@ -754,3 +774,108 @@
     </ul>
   </section>
 </div>
+
+<script>
+  // This page is a spec, so only its examples are translated. The prose around
+  // them explains the system to whoever is building it and stays as written.
+  // Matching whole text nodes keeps the markup untouched.
+  const EXAMPLES = {
+    "직원 고용": "Hire",
+    "업무 할당": "Assign work",
+    "정렬": "Sort",
+    "더보기": "More",
+    "취소": "Cancel",
+    "해고하기": "Let them go",
+    "할당하는 중…": "Assigning…",
+    "열기": "Open",
+    "수정": "Edit",
+    "방 추가": "Add a room",
+    "대기 중": "Free",
+    "업무 중": "Working",
+    "휴가 중": "On leave",
+    "변경 요청": "Changes requested",
+    "준비됨": "Ready",
+    "완료": "Done",
+    "빈 책상에 직원 채우기": "Fill this desk",
+    "진행 중": "In progress",
+    "결제 API 에러 응답 구조 변경": "Change the payment API error shape",
+    "22/30분": "22/30 min",
+    "완료 처리": "Mark done",
+    "업무 상세": "Task details",
+    "담당 변경": "Reassign",
+    "다른 업무로 교체": "Swap the task",
+    "할당 취소": "Unassign",
+    "복귀 처리": "Bring them back",
+    "교육 보내기": "Send to training",
+    "휴가 보내기": "Send on leave",
+    "휴가 중에는 업무를 맡길 수 없습니다.": "They cannot take work while on leave.",
+    "어제 하던 업무가 남아 있어요": "You left work unfinished yesterday",
+    "모카 · 결제 API 에러 응답 구조 변경 · 22/30분": "Mocha · Change the payment API error shape · 22/30 min",
+    "나중에": "Later",
+    "이어서 하기": "Pick it up",
+    "두부가 로그인 폼 구현을 끝냈어요": "Tofu finished the login form",
+    "25분 걸렸어요 · PR이 리뷰를 기다리고 있어요": "Took 25 minutes · a PR is waiting for review",
+    "PR 보기": "View the PR",
+    "단풍이 30분째 같은 업무에 머물러 있어요": "Maple has been on the same task for 30 minutes",
+    "예상 20분짜리 업무예요. 막혔는지 한번 확인해 보세요.": "It was estimated at 20. Worth checking whether they are stuck.",
+    "업무 보기": "View the task",
+    "모카의 에이전트 연결이 끊어졌어요": "Mocha's agent disconnected",
+    "진행 중이던 업무는 그대로 있어요. 다시 연결하면 이어서 해요.": "The task in progress is untouched. Reconnect and they pick it up.",
+    "다시 연결": "Reconnect",
+    "직원을 고용하면 업무를 맡길 수 있어요. 방은 지금 만들어 둬도 돼요.": "Hire someone and you can give them work. You can set the room up now.",
+    "아직 직원이 없어요": "No employees yet",
+    "첫 직원을 고용하면 사무실에 자리를 잡고 바로 업무를 받을 수 있어요.": "Hire your first and they take a desk, ready for work straight away.",
+    "아직 연결된 에이전트가 없어요": "No agent connected yet",
+    "직원에게 Claude Code를 연결하면 맡긴 업무를 실제로 처리해요. 연결 없이도 게임은 돌아가요.": "Connect Claude Code to an employee and they do the work for real. The game runs either way.",
+    "연결하기": "Connect",
+    "그냥 둘러보기": "Just look around",
+    "모카를 내보낼까요?": "Let Mocha go?",
+    "진행 중이던 업무는 대기 상태로 돌아가고 자리가 비워져요. 쌓은 능력치는 사라져요.": "Their task goes back to the queue and the desk empties. What they learned is gone.",
+    "계속 두기": "Keep them",
+    "내보내기": "Let them go",
+    "백엔드팀 전체에 이 업무를 맡길까요?": "Give this task to the whole backend team?",
+    "지금 대기 중인 직원 2명이 같은 업무를 나눠 받아요.": "The 2 people currently free will split it.",
+    "2명에게 맡기기": "Give it to 2 people",
+    "진행 중이던 업무는 대기 상태로 돌아가요.": "Their task goes back to the queue.",
+    "정말 삭제하시겠습니까?": "Are you sure you want to delete?",
+    "이 작업은 되돌릴 수 없습니다.": "This action cannot be undone.",
+    "확인": "OK",
+    "모카가 맡을 업무": "Work for Mocha",
+    "Backend Engineer · 백엔드팀": "Backend Engineer · Backend",
+    "대기 중인 업무": "Waiting",
+    "결제 내역 페이지네이션": "Paginate the payment history",
+    "주문 취소 API 추가": "Add an order cancellation API",
+    "새 업무 만들기": "Create a task",
+    "이 업무 맡기기": "Assign this",
+    "데이터베이스": "Database",
+    "아키텍처": "Architecture"
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  document.documentElement.lang = lang;
+  {
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+  }
+  if (lang === "en") {
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const hits = [];
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      if (n.parentElement.closest(".lang")) continue;
+      const k = n.nodeValue.trim();
+      if (k && EXAMPLES[k]) hits.push([n, EXAMPLES[k]]);
+    }
+    for (const [n, v] of hits) n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), v);
+    for (const el of document.querySelectorAll("[aria-label]")) {
+      const v = EXAMPLES[el.getAttribute("aria-label")];
+      if (v) el.setAttribute("aria-label", v);
+    }
+  }
+</script>

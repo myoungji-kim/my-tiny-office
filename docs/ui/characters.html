@@ -69,6 +69,21 @@
   h3:first-of-type { margin-top: 0; }
   canvas { image-rendering: pixelated; display: block; }
 
+  .lang {
+    position: fixed; bottom: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(20 20 25 / .14);
+    opacity: .5; transition: opacity .12s;
+  }
+  .lang:hover, .lang:focus-within { opacity: 1; }
+  .lang button {
+    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
+    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   .sheet { display: flex; flex-direction: column; gap: 18px; }
   .famgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
   .grp { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
@@ -147,6 +162,11 @@
   .rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 </style>
 
+<div class="lang" id="lang">
+  <button type="button" data-lang="ko">한국어</button>
+  <button type="button" data-lang="en">English</button>
+</div>
+
 <div class="wrap">
   <header class="top">
     <h1>직원 캐릭터</h1>
@@ -213,7 +233,7 @@
     <div class="grid2">
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
-        <div style="font-size:15px;font-weight:600">모카</div>
+        <div style="font-size:15px;font-weight:600" data-t="goodName">모카</div>
         <div style="font-size:13px;color:var(--muted)">Backend Engineer</div>
         <div class="note" style="margin:10px 0 0">
           닉네임 한 단어 + 진지한 직함. 한글 2–3자, 영문 6자 이내로 카드가 흔들리지 않습니다.
@@ -221,8 +241,8 @@
       </div>
       <div class="bad-ex">
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
-        <div style="font-size:15px;font-weight:600">모카냥이 🐱</div>
-        <div style="font-size:13px;color:var(--muted)">백엔드 개발 담당 고양이</div>
+        <div style="font-size:15px;font-weight:600" data-t="badName">모카냥이 🐱</div>
+        <div style="font-size:13px;color:var(--muted)" data-t="badRole">백엔드 개발 담당 고양이</div>
         <div class="note" style="margin:10px 0 0">
           이모지와 종족 설명을 이름에 넣지 않습니다. 종족은 스프라이트가 이미 말하고 있습니다.
         </div>
@@ -265,6 +285,55 @@
     p: "#b5674a", n: "#4f8f55", N: "#6fae6e",
     f: "#8a6240", r: "#d8574f", u: "#5b8de0", v: "#e0a93c",
   };
+
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Only the examples: the prose around them explains the system to whoever
+  // is building it.
+  const TEXT = {
+    ko: {
+      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
+      minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
+      notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
+      goodName: "모카", badName: "모카냥이 🐱", badRole: "백엔드 개발 담당 고양이",
+    },
+    en: {
+      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      work: "WORK", noTask: "Nothing assigned", away: "Away",
+      minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
+      notStarted: "Not started", waiting: "Free", onLeave: "Leave",
+      goodName: "Mocha", badName: "Mocha the Cat 🐱", badRole: "Cat in charge of backend work",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  document.documentElement.lang = lang;
+  {
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+  }
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+  const famLabel = (ko) => tx(CAST.find((c) => c.family.ko === ko).family);
+  applyStatic();
 
   /* ── the cast ────────────────────────────────────────────────── */
   // B body · L belly · O eye white · A ear · H blush · N beak · E eye and mouth
@@ -632,45 +701,45 @@
   ];
 
   const CAST = [
-    { key: "cat", sprite: CAT, ko: "모카", en: "Mocha", species: "고양이", family: "뾰족 귀",
+    { key: "cat", sprite: CAT, ko: "모카", en: "Mocha", species: { ko: "고양이", en: "Cat" }, family: { ko: "뾰족 귀", en: "Pointed ears" },
       B: "#f3e0c8", L: "#fdf3e2", A: "#e3bfa0", H: "#f4a7b0", N: "#e3bfa0" },
-    { key: "fox", sprite: FOX, ko: "여우", en: "Fennec", species: "여우", family: "뾰족 귀",
+    { key: "fox", sprite: FOX, ko: "여우", en: "Fennec", species: { ko: "여우", en: "Fox" }, family: { ko: "뾰족 귀", en: "Pointed ears" },
       B: "#e89055", L: "#fdf2e6", A: "#a85f34", H: "#f4a7b0", N: "#a85f34" },
-    { key: "squirrel", sprite: SQUIRREL, ko: "도토", en: "Acorn", species: "다람쥐", family: "뾰족 귀",
+    { key: "squirrel", sprite: SQUIRREL, ko: "도토", en: "Acorn", species: { ko: "다람쥐", en: "Squirrel" }, family: { ko: "뾰족 귀", en: "Pointed ears" },
       B: "#c97f4a", L: "#f7e6cf", A: "#a8663a", H: "#f4a7b0", N: "#a8663a" },
-    { key: "bunny", sprite: BUNNY, ko: "두부", en: "Tofu", species: "토끼", family: "긴 귀",
+    { key: "bunny", sprite: BUNNY, ko: "두부", en: "Tofu", species: { ko: "토끼", en: "Rabbit" }, family: { ko: "긴 귀", en: "Long ears" },
       B: "#fbfafb", L: "#fff1f4", A: "#f6c6d0", H: "#f4a7b0", N: "#f6c6d0" },
-    { key: "dog", sprite: DOG, ko: "콩이", en: "Bean", species: "강아지", family: "처진 귀",
+    { key: "dog", sprite: DOG, ko: "콩이", en: "Bean", species: { ko: "강아지", en: "Dog" }, family: { ko: "처진 귀", en: "Floppy ears" },
       B: "#d9b083", L: "#f3e2c9", A: "#a87f55", H: "#f4a7b0", N: "#6b4c33" },
-    { key: "bear", sprite: BEAR, ko: "코코", en: "Coco", species: "곰", family: "둥근 귀",
+    { key: "bear", sprite: BEAR, ko: "코코", en: "Coco", species: { ko: "곰", en: "Bear" }, family: { ko: "둥근 귀", en: "Round ears" },
       B: "#b79070", L: "#d2ad8c", A: "#96704f", H: "#e2929c", N: "#96704f" },
-    { key: "panda", sprite: PANDA, ko: "반달", en: "Moon", species: "판다", family: "둥근 귀",
+    { key: "panda", sprite: PANDA, ko: "반달", en: "Moon", species: { ko: "판다", en: "Panda" }, family: { ko: "둥근 귀", en: "Round ears" },
       B: "#fafafb", L: "#ffffff", A: "#3f3a44", H: "#f4a7b0", N: "#3f3a44" },
-    { key: "mouse", sprite: MOUSE, ko: "치즈", en: "Cheese", species: "생쥐", family: "둥근 귀",
+    { key: "mouse", sprite: MOUSE, ko: "치즈", en: "Cheese", species: { ko: "생쥐", en: "Mouse" }, family: { ko: "둥근 귀", en: "Round ears" },
       B: "#b9b4bd", L: "#d8d4dc", A: "#f2c0cb", H: "#f4a7b0", N: "#f2c0cb" },
-    { key: "hamster", sprite: HAMSTER, ko: "밤톨", en: "Nut", species: "햄스터", family: "둥근 귀",
+    { key: "hamster", sprite: HAMSTER, ko: "밤톨", en: "Nut", species: { ko: "햄스터", en: "Hamster" }, family: { ko: "둥근 귀", en: "Round ears" },
       B: "#f0cf9a", L: "#fdf0d8", A: "#d9a86a", H: "#f4a7b0", N: "#d9a86a" },
-    { key: "koala", sprite: KOALA, ko: "유칼", en: "Euca", species: "코알라", family: "둥근 귀",
+    { key: "koala", sprite: KOALA, ko: "유칼", en: "Euca", species: { ko: "코알라", en: "Koala" }, family: { ko: "둥근 귀", en: "Round ears" },
       B: "#a8adb8", L: "#ccd0d8", A: "#8b909c", H: "#f4a7b0", N: "#5d6470" },
-    { key: "chick", sprite: CHICK, ko: "삐약", en: "Pip", species: "병아리", family: "머리 장식",
+    { key: "chick", sprite: CHICK, ko: "삐약", en: "Pip", species: { ko: "병아리", en: "Chick" }, family: { ko: "머리 장식", en: "Crest" },
       B: "#f9da80", L: "#fdecb2", A: "#eda93c", H: "#f4a7b0", N: "#eda93c" },
-    { key: "owl", sprite: OWL, ko: "야간", en: "Nox", species: "부엉이", family: "머리 장식",
+    { key: "owl", sprite: OWL, ko: "야간", en: "Nox", species: { ko: "부엉이", en: "Owl" }, family: { ko: "머리 장식", en: "Crest" },
       B: "#a3845f", L: "#c9ac86", A: "#7d6244", H: "#f4a7b0", N: "#f0a63c" },
-    { key: "sheep", sprite: SHEEP, ko: "구름", en: "Cloud", species: "양", family: "머리 장식",
+    { key: "sheep", sprite: SHEEP, ko: "구름", en: "Cloud", species: { ko: "양", en: "Sheep" }, family: { ko: "머리 장식", en: "Crest" },
       B: "#e6d6bf", L: "#fff8ee", A: "#fdfbf6", H: "#f4a7b0", N: "#c9bda8" },
-    { key: "hedgehog", sprite: HEDGEHOG, ko: "가시", en: "Quill", species: "고슴도치", family: "머리 장식",
+    { key: "hedgehog", sprite: HEDGEHOG, ko: "가시", en: "Quill", species: { ko: "고슴도치", en: "Hedgehog" }, family: { ko: "머리 장식", en: "Crest" },
       B: "#e6d3b8", L: "#f6ecdc", A: "#8a6a4a", H: "#f4a7b0", N: "#8a6a4a" },
-    { key: "duck", sprite: DUCK, ko: "꽥꽥", en: "Quack", species: "오리", family: "부리·코",
+    { key: "duck", sprite: DUCK, ko: "꽥꽥", en: "Quack", species: { ko: "오리", en: "Duck" }, family: { ko: "부리·코", en: "Beak or snout" },
       B: "#fbfbfc", L: "#ffffff", A: "#f0a63c", H: "#f4a7b0", N: "#f0a63c" },
-    { key: "penguin", sprite: PENGUIN, ko: "별", en: "Star", species: "펭귄", family: "부리·코",
+    { key: "penguin", sprite: PENGUIN, ko: "별", en: "Star", species: { ko: "펭귄", en: "Penguin" }, family: { ko: "부리·코", en: "Beak or snout" },
       B: "#61708f", L: "#fafbfd", A: "#495470", H: "#f4a7b0", N: "#f0a63c" },
-    { key: "pig", sprite: PIG, ko: "분홍", en: "Rosy", species: "돼지", family: "부리·코",
+    { key: "pig", sprite: PIG, ko: "분홍", en: "Rosy", species: { ko: "돼지", en: "Pig" }, family: { ko: "부리·코", en: "Beak or snout" },
       B: "#f4b8c0", L: "#fbd9de", A: "#e295a2", H: "#e87f90", N: "#e08e9c" },
-    { key: "cow", sprite: COW, ko: "얼룩", en: "Patch", species: "소", family: "뿔",
+    { key: "cow", sprite: COW, ko: "얼룩", en: "Patch", species: { ko: "소", en: "Cow" }, family: { ko: "뿔", en: "Horns" },
       B: "#fafafb", L: "#ffffff", A: "#e8dfc8", H: "#f4a7b0", N: "#3f3a44" },
-    { key: "deer", sprite: DEER, ko: "단풍", en: "Maple", species: "사슴", family: "뿔",
+    { key: "deer", sprite: DEER, ko: "단풍", en: "Maple", species: { ko: "사슴", en: "Deer" }, family: { ko: "뿔", en: "Horns" },
       B: "#cfa274", L: "#ecd7ba", A: "#8a6b49", H: "#f4a7b0", N: "#8a6b49" },
-    { key: "frog", sprite: FROG, ko: "완두", en: "Pea", species: "개구리", family: "솟은 눈",
+    { key: "frog", sprite: FROG, ko: "완두", en: "Pea", species: { ko: "개구리", en: "Frog" }, family: { ko: "솟은 눈", en: "Raised eyes" },
       B: "#a6d988", L: "#c4e8aa", A: "#7ab863", H: "#f2a0b8", N: "#7ab863" },
   ];
   const skin = (c) => ({ B: c.B, L: c.L, O: "#ffffff", A: c.A, H: c.H, N: c.N });
@@ -719,19 +788,19 @@
   const byKey = new Map(CAST.map((c) => [c.key, c]));
   const pick = (key) => byKey.get(key);
 
-  const FAMILIES = [...new Set(CAST.map((c) => c.family))];
+  const FAMILIES = [...new Set(CAST.map((c) => c.family.ko))];
   const sheet = document.getElementById("sheet");
   for (const family of FAMILIES) {
-    const group = CAST.filter((c) => c.family === family);
+    const group = CAST.filter((c) => c.family.ko === family);
     const wrap = document.createElement("div");
     wrap.className = "js-family";
-    wrap.innerHTML = `<div class="grp"><h3>${family}</h3><span class="cnt">${group.length}</span></div>`;
+    wrap.innerHTML = `<div class="grp"><h3>${famLabel(family)}</h3><span class="cnt">${group.length}</span></div>`;
     const grid = document.createElement("div");
     grid.className = "famgrid";
     for (const c of group) {
       const el = document.createElement("div");
       el.className = "cast";
-      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="sp">${c.en} · ${c.species}</span>`;
+      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="sp">${c.en} · ${tx(c.species)}</span>`;
       el.querySelector(".pad").appendChild(sprite(c, 4));
       grid.appendChild(el);
     }
@@ -741,11 +810,11 @@
 
   const sil = document.getElementById("silhouette");
   for (const family of FAMILIES) {
-    const group = CAST.filter((c) => c.family === family);
+    const group = CAST.filter((c) => c.family.ko === family);
     const wrap = document.createElement("div");
     wrap.className = "silgroup";
     for (const c of group) wrap.appendChild(sprite(c, 3, FLAT));
-    wrap.insertAdjacentHTML("beforeend", `<span class="silname">${family}</span>`);
+    wrap.insertAdjacentHTML("beforeend", `<span class="silname">${famLabel(family)}</span>`);
     sil.appendChild(wrap);
   }
 
@@ -754,7 +823,7 @@
     const f = document.createElement("figure");
     const pad = document.createElement("div");
     pad.className = "pad";
-    for (const c of FAMILIES.map((f) => CAST.find((c) => c.family === f))) {
+    for (const c of FAMILIES.map((f) => CAST.find((c) => c.family.ko === f))) {
       const el = sprite(c, Math.max(1, Math.round(s)));
       el.style.display = "inline-block";
       el.style.width = 16 * s + "px";
@@ -769,18 +838,18 @@
 
   /* ── the room ────────────────────────────────────────────────── */
   const STATUS = {
-    working:   { label: "업무 중", color: "var(--warn)" },
-    ready:     { label: "준비됨",  color: "var(--info)" },
-    available: { label: "대기 중", color: "var(--ok)" },
-    vacation:  { label: "휴가 중", color: "var(--faint)" },
+    working:   { color: "var(--warn)" },
+    ready:     { color: "var(--info)" },
+    available: { color: "var(--ok)" },
+    vacation:  { color: "var(--faint)" },
   };
   const seats = [
-    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: "결제 API 에러 응답 구조 변경", spent: 22, total: 30 },
-    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: "로그인 폼 구현",              spent: 12, total: 25 },
-    { c: pick("deer"),    col: 13, row: 3, status: "ready",     task: "API 문서 작성",               spent: 0,  total: 20 },
-    { c: pick("chick"),   col: 3,  row: 6, status: "available", last: "인덱스 튜닝 완료" },
-    { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  back: "3일 후 복귀" },
-    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: "회귀 테스트 작성",            spent: 7,  total: 18 },
+    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, spent: 22, total: 30 },
+    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: { ko: "로그인 폼 구현", en: "Build the login form" },              spent: 12, total: 25 },
+    { c: pick("deer"),    col: 13, row: 3, status: "ready",     task: { ko: "API 문서 작성", en: "Write the API docs" },               spent: 0,  total: 20 },
+    { c: pick("chick"),   col: 3,  row: 6, status: "available", last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" } },
+    { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  back: { ko: "3일 후 복귀", en: "Back in 3 days" } },
+    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: { ko: "회귀 테스트 작성", en: "Write the regression tests" },            spent: 7,  total: 18 },
   ];
 
   const S = 3, T = 48;
@@ -813,7 +882,7 @@
     bub.className = "bub";
     bub.style.left = s.col * T + T + "px";
     bub.style.top = s.row * T - T - 24 + "px";
-    bub.innerHTML = `<span class="dot ${s.status}"></span>${STATUS[s.status].label}`;
+    bub.innerHTML = `<span class="dot ${s.status}"></span>${t().status[s.status]}`;
     overlay.appendChild(bub);
   }
 
@@ -827,13 +896,13 @@
       : s.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
       : "";
     const nums =
-      s.status === "working" ? `<span>${s.spent}/${s.total}분</span><b>${v}%</b>`
-      : s.status === "ready" ? `<span>예상 ${s.total}분</span><b>시작 전</b>`
-      : s.status === "available" ? `<span>${s.last}</span><b>대기</b>`
-      : `<span>${s.back}</span><b>휴가</b>`;
+      s.status === "working" ? `<span>${t().minutes(s.spent, s.total)}</span><b>${v}%</b>`
+      : s.status === "ready" ? `<span>${t().estimate(s.total)}</span><b>${t().notStarted}</b>`
+      : s.status === "available" ? `<span>${tx(s.last)}</span><b>${t().waiting}</b>`
+      : `<span>${tx(s.back)}</span><b>${t().onLeave}</b>`;
     const line =
-      s.status === "working" || s.status === "ready" ? s.task
-      : s.status === "available" ? "할당된 업무 없음" : "자리 비움";
+      s.status === "working" || s.status === "ready" ? tx(s.task)
+      : s.status === "available" ? t().noTask : t().away;
 
     const el = document.createElement("div");
     el.className = "card";
@@ -843,7 +912,7 @@
       <span class="c-name">${s.c.ko}</span>
       <span class="c-role">${ROLES[i]}</span>
       <span class="c-rule"></span>
-      <span class="c-k">업무</span>
+      <span class="c-k">${t().work}</span>
       <span class="c-task">${line}</span>
       <span class="meter">${bar}</span>
       <span class="c-nums">${nums}</span>`;
