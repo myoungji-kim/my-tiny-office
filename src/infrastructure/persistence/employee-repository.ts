@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import type { EmployeeRepository } from "../../application/repositories";
 import type { Employee } from "../../domain/employee";
@@ -36,6 +36,16 @@ export function createSqliteEmployeeRepository(db: AppDatabase): EmployeeReposit
     async findById(id) {
       const row = db.select().from(employees).where(eq(employees.id, id)).get();
       return row === undefined ? undefined : toEmployee(row);
+    },
+
+    async findByCompany(companyId) {
+      return db
+        .select()
+        .from(employees)
+        .where(eq(employees.companyId, companyId))
+        .orderBy(asc(employees.hiredAt))
+        .all()
+        .map(toEmployee);
     },
 
     async save(employee) {

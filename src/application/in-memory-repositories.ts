@@ -15,6 +15,9 @@ export function createInMemoryCompanyRepository(): CompanyRepository {
     async findById(id) {
       return companies.get(id);
     },
+    async findAll() {
+      return [...companies.values()].sort((a, b) => a.foundedAt - b.foundedAt);
+    },
     async save(company) {
       companies.set(company.id, company);
     },
@@ -27,6 +30,11 @@ export function createInMemoryEmployeeRepository(): EmployeeRepository {
   return {
     async findById(id) {
       return employees.get(id);
+    },
+    async findByCompany(companyId) {
+      return [...employees.values()]
+        .filter((employee) => employee.companyId === companyId)
+        .sort((a, b) => a.hiredAt - b.hiredAt);
     },
     async save(employee) {
       employees.set(employee.id, employee);
@@ -41,13 +49,18 @@ export function createInMemoryTaskRepository(): TaskRepository {
     async findById(id) {
       return tasks.get(id);
     },
-    async save(task) {
-      tasks.set(task.id, task);
+    async findByCompany(companyId) {
+      return [...tasks.values()]
+        .filter((task) => task.companyId === companyId)
+        .sort((a, b) => a.createdAt - b.createdAt);
     },
     async findWorkingByCompany(companyId) {
       return [...tasks.values()].filter(
         (task) => task.companyId === companyId && task.status === "working",
       );
+    },
+    async save(task) {
+      tasks.set(task.id, task);
     },
   };
 }

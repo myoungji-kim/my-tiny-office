@@ -39,6 +39,7 @@ function failOnSave(repository: TaskRepository, nth: number): TaskRepository {
 
   return {
     findById: (id) => repository.findById(id),
+    findByCompany: (id) => repository.findByCompany(id),
     findWorkingByCompany: (id) => repository.findWorkingByCompany(id),
     async save(task) {
       saves += 1;

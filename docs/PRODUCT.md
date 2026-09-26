@@ -62,6 +62,10 @@ If Claude Code is selected:
 - confirm it is ready
 - do not ask for an Anthropic API key for the Claude Code runtime
 
+The first playable slice covers only the company, employee and task loop. The
+first-run screen asks for a company name and nothing else, because no AI runtime
+exists yet to choose between.
+
 ## Starting Company Sizes
 
 - Solo

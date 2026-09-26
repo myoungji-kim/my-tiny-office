@@ -35,6 +35,7 @@ export const employees = sqliteTable(
     hiredAt: integer("hired_at").notNull(),
   },
   (table) => [
+    index("idx_employees_company").on(table.companyId),
     check("employees_availability", sql`${table.availability} in ('available', 'onVacation')`),
   ],
 );

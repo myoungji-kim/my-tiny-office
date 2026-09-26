@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import type { TaskRepository } from "../../application/repositories";
 import { toCompanyId, toEmployeeId, toTaskId } from "../../domain/ids";
@@ -46,6 +46,16 @@ export function createSqliteTaskRepository(db: AppDatabase): TaskRepository {
     async findById(id) {
       const row = db.select().from(tasks).where(eq(tasks.id, id)).get();
       return row === undefined ? undefined : toTask(row);
+    },
+
+    async findByCompany(companyId) {
+      return db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.companyId, companyId))
+        .orderBy(asc(tasks.createdAt))
+        .all()
+        .map(toTask);
     },
 
     async save(task) {

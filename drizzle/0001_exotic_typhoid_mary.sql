@@ -1,0 +1,1 @@
+CREATE INDEX `idx_employees_company` ON `employees` (`company_id`);

@@ -26,6 +26,27 @@ Agent Runtime
 
 Server-side logic, persistence, and agent runtimes run on the local Next.js process. The browser is a client, not a place where SQLite or runtime processes live.
 
+### Server and client boundary
+
+SQLite, Drizzle and the application context run only on the server. The browser
+never opens the database.
+
+```text
+React component
+  ↓ server action / server component
+Application use case
+  ↓
+Repository
+  ↓
+SQLite
+```
+
+Pages read through a server-side view model that shapes domain entities into
+display data, including task progress derived from the current time. Mutations
+go through server actions that call a use case and revalidate the page; they
+carry no domain logic of their own. Nothing under `src/infrastructure` may be
+imported from a client component.
+
 Electron and Tauri are not used in the MVP.
 
 Desktop packaging remains a natural long-term fit for local SQLite, local agent runtimes, process management, and workspace access, but it is a separate decision to be revisited when the product actually requires it. Until then, the UI and domain layers must stay usable as a plain web application.

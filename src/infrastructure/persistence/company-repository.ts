@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import type { CompanyRepository } from "../../application/repositories";
 import type { Company } from "../../domain/company";
@@ -32,6 +32,10 @@ export function createSqliteCompanyRepository(db: AppDatabase): CompanyRepositor
     async findById(id) {
       const row = db.select().from(companies).where(eq(companies.id, id)).get();
       return row === undefined ? undefined : toCompany(row);
+    },
+
+    async findAll() {
+      return db.select().from(companies).orderBy(asc(companies.foundedAt)).all().map(toCompany);
     },
 
     async save(company) {
