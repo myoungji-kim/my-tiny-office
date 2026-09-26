@@ -438,7 +438,8 @@ copies equal. They did not stay equal.
 `npm run check:ui` runs four checks over what is left:
 
 - **parse** — every inline script and `system.js` must still parse
-- **parity** — the rules a page shares with `components.html` must be identical
+- **parity** — `.notice` is the last component the pages still define themselves,
+  and audit waves spacing through on purpose, so this compares it across all five
 - **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
   the documented set, `:focus-visible` wherever there are controls, no tracked
   Korean, no class without a rule, the same sidebar and header frame on `office`
