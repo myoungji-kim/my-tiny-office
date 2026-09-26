@@ -225,9 +225,43 @@ Prioritize:
 Density comes from status, progress and cards — not from decoration. Decorative
 art supports comprehension rather than consuming the information area.
 
-## Agent Connection UI
+## First run
 
-The player should see the runtime as an employee configuration:
+```text
+앱 실행
+  │
+  ├─ 회사 없음 → 회사 만들기 → 첫 직원 고용 → 사무실 도착 → 업무 맡기기
+  │                                                    ▲
+  │                          여기까지 Claude Code 없이 됩니다
+  │
+  └─ (언제든, 선택) 직원에게 에이전트 연결 → 그 직원만 실제로 일합니다
+```
+
+**The runtime is an upgrade, not a gate.** An employee does not require an
+agent to exist, so first run must never stop at a login. A game that cannot be
+started without an AI tool is an AI tool.
+
+First run mentions Claude Code once, as a notice, and moves on. It does not ask
+the player to choose a runtime before they have an employee to judge the choice
+with — that question belongs to the moment of connecting.
+
+## Simulated and connected employees
+
+Both are employees and both do work. The difference is whether the work is real.
+
+| | Work | Progress |
+| --- | --- | --- |
+| Simulated | Nothing happens outside the game | Derived from elapsed time |
+| Connected | An agent actually works in a folder | Reported by the runtime |
+
+**The office must show which is which.** Hiding it would make the game claim
+more than it does. The treatment has to sit beside the existing status bubble
+and dot without competing with them — it is a second axis, not a fifth status.
+
+## Agent connection
+
+The player sees the runtime as an employee configuration, never as an account
+setup:
 
 ```text
 모카 — Backend Engineer
@@ -235,34 +269,37 @@ The player should see the runtime as an employee configuration:
 Agent Runtime
 [ Claude Code ]
 
-Connection
-● Ready
-
 Workspace
 ~/Projects/tinysoft
 
-Session
-Connected
+Connection
+● Ready
 
-[ Start Work ]
+[ 연결하기 ]
 ```
 
-Do not expose technical credential details unless necessary.
+**The workspace belongs to the employee**, not the company. Two employees can
+work in different repositories, which is the normal case once a company has a
+frontend and a backend. A company-level default may be offered, but ownership
+stays with the employee — the same chain as the agent itself.
 
-## First-Run AI Choice
+### We do not handle authentication
 
-The first-run screen should avoid an API-key-first experience.
+Claude Code owns its own login. The game detects and explains; it never
+authenticates.
 
-```text
-How should your employees work?
+| State | Detected by | What the screen says | Fixed |
+| --- | --- | --- | --- |
+| Not installed | `claude` is not on PATH | The office runs without it; installing it makes employees work for real | Install |
+| **Not logged in** | Running the CLI returns an auth error | Run `claude` once in a terminal to log in, then **[다시 확인]** | **Outside this app** |
+| Ready | The CLI runs | Connection available | — |
 
-[ Simulation Only ]
-[ Claude Code ]
-[ Local AI ]
-```
+The second row is the one that matters. The fix happens somewhere the game
+cannot reach, so the screen has to say so plainly. **Never add a token field.**
+Never read a credential store. This is where that temptation appears.
 
-Claude Code should feel like connecting an existing tool, not purchasing or
-configuring an API service.
+*Open:* how to check "logged in" without spending tokens. `claude -p` bills a
+request. Settle this by experiment before designing the connection screen.
 
 ## Localization
 
