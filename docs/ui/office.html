@@ -69,6 +69,19 @@
   * { box-sizing: border-box; }
   button { font: inherit; color: inherit; }
 
+  .lang {
+    position: fixed; top: 14px; right: 14px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+    box-shadow: 0 1px 3px rgb(20 20 25 / .08);
+  }
+  .lang button {
+    height: 26px; padding-inline: 12px; border: none; border-radius: 999px;
+    background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
   .app {
     max-width: 1240px; margin: 0 auto;
     background: var(--surface);
@@ -304,6 +317,11 @@
   }
 </style>
 
+<div class="lang" id="lang">
+  <button type="button" data-lang="ko">한국어</button>
+  <button type="button" data-lang="en">English</button>
+</div>
+
 <div class="app">
   <!-- ═══ sidebar ═══ -->
   <nav class="side">
@@ -316,21 +334,21 @@
     </div>
 
     <div class="nav">
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="2"/></svg><span>홈</span></a>
-      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span>사무실</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span>프로젝트</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="4.5" cy="4.5" r="1.8"/><circle cx="4.5" cy="13.5" r="1.8"/><circle cx="13.5" cy="9" r="1.8"/><path d="M4.5 6.3v5.4M6.3 13.5h3.2a2 2 0 0 0 2-2v-.8"/></svg><span>PR · 코드리뷰</span><span class="badge">3</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span>직원</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="2"/></svg><span data-t="nav.home">홈</span></a>
+      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span data-t="nav.office">사무실</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span data-t="nav.projects">프로젝트</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="4.5" cy="4.5" r="1.8"/><circle cx="4.5" cy="13.5" r="1.8"/><circle cx="13.5" cy="9" r="1.8"/><path d="M4.5 6.3v5.4M6.3 13.5h3.2a2 2 0 0 0 2-2v-.8"/></svg><span data-t="nav.prs">PR · 코드리뷰</span><span class="badge">3</span></a>
+      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span data-t="nav.people">직원</span></a>
     </div>
 
     <div class="rule"></div>
-    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
+    <div class="ws-hd"><span>Acme Tiny Software</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
     <div id="members"></div>
 
     <div class="side-foot">
       <div class="rule" style="margin:0 4px 8px"></div>
       <div class="nav">
-        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span>설정</span></a>
+        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span data-t="nav.settings">설정</span></a>
       </div>
     </div>
   </nav>
@@ -340,21 +358,21 @@
     <div class="head">
       <div class="head-row">
         <span>
-          <h1>사무실</h1>
-          <span class="sub">백엔드팀 · 책상 6석 중 5석 사용</span>
+          <h1 data-t="title">사무실</h1>
+          <span class="sub" data-t="sub">백엔드팀 · 책상 6석 중 5석 사용</span>
         </span>
         <div class="head-right">
-          <span class="ghost-note">2026. 9. 26. (토) 10:24</span>
-          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>직원 고용</button>
+          <span class="ghost-note" data-t="date">2026. 9. 26. (토) 10:24</span>
+          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="hire">직원 고용</span></button>
         </div>
       </div>
 
       <div class="tabs">
-        <button class="tab" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.4"/></svg>전체<span class="n">5</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h7"/></svg>백엔드팀<span class="n">3</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2.5" width="12" height="11" rx="1.4"/><path d="M2 6h12"/></svg>프론트엔드팀<span class="n">2</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>휴게실<span class="n">0</span></button>
-        <button class="tab" aria-label="방 추가" style="color:var(--faint)">+</button>
+        <button class="tab" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.4"/></svg><span data-t="tabs.all">전체</span><span class="n">5</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h7"/></svg><span data-t="tabs.backend">백엔드팀</span><span class="n">3</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2.5" width="12" height="11" rx="1.4"/><path d="M2 6h12"/></svg><span data-t="tabs.frontend">프론트엔드팀</span><span class="n">2</span></button>
+        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg><span data-t="tabs.lounge">휴게실</span><span class="n">0</span></button>
+        <button class="tab" data-a="addRoom" aria-label="방 추가" style="color:var(--faint)">+</button>
       </div>
     </div>
 
@@ -833,28 +851,106 @@
     paint(c, sp.sprite, scale, pad, pad, skin(sp));
   }
 
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // Employee nicknames are absent on purpose: the player wrote them, so they
+  // never go through a dictionary.
+  const TEXT = {
+    ko: {
+      nav: { home: "홈", office: "사무실", projects: "프로젝트", prs: "PR · 코드리뷰", people: "직원", settings: "설정" },
+      hire: "직원 고용", hireDesk: "빈 책상에 직원 채우기",
+      emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
+      title: "사무실", sub: "백엔드팀 · 책상 6석 중 5석 사용", date: "2026. 9. 26. (토) 10:24",
+      tabs: { all: "전체", backend: "백엔드팀", frontend: "프론트엔드팀", lounge: "휴게실" },
+      teams: { backend: "백엔드팀", frontend: "프론트엔드팀" },
+      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
+      minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
+      notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
+      inProgress: "진행 중", assigned: "할당된 업무", lastDone: "최근 완료", vacationLabel: "휴가",
+      actions: {
+        complete: "완료 처리", detail: "업무 상세", reassign: "담당 변경",
+        start: "업무 시작", swap: "다른 업무로 교체", unassign: "할당 취소",
+        assign: "업무 할당", train: "교육 보내기", leave: "휴가 보내기", comeBack: "복귀 처리",
+      },
+      cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
+      actionOf: (n) => n + " 행동",
+      tasks: { pay: "결제 API 에러 응답 구조 변경", login: "로그인 폼 구현", docs: "API 문서 작성" },
+      lastIndex: "인덱스 튜닝 완료", backIn: "3일 후 복귀",
+    },
+    en: {
+      nav: { home: "Home", office: "Office", projects: "Projects", prs: "PRs · Review", people: "People", settings: "Settings" },
+      hire: "Hire", hireDesk: "Fill this desk",
+      emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
+      title: "Office", sub: "Backend · 5 of 6 desks in use", date: "Sat, Sep 26, 2026 · 10:24",
+      tabs: { all: "All", backend: "Backend", frontend: "Frontend", lounge: "Lounge" },
+      teams: { backend: "Backend", frontend: "Frontend" },
+      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      work: "WORK", noTask: "Nothing assigned", away: "Away",
+      minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
+      notStarted: "Not started", waiting: "Free", onLeave: "Leave",
+      inProgress: "In progress", assigned: "Assigned", lastDone: "Last finished", vacationLabel: "On leave",
+      actions: {
+        complete: "Mark done", detail: "Task details", reassign: "Reassign",
+        start: "Start work", swap: "Swap the task", unassign: "Unassign",
+        assign: "Assign work", train: "Send to training", leave: "Send on leave", comeBack: "Bring back",
+      },
+      cannotAssign: "They cannot take work while on leave.",
+      actionOf: (n) => "Actions for " + n,
+      tasks: { pay: "Change the payment API error shape", login: "Build the login form", docs: "Write the API docs" },
+      lastIndex: "Finished tuning indexes", backIn: "Back in 3 days",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  document.documentElement.lang = lang;
+  {
+    const box = document.getElementById("lang");
+    for (const b of box.querySelectorAll("[data-lang]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        u.searchParams.set("lang", b.dataset.lang);
+        location.href = u.toString();
+      });
+    }
+  }
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  const applyStatic = () => {
+    for (const el of document.querySelectorAll("[data-t]")) {
+      const v = dig(t(), el.dataset.t);
+      if (typeof v === "string") el.textContent = v;
+    }
+    for (const el of document.querySelectorAll("[data-a]")) {
+      const v = dig(t(), el.dataset.a);
+      if (typeof v === "string") el.setAttribute("aria-label", v);
+    }
+  };
+  applyStatic();
+
   /* ── data ────────────────────────────────────────────────────── */
   // Status mirrors the domain: a task is working or ready, an employee is
   // available or on vacation. The actions offered follow from that alone.
   const STATUS = {
-    working:   { label: "업무 중", color: "var(--warn)" },
-    ready:     { label: "준비됨",  color: "var(--info)" },
-    available: { label: "대기 중", color: "var(--ok)" },
-    vacation:  { label: "휴가 중", color: "var(--faint)" },
+    working:   { color: "var(--warn)" },
+    ready:     { color: "var(--info)" },
+    available: { color: "var(--ok)" },
+    vacation:  { color: "var(--faint)" },
   };
+  const label = (k) => t().status[k];
 
   // The nickname is the player's; the species only picks a sprite.
   const people = [
-    { id: "p1", name: "모카", species: "cat", role: "Backend Engineer", team: "백엔드팀", col: 3, row: 3,
-      status: "working", task: { title: "결제 API 에러 응답 구조 변경", spent: 22, total: 30 } },
-    { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer", team: "프론트엔드팀", col: 8, row: 3,
-      status: "working", task: { title: "로그인 폼 구현", spent: 12, total: 25 } },
-    { id: "p3", name: "단풍", species: "deer", role: "Product Manager", team: "백엔드팀", col: 13, row: 3,
-      status: "ready", task: { title: "API 문서 작성", spent: 0, total: 20 } },
-    { id: "p4", name: "삐약", species: "chick", role: "DBA", team: "백엔드팀", col: 3, row: 6,
-      status: "available", last: "인덱스 튜닝 완료" },
-    { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer", team: "프론트엔드팀", col: 8, row: 6,
-      status: "vacation", back: "3일 후 복귀" },
+    { id: "p1", name: "모카", species: "cat", role: "Backend Engineer", team: "backend", col: 3, row: 3,
+      status: "working", task: { key: "pay", spent: 22, total: 30 } },
+    { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer", team: "frontend", col: 8, row: 3,
+      status: "working", task: { key: "login", spent: 12, total: 25 } },
+    { id: "p3", name: "단풍", species: "deer", role: "Product Manager", team: "backend", col: 13, row: 3,
+      status: "ready", task: { key: "docs", spent: 0, total: 20 } },
+    { id: "p4", name: "삐약", species: "chick", role: "DBA", team: "backend", col: 3, row: 6,
+      status: "available", last: "lastIndex" },
+    { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer", team: "frontend", col: 8, row: 6,
+      status: "vacation", back: "backIn" },
     { id: null, col: 13, row: 6 },
   ];
   const staffed = people.filter((p) => p.id);
@@ -889,7 +985,7 @@
     btn.style.top = p.row * T - T - 6 + "px";
     btn.style.width = 2 * T + 8 + "px";
     btn.style.height = 2 * T + 10 + "px";
-    btn.setAttribute("aria-label", p.id ? p.name : "빈 책상");
+    btn.setAttribute("aria-label", p.id ? p.name : t().emptyDesk);
     if (p.id) btn.addEventListener("click", (e) => open(p.id, btn, e.detail === 0));
     overlay.appendChild(btn);
 
@@ -897,7 +993,7 @@
     tag.className = "tag";
     tag.style.left = p.col * T + T + "px";
     tag.style.top = p.row * T + T + 4 + "px";
-    tag.textContent = p.id ? p.name : "빈 자리";
+    tag.textContent = p.id ? p.name : t().emptySeat;
     if (!p.id) tag.style.opacity = ".7";
     overlay.appendChild(tag);
     if (!p.id) continue;
@@ -906,7 +1002,7 @@
     bub.className = "bub";
     bub.style.left = p.col * T + T + "px";
     bub.style.top = p.row * T - T - 24 + "px";
-    bub.innerHTML = '<span class="dot ' + p.status + '"></span>' + STATUS[p.status].label;
+    bub.innerHTML = '<span class="dot ' + p.status + '"></span>' + label(p.status);
     overlay.appendChild(bub);
   }
 
@@ -935,16 +1031,16 @@
       : p.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
       : "";
     const nums =
-      p.status === "working" ? `<span>${p.task.spent}/${p.task.total}분</span><b>${v}%</b>`
-      : p.status === "ready" ? `<span>예상 ${p.task.total}분</span><b>시작 전</b>`
-      : p.status === "available" ? `<span>${p.last}</span><b>대기</b>`
-      : `<span>${p.back}</span><b>휴가</b>`;
+      p.status === "working" ? `<span>${t().minutes(p.task.spent, p.task.total)}</span><b>${v}%</b>`
+      : p.status === "ready" ? `<span>${t().estimate(p.task.total)}</span><b>${t().notStarted}</b>`
+      : p.status === "available" ? `<span>${t()[p.last]}</span><b>${t().waiting}</b>`
+      : `<span>${t()[p.back]}</span><b>${t().onLeave}</b>`;
     const line =
-      p.status === "working" || p.status === "ready" ? p.task.title
-      : p.status === "available" ? "할당된 업무 없음"
-      : "자리 비움";
+      p.status === "working" || p.status === "ready" ? t().tasks[p.task.key]
+      : p.status === "available" ? t().noTask
+      : t().away;
     return `
-      <button class="c-menu" type="button" data-id="${p.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${p.name} 행동"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.2" r="1.35"/><circle cx="8" cy="8" r="1.35"/><circle cx="8" cy="12.8" r="1.35"/></svg></button>
+      <button class="c-menu" type="button" data-id="${p.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${t().actionOf(p.name)}"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.2" r="1.35"/><circle cx="8" cy="8" r="1.35"/><circle cx="8" cy="12.8" r="1.35"/></svg></button>
       <span class="c-av">
         <canvas aria-hidden="true" width="34" height="34"></canvas>
         <span class="c-live" style="background:${STATUS[p.status].color}"></span>
@@ -952,18 +1048,18 @@
       <span class="c-name">${p.name}</span>
       <span class="c-role">${p.role}</span>
       <span class="c-rule"></span>
-      <span class="c-k">업무</span>
+      <span class="c-k">${t().work}</span>
       <span class="c-task">${line}</span>
       <span class="meter">${bar}</span>
       <span class="c-nums">${nums}</span>`;
   }
 
   const teams = document.getElementById("teams");
-  for (const team of ["백엔드팀", "프론트엔드팀"]) {
+  for (const team of ["backend", "frontend"]) {
     const group = staffed.filter((p) => p.team === team);
     const wrap = document.createElement("div");
     wrap.style.marginBottom = "18px";
-    wrap.innerHTML = `<div class="grp"><h2>${team}</h2><span class="cnt">${group.length}</span></div>`;
+    wrap.innerHTML = `<div class="grp"><h2>${t().teams[team]}</h2><span class="cnt">${group.length}</span></div>`;
     const grid = document.createElement("div");
     grid.className = "cards";
     for (const p of group) {
@@ -975,12 +1071,12 @@
       grid.appendChild(c);
       drawAvatar(c.querySelector("canvas"), p.species);
     }
-    if (team === "백엔드팀") {
+    if (team === "backend") {
       const add = document.createElement("button");
       add.className = "addcard";
       add.type = "button";
       add.innerHTML =
-        '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>빈 책상에 직원 채우기';
+        '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' + t().hireDesk;
       grid.appendChild(add);
     }
     wrap.appendChild(grid);
@@ -1003,23 +1099,23 @@
   // one the player came here for.
   const ACTIONS = {
     working: [
-      { icon: I.check, label: "완료 처리", key: true },
-      { icon: I.info, label: "업무 상세" },
-      { icon: I.swap, label: "담당 변경" },
+      { icon: I.check, label: t().actions.complete, key: true },
+      { icon: I.info, label: t().actions.detail },
+      { icon: I.swap, label: t().actions.reassign },
     ],
     ready: [
-      { icon: I.play, label: "업무 시작", key: true },
-      { icon: I.swap, label: "다른 업무로 교체" },
-      { icon: I.undo, label: "할당 취소", bad: true },
+      { icon: I.play, label: t().actions.start, key: true },
+      { icon: I.swap, label: t().actions.swap },
+      { icon: I.undo, label: t().actions.unassign, bad: true },
     ],
     available: [
-      { icon: I.plus, label: "업무 할당", key: true },
-      { icon: I.book, label: "교육 보내기" },
-      { icon: I.sun, label: "휴가 보내기" },
+      { icon: I.plus, label: t().actions.assign, key: true },
+      { icon: I.book, label: t().actions.train },
+      { icon: I.sun, label: t().actions.leave },
     ],
     vacation: [
-      { icon: I.plus, label: "업무 할당", key: true, off: "휴가 중에는 업무를 맡길 수 없습니다." },
-      { icon: I.undo, label: "복귀 처리" },
+      { icon: I.plus, label: t().actions.assign, key: true, off: t().cannotAssign },
+      { icon: I.undo, label: t().actions.comeBack },
     ],
   };
 
@@ -1029,16 +1125,16 @@
   function stateBlock(p) {
     const v = pct(p);
     if (p.status === "working")
-      return `<span class="c-k">진행 중</span><span class="c-task">${p.task.title}</span>
+      return `<span class="c-k">${t().inProgress}</span><span class="c-task">${t().tasks[p.task.key]}</span>
         <span class="track" style="margin-top:9px"><i style="width:${v}%;background:var(--warn)"></i></span>
-        <span class="p-nums"><span>${p.task.spent}/${p.task.total}분</span><b>${v}%</b></span>`;
+        <span class="p-nums"><span>${t().minutes(p.task.spent, p.task.total)}</span><b>${v}%</b></span>`;
     if (p.status === "ready")
-      return `<span class="c-k">할당된 업무</span><span class="c-task">${p.task.title}</span>
-        <span class="p-nums"><span>예상 ${p.task.total}분</span><b>시작 전</b></span>`;
+      return `<span class="c-k">${t().assigned}</span><span class="c-task">${t().tasks[p.task.key]}</span>
+        <span class="p-nums"><span>${t().estimate(p.task.total)}</span><b>${t().notStarted}</b></span>`;
     if (p.status === "available")
-      return `<span class="c-k">최근 완료</span><span class="c-task">${p.last}</span>
+      return `<span class="c-k">${t().lastDone}</span><span class="c-task">${t()[p.last]}</span>
         <span class="p-nums"><span>지금은 비어 있습니다</span><b>대기</b></span>`;
-    return `<span class="c-k">휴가</span><span class="c-task">${p.back}</span>`;
+    return `<span class="c-k">${t().vacationLabel}</span><span class="c-task">${t()[p.back]}</span>`;
   }
 
   function open(id, el, viaKey) {
@@ -1068,7 +1164,7 @@
           <span class="p-name">${p.name}</span>
           <span class="p-role">${p.role}</span>
         </span>
-        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${STATUS[p.status].label}</span>
+        <span class="chip ${p.status}"><span class="dot ${p.status}"></span>${label(p.status)}</span>
       </div>
       <div class="p-rule"></div>
       <div class="p-state">${stateBlock(p)}</div>

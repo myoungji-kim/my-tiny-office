@@ -388,6 +388,9 @@ Rules for a new species:
 ## 11. Localization
 
 - All game text goes through i18n. Player input does not.
+- **The sample pages carry both languages**, switched with `?lang=en`. A layout
+  proved in one language is not proved. Employee nicknames stay untranslated in
+  both, which is the rule made visible.
 - **Never bake text into canvas, SVG or any other asset.** Names and labels are
   DOM elements positioned over the canvas.
 - No fixed widths, no hard-coded line breaks.
