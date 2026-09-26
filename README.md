@@ -69,13 +69,25 @@ my-tiny-office/
 │   ├── PRODUCT.md
 │   ├── DESIGN.md
 │   ├── GAMEPLAY.md
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   ├── STYLE-GUIDE.md
+│   ├── ui/                  the UI standard: open index.html
+│   ├── design-references/   images the direction was argued from
+│   └── archive/             superseded directions, kept for comparison
 ├── .github/
 │   ├── pull_request_template.md
 │   ├── ISSUE_TEMPLATE/
 │   └── workflows/
+├── scripts/
+│   └── ui/                  the checks that keep docs/ui honest
 └── src/
-    └── app/
+    ├── app/
+    ├── application/
+    ├── components/
+    ├── domain/
+    ├── i18n/
+    ├── infrastructure/
+    └── server/
 ```
 
 ## Development
@@ -92,6 +104,7 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
+npm run check:ui   # when docs/ui changed
 ```
 
 Keep the game playable without AI.
