@@ -8,7 +8,8 @@ before building or changing a screen.
 | Page | Authoritative for |
 | --- | --- |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
-| `ui/components.html` | Buttons, menu rows, status chips, add affordances |
+| `ui/employees.html` | List and detail, org chart, skill bars, specialties, training |
+| `ui/components.html` | Buttons, menu rows, notices, empty states, confirm dialogs |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
 This document holds the direction and the screen structure. Written rules —
@@ -98,6 +99,24 @@ The species is shown by the sprite, never spelled out next to the name.
 
 See `ui/characters.html` for the twenty species and the silhouette-family rule.
 
+### Skills, specialty and training
+
+`GAMEPLAY.md` gives an employee *skills*, a *specialty*, and training that
+"consumes time and improves skills". It also lists the reviewer seats a PR can
+ask for. `ui/employees.html` draws them as one loop:
+
+```text
+업무 → 학습(시간 소모) → 스킬 상승 → 임계치 돌파 → 전문성 → PR 리뷰 자격
+```
+
+The seven skills are the seven reviewer seats. A skill above the threshold
+becomes a specialty, and a specialty is what makes an employee eligible to
+review that kind of work. The employees screen shows the threshold as a tick on
+every skill bar, so the player can see how far a teammate is from a review seat.
+
+A seat no employee can fill is worth saying out loud — the training tab leads
+with it.
+
 ## Status
 
 The office must be readable at a glance. Status mirrors the domain rather than
@@ -108,13 +127,18 @@ inventing its own vocabulary:
 | `working` | A task is in progress | Amber dot with ring, live progress |
 | `ready` | A task is assigned, not started | Hollow blue dot |
 | `available` | No task assigned | Solid green dot |
+| `training` | Employee is learning | Indigo square, progress to completion |
 | `vacation` | Employee is away | Grey dash |
 
 Colour never carries status alone — **the dot shape differs too**.
 
+`training` is the one status that borrows `--brand`, because indigo is already
+the colour of a skill bar — a learning employee and a rising skill are the same
+event.
+
 Further runtime states the agent layer can report (`blocked`, `disconnected`,
-`failed`, `training`, `reviewing`) get the same treatment when their systems
-exist: a distinct dot shape, a label, and no reliance on hue.
+`failed`, `reviewing`) get the same treatment when their systems exist: a
+distinct dot shape, a label, and no reliance on hue.
 
 ## Actions
 

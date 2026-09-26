@@ -52,7 +52,8 @@ value is missing, add a token.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--brand` | `#5b5bd6` | Focus rings, skill bars. **Not** buttons |
+| `--brand` | `#5b5bd6` | Focus rings, skill bars, `training`. **Not** buttons |
+| `--brand-soft` | `#ecebfb` | Specialty chips, selected rows, `training` chip |
 | `--ok` / `--ok-soft` | `#2fae62` / `#e4f6ec` | `available`, completed |
 | `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | `ready` |
 | `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
@@ -130,11 +131,22 @@ and greyscale.
 | Status | Colour | Dot |
 | --- | --- | --- |
 | `working` | `--warn` | Filled, with a ring |
+| `training` | `--brand` | Square |
 | `ready` | `--info` | Hollow |
 | `available` | `--ok` | Filled |
 | `vacation` | `--faint` | Short dash |
 
 A status is always accompanied by a text label somewhere in the same view.
+
+`training` is the one status allowed to use `--brand`, because a skill bar is
+already indigo and the two mean the same thing.
+
+### Progress with a threshold
+
+A bar that has a meaningful cut-off draws the cut-off. A skill bar carries a
+tick at the specialty threshold and turns green past it, so "how far from a
+review seat" is readable without arithmetic. Never rely on the fill colour
+alone — the tick has to read against both the empty track and a filled bar.
 
 ---
 
@@ -285,6 +297,8 @@ Rules for a new species:
 | Colour plus shape for status | Colour alone |
 | Add the pattern to `ui/` first | Invent a pattern in a feature branch |
 | Let the sprite say the species | Write the species next to the name |
+| Draw the threshold on a bar that has one | Leave the player to do the arithmetic |
+| Name the review seat nobody can fill | Show only the skills that exist |
 | Say what happened | Say only the status name |
 | Label a confirm button with its effect | Label it `확인` |
 | Focus cancel first in a destructive dialog | Focus the destructive action |

@@ -79,7 +79,7 @@
   .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
 
   /* ═══ the three pages ═══ */
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
   .item {
     display: block; text-decoration: none; color: inherit;
     background: var(--surface); border: 1px solid var(--line-2);
@@ -133,7 +133,7 @@
     <span>
       <h1>Design System</h1>
       <span class="sub">My Tiny Office</span>
-      <p>화면을 새로 만들거나 고칠 때 먼저 이 세 페이지를 열어 봅니다. 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.</p>
+      <p>화면을 새로 만들거나 고칠 때 먼저 이 페이지들을 열어 봅니다. 여기에 없는 패턴은 만들기 전에 여기에 먼저 추가합니다.</p>
     </span>
   </header>
 
@@ -160,6 +160,23 @@
         <p>화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.</p>
         <ul class="owns">
           <li>레이아웃</li><li>컬러 토큰</li><li>타일 엔진</li><li>상태 표시</li><li>행동 팝오버</li>
+        </ul>
+      </div>
+    </a>
+
+    <a class="item" href="employees.html">
+      <div class="shot">
+        <div class="frame">
+          <div class="fallback">employees.html</div>
+          <iframe src="employees.html" title="" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>직원 화면</h2>
+        <code>ui/employees.html</code>
+        <p>목록·상세의 기준. 조직도, 스킬과 전문성, 학습 과정이 한 화면에 들어 있습니다.</p>
+        <ul class="owns">
+          <li>목록 · 상세</li><li>조직도</li><li>스킬 바</li><li>전문성</li><li>학습</li>
         </ul>
       </div>
     </a>
