@@ -312,6 +312,10 @@
   .devbar .sep { width: 1px; height: 18px; background: var(--line-2); flex: none; margin-inline: 4px; }
   .devbar .home { padding-inline: 9px; }
   .devbar svg { width: 14px; height: 14px; }
+  .devbar .grouplabel {
+    font-size: 11px; font-weight: 600; color: var(--faint);
+    padding-inline: 6px 2px; flex: none; white-space: nowrap;
+  }
   .lang { display: contents; }
   .langscope {
     margin: -6px 0 22px; font-size: 12.5px; color: var(--faint);
@@ -325,9 +329,12 @@
 <nav class="devbar" id="devbar" aria-label="샘플 페이지">
   <a class="home" href="index.html" data-p="index" data-ko="Design System" data-en="Design System" aria-label="Design System"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></a>
   <span class="sep"></span>
+  <span class="grouplabel" data-ko="화면" data-en="Screens">화면</span>
   <a href="first-run.html" data-p="first-run" data-ko="첫 실행" data-en="First run">첫 실행</a>
   <a href="office.html" data-p="office" data-ko="사무실" data-en="Office">사무실</a>
   <a href="employees.html" data-p="employees" data-ko="직원" data-en="People">직원</a>
+  <span class="sep"></span>
+  <span class="grouplabel" data-ko="문서" data-en="Reference">문서</span>
   <a href="connect.html" data-p="connect" data-ko="연결" data-en="Connect">연결</a>
   <a href="components.html" data-p="components" data-ko="컴포넌트" data-en="Components">컴포넌트</a>
   <a href="characters.html" data-p="characters" data-ko="캐릭터" data-en="Cast">캐릭터</a>
@@ -914,15 +921,22 @@
 </script>
 <script>
   // The bar marks where you are and carries ?lang= across pages, so switching
-  // screens does not silently switch you back to Korean.
+  // screens does not silently switch you back to Korean. In-app links in the
+  // samples carry it too, for the same reason.
   {
     const here = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
     const l = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
-    for (const a of document.querySelectorAll(".devbar a")) {
-      if (a.dataset.p === here) a.setAttribute("aria-current", "page");
-      else if (l === "en") a.href += "?lang=en";
-      if (a.dataset.p !== "index") a.textContent = a.dataset[l];
-      else a.setAttribute("aria-label", a.dataset[l]);
+    for (const el of document.querySelectorAll(".devbar [data-ko]")) {
+      if (el.dataset.p === here) el.setAttribute("aria-current", "page");
+      if (el.tagName === "A" && el.dataset.p === "index") el.setAttribute("aria-label", el.dataset[l]);
+      else el.textContent = el.dataset[l];
+    }
+    if (l === "en") {
+      for (const a of document.querySelectorAll('a[href$=".html"]')) {
+        // keep the link relative: reading .href would absolutise it
+        const h = a.getAttribute("href");
+        if (!a.hasAttribute("aria-current") && !h.includes("?")) a.setAttribute("href", h + "?lang=en");
+      }
     }
   }
 </script>
