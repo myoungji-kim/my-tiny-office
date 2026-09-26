@@ -17,6 +17,23 @@
 
     --ink: #1b1b1f;
     --solid: #17171c;
+    --ok-ink: #1f7a48;
+    --ok-line: #bfe6cf;
+    --info-ink: #2557b5;
+    --warn-ink: #8a5c10;
+    --warn-line: #f0d8a8;
+    --bad-ink: #a8322f;
+    --bad-line: #f4c2c3;
+    --bad-wash: #fffafa;
+    --brand-ink: #4342a6;
+    --solid-hover: #2a2a31;
+    --hairline-hover: #cfcfd4;
+    --floor: #b0854f;
+    --term: #17171c;
+    --term-fg: #e8e8ea;
+    --term-dim: #6f6f78;
+    --term-line: #3a3a42;
+    --term-hover: #26262d;
     --muted: #86868d;
     --faint: #b2b2b9;
 
@@ -77,7 +94,10 @@
   .scales figcaption { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 8px; }
   .scales .pad { background: var(--subtle); border-radius: 10px; padding: 10px; display: inline-block; }
 
-  .stage { background: var(--subtle); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow: auto; }
+  .stage {
+    border-radius: var(--r-card); background: var(--subtle);
+    border: 1px solid var(--line); padding: 12px; overflow: auto; position: relative;
+  }
   .room-wrap { position: relative; width: max-content; margin: 0 auto; }
   .overlay { position: absolute; inset: 0; }
   .bub {
@@ -99,25 +119,29 @@
   .dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
 
   .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); }
-  .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  .c-av { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; }
+.card {
+      position: relative; background: var(--surface);
+      border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px;
+      cursor: pointer; transition: border-color .1s, box-shadow .1s;
+    }
+.c-av { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; overflow: visible; }
   .c-live { position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px; border-radius: 999px; border: 3px solid var(--surface); }
   .c-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; margin-top: 11px; }
   .c-role { display: block; font-size: 13px; color: var(--faint); line-height: 1.35; }
   .c-rule { display: block; height: 1px; background: var(--line); margin: 13px 0; }
-  .c-k { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); }
+  .c-k { display: block; font-size: 11px; font-weight: 600; color: var(--faint); }
   .c-task { display: block; font-size: 13.5px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .meter { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 11px; }
   .meter i { display: block; height: 100%; border-radius: 999px; }
-  .c-nums { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
-  .c-nums b { font-weight: 600; color: var(--ink); }
+.c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+.c-nums b { font-weight: 600; color: var(--ink); flex: none; }
 
   .grid2 { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
   .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
   .exlabel { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 10px; }
-  .spec { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .spec { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line); }
   .spec:last-child { border-bottom: none; }
   .spec code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .rowline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -188,7 +212,7 @@
     </p>
     <div class="grid2">
       <div class="good-ex">
-        <div class="exlabel" style="color:#1f7a48">✓ DO</div>
+        <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div style="font-size:15px;font-weight:600">모카</div>
         <div style="font-size:13px;color:var(--muted)">Backend Engineer</div>
         <div class="note" style="margin:10px 0 0">
@@ -196,7 +220,7 @@
         </div>
       </div>
       <div class="bad-ex">
-        <div class="exlabel" style="color:#a8322f">✕ DON&rsquo;T</div>
+        <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
         <div style="font-size:15px;font-weight:600">모카냥이 🐱</div>
         <div style="font-size:13px;color:var(--muted)">백엔드 개발 담당 고양이</div>
         <div class="note" style="margin:10px 0 0">
@@ -232,7 +256,7 @@
   const OUTLINE = "#2f2a3d";
   const P = {
     ".": null, K: OUTLINE, E: OUTLINE,
-    w: "#c9a06a", W: "#d8b17c", d: "#b0854f",
+    w: "#c9a06a", W: "#d8b17c", d: "var(--floor)",
     a: "#e9dcc4", A: "#f4ead7", b: "#c2b195",
     g: "#8ec3e8", G: "#bcdcf2",
     s: "#c9964f", S: "#dcae6c", t: "#9c6f3a",
@@ -650,7 +674,7 @@
       B: "#a6d988", L: "#c4e8aa", A: "#7ab863", H: "#f2a0b8", N: "#7ab863" },
   ];
   const skin = (c) => ({ B: c.B, L: c.L, O: "#ffffff", A: c.A, H: c.H, N: c.N });
-  const FLAT = { B: "#c9c9ce", L: "#d6d6db", O: "#f0f0f2", A: "#b3b3ba", H: "#c9c9ce", N: "#b3b3ba" };
+  const FLAT = { B: "var(--faint)", L: "#d6d6db", O: "#f0f0f2", A: "#b3b3ba", H: "var(--faint)", N: "#b3b3ba" };
 
   /* ── tiles ───────────────────────────────────────────────────── */
   const TILES = {

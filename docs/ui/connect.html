@@ -17,6 +17,23 @@
 
     --ink: #1b1b1f;
     --solid: #17171c;
+    --ok-ink: #1f7a48;
+    --ok-line: #bfe6cf;
+    --info-ink: #2557b5;
+    --warn-ink: #8a5c10;
+    --warn-line: #f0d8a8;
+    --bad-ink: #a8322f;
+    --bad-line: #f4c2c3;
+    --bad-wash: #fffafa;
+    --brand-ink: #4342a6;
+    --solid-hover: #2a2a31;
+    --hairline-hover: #cfcfd4;
+    --floor: #b0854f;
+    --term: #17171c;
+    --term-fg: #e8e8ea;
+    --term-dim: #6f6f78;
+    --term-line: #3a3a42;
+    --term-hover: #26262d;
     --muted: #86868d;
     --faint: #b2b2b9;
 
@@ -59,13 +76,13 @@
   .spec { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line); }
   .spec:last-child { border-bottom: none; }
   .spec code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  .grid2 { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid2 { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
 
   /* ═══ buttons ═══ */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-    font: inherit; font-weight: 600; white-space: nowrap;
+    font: inherit; font-weight: 600; white-space: nowrap; text-decoration: none;
     border-radius: 999px; border: 1px solid transparent; cursor: pointer;
     transition: background .1s, border-color .1s;
   }
@@ -73,7 +90,7 @@
   .btn-md { height: 36px; padding-inline: 16px; font-size: 14px; }
   .btn-sm { height: 30px; padding-inline: 13px; font-size: 13px; }
   .btn-primary { background: var(--solid); color: #fff; }
-  .btn-primary:hover { background: #2a2a31; }
+  .btn-primary:hover { background: var(--solid-hover); }
   .btn-secondary { background: var(--surface); border-color: var(--line-2); color: var(--ink); }
   .btn-secondary:hover { background: var(--subtle); }
   .btn-ghost { background: none; color: var(--muted); }
@@ -83,10 +100,14 @@
 
   /* ═══ modal ═══ */
   .modal {
-    width: 100%; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 16px; overflow: hidden;
-    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14);
+    width: 100%; max-width: 486px; max-height: 100%; overflow: auto;
+    background: var(--surface); border-radius: 16px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .08), 0 22px 60px rgb(20 20 25 / .26);
   }
+  /* this page shows modals inline instead of over a scrim */
+  /* shown inline on this page instead of over a scrim */
+  .modal-inline { max-width: 100%; overflow: hidden; border: 1px solid var(--line);
+    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14); }
   .m-hd { display: flex; align-items: center; gap: 12px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
   .m-av { position: relative; width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
   .m-t { display: block; font-size: 16.5px; font-weight: 600; line-height: 1.35; }
@@ -94,7 +115,7 @@
   .m-sec { padding: 15px 20px; border-bottom: 1px solid var(--line); }
   .m-sec:last-of-type { border-bottom: none; }
   .m-foot { padding: 15px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
-  .k { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--faint); margin-bottom: 8px; }
+  .k { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--faint); margin-bottom: 8px; }
 
   .pick {
     display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: center; gap: 11px;
@@ -110,7 +131,7 @@
   .pick[aria-checked="true"] .radio { border-color: var(--brand); }
   .pick[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
   .pick-t { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pick-m { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .pick-m { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   .folder {
     display: flex; align-items: center; gap: 10px;
@@ -124,8 +145,8 @@
   .check { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; }
   .c-ic { width: 18px; height: 18px; border-radius: 999px; flex: none; margin-top: 2px; display: grid; place-items: center; }
   .c-ic svg { width: 11px; height: 11px; }
-  .c-ic.ok { background: var(--ok-soft); color: #1f7a48; }
-  .c-ic.bad { background: var(--bad-soft); color: #a8322f; }
+  .c-ic.ok { background: var(--ok-soft); color: var(--ok-ink); }
+  .c-ic.bad { background: var(--bad-soft); color: var(--bad-ink); }
   .c-ic.wait { background: var(--sunk); color: var(--muted); }
   .c-tx { flex: 1; min-width: 0; font-size: 13px; }
   .c-tx b { font-weight: 600; }
@@ -133,17 +154,17 @@
   .c-val { font-size: 12px; color: var(--faint); font-family: var(--mono); flex: none; }
 
   .cmd {
-    margin-top: 9px; background: #17171c; border-radius: 10px; padding: 11px 12px;
+    margin-top: 9px; background: var(--term); border-radius: 10px; padding: 11px 12px;
     display: flex; align-items: flex-start; gap: 10px;
   }
-  .cmd pre { margin: 0; flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #e8e8ea; overflow-x: auto; }
-  .cmd .p { color: #6f6f78; }
+  .cmd pre { margin: 0; flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--term-fg); overflow-x: auto; }
+  .cmd .p { color: var(--term-dim); }
   .copy {
     flex: none; height: 26px; padding-inline: 10px; border-radius: 999px;
-    border: 1px solid #3a3a42; background: none; color: #c9c9ce;
+    border: 1px solid var(--term-line); background: none; color: var(--faint);
     font-size: 12px; font-weight: 600; cursor: pointer;
   }
-  .copy:hover { background: #26262d; color: #fff; }
+  .copy:hover { background: var(--term-hover); color: #fff; }
   .recheck { margin-top: 10px; display: flex; justify-content: flex-end; }
 
   /* ═══ connected block ═══ */
@@ -151,16 +172,16 @@
   .rt-hd { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
   .rt-hd h4 { margin: 0; font-size: 13.5px; font-weight: 600; }
   .rt-bd { padding: 12px 14px; }
-  .kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 4px 0; }
+  .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 4px 0; }
   .kv span:first-child { color: var(--muted); flex: none; }
   .kv b { font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .kv b.mono { font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
   .rt-acts { display: flex; gap: 8px; padding: 0 14px 13px; }
 
   .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 600; flex: none; }
-  .chip.live { background: var(--ok-soft); color: #1f7a48; }
+  .chip.live { background: var(--ok-soft); color: var(--ok-ink); }
   .chip.sim { background: var(--sunk); color: var(--muted); }
-  .chip.lost { background: var(--bad-soft); color: #a8322f; }
+  .chip.lost { background: var(--bad-soft); color: var(--bad-ink); }
 
   /* ═══ how a connected employee reads ═══ */
   .agent-mark {
@@ -185,7 +206,7 @@
   .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
   .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
   .bubble .live-ic { width: 11px; height: 11px; color: var(--ok); }
-  .stage { background: #b0854f; border-radius: var(--r-card); padding: 16px; display: flex; gap: 22px; align-items: center; }
+  .floor-demo { background: var(--floor); border-radius: var(--r-card); padding: 16px; display: flex; gap: 22px; align-items: center; }
 
   .good-ex { border: 1px dashed var(--ok); border-radius: 12px; padding: 14px; background: var(--ok-soft); }
   .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
@@ -202,8 +223,8 @@
   .n-tx b { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.45; }
   .n-tx span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
   .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
-  .notice-bad { border-color: #f4c2c3; }
-  .notice-bad .n-ic { background: var(--bad-soft); color: #a8322f; }
+  .notice-bad { border-color: var(--bad-line); }
+  .notice-bad .n-ic { background: var(--bad-soft); color: var(--bad-ink); }
 </style>
 
 <div class="wrap">
@@ -223,7 +244,7 @@
       <code>claude auth status --json</code>은 요청을 쓰지 않습니다.
     </p>
     <div class="grid2">
-      <div class="modal" id="mReady"></div>
+      <div class="modal modal-inline" id="mReady"></div>
       <div>
         <div class="spec"><code>런타임</code><span>지금은 Claude Code 하나뿐입니다. 없는 런타임은 <strong>숨기지 않고 비활성</strong>으로 둬서 나중에 생긴다는 걸 알립니다.</span></div>
         <div class="spec"><code>작업 폴더</code><span>직원마다 다릅니다. 프론트와 백엔드가 다른 레포에서 일하는 게 정상입니다.</span></div>
@@ -262,17 +283,17 @@
     <div class="demo-row" id="marks"></div>
 
     <h3>사무실 말풍선</h3>
-    <div class="stage" id="bubbles"></div>
+    <div class="floor-demo" id="bubbles"></div>
 
     <h3>Do &amp; don&rsquo;t</h3>
     <div class="grid2">
       <div class="good-ex">
-        <div class="exlabel" style="color:#1f7a48">✓ DO</div>
+        <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div class="demo-row" id="doMark"></div>
         <div class="note" style="margin:11px 0 0">에이전트 표식은 상태 점과 <strong>다른 모서리</strong>에 둡니다. 둘 다 읽힙니다.</div>
       </div>
       <div class="bad-ex">
-        <div class="exlabel" style="color:#a8322f">✕ DON&rsquo;T</div>
+        <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
         <div class="demo-row" id="dontMark"></div>
         <div class="note" style="margin:11px 0 0">연결 여부를 상태 색으로 섞으면 "일하는 중"과 "진짜로 일하는 중"을 구분할 수 없습니다.</div>
       </div>
@@ -793,7 +814,7 @@
 
   function modal({ dir, checks, ready, runtimeReady }) {
     const el = document.createElement("div");
-    el.className = "modal";
+    el.className = "modal modal-inline";
     el.innerHTML = `
       <div class="m-hd">
         <span class="m-av"></span>

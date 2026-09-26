@@ -45,6 +45,8 @@ value is missing, add a token.
 | --- | --- | --- |
 | `--ink` | `#1b1b1f` | Primary text |
 | `--solid` | `#17171c` | Primary button fill only |
+| `--solid-hover` | `#2a2a31` | Primary button, hovered |
+| `--hairline-hover` | `#cfcfd4` | A hairline that has to answer a hover |
 | `--muted` | `#86868d` | Secondary text, inactive nav |
 | `--faint` | `#b2b2b9` | Labels, metadata, placeholders |
 
@@ -59,14 +61,120 @@ value is missing, add a token.
 | `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
 | `--bad` / `--bad-soft` | `#e5484d` / `#fdeaea` | Destructive, changes requested |
 
+Each status needs three values, not one: the colour itself, a soft background,
+and **text dark enough to sit on that background**. The third was hardcoded on
+five pages before it was named.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--ok-ink` / `--ok-line` | `#1f7a48` / `#bfe6cf` | Text and border on `--ok-soft` |
+| `--info-ink` | `#2557b5` | Text on `--info-soft` |
+| `--warn-ink` / `--warn-line` | `#8a5c10` / `#f0d8a8` | Text and border on `--warn-soft` |
+| `--bad-ink` / `--bad-line` | `#a8322f` / `#f4c2c3` | Text and border on `--bad-soft` |
+| `--bad-wash` | `#fffafa` | A row that needs attention without alarm |
+| `--brand-ink` | `#4342a6` | Text on `--brand-soft` |
+
 ### Office
 
 The tile palette is a separate, shared map in the page script. One value is
 load-bearing:
 
-| | Value | Use |
+| Token | Value | Use |
 | --- | --- | --- |
 | Outline | `#2f2a3d` | Furniture **and** characters, so the scene reads as one |
+| `--floor` | `#b0854f` | The office floor, when a screen shows a scrap of it |
+
+### Terminal
+
+A command the player has to run is shown on a dark surface, because it belongs
+to their terminal rather than to the game.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--term` | `#17171c` | The block itself |
+| `--term-fg` / `--term-dim` | `#e8e8ea` / `#6f6f78` | The command, and the `# My Tiny Office — Style Guide
+
+What has to be written down. Everything that is easier to *look at* lives in
+[`docs/ui/`](ui/index.html) — open those pages first.
+
+- `ui/office.html` — the screen
+- `ui/components.html` — buttons, menu rows, chips
+- `ui/characters.html` — the twenty species
+
+Direction and screen structure are in [`DESIGN.md`](DESIGN.md).
+
+---
+
+## 1. Visual thesis
+
+> The chrome is monochrome. Colour belongs to the office and to the data.
+
+A saturated colour in the interface must be carrying information — progress,
+status, or the office scene itself. If it is only decorating, it is wrong.
+
+This is why the primary button is near-black rather than brand indigo: a button
+is chrome.
+
+---
+
+## 2. Colour tokens
+
+Declared on `:root` in every page. **Never write a raw hex in a rule** — if a
+value is missing, add a token.
+
+### Surfaces
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--page` | `#edecee` | Page behind the app panel |
+| `--surface` | `#ffffff` | The app panel, cards, popovers |
+| `--subtle` | `#f6f6f7` | Sidebar, inset areas, hover |
+| `--sunk` | `#eeeef0` | Progress tracks, avatar wells |
+| `--line` | `#ebebed` | Hairline borders, dividers |
+| `--line-2` | `#e0e0e3` | Borders that need to be seen |
+
+### Text
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--ink` | `#1b1b1f` | Primary text |
+| `--solid` | `#17171c` | Primary button fill only |
+| `--solid-hover` | `#2a2a31` | Primary button, hovered |
+| `--hairline-hover` | `#cfcfd4` | A hairline that has to answer a hover |
+| `--muted` | `#86868d` | Secondary text, inactive nav |
+| `--faint` | `#b2b2b9` | Labels, metadata, placeholders |
+
+### Accent and status
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--brand` | `#5b5bd6` | Focus rings. **Not** buttons |
+| `--brand-soft` | `#ecebfb` | Area chips, quoted memory, selected rows |
+| `--ok` / `--ok-soft` | `#2fae62` / `#e4f6ec` | `available`, completed |
+| `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | `ready` |
+| `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
+| `--bad` / `--bad-soft` | `#e5484d` / `#fdeaea` | Destructive, changes requested |
+
+Each status needs three values, not one: the colour itself, a soft background,
+and **text dark enough to sit on that background**. The third was hardcoded on
+five pages before it was named.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--ok-ink` / `--ok-line` | `#1f7a48` / `#bfe6cf` | Text and border on `--ok-soft` |
+| `--info-ink` | `#2557b5` | Text on `--info-soft` |
+| `--warn-ink` / `--warn-line` | `#8a5c10` / `#f0d8a8` | Text and border on `--warn-soft` |
+| `--bad-ink` / `--bad-line` | `#a8322f` / `#f4c2c3` | Text and border on `--bad-soft` |
+| `--bad-wash` | `#fffafa` | A row that needs attention without alarm |
+| `--brand-ink` | `#4342a6` | Text on `--brand-soft` |
+
+### Office
+
+The tile palette is a separate, shared map in the page script. One value is
+load-bearing:
+
+ prompt |
+| `--term-line` / `--term-hover` | `#3a3a42` / `#26262d` | Copy button border and hover |
 
 ---
 
@@ -104,8 +212,10 @@ layout does not twitch.
 
 ### Korean rules
 
-- **Never `letter-spacing` or `text-transform: uppercase` on Korean.** Both
-  break Hangul. Casing belongs in the dictionary, not in CSS.
+- **Never positive `letter-spacing`, and never `text-transform: uppercase`, on
+  Korean.** Tracking pulls the jamo of a syllable apart. Negative tracking on a
+  large heading (`-.01em`) only tightens it optically and is fine. Casing
+  belongs in the dictionary, not in CSS.
 - **Never concatenate a Korean particle.** 을/를 and 이/가 depend on whether the
   preceding syllable carries a final consonant, so `name + "가"` produces 단풍가
   and `area + "를"` produces 품질를. Compute it:
@@ -301,7 +411,23 @@ Rules for a new species:
 
 ---
 
-## 13. Do and don't
+## 13. Keeping the pages honest
+
+Seven pages each carry their own copy of the system, which is what makes them
+openable on their own — and what lets them drift. Two checks run over all of
+them:
+
+- **parity** — the rules a page shares with `components.html` must be identical
+- **audit** — every selector defined on more than one page must agree, no raw
+  colour may appear outside `:root`, button heights must be 42/36/30, every
+  radius must come from the set, a page with controls must define
+  `:focus-visible`, and no Korean may be tracked
+
+They have caught, among others: a 44px `btn-lg`, a chip with its own padding, a
+`.notice` carrying an outer margin, and three different components all called
+`.card`. Run them before believing a page is consistent.
+
+## 14. Do and don't
 
 | Do | Don't |
 | --- | --- |
@@ -320,6 +446,9 @@ Rules for a new species:
 | Let the company own its area list | Hard-code the vocabulary |
 | Preview the consequence in the modal | Ask to confirm a choice blind |
 | Compute the Korean particle | Concatenate 를 and hope |
+| One class name, one component | Reuse `.card` for three different things |
+| Give a variant its own name | Redeclare the base class further down |
+| Let the container own the spacing | Ship a component with an outer margin |
 | Say what happened | Say only the status name |
 | Label a confirm button with its effect | Label it `확인` |
 | Focus cancel first in a destructive dialog | Focus the destructive action |
