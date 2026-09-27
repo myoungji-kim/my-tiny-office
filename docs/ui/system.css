@@ -196,6 +196,8 @@ button { font: inherit; color: inherit; }
 
 .logo svg { width: 14px; height: 14px; color: #fff; }
 
+body:has(> .app) { padding: 22px 18px 40px; }
+
 .app {
     max-width: 1400px; margin: 0 auto;
     background: var(--surface);
@@ -430,6 +432,8 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .p-rule { height: 1px; background: var(--line); margin: 0 10px; }
 
 .p-state { padding: 11px 10px; }
+
+.p-state .track { margin-top: 9px; }
 
 .p-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 

@@ -8,11 +8,11 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  header.top { display: flex; align-items: flex-start; gap: 13px; }
+  header.top:has(> .logo) { display: flex; align-items: flex-start; gap: 13px; }
 
-  .logo { width: 32px; height: 32px; border-radius: 9px; background: var(--ink); display: grid; place-items: center; flex: none; margin-top: 4px; }
+  header.top .logo { width: 32px; height: 32px; border-radius: 9px; background: var(--ink); display: grid; place-items: center; flex: none; margin-top: 4px; }
 
-  .logo svg { width: 17px; height: 17px; color: #fff; }
+  header.top .logo svg { width: 17px; height: 17px; color: #fff; }
 
   header.top .sub { display: block; font-size: 14px; color: var(--faint); margin-top: 1px; }
 
