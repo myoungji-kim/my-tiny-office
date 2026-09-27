@@ -844,6 +844,7 @@
   // who is free starts right away. Work already past the office does not move.
   function settle(task) {
     if (task.status !== "backlog" && task.status !== "working") return;
+    if (RUNTIME.off && task.status === "backlog") return;
     if (PROJECTS.find((p) => p.id === task.project)?.status === "planned") return;
     if (!task.who) {
       task.status = "backlog";
@@ -1007,26 +1008,34 @@
     const box = document.getElementById("tkActs");
     box.innerHTML = "";
     const live = p.status === "active";
-    const button = (label, kind, run) => {
+    // `waits` marks what needs a working Claude Code.
+    const button = (label, kind, run, waits = false) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "btn btn-lg " + (kind === "primary" ? "btn-primary" : "btn-secondary");
       b.textContent = label;
+      b.disabled = waits && RUNTIME.off;
       b.addEventListener("click", run);
       box.appendChild(b);
       return b;
     };
-    if (task.status === "backlog" && live) button(t().actions.assign, "primary", () => assignTask(task));
+    if (task.status === "backlog" && live) button(t().actions.assign, "primary", () => assignTask(task), true);
     if (task.status === "working" && live) {
-      button(t().actions.edit, "secondary", () => openEditTask(task));
-      if (!task.peer) { const ask = button(t().actions.pickPeer, "secondary", () => open(task, ask, false, true)); }
+      button(t().actions.edit, "secondary", () => openEditTask(task), true);
+      if (!task.peer) { const ask = button(t().actions.pickPeer, "secondary", () => open(task, ask, false, true), true); }
     }
     if (task.status === "approval" && p.status !== "done") {
       button(t().actions.hold, "secondary", () => askHoldTask(task));
-      button(t().actions.rework, "secondary", () => askRework(task));
-      button(t().actions.approve, "primary", () => approveTask(task));
+      button(t().actions.rework, "secondary", () => askRework(task), true);
+      button(t().actions.approve, "primary", () => approveTask(task), !!task.outbound?.length);
     }
-    if (task.status === "held" && live) button(t().actions.resume, "primary", () => resumeTask(task));
+    if (task.status === "held" && live) button(t().actions.resume, "primary", () => resumeTask(task), true);
+    if (box.querySelector(":disabled")) {
+      const note = document.createElement("span");
+      note.className = "ghost-note";
+      note.textContent = t().runtime.cannotStart;
+      box.prepend(note);
+    }
     if (task.status !== "done" && writable(p)) {
       const more = document.createElement("button");
       more.className = "ibtn";
@@ -1096,10 +1105,10 @@
     notice.innerHTML =
       p.status === "planned" ? `<div class="notice"><span class="n-ic">${icon.flag}</span>
           <span class="n-tx"><b>${t().plannedNotice}</b><span>${p.folder ? t().plannedNoticeWhy : t().needsFolder}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-start${p.folder ? "" : " disabled"}>${t().actions.startProject}</button></span></div>`
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-start${p.folder && !RUNTIME.off ? "" : " disabled"}>${t().actions.startProject}</button></span></div>`
       : p.status === "held" ? `<div class="notice notice-warn"><span class="n-ic">${icon.pause}</span>
           <span class="n-tx"><b>${t().heldNotice}</b><span>${tx(p.reason)} · ${t().heldNoticeHint}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-resume>${t().actions.resumeProject}</button></span></div>`
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-resume${RUNTIME.off ? " disabled" : ""}>${t().actions.resumeProject}</button></span></div>`
       : p.status === "done" ? `<div class="notice"><span class="n-ic">${icon.check}</span>
           <span class="n-tx"><b>${t().doneNotice(shortDate(p.doneOn))}</b><span>${t().doneNoticeWhy}</span></span>
           <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-resume>${t().actions.reopenProject}</button></span></div>`
@@ -1139,8 +1148,8 @@
     const unsettled = tasksOf(p).filter((k) => k.status === "working" || k.status === "approval").length;
     const rows =
       p.status === "planned" ? [
-        p.folder ? menu(t().actions.startProject, "key", () => startProject(p)) : offRow(t().actions.startProject),
-        ...(p.folder ? [] : [why(t().needsFolder)]),
+        p.folder && !RUNTIME.off ? menu(t().actions.startProject, "key", () => startProject(p)) : offRow(t().actions.startProject),
+        ...(p.folder ? RUNTIME.off ? [why(t().runtime.cannotStart)] : [] : [why(t().needsFolder)]),
         menu(t().actions.editProject, null, () => openEditProject(p)),
       ]
       : p.status === "active" ? [
@@ -1149,7 +1158,7 @@
         ...(unsettled ? [offRow(t().actions.finishProject), why(t().cannotFinish(unsettled))] : [menu(t().actions.finishProject, null, () => askFinishProject(p))]),
       ]
       : p.status === "held" ? [
-        menu(t().actions.resumeProject, "key", () => resumeProject(p)),
+        ...(RUNTIME.off ? [offRow(t().actions.resumeProject), why(t().runtime.cannotStart)] : [menu(t().actions.resumeProject, "key", () => resumeProject(p))]),
         menu(t().actions.editProject, null, () => openEditProject(p)),
       ]
       : [menu(t().actions.reopenProject, null, () => resumeProject(p))];
@@ -1262,12 +1271,18 @@
     const live = here().status === "active";
     const kept = here().status !== "done";
     const draft = writable(here());
+    // Whatever would start or resume an agent waits while Claude Code is
+    // signed out: the row stays, disabled, and the reason is said once.
+    const gated = (label, kind, run) => (RUNTIME.off ? offRow(label) : menu(label, kind, run));
+    const reviewOpen = !task.peer || task.peer.state === "suggested";
 
     if (task.status === "backlog" && live) {
-      acts.appendChild(menu(t().actions.assign, null, () => assignTask(task)));
+      acts.appendChild(gated(t().actions.assign, null, () => assignTask(task)));
     }
 
-    if (task.status === "working" && live) {
+    if (task.status === "working" && live && RUNTIME.off && reviewOpen) {
+      acts.appendChild(offRow(t().actions.pickPeer));
+    } else if (task.status === "working" && live) {
       // The system offers the review; it knows the area and who was taught it.
       if (task.peer?.state === "suggested") {
         reviewChoices(task, acts, say);
@@ -1287,14 +1302,15 @@
     // This is the line the work does not cross on its own.
     if (task.status === "approval" && kept) {
       say("p-said", `<b>${t().approveTitle}</b>${t().approveWhy}`);
-      acts.appendChild(menu(t().actions.approve, "key", () => approveTask(task)));
-      acts.appendChild(menu(t().actions.rework, null, () => askRework(task)));
+      // a commit needs no agent, but writing outside resumes the session
+      acts.appendChild(task.outbound?.length ? gated(t().actions.approve, "key", () => approveTask(task)) : menu(t().actions.approve, "key", () => approveTask(task)));
+      acts.appendChild(gated(t().actions.rework, null, () => askRework(task)));
       acts.appendChild(menu(t().actions.hold, null, () => askHoldTask(task)));
     }
 
     if (task.status === "held") {
       say("p-said", `<b>${t().heldBecause}</b>${tx(task.reason)}`);
-      if (live) acts.appendChild(menu(t().actions.resume, "key", () => resumeTask(task)));
+      if (live) acts.appendChild(gated(t().actions.resume, "key", () => resumeTask(task)));
       acts.appendChild(menu(t().actions.teach, null, () => teachFrom(task)));
     }
 
@@ -1302,7 +1318,7 @@
     // thrown away. One waiting for approval is finished too - the answer there
     // is to approve it, send it back or hold it, not to rewrite what was done.
     if (task.status !== "done" && draft) {
-      if (task.status !== "approval") acts.appendChild(menu(t().actions.edit, null, () => openEditTask(task)));
+      if (task.status !== "approval") acts.appendChild(task.status === "working" ? gated(t().actions.edit, null, () => openEditTask(task)) : menu(t().actions.edit, null, () => openEditTask(task)));
       acts.appendChild(menu(t().actions.removeTask, "bad", () => askRemoveTask(task)));
     }
 
@@ -1311,6 +1327,7 @@
     detail.href = "#" + task.project + "/" + task.id;
     detail.textContent = t().actions.detail;
     detail.addEventListener("click", close);
+    if (acts.querySelector(".mrow:disabled")) acts.prepend(why(t().runtime.cannotStart));
     acts.prepend(detail);
     pop.appendChild(acts);
 
@@ -1410,6 +1427,7 @@
       if (editing?.status === "held") return picked ? t().whenResumed(picked.name) : t().whenResumedAnyone;
       if (PROJECTS.find((p) => p.id === into)?.status === "planned") return picked ? t().whenStarted(picked.name) : t().whenStartedAnyone;
       if (!picked) return t().whoTakes;
+      if (RUNTIME.off && free(picked)) return t().runtime.cannotStart;
       return free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name);
     };
 
@@ -1863,5 +1881,6 @@
     }
   }
   window.addEventListener("hashchange", route);
+  document.addEventListener("runtimeback", () => { close(); render(); });
   route();
 </script>
