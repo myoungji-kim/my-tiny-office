@@ -32,7 +32,7 @@ value is missing, add a token.
 | `--page` | `#edecee` | Page behind the app panel |
 | `--surface` | `#ffffff` | The app panel, cards, popovers |
 | `--subtle` | `#f6f6f7` | Sidebar, inset areas, hover |
-| `--sunk` | `#eeeef0` | Progress tracks, avatar wells |
+| `--sunk` | `#eeeef0` | Avatar wells, quiet fills |
 | `--line` | `#ebebed` | Hairline borders, dividers |
 | `--line-2` | `#e0e0e3` | Borders that need to be seen |
 

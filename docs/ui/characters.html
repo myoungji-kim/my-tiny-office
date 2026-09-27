@@ -170,14 +170,14 @@
     ko: {
       ...WORDS.ko,
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
-      minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
+      spent: (m) => m + "분째", estimate: (m) => "예상 " + m + "분",
       notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
       goodName: "모카", badName: "모카냥이 🐱", badRole: "백엔드 개발 담당 고양이",
     },
     en: {
       ...WORDS.en,
       work: "WORK", noTask: "Nothing assigned", away: "Away",
-      minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
+      spent: (m) => m + " min so far", estimate: (m) => "~" + m + " min",
       notStarted: "Not started", waiting: "Free", onLeave: "Leave",
       goodName: "Mocha", badName: "Mocha the Cat 🐱", badRole: "Cat in charge of backend work",
     },
@@ -317,14 +317,8 @@
   /* ── cards ───────────────────────────────────────────────────── */
   const cards = document.getElementById("cards");
   seats.forEach((s, i) => {
-    const v = s.total ? Math.round((s.spent / s.total) * 100) : 0;
-    const bar =
-      s.status === "working" ? `<i style="width:${v}%;background:var(--warn)"></i>`
-      : s.status === "ready" ? `<i style="width:3%;background:var(--info)"></i>`
-      : s.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
-      : "";
     const nums =
-      s.status === "working" ? `<span>${t().minutes(s.spent, s.total)}</span><b>${v}%</b>`
+      s.status === "working" ? `<span>${t().spent(s.spent)}</span><b>${t().status.working}</b>`
       : s.status === "ready" ? `<span>${t().estimate(s.total)}</span><b>${t().notStarted}</b>`
       : s.status === "available" ? `<span>${tx(s.last)}</span><b>${t().waiting}</b>`
       : `<span>${tx(s.back)}</span><b>${t().onLeave}</b>`;
@@ -342,7 +336,6 @@
       <span class="c-rule"></span>
       <span class="c-k">${t().work}</span>
       <span class="c-task">${line}</span>
-      <span class="meter">${bar}</span>
       <span class="c-nums">${nums}</span>`;
     el.querySelector(".c-av").prepend(sprite(s.c, 2));
     cards.appendChild(el);

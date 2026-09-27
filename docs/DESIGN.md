@@ -53,7 +53,7 @@ Avoid:
 - 3D realism
 - texture or warmth applied to the chrome instead of to the office
 
-Density comes from status, progress and cards — not from decoration. What the
+Density comes from status, time taken and cards — not from decoration. What the
 user should see first: who is working, their current task, review status,
 blockers, recent activity, team workload.
 
@@ -119,7 +119,7 @@ Status mirrors the domain rather than inventing its own vocabulary:
 
 | Status | Meaning | Shown as |
 | --- | --- | --- |
-| `working` | A task is in progress | Amber dot with ring, live progress |
+| `working` | A task is in progress | Amber dot with ring, time taken |
 | `ready` | A task is assigned, not started | Hollow blue dot |
 | `available` | No task assigned | Solid green dot |
 | `vacation` | Employee is away | Grey dash |
@@ -438,9 +438,6 @@ the measured runtime surface.
 
 ## Open questions
 
-- **The office cards still show a share of an estimate.** Every employee is a
-  real agent, so nobody knows when work ends: the cards should show time taken,
-  as the board does.
 - **The domain predates the board.** `src/domain/task.ts` needs backlog,
   working, approval, done and held, plus the blocked mark, and time taken rather
   than progress derived from `estimatedDuration`.

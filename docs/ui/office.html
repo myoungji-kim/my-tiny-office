@@ -161,7 +161,7 @@
         lounge: "휴게실", loungeWhy: "이미 있어요.",
       },
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
-      minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
+      spent: (m) => m + "분째", estimate: (m) => "예상 " + m + "분",
       notStarted: "시작 전", waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
       inProgress: "진행 중", assigned: "할당된 업무", lastDone: "최근 완료", vacationLabel: "휴가",
       actions: {
@@ -193,7 +193,7 @@
         lounge: "Lounge", loungeWhy: "You already have one.",
       },
       work: "WORK", noTask: "Nothing assigned", away: "Away",
-      minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
+      spent: (m) => m + " min so far", estimate: (m) => "~" + m + " min",
       notStarted: "Not started", waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",
       inProgress: "In progress", assigned: "Assigned", lastDone: "Last finished", vacationLabel: "On leave",
       actions: {
@@ -242,7 +242,6 @@
   const people = DESKS.map((d) => (d.id ? { ...fromCompany.get(d.id), ...d } : d));
   const staffed = people.filter((p) => p.id);
   const byId = new Map(staffed.map((p) => [p.id, p]));
-  const pct = (p) => (p.task ? Math.round((p.task.spent / p.task.total) * 100) : 0);
 
   /* ── rooms ───────────────────────────────────────────────────── */
   // A tab is a room. The whole floor is one of them, each team has its own,
@@ -411,14 +410,8 @@
   renderMembers();
   /* ── team cards ──────────────────────────────────────────────── */
   function cardInner(p) {
-    const v = pct(p);
-    const bar =
-      p.status === "working" ? `<i style="width:${v}%;background:var(--warn)"></i>`
-      : p.status === "ready" ? `<i style="width:3%;background:var(--info)"></i>`
-      : p.status === "available" ? `<i style="width:100%;background:var(--ok)"></i>`
-      : "";
     const nums =
-      p.status === "working" ? `<span>${t().minutes(p.task.spent, p.task.total)}</span><b>${v}%</b>`
+      p.status === "working" ? `<span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b>`
       : p.status === "ready" ? `<span>${t().estimate(p.task.total)}</span><b>${t().notStarted}</b>`
       : p.status === "available" ? `<span>${t()[p.last]}</span><b>${t().waiting}</b>`
       : `<span>${t()[p.back]}</span><b>${t().onLeave}</b>`;
@@ -437,7 +430,6 @@
       <span class="c-rule"></span>
       <span class="c-k">${t().work}</span>
       <span class="c-task">${line}</span>
-      <span class="meter">${bar}</span>
       <span class="c-nums">${nums}</span>`;
   }
 
@@ -558,11 +550,9 @@
   let anchor = null;
 
   function stateBlock(p) {
-    const v = pct(p);
     if (p.status === "working")
       return `<span class="c-k">${t().inProgress}</span><span class="c-task">${t().tasks[p.task.key]}</span>
-        <span class="track"><i style="width:${v}%;background:var(--warn)"></i></span>
-        <span class="p-nums"><span>${t().minutes(p.task.spent, p.task.total)}</span><b>${v}%</b></span>`;
+        <span class="p-nums"><span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b></span>`;
     if (p.status === "ready")
       return `<span class="c-k">${t().assigned}</span><span class="c-task">${t().tasks[p.task.key]}</span>
         <span class="p-nums"><span>${t().estimate(p.task.total)}</span><b>${t().notStarted}</b></span>`;

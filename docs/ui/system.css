@@ -440,8 +440,6 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .p-state { padding: 11px 10px; }
 
-.p-state .track { margin-top: 9px; }
-
 .p-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 
 .p-nums b { font-weight: 600; color: var(--ink); flex: none; }
@@ -449,10 +447,6 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .p-acts { padding-top: 5px; }
 
 .p-why { margin: 0; font-size: 13px; color: var(--muted); padding: 1px 10px 7px; }
-
-.track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
-
-.track i { display: block; height: 100%; border-radius: 999px; }
 
 .scrim {
     position: fixed; inset: 0; z-index: 60; background: rgb(20 20 25 / .34);
@@ -586,10 +580,6 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .c-k { display: block; font-size: 12px; font-weight: 600; color: var(--faint); }
 
 .c-task { display: block; font-size: 15px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.meter { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 11px; }
-
-.meter i { display: block; height: 100%; border-radius: 999px; }
 
 .c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 
