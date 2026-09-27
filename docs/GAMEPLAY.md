@@ -4,16 +4,34 @@
 
 Each employee has:
 
-- identity
-- avatar
-- role
-- team
-- specialty
-- memories
-- personality
-- availability
-- current tasks
-- optional Agent
+- a nickname the player wrote, and a species that only decides their sprite
+- a role, from the company's list
+- a team, or none
+- memories, and the expertise that follows from them
+- a way of working (일하는 방식)
+- a status: working, ready, available or on leave
+- a current task
+- optionally, an Agent
+
+## People and teams
+
+**Hiring needs a free desk.** A new hire starts simulated, with no memory and no
+way of working; the first hire is made in first-run, the rest from the office,
+the org chart or the people screen.
+
+**A role is a job title from the company's list.** Everyone has one, so the last
+role cannot be removed, and removing one that people hold changes them to
+another first. No rule hangs on a role: expertise and review come from memory.
+
+**A team is optional, and there is nothing above it.** A company of one has no
+reason to have a team, so the first hire starts without one; teams appear when
+the work splits. Removing a team moves its people to another team or to none.
+A team is organisation, not space — making one does not build its room.
+
+**Leave and letting go.** Sending someone on leave returns their task to the
+backlog, and nobody on leave can be given work. Letting someone go returns
+their task too and takes what they were taught with them; the company's
+history keeps their hire.
 
 ## Agent
 
@@ -109,11 +127,7 @@ Example:
 PR #4821 — Payment API error response change
 
 The office suggests a reviewer by the task's area, from the people who have
-been taught it:
-
-- Architecture, Type safety, Database, Security, Localization, Product, Quality
-
-Where a review stands:
+been taught it. Where a review stands:
 - suggested — the area asks for a second pair of eyes, nobody picked yet
 - reviewing — a colleague is looking
 - settled — they are done, and the work carries on or is corrected
@@ -123,6 +137,17 @@ None of these is a task status. The task is `working` throughout, and moves to
 
 ## Memory
 
+Under the Claude Code runtime a memory is not a metaphor: it is what the
+employee's agent actually carries into the work.
+
+```text
+업무나 PR에서 문제가 나옴
+  → 그 자리에서 "이거 기억해둬"
+  → 그 직원의 기억에 추가 (출처 = 그 업무)
+  → 다음 업무에서 참조됨
+  → "모카가 [인덱스 규칙]을 참고했어요"   ← 루프가 닫히는 지점
+```
+
 Expertise is taught, not grown. An employee does not fill a skill bar; the
 player tells them something worth keeping, and it stays with them.
 
@@ -131,20 +156,41 @@ A memory has an area of expertise, the text itself, and the work it came from:
 - Database — "복합 인덱스는 컬럼 순서가 중요해요" — from the slow payment lookup
 - Security — "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요" — told directly
 
-The company starts with seven areas — Architecture, Type safety, Database,
-Security, Localization, Product, Quality — and can add, rename or delete its
-own. An area becomes someone's expertise when they are taught something in it,
-and that is also what lets them review a PR in it.
+The source is never asked for: teaching opened from a task takes that task as
+its source, and anywhere else it was told directly.
 
-A rule about how work is done ("PR은 300줄을 넘기지 않아요") is not expertise.
-It is that person's 일하는 방식, or company memory when everyone should follow
-it; neither has an area.
+What someone is told goes to one of three places, and only one has an area:
+
+| | What | Area |
+| --- | --- | --- |
+| 기억 | Expert knowledge — "복합 인덱스는 컬럼 순서가 중요해요" | Always |
+| 일하는 방식 | How this person works — "테스트를 먼저 써" | None |
+| 회사 기억 | What everyone follows — "커밋은 conventional prefix로" | None |
+
+### Expertise
+
+**Expertise is taught, never assigned.** An area becomes someone's expertise
+when they are taught something in it, and that is also what lets them review a
+PR in it. A role or a team never implies it: DBA does not mean "already knows
+databases", or there would be nothing to teach.
+
+**The company owns the list of areas.** It starts with seven — Architecture,
+Type safety, Database, Security, Localization, Product, Quality — and adds,
+renames or removes its own; a studio that cares about 게임 서버 says so.
+Memory and tasks point at an area by id, so a rename changes nothing else, and
+removing an area that holds memory moves that memory elsewhere first. There is
+no 프로세스 area: a rule about how work is done is a way of working.
+
+An area nobody knows is a gap: its work starts with nothing to draw on and
+nobody can review it.
 
 A memory is used, not just stored: when an employee references one, the
 activity feed says so. Without that, teaching is only a notes field.
 
 Memory has no cap, but it does have a cost: everything taught is carried into
-the work. A memory that stops being referenced is corrected or deleted.
+every task, whatever its area, as a person brings everything they know. A
+memory that stops being referenced is corrected or deleted; there is no
+archive.
 
 ## Activity Feed
 
@@ -176,6 +222,22 @@ The player can reconnect/retry.
 A runtime failure should not delete the employee or task.
 
 ## Progression
+
+The company's history records milestones as they happen, not reconstructed
+later, so a hire stays in it after the person leaves:
+
+| Milestone | When |
+| --- | --- |
+| 창업 | The company is created |
+| 합류 | Every hire; the first is called out |
+| 팀 생김 | A team gets its first member |
+| 첫 업무 완료 | Once, company-wide |
+| 업무 N건 | 10 · 50 · 100 · 500 |
+| 첫 리뷰 | The first peer review settles |
+| 기억 N개 | 10 · 50 · 100 |
+| 프로젝트 완료 | A project's last task is done |
+
+There are no growth stages yet; the history is what shows the company growing.
 
 Early game:
 - one employee

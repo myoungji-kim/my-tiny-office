@@ -120,7 +120,7 @@ Employee
 ├── role
 ├── team
 ├── memories
-├── personality
+├── workingStyle
 ├── availability
 ├── tasks
 └── Agent
@@ -190,8 +190,8 @@ Employee
 ├── companyId
 ├── name
 ├── role
-├── teamId
-├── personality
+├── teamId?
+├── workingStyle
 ├── availability
 └── agentId?
 
@@ -490,6 +490,8 @@ The simulation owns events such as:
 - ReviewApproved
 - ChangesRequested
 - EmployeeWentOnVacation
+- EmployeeReturned
+- EmployeeLetGo
 - OfficeExpanded
 
 Runtime events can be translated into domain events:

@@ -11,15 +11,12 @@ Direction and screen structure are in [`DESIGN.md`](DESIGN.md).
 
 ---
 
-## 1. Visual thesis
+## 1. Colour carries information
 
-> The chrome is monochrome. Colour belongs to the office and to the data.
-
-A saturated colour in the interface must be carrying information — progress,
-status, or the office scene itself. If it is only decorating, it is wrong.
-
-This is why the primary button is near-black rather than brand indigo: a button
-is chrome.
+The chrome is monochrome (DESIGN.md). A saturated colour in the interface must
+be carrying information — progress, status, or the office scene itself. If it
+is only decorating, it is wrong. That is why the primary button is near-black
+rather than brand indigo: a button is chrome.
 
 ---
 
@@ -62,8 +59,7 @@ value is missing, add a token.
 | `--bad` / `--bad-soft` | `#e5484d` / `#fdeaea` | Destructive, changes requested |
 
 Each status needs three values, not one: the colour itself, a soft background,
-and **text dark enough to sit on that background**. The third was hardcoded on
-five pages before it was named.
+and **text dark enough to sit on that background**.
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -92,88 +88,7 @@ to their terminal rather than to the game.
 | Token | Value | Use |
 | --- | --- | --- |
 | `--term` | `#17171c` | The block itself |
-| `--term-fg` / `--term-dim` | `#e8e8ea` / `#6f6f78` | The command, and the `# My Tiny Office — Style Guide
-
-What has to be written down. Everything that is easier to *look at* lives in
-[`docs/ui/`](ui/index.html) — open those pages first.
-
-- `ui/office.html` — the screen
-- `ui/components.html` — buttons, menu rows, chips
-- `ui/characters.html` — the twenty species
-
-Direction and screen structure are in [`DESIGN.md`](DESIGN.md).
-
----
-
-## 1. Visual thesis
-
-> The chrome is monochrome. Colour belongs to the office and to the data.
-
-A saturated colour in the interface must be carrying information — progress,
-status, or the office scene itself. If it is only decorating, it is wrong.
-
-This is why the primary button is near-black rather than brand indigo: a button
-is chrome.
-
----
-
-## 2. Colour tokens
-
-Declared on `:root` in every page. **Never write a raw hex in a rule** — if a
-value is missing, add a token.
-
-### Surfaces
-
-| Token | Value | Use |
-| --- | --- | --- |
-| `--page` | `#edecee` | Page behind the app panel |
-| `--surface` | `#ffffff` | The app panel, cards, popovers |
-| `--subtle` | `#f6f6f7` | Sidebar, inset areas, hover |
-| `--sunk` | `#eeeef0` | Progress tracks, avatar wells |
-| `--line` | `#ebebed` | Hairline borders, dividers |
-| `--line-2` | `#e0e0e3` | Borders that need to be seen |
-
-### Text
-
-| Token | Value | Use |
-| --- | --- | --- |
-| `--ink` | `#1b1b1f` | Primary text |
-| `--solid` | `#17171c` | Primary button fill only |
-| `--solid-hover` | `#2a2a31` | Primary button, hovered |
-| `--hairline-hover` | `#cfcfd4` | A hairline that has to answer a hover |
-| `--muted` | `#86868d` | Secondary text, inactive nav |
-| `--faint` | `#b2b2b9` | Labels, metadata, placeholders |
-
-### Accent and status
-
-| Token | Value | Use |
-| --- | --- | --- |
-| `--brand` | `#5b5bd6` | Focus rings. **Not** buttons |
-| `--brand-soft` | `#ecebfb` | Area chips, quoted memory, selected rows |
-| `--ok` / `--ok-soft` | `#2fae62` / `#e4f6ec` | `available`, completed |
-| `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | `ready` |
-| `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
-| `--bad` / `--bad-soft` | `#e5484d` / `#fdeaea` | Destructive, changes requested |
-
-Each status needs three values, not one: the colour itself, a soft background,
-and **text dark enough to sit on that background**. The third was hardcoded on
-five pages before it was named.
-
-| Token | Value | Use |
-| --- | --- | --- |
-| `--ok-ink` / `--ok-line` | `#1f7a48` / `#bfe6cf` | Text and border on `--ok-soft` |
-| `--info-ink` | `#2557b5` | Text on `--info-soft` |
-| `--warn-ink` / `--warn-line` | `#8a5c10` / `#f0d8a8` | Text and border on `--warn-soft` |
-| `--bad-ink` / `--bad-line` | `#a8322f` / `#f4c2c3` | Text and border on `--bad-soft` |
-| `--bad-wash` | `#fffafa` | A row that needs attention without alarm |
-| `--brand-ink` | `#4342a6` | Text on `--brand-soft` |
-
-### Office
-
-The tile palette is a separate, shared map in the page script. One value is
-load-bearing:
-
- prompt |
+| `--term-fg` / `--term-dim` | `#e8e8ea` / `#6f6f78` | The command, and the `$` prompt |
 | `--term-line` / `--term-hover` | `#3a3a42` / `#26262d` | Copy button border and hover |
 
 ---
@@ -237,9 +152,10 @@ layout does not twitch.
 - Focus is `2px solid var(--brand)` with `outline-offset: 2px`, via
   `:focus-visible`. **Never removed anywhere.**
 - **Every inline `<svg>` needs an explicit width and height.** Without one it
-  stretches to fill its grid or flex cell, which has produced a giant plus and a
-  giant folder in this codebase already. Size it on the container rule, not per
+  stretches to fill its grid or flex cell. Size it on the container rule, not per
   icon.
+- **`[hidden]` always hides.** `system.css` makes it win over any component's
+  own `display`, so a component never needs its own `[hidden]` rule.
 - Focus moves into a popover only when it was opened from the keyboard
   (`event.detail === 0`); a mouse user should never see a ring appear.
 
@@ -296,30 +212,23 @@ finished. "에이전트 연결이 끊어졌어요" is half of it; "진행 중이
 An empty state is not an error and does not apologise. Offer the action that
 fills it, and — where the feature is optional — an honest way to skip it.
 
-### Modal
+### Modals and confirm dialogs
 
 Covering the screen is for a choice that has to be answered now. Anything
 reversible belongs in a popover.
 
-- A dialog is yes/no. A modal is for picking something.
-- Focus starts on **cancel**; closing returns focus to the trigger.
+- A modal is for picking or writing something; a confirm dialog is yes/no, and
+  only for work that is hard to undo. It replaces `confirm()`.
+- Focus starts on **cancel** — except in a dialog whose point is writing
+  (teaching, hiring), which starts on its first field. Closing returns focus to
+  the trigger.
 - `Escape` and a click outside both close, and closing saves nothing.
-- The confirm button names the choice — `이 업무 맡기기`, never `확인`.
+- The confirm button says **what will happen** — `이 업무 맡기기`, `내보내기` —
+  never `확인`.
 - **Show the consequence of the choice in the same window**, before it is made.
-
-### Confirm dialog
-
-Replaces `confirm()`. Only for work that is hard to undo.
-
-- Destructive dialogs use the danger icon and a danger confirm button.
-- **Focus starts on cancel**, not on confirm.
-- `Escape` cancels.
-- The confirm button is labelled with **what will happen** — `내보내기`,
-  `2명에게 맡기기` — never `확인`.
-
-A long blocking operation would want a progress lock box. Nothing in the game
-blocks long enough yet, so it is not in the system; add it when starting an
-agent session proves slow.
+- A destructive confirm uses the danger icon and a danger button.
+- Removing one row asks once more **inside its menu** rather than in a dialog;
+  a dialog is for when removing needs a choice, such as where its contents go.
 
 ---
 
@@ -381,7 +290,7 @@ Rules for a new species:
 | --- | --- |
 | `name` | The player's nickname. **Never goes through i18n.** |
 | `species` | Picks a sprite. Display names are translated. |
-| `role` | Domain value; the display string is translated. |
+| `role` | A job title from the company's list. Written the same in both languages. |
 
 - Nicknames stay short — 2–3 Hangul characters, ≤6 Latin — so cards do not shift.
 - No emoji and no species description in a name. The sprite already says it.
@@ -403,8 +312,9 @@ Rules for a new species:
 - **Never bake text into canvas, SVG or any other asset.** Names and labels are
   DOM elements positioned over the canvas.
 - No fixed widths, no hard-coded line breaks.
-- Test both languages. The action popover had to be widened once because an
-  English role outgrew a width that fit the Korean.
+- Test both languages; English usually runs longer than Korean.
+- A label the player wrote — a nickname, a company name, an area, team or role
+  they named — is shown as written in either language.
 
 ---
 
@@ -433,11 +343,8 @@ The shared half of the pages lives in two files that every page loads:
 
 A page keeps only what is its own. Both are plain, relative `<link>` and
 `<script>`, never modules, so a page still opens by double-clicking it.
-
-This replaced a worse arrangement. Each page used to carry its own copy of the
-system: 172 rules existed on more than one page, the token block seven times,
-the cast and the tile engine five times each, and nothing but a check kept the
-copies equal. They did not stay equal.
+Anything two pages need — a dialog, a menu, a helper — lives in these files,
+never as a copy.
 
 `npm run check:ui` runs four checks over what is left:
 
@@ -453,13 +360,6 @@ copies equal. They did not stay equal.
   redefining a selector, redeclaring a name, or declaring a token of its own
 - **verify-docs** — the token table here must match `system.css`, and the cast
   claims must match `system.js`
-
-They have caught, among others: a 44px `btn-lg`, a chip with its own padding, a
-`.notice` carrying an outer margin, three different components all called
-`.card`, one sidebar built with a wrapper class and one without, a page whose
-script looked up an element it no longer had, a page still titled after an early
-draft, and two pages using `var(--r-card)` without ever defining it, so their
-cards had square corners.
 
 A check reports drift; it does not prevent it. When something is shared, move it
 into `system.css` or `system.js` rather than adding a check that the copies
@@ -478,9 +378,9 @@ still agree.
 | Add the pattern to `ui/` first | Invent a pattern in a feature branch |
 | Let the sprite say the species | Write the species next to the name |
 | Show counts of real events | Invent a 0–100 bar |
-| Name the review area nobody knows | Show only what exists |
+| Name the area nobody knows | Show only what exists |
 | Show that a memory was used | Let teaching disappear into a notes field |
-| Fold a long list, most-used first | Scroll forever |
+| Split a long page into tabs, a long list by area | Scroll forever |
 | Let the company own its area list | Hard-code the vocabulary |
 | Preview the consequence in the modal | Ask to confirm a choice blind |
 | Compute the Korean particle | Concatenate 를 and hope |

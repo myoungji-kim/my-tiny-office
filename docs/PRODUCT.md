@@ -47,31 +47,9 @@ The app is not intended to visualize every agent running on the local machine.
 
 ## First Run
 
-1. Welcome
-2. Choose AI mode:
-   - Simulation only
-   - Claude Code
-   - Local AI (future/optional)
-3. Create company
-4. Select starting size
-5. Create initial employees
-6. Open office
-
-If Claude Code is selected:
-- detect availability
-- confirm it is ready
-- do not ask for an Anthropic API key for the Claude Code runtime
-
-The first playable slice covers only the company, employee and task loop. The
-first-run screen asks for a company name and nothing else, because no AI runtime
-exists yet to choose between.
-
-## Starting Company Sizes
-
-- Solo
-- Tiny Team
-- Growing Team
-- Existing Company
+Create the company, hire the first employee, arrive at the office. No AI runtime
+is chosen here: an employee does not need one, and connecting one is an upgrade
+the player makes later, per employee. The screens are in DESIGN.md.
 
 ## Player Actions
 
@@ -86,6 +64,8 @@ exists yet to choose between.
 - configure agent runtime
 
 ## Office Progression
+
+The direction, not yet a design:
 
 1. One room / one desk / one employee
 2. Team rooms
@@ -103,7 +83,7 @@ AI should enhance the simulation, not replace it.
 For example:
 - A task can exist before an Agent is connected.
 - A player can complete early gameplay without AI.
-- An employee can have memories and personality independent of model choice.
+- An employee can have memories and a way of working independent of model choice.
 - Runtime status can influence employee status without becoming the only source of truth.
 
 ## Localization
