@@ -275,7 +275,7 @@ Hire employee — their agent runs on the company's Claude Code
   ↓
 Give work
   ↓
-Launch a session for the task in its project's folder
+Launch a session for the task in its own worktree of the project
   ↓
 Store session association
   ↓
@@ -328,7 +328,7 @@ button says it is sending the change rather than saving it.
 
 **Handing the task to a different employee is not this.** A session belongs to
 one employee's agent, so the work starts again in a new session, with only the
-folder carried over. The board says so before it happens.
+task's worktree carried over. The board says so before it happens.
 
 **The project of a running task cannot change.** The session was launched in
 that workspace, and a different project is a different folder. The task is
@@ -462,20 +462,21 @@ Do not import arbitrary sessions.
 
 ## 11. Workspace Model
 
-Each project has one workspace, its folder; a company has as many as it has
-projects.
+Each project has one workspace, its folder, and every task in it a worktree of
+that folder; a company has as many as it has projects.
 
 ```text
 Company
 ├── Project A
 │   └── Workspace A
+│       └── .worktrees/<task>   one per task
 ├── Project B
 │   └── Workspace B
 └── Project C
     └── Workspace C
 ```
 
-An Agent Session may be associated with one workspace.
+An Agent Session runs in one task's worktree.
 
 Workspace is a useful scoping signal, but workspace alone is not sufficient identity because multiple sessions can exist in the same workspace.
 

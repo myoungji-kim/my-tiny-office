@@ -19,7 +19,7 @@ before building or changing a screen.
 | --- | --- |
 | `ui/first-run.html` | First run: the Claude Code check, the company, the first hire, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
-| `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
+| `ui/projects.html` | The project list, a project's board, a task's page, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
 | `ui/settings.html` | The company's Claude Code, language, the open company's file, export, import and deleting it |
@@ -571,7 +571,8 @@ the measured runtime surface.
 - **The domain predates the board.** `src/domain/task.ts` needs backlog,
   working, approval, done and held, plus the blocked mark, and time taken rather
   than progress derived from `estimatedDuration`. Projects need their status
-  and priority, and employees the `reviewing` status.
+  and priority, employees the `reviewing` status, and a task its worktree,
+  branch and drafted outside writes.
 - **The code opens one database.** `src/infrastructure/persistence/database.ts`
   opens a single `my-tiny-office.db`; a file per company, the list of them, and
   the language and last company in `settings.json` are not built yet.

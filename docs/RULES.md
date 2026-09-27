@@ -163,8 +163,8 @@ company.
 
 A PR is an activity card, not a place of its own. It belongs to a task that is
 still `working`, and it is where a colleague's comments and the back-and-forth
-live. PRs surface on the office floor and in the activity feed; there is no PR
-menu.
+live. PRs surface on the task's page, the office floor and the activity feed; there
+is no PR menu.
 
 Example:
 
