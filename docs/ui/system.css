@@ -154,8 +154,6 @@ button { font: inherit; color: inherit; }
 
 .chip.vacation { background: var(--sunk); color: var(--muted); }
 
-.chip.sim { background: var(--sunk); color: var(--muted); }
-
 /* ═══ notices, empty states, dialogs ═══ */
 
 .notice-warn { border-color: var(--warn-line); }

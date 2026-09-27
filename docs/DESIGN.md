@@ -22,7 +22,7 @@ before building or changing a screen.
 | `ui/projects.html` | The task board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
+| `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
@@ -395,15 +395,17 @@ says it can be changed later, because a first decision should not feel heavy.
 Every employee works through Claude Code, so there is no fake work to fall
 back on. When the runtime stops — logged out, uninstalled, a session dropped —
 the office says so and keeps everything: the employee, their memory, their
-task. **Status is the dot at bottom-right; the agent is the mark at top-left.**
-A dropped session reads as a red mark with the status unchanged, and nothing
-new can start until it is back. Never fold the agent's state into the status
-colour.
+task. A runtime that stops for the company is one line at the top of the
+office, and nothing new starts until it is back. A dropped session stops only
+its employee: **status is the dot at bottom-right; a dropped agent is a red mark
+at top-left**, with no mark while it works, and the task card carries the
+blocked mark. Never fold the agent's state into the status colour.
 
 ## Agent connection
 
 The user sees the runtime as part of the office, never as an account setup. It is
-checked once, for the whole company, at first run and whenever it stops:
+checked once, for the whole company, at first run, in Settings, and whenever
+it stops:
 
 ```text
 Claude Code
@@ -421,24 +423,21 @@ authenticates.
 | State | Detected by | What the screen says | Fixed |
 | --- | --- | --- | --- |
 | Not installed | `claude` is not on PATH | Nothing can work without it; install it, then **[다시 확인]** | Install |
-| **Not logged in** | Running the CLI returns an auth error | Run `claude` once in a terminal to log in, then **[다시 확인]** | **Outside this app** |
-| Ready | The CLI runs | Connection available | — |
+| **Not logged in** | Running the CLI returns an auth error | Run `claude auth login` in a terminal, then **[다시 확인]** | **Outside this app** |
+| Ready | The CLI runs | Work can start | — |
 
 The second row is the one that matters. The fix happens somewhere the app
 cannot reach, so the screen has to say so plainly. **Never add a token field.**
 Never read a credential store.
 
-Connecting also needs the workspace to be trusted, and **that has no
+A folder belongs to a project, and each needs trust once. **That has no
 non-interactive path** — one `claude` run in the folder, accepted by the
-user. The connection screen has to ask for it as plainly as it asks for
-login. ARCHITECTURE.md has the measured runtime surface.
+user — so it is checked where the project's folder is chosen, as plainly as
+login, and a task in an untrusted folder does not start. ARCHITECTURE.md has
+the measured runtime surface.
 
 ## Open questions
 
-- **Whose is the folder, the project's or the employee's?** The board and
-  ARCHITECTURE.md §11 give each project a workspace; the connection screen above
-  gives each employee one. A task names a project and an agent has to run
-  somewhere; one of the two has to go.
 - **The office cards still show a share of an estimate.** Every employee is a
   real agent, so nobody knows when work ends: the cards should show time taken,
   as the board does.
