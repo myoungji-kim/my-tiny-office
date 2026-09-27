@@ -359,9 +359,9 @@
       desc: { ko: "운영팀이 주문과 환불을 한 화면에서 봐요.", en: "One screen for support to see orders and refunds." },
       reason: { ko: "결제 개편을 먼저 끝내기로", en: "Payments rework comes first" } },
     // A finished project is kept as its record: its span and how much was done.
-    { id: "login", status: "done", priority: "high", since: "2026. 4. 14.", doneOn: "2026. 5. 29.", tasks: 14, name: { ko: "로그인 개편", en: "Login rework" }, folder: "~/Projects/tinysoft" },
-    { id: "deploy", status: "done", priority: "normal", since: "2026. 2. 1.", doneOn: "2026. 3. 20.", tasks: 9, name: { ko: "배포 파이프라인", en: "Deploy pipeline" }, folder: "~/Projects/infra" },
-    { id: "first", status: "done", priority: "normal", since: "2026. 1. 18.", doneOn: "2026. 2. 27.", tasks: 6, name: { ko: "첫 API", en: "First API" }, folder: "~/Projects/tinysoft" },
+    { id: "login", status: "done", priority: "high", since: "2026. 4. 15.", doneOn: "2026. 5. 29.", tasks: 14, name: { ko: "로그인 개편", en: "Login rework" }, folder: "~/Projects/tinysoft" },
+    { id: "deploy", status: "done", priority: "normal", since: "2026. 2. 2.", doneOn: "2026. 3. 20.", tasks: 9, name: { ko: "배포 파이프라인", en: "Deploy pipeline" }, folder: "~/Projects/infra" },
+    { id: "first", status: "done", priority: "normal", since: "2026. 1. 19.", doneOn: "2026. 2. 27.", tasks: 11, name: { ko: "첫 API", en: "First API" }, folder: "~/Projects/tinysoft" },
   ];
 
   // backlog → working → approval → done, and held off to the side.
@@ -797,7 +797,8 @@
 
   const dayOf = (s) => { const [y, m, d] = s.split(".").map(Number); return new Date(y, m - 1, d); };
   const shortDate = (s) => { const [y, m, d] = s.split(".").map(Number); return t().date(y, m, d); };
-  const daysBetween = (a, b) => Math.round((dayOf(b) - dayOf(a)) / 86400000);
+  // both days count, as the company screen counts them
+  const daysBetween = (a, b) => Math.round((dayOf(b) - dayOf(a)) / 86400000) + 1;
 
   const icon = {
     clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.6"/><path d="M8 5v3.2l2 1.3"/></svg>',

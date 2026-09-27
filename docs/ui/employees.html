@@ -339,16 +339,16 @@
       removeTeamTitle: (team) => "‘" + team + "’ 지우기", removeTeamSub: (n) => "팀원이 " + n + "명 있어요. 지우기 전에 옮길 팀을 골라요.",
       memory: "기억", memCountShort: (n) => "<b>" + n + "</b>개 기억",
       currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
-      doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
+      doneAndReviews: "완료한 업무 · 검토", counts: (a, b) => a + "건 · " + b + "건",
       timesUsed: "기억이 쓰인 횟수", times: (n) => n + "회",
       expertise: "전문 분야",
-      expertiseWhy: "알려준 기억이 있는 분야예요. 이 분야 PR 리뷰도 맡을 수 있어요.",
+      expertiseWhy: "알려준 기억이 있는 분야예요. 이 분야 업무의 검토도 맡을 수 있어요.",
       noExpertise: "아직 전문 분야가 없어요. 무엇이든 알려주면 거기서 시작돼요.",
       carried: "업무마다 함께 들고 가요", chars: (n) => n + "자",
       fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
       neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
       howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
-      giveWork: "업무 맡기기", cannotAssign: "휴가 중에는 업무를 맡길 수 없어요", nobodyYet: "아직 아무도 없어요",
+      giveWork: "업무 맡기기", cannotAssign: "휴가 중에는 업무를 맡길 수 없어요", hireInto: "이 팀에 직원 고용",
       feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
       referenced: (who, mem) => withParticle(who, "이", "가") + " <q>" + mem + "</q>" + (hasBatchim(mem) ? "을" : "를") + " 참고했어요",
       assignTitle: (n) => n + (hasBatchim(n) ? "이" : "가") + " 맡을 업무",
@@ -397,7 +397,7 @@
       fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
       neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
       howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
-      giveWork: "Give them work", cannotAssign: "They cannot take work while on leave", nobodyYet: "Nobody here yet",
+      giveWork: "Give them work", cannotAssign: "They cannot take work while on leave", hireInto: "Hire into this team",
       feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
       referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
       assignTitle: (n) => "Work for " + n,
@@ -456,12 +456,13 @@
     { id: "settle", name: { ko: "정산 리포트", en: "Settlement reports" } },
   ];
 
+  // What was drawn on today, on the work the board shows.
   const feed = [
-    { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "12분 전", en: "12 min ago" } },
-    { who: "p2", mem: { ko: "한글에는 letter-spacing을 걸지 않아요", en: "Never track Hangul" }, on: { ko: "로그인 폼 구현", en: "Build the login form" }, when: { ko: "34분 전", en: "34 min ago" } },
-    { who: "p1", mem: { ko: "복합 인덱스는 컬럼 순서가 중요해요", en: "Composite indexes care about column order" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "1시간 전", en: "1 hour ago" } },
-    { who: "p5", mem: { ko: "배포 전에 세 개를 모두 돌려요", en: "Run all three before a deploy" }, on: { ko: "배포 파이프라인 정리", en: "Tidy the deploy pipeline" }, when: { ko: "2시간 전", en: "2 hours ago" } },
-    { who: "p3", mem: { ko: "PR 설명에는 왜 했는지를 적어요", en: "A PR description says why" }, on: { ko: "API 문서 작성", en: "Write the API docs" }, when: { ko: "어제", en: "Yesterday" } },
+    { who: "p2", mem: { ko: "한글에는 letter-spacing을 걸지 않아요", en: "Never track Hangul" }, on: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" }, when: { ko: "5분 전", en: "5 min ago" } },
+    { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, when: { ko: "15분 전", en: "15 min ago" } },
+    { who: "p1", mem: { ko: "복합 인덱스는 컬럼 순서가 중요해요", en: "Composite indexes care about column order" }, on: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, when: { ko: "20분 전", en: "20 min ago" } },
+    { who: "p3", mem: { ko: "PR 설명에는 왜 했는지를 적어요", en: "A PR description says why" }, on: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, when: { ko: "30분 전", en: "30 min ago" } },
+    { who: "p4", mem: { ko: "트랜잭션 안에서 외부 API를 호출하지 않아요", en: "Never call an external API inside a transaction" }, on: { ko: "주문 테이블 인덱스 정리", en: "Tidy the order table indexes" }, when: { ko: "1시간 전", en: "1 hour ago" } },
   ];
 
   const ICON = {
@@ -888,7 +889,7 @@
         v.className = "vacant";
         v.type = "button";
         v.dataset.hire = team.key;
-        v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
+        v.innerHTML = `${ICON.plus}<span>${t().hireInto}</span>`;
         grid.append(v);
       }
       const bd = document.createElement("div");
@@ -1035,7 +1036,7 @@
   const cold = people.flatMap((p) => p.memories.filter(isCold).map((m) => ({ p, m })));
   if (cold.length) {
     const n = document.createElement("div");
-    n.className = "notice notice-bad";
+    n.className = "notice notice-warn";
     n.innerHTML = `
       <span class="n-ic">${ICON.x}</span>
       <span class="n-tx">

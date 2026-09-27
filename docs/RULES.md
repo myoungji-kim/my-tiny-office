@@ -268,7 +268,7 @@ later, so a hire stays in it after the person leaves:
 | 팀 생김 | A team gets its first member |
 | 첫 업무 완료 | Once, company-wide |
 | 업무 N건 | 10 · 50 · 100 · 500 |
-| 첫 리뷰 | The first peer review settles |
+| 첫 검토 | The first peer review settles |
 | 기억 N개 | 10 · 50 · 100 |
 | 프로젝트 완료 | The user finishes a project |
 

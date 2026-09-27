@@ -266,7 +266,7 @@
       rename: "이름 바꾸기", save: "저장", cancel: "취소",
       since: (date, days) => date + " 창업 · " + days + "일째",
       tiles: {
-        people: "직원", done: "완료한 업무", reviews: "리뷰", memories: "가르친 기억",
+        people: "직원", done: "완료한 업무", reviews: "검토", memories: "가르친 기억",
         peopleN: (n) => n + "명", teamsN: (n) => "팀 " + n + "개",
         count: (n) => n + "건", memN: (n) => n + "개", week: (n) => "이번 주 +" + n,
       },
@@ -281,15 +281,15 @@
         team: (m) => withParticle(WORDS.ko.teams[m.team], "이", "가") + " 생겼어요",
         firstTask: (m) => withParticle(m.who.name, "이", "가") + " 첫 업무를 마쳤어요<span> · " + m.task.ko + "</span>",
         tasks: (m) => "완료한 업무가 " + m.n + "건을 넘었어요",
-        firstReview: (m) => withParticle(m.who.name, "이", "가") + " 첫 리뷰를 마쳤어요",
+        firstReview: (m) => withParticle(m.who.name, "이", "가") + " 첫 검토를 마쳤어요",
         memories: (m) => "가르친 기억이 " + m.n + "개가 됐어요",
         project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
       },
       areasTitle: "전문 분야", areasSub: "우리 회사가 다루는 분야예요. 직원에게 알려준 기억은 모두 이 중 하나에 속해요.",
-      teachLink: "알려주기", addArea: "분야 추가하기",
+      teachLink: "알려주기", addArea: "분야 추가",
       memCount: (n) => "기억 " + n + "개",
       nobodyKnowsArea: (list) => list.join(" · ") + (hasBatchim(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
-      nobodyKnowsWhy: "이 분야 업무는 참고할 기억 없이 시작하고, PR 리뷰를 맡을 사람도 없어요. 누구에게든 한 줄 알려주면 시작돼요.",
+      nobodyKnowsWhy: "이 분야 업무는 참고할 기억 없이 시작하고, 검토를 맡을 사람도 없어요. 누구에게든 한 줄 알려주면 시작돼요.",
       pickSomeone: "알려줄 직원 고르기",
       areaMenu: "분야 메뉴", areaName: "분야 이름", areaPlaceholder: "예: 게임 서버", nameTaken: "이미 있는 이름이에요.",
       removeArea: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
@@ -477,7 +477,8 @@
   }
   renderName(false);
 
-  const teams = new Set(people.map((p) => p.team)).size;
+  // the company's teams, including one nobody has joined yet
+  const teams = Object.keys(WORDS.ko.teams).length;
   const taught = sum((p) => p.memories.length) + companyMemories.length;
   const STATS = [
     { k: t().tiles.people, n: t().tiles.peopleN(people.length), d: t().tiles.teamsN(teams) },

@@ -39,18 +39,8 @@
 
   /* ═══ notices, empty states, dialogs ═══ */
 
-  .notice-ok { border-color: var(--ok-line); }
-
-  .notice-ok .n-ic { background: var(--ok-soft); color: var(--ok-ink); }
-
-  .locked {
-    display: flex; align-items: center; gap: 9px;
-    background: var(--subtle); border: 1px dashed var(--line-2);
-    border-radius: var(--r-card); padding: 11px 13px;
-    font-size: 14px; color: var(--muted);
-  }
-
-  .locked svg { width: 14px; height: 14px; flex: none; }
+  /* A popover shown as a sample: open, and in the page's flow instead of fixed. */
+  .pop.pop-sample { position: static; opacity: 1; visibility: visible; transform: none; pointer-events: auto; z-index: auto; }
 
   .empty {
     display: grid; justify-items: center; gap: 4px; text-align: center;
@@ -171,7 +161,7 @@
 
     <h3>Anatomy</h3>
     <div class="row" style="align-items:flex-start;gap:20px">
-      <div class="pop">
+      <div class="pop pop-sample">
         <div class="p-hd">
           <span class="p-av"></span>
           <span style="flex:1;min-width:0">
@@ -204,7 +194,7 @@
 
     <h3>Row variants</h3>
     <div class="row" style="align-items:flex-start;gap:14px">
-      <div class="pop" style="width:236px">
+      <div class="pop pop-sample" style="width:236px">
         <div class="p-acts" style="padding:0">
           <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
           <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
@@ -226,7 +216,7 @@
     <div class="grid2">
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
-        <div class="pop" style="width:100%;box-shadow:none">
+        <div class="pop pop-sample" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
             <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
             <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
@@ -236,7 +226,7 @@
       </div>
       <div class="bad-ex">
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
-        <div class="pop" style="width:100%;box-shadow:none">
+        <div class="pop pop-sample" style="width:100%;box-shadow:none">
           <div class="row" style="padding:4px;gap:8px">
             <button class="btn btn-primary btn-sm" style="flex:1">업무 상세</button>
             <button class="btn btn-secondary btn-sm" style="flex:1">담당 변경</button>
@@ -246,7 +236,7 @@
       </div>
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
-        <div class="pop" style="width:100%;box-shadow:none">
+        <div class="pop pop-sample" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
             <button class="mrow" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
             <p class="p-why">휴가 중에는 업무를 맡길 수 없습니다.</p>
@@ -257,7 +247,7 @@
       </div>
       <div class="bad-ex">
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
-        <div class="pop" style="width:100%;box-shadow:none">
+        <div class="pop pop-sample" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
             <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
             <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
@@ -291,7 +281,7 @@
       비어 있는 자리를 채우는 행동은 <strong>그 자리에</strong> 둡니다. 헤더 버튼과 중복되지 않습니다.
     </p>
     <div class="row" style="align-items:flex-start">
-      <button class="addcard">
+      <button class="addcard" style="width:238px;min-height:150px">
         <span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>
         이 팀에 직원 고용
       </button>
@@ -354,29 +344,26 @@
 
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="notice">
-        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
-        <span class="n-tx"><b>어제 하던 업무가 남아 있어요</b><span>모카 · 결제 API 에러 응답 구조 변경 · 22분째</span></span>
-        <span class="n-acts">
-          <button class="btn btn-ghost btn-sm" type="button">나중에</button>
-          <button class="btn btn-secondary btn-sm" type="button">이어서 하기</button>
-        </span>
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 14V3h8l-1.6 2.6L12 8.2H4"/></svg></span>
+        <span class="n-tx"><b>아직 시작하지 않은 프로젝트예요</b><span>업무를 적어 둘 수 있어요. 시작하면 그때부터 대기열의 업무를 가져가요.</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">시작하기</button></span>
       </div>
 
       <div class="notice notice-ok">
         <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg></span>
-        <span class="n-tx"><b>두부가 로그인 폼 구현을 끝냈어요</b><span>25분 걸렸어요 · PR이 리뷰를 기다리고 있어요</span></span>
+        <span class="n-tx"><b>모카가 결제 API 에러 응답 구조 변경을 마쳤어요</b><span>52분 걸렸어요 · 승인을 기다려요</span></span>
         <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">업무 상세</button></span>
       </div>
 
       <div class="notice notice-warn">
-        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
-        <span class="n-tx"><b>단풍이 30분째 같은 업무에 머물러 있어요</b><span>그동안 남긴 기록이 없어요. 막혔는지 한번 확인해 보세요.</span></span>
-        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">업무 보기</button></span>
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v8M10 4v8"/></svg></span>
+        <span class="n-tx"><b>보류한 프로젝트예요</b><span>결제 개편을 먼저 끝내기로 · 다시 진행할 때까지 아무도 새로 시작하지 않아요.</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 진행</button></span>
       </div>
 
       <div class="notice notice-bad">
         <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></span>
-        <span class="n-tx"><b>모카의 에이전트 연결이 끊어졌어요</b><span>진행 중이던 업무는 그대로 있어요. 다시 연결하면 이어서 해요.</span></span>
+        <span class="n-tx"><b>모카의 에이전트 연결이 끊겼어요</b><span>하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.</span></span>
         <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 연결</button></span>
       </div>
 
@@ -385,8 +372,6 @@
         <span class="n-tx"><b>Claude Code 로그인이 풀렸어요</b><span>하던 업무와 기억은 그대로예요. 다시 로그인하기 전까지 새 업무는 시작하지 않아요.</span></span>
         <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 확인</button></span>
       </div>
-
-      <div class="locked"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg><span>직원을 고용하면 업무를 맡길 수 있어요. 프로젝트는 지금 만들어 둬도 돼요.</span></div>
     </div>
 
     <h3>언제 무엇을 쓰나</h3>
@@ -395,7 +380,6 @@
     <div class="spec"><code>warn</code><span>아직 고장은 아니지만 봐야 하는 일. 무엇을 확인하면 되는지 적습니다.</span></div>
     <div class="spec"><code>bad</code><span>실패했거나 끊어진 일. <strong>데이터가 무사한지 먼저 말합니다.</strong></span></div>
     <div class="spec"><code>stop</code><span>회사 전체가 새 일을 못 하는 때 — Claude Code 로그인이 풀렸을 때. <strong>모든 화면 맨 위에 하나만</strong>, 다른 무엇보다 먼저 읽히도록 배경까지 채웁니다. 한 사람, 한 업무의 실패에는 쓰지 않습니다.</span></div>
-    <div class="spec"><code>.locked</code><span>아직 쓸 수 없는 영역. 왜 잠겼는지와 <strong>지금 할 수 있는 것</strong>을 같이 적습니다.</span></div>
   </section>
 
   <section>
@@ -530,7 +514,7 @@
   </section>
 
   <section>
-    <h2>폼</h2>
+    <h2>Forms</h2>
     <p class="note">
       라벨은 필드 위에, 필수 표시는 라벨에 붙습니다. 설명이 필요하면 필드 아래
       한 줄로 답니다. 입력 높이는 38px, 첫 실행처럼 화면에 필드가 셋뿐인 곳만
@@ -575,17 +559,17 @@
       </div>
 
       <div>
-        <div class="exlabel bad-ex">이렇게 하지 않습니다</div>
-        <div class="field" style="margin-top:0">
+        <div class="bad-ex">
+          <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
           <input class="input" placeholder="제목 *" />
-          <span class="hint">라벨을 placeholder로 대신하면, 입력하는 순간 무엇을 적는 칸이었는지 사라집니다.</span>
+          <div class="note" style="margin:10px 0 0">라벨을 placeholder로 대신하면, 입력하는 순간 무엇을 적는 칸이었는지 사라집니다.</div>
         </div>
 
-        <div class="exlabel good-ex">이렇게 합니다</div>
-        <div class="field" style="margin-top:0">
+        <div class="good-ex" style="margin-top:12px">
+          <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
           <span class="label">제목 <span class="req">*</span></span>
           <input class="input" placeholder="결제 API 에러 응답 구조 변경" />
-          <span class="hint">placeholder는 예시를 보여주는 자리입니다.</span>
+          <div class="note" style="margin:10px 0 0">placeholder는 예시를 보여주는 자리입니다.</div>
         </div>
       </div>
     </div>
@@ -689,23 +673,22 @@
     "결제 API 에러 응답 구조 변경": "Change the payment API error shape",
     "22분째": "22 min so far",
     "업무 상세": "Task details",
+    "아직 시작하지 않은 프로젝트예요": "This project has not started",
+    "업무를 적어 둘 수 있어요. 시작하면 그때부터 대기열의 업무를 가져가요.": "Write its tasks down now. Once it starts, the backlog gets picked up.",
+    "시작하기": "Start",
+    "모카가 결제 API 에러 응답 구조 변경을 마쳤어요": "Mocha finished Change the payment API error shape",
+    "52분 걸렸어요 · 승인을 기다려요": "Took 52 min · waiting on you",
+    "보류한 프로젝트예요": "This project is held",
+    "결제 개편을 먼저 끝내기로 · 다시 진행할 때까지 아무도 새로 시작하지 않아요.": "Payments rework comes first · Nobody starts anything new until it resumes.",
+    "다시 진행": "Resume",
+    "모카의 에이전트 연결이 끊겼어요": "Mocha's agent disconnected",
+    "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.": "The task and everything they remember are untouched. Reconnect and they pick it up.",
     "담당 변경": "Reassign",
     "복귀 처리": "Bring them back",
     "교육 보내기": "Send to training",
     "휴가 보내기": "Send on leave",
     "휴가 중에는 업무를 맡길 수 없습니다.": "They cannot take work while on leave.",
-    "어제 하던 업무가 남아 있어요": "You left work unfinished yesterday",
-    "모카 · 결제 API 에러 응답 구조 변경 · 22분째": "Mocha · Change the payment API error shape · 22 min so far",
-    "나중에": "Later",
-    "이어서 하기": "Pick it up",
-    "두부가 로그인 폼 구현을 끝냈어요": "Tofu finished the login form",
-    "25분 걸렸어요 · PR이 리뷰를 기다리고 있어요": "Took 25 minutes · a PR is waiting for review",
     "PR 보기": "View the PR",
-    "단풍이 30분째 같은 업무에 머물러 있어요": "Maple has been on the same task for 30 minutes",
-    "그동안 남긴 기록이 없어요. 막혔는지 한번 확인해 보세요.": "Nothing new in that time. Worth checking whether they are stuck.",
-    "업무 보기": "View the task",
-    "모카의 에이전트 연결이 끊어졌어요": "Mocha's agent disconnected",
-    "진행 중이던 업무는 그대로 있어요. 다시 연결하면 이어서 해요.": "The task in progress is untouched. Reconnect and they pick it up.",
     "다시 연결": "Reconnect",
     "직원을 고용하면 업무를 맡길 수 있어요. 방은 지금 만들어 둬도 돼요.": "Hire someone and you can give them work. You can set the room up now.",
     "아직 직원이 없어요": "No employees yet",
@@ -728,10 +711,19 @@
     "데이터베이스": "Database",
     "아키텍처": "Architecture",
     "업무 상세": "Task details",
+    "아직 시작하지 않은 프로젝트예요": "This project has not started",
+    "업무를 적어 둘 수 있어요. 시작하면 그때부터 대기열의 업무를 가져가요.": "Write its tasks down now. Once it starts, the backlog gets picked up.",
+    "시작하기": "Start",
+    "모카가 결제 API 에러 응답 구조 변경을 마쳤어요": "Mocha finished Change the payment API error shape",
+    "52분 걸렸어요 · 승인을 기다려요": "Took 52 min · waiting on you",
+    "보류한 프로젝트예요": "This project is held",
+    "결제 개편을 먼저 끝내기로 · 다시 진행할 때까지 아무도 새로 시작하지 않아요.": "Payments rework comes first · Nobody starts anything new until it resumes.",
+    "다시 진행": "Resume",
+    "모카의 에이전트 연결이 끊겼어요": "Mocha's agent disconnected",
+    "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.": "The task and everything they remember are untouched. Reconnect and they pick it up.",
     "Claude Code 로그인이 풀렸어요": "Claude Code signed out",
     "하던 업무와 기억은 그대로예요. 다시 로그인하기 전까지 새 업무는 시작하지 않아요.": "Tasks in progress and everything remembered are untouched. New tasks wait until you sign in again.",
     "다시 확인": "Check again",
-    "직원을 고용하면 업무를 맡길 수 있어요. 프로젝트는 지금 만들어 둬도 돼요.": "Hire someone to give out work. Projects can be set up now.",
     "아직 프로젝트가 없어요": "No projects yet",
     "프로젝트를 만들면 업무를 적어 두고 직원에게 맡길 수 있어요. 폴더는 나중에 정해도 돼요.": "Make a project to write work down and hand it out. The folder can come later.",
     "새 프로젝트": "New project",
@@ -757,6 +749,8 @@
 
   // drawn with the shared helpers, so this page shows exactly what the screens do
   (() => {
+    document.querySelector(".modal .m-av")?.append(spriteCanvas("cat", 44));
+    for (const av of document.querySelectorAll(".pop-sample .p-av:empty")) av.append(spriteCanvas("cat", 38));
     const mark = document.getElementById("markDemo");
     const avatar = (species, lost, status) => {
       const a = document.createElement("span");

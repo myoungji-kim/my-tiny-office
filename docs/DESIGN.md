@@ -131,9 +131,9 @@ Under the floor, above the cards, **오늘** lists what happened in the office,
 newest first: who started what, a colleague starting a review, a memory drawn
 on, work finished and waiting on the user, work applied, someone going on
 leave. Each row is a domain event worded by the dictionary, with its time. The
-feed follows the room — a team's room the meeting room and the lounge show the people in
-them —
-and shows six before 더 보기. Only what waits on the user carries an action, the way to it
+feed follows the room — a team's room, the meeting room and the lounge show
+what happened to the people in them — and shows six before 더 보기. Only what
+waits on the user carries an action, the way to it
 (승인하러 가기, and 보러 가기 for an agent that stopped); the rest is there to
 be read.
 

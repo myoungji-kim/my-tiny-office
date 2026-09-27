@@ -35,7 +35,7 @@
 
   .cast b { font-size: 17px; font-weight: 600; }
 
-  .cast .sp { font-size: 13px; color: var(--faint); }
+  .cast-sp { font-size: 13px; color: var(--faint); }
 
 
   .scales { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
@@ -234,7 +234,7 @@
     for (const c of group) {
       const el = document.createElement("div");
       el.className = "cast";
-      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="sp">${c.en} · ${tx(c.species)}</span>`;
+      el.innerHTML = `<div class="pad"></div><b>${c.ko}</b><span class="cast-sp">${c.en} · ${tx(c.species)}</span>`;
       el.querySelector(".pad").appendChild(sprite(c, 4));
       grid.appendChild(el);
     }

@@ -55,6 +55,7 @@ body {
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     background: var(--page); color: var(--ink);
     font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    word-break: keep-all; overflow-wrap: break-word; text-wrap: pretty;
   }
 
 button { font: inherit; color: inherit; }
@@ -178,6 +179,8 @@ button { font: inherit; color: inherit; }
 }
 
 /* after the base rule, which sets the same border and background */
+.notice-ok { border-color: var(--ok-line); }
+
 .notice-warn { border-color: var(--warn-line); }
 
 .notice-bad { border-color: var(--bad-line); }
@@ -187,6 +190,8 @@ button { font: inherit; color: inherit; }
 .notice-stop { background: var(--bad-soft); border-color: var(--bad-line); }
 
 .notice-stop .n-tx b { color: var(--bad-ink); }
+
+.notice-ok .n-ic { background: var(--ok-soft); color: var(--ok-ink); }
 
 .notice-warn .n-ic { background: var(--warn-soft); color: var(--warn-ink); }
 
@@ -391,9 +396,9 @@ header.top { margin-bottom: 24px; }
 
 header.top h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
 
-header.top p { margin: 6px 0 0; color: var(--muted); max-width: 72ch; }
+header.top p { margin: 6px 0 0; color: var(--muted); }
 
-section > .note { margin: 0 0 18px; color: var(--muted); font-size: 14px; max-width: 100ch; }
+section > .note { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
 
 :where(section) h3 { font-size: 14px; font-weight: 600; color: var(--muted); margin: 24px 0 10px; }
 
@@ -721,9 +726,9 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 [data-effect] .hint:first-child { margin-top: 0; }
 
-.hint a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.hint a, .note a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 
-.hint a:hover { color: var(--brand-ink); }
+.hint a:hover, .note a:hover { color: var(--brand-ink); }
 
 /* ═══ the species picker ═══ */
 

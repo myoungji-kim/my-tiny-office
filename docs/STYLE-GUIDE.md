@@ -140,6 +140,11 @@ layout does not twitch.
   and `area + "를"` produces 품질를. Compute it:
   `(code - 0xac00) % 28 !== 0` means the syllable has one.
 - A Latin wordmark may be tracked. Nothing else.
+- **Korean breaks between words, never inside one.** `body` sets
+  `word-break: keep-all` with `text-wrap: pretty`, so 인덱스 never splits as
+  인덱/스 and a paragraph does not end on a lone 요. Prose takes the width of its
+  container: an intro or a note has no `max-width` of its own, so both margins
+  stay the container's.
 - Do not assume Korean and English are the same length. Test both.
 
 ---
@@ -204,7 +209,6 @@ Shapes are in `ui/components.html`. The rules:
 | `notice-warn` | Not broken, but worth a look | What to check |
 | `notice-bad` | Failed or disconnected | **Whether the data survived**, first |
 | `notice-stop` | The whole company cannot start work — Claude Code signed out | That the work survived, and the one step that brings it back. Filled, one at a time, above every screen |
-| `.locked` | An area is not usable yet | Why, and what *can* be done now |
 
 A failure notice that does not say what happened to the user's work is not
 finished. "에이전트 연결이 끊어졌어요" is half of it; "진행 중이던 업무는
@@ -344,7 +348,9 @@ The shared half of the pages lives in two files that every page loads:
 
 - `docs/ui/system.css` — the token block and every rule more than one page uses
 - `docs/ui/system.js` — the palette, the twenty sprites, the tile painter, the
-  cast, and the sample-page bar, which builds itself
+  cast, and the sample-page bar, which builds itself. On the screens that
+  change with it, the bar's 화면 group carries the Claude Code 로그아웃 switch; it
+  holds across screens like the language does, and the spec pages do not show it
 
 A page keeps only what is its own. Both are plain, relative `<link>` and
 `<script>`, never modules, so a page still opens by double-clicking it.
@@ -354,8 +360,8 @@ never as a copy.
 `npm run check:ui` runs four checks over what is left:
 
 - **parse** — every inline script and `system.js` must still parse
-- **parity** — `.notice` is the last component the pages still define themselves,
-  and audit waves spacing through on purpose, so this compares it across all five
+- **parity** — a selector two product screens still both define must agree in
+  full, spacing included, which audit waives on purpose
 - **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
   the documented set, `:focus-visible` wherever there are controls, no tracked
   Korean, no class without a rule, the same sidebar and header frame on the
