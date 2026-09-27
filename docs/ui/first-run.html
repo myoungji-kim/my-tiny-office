@@ -117,7 +117,8 @@
     </div>
 
     <div class="acts">
-      <button class="btn btn-primary btn-lg" id="toCompany" disabled data-t="next">다음</button>
+      <button class="btn btn-secondary btn-lg" id="toImport" disabled data-t="startImport">내보낸 파일로 시작</button>
+      <button class="btn btn-primary btn-lg" style="flex:1" id="toCompany" disabled data-t="startNew">새 회사 만들기</button>
     </div>
   </div>
 
@@ -188,6 +189,24 @@
       <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
     </div>
   </div>
+
+  <!-- ── 4'. 가져온 회사에 도착 ─────────────────────────────── -->
+  <div class="pane" id="p5" hidden>
+    <h2 data-t="importedTitle">TinySoft를 가져왔어요</h2>
+    <p class="sub" data-t="importedSub">my-tiny-office-2026-09-26.db · 직원 5명 · 프로젝트 7개</p>
+
+    <div class="notice notice-warn">
+      <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
+      <span class="n-tx">
+        <b data-t="againTitle">이 컴퓨터에서 다시 할 것</b>
+        <span data-t="againBody">프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 신뢰를 확인해요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.</span>
+      </span>
+    </div>
+
+    <div class="acts">
+      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
+    </div>
+  </div>
 </div>
 
 <div class="doc">
@@ -200,6 +219,7 @@
     <li><strong>Claude Code 확인이 먼저입니다.</strong> 직원은 에이전트로 일하고, 에이전트 없이 할 수 있는 일은 없습니다. 준비될 때까지 다음으로 넘어가지 않습니다.</li>
     <li><strong>로그인은 대신 해주지 않습니다.</strong> 확인하고, 터미널에서 할 일을 보여주고, 기다립니다. 토큰 입력칸은 없습니다.</li>
     <li>확인은 <strong>회사 전체에 한 번</strong>입니다. 이후에 뽑는 직원은 따로 연결하지 않습니다.</li>
+    <li><strong>내보낸 파일로 시작할 수 있습니다.</strong> 다른 컴퓨터에서 옮겨 올 때입니다. Claude Code 확인은 그래도 먼저이고, 회사와 직원 단계는 건너뜁니다. 파일에 없는 것 — 이 컴퓨터의 폴더, 예전 세션 — 은 도착 화면에서 말합니다.</li>
     <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다. 팀은 묻지 않습니다.</li>
     <li>이름은 사용자가 짓습니다 — <strong>i18n을 거치지 않는 텍스트</strong>입니다.</li>
     <li>종족은 외형일 뿐이라 <strong>능력치에 영향이 없습니다.</strong> 그래서 고민 없이 고를 수 있습니다.</li>
@@ -263,7 +283,11 @@
       checkLabel: "먼저 Claude Code를 확인해요",
       checkHint: "직원들은 Claude Code로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
       installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요",
-      loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", recheck: "다시 확인", copy: "복사",
+      loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", startNew: "새 회사 만들기", startImport: "내보낸 파일로 시작",
+      importedTitle: "TinySoft를 가져왔어요", importedSub: "my-tiny-office-2026-09-26.db · 직원 5명 · 프로젝트 7개",
+      againTitle: "이 컴퓨터에서 다시 할 것",
+      againBody: "프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 신뢰를 확인해요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.",
+      recheck: "다시 확인", copy: "복사",
       companyTitle: "회사 이름을 정해요", companySub: "사이드바 맨 위에 보이는 이름이에요.",
       companyLabel: "회사 이름",
       companyHint: "나중에 바꿀 수 있어요.",
@@ -290,7 +314,11 @@
       checkLabel: "First, Claude Code",
       checkHint: "Your employees work through Claude Code. You sign in to Claude Code itself; this app only checks.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed",
-      loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", copy: "Copy",
+      loggedOutWhy: "Sign in once from a terminal. A browser will open.", startNew: "Start a new company", startImport: "Start from a file",
+      importedTitle: "Imported TinySoft", importedSub: "my-tiny-office-2026-09-26.db · 5 people · 7 projects",
+      againTitle: "To do again on this computer",
+      againBody: "2 projects' folders are not here. Choosing a folder again checks its trust. 3 tasks in progress had their sessions on the old computer, so they start again.",
+      recheck: "Check again", copy: "Copy",
       companyTitle: "Name your company", companySub: "It is the name at the top of the sidebar.",
       companyLabel: "Company name",
       companyHint: "You can change this later.",
@@ -324,13 +352,15 @@
   let chosen = null;
 
   const steps = document.getElementById("steps").children;
-  const panes = [null, ...[1, 2, 3, 4].map((i) => document.getElementById("p" + i))];
+  const panes = [null, ...[1, 2, 3, 4, 5].map((i) => document.getElementById("p" + i))];
 
+  // Pane 5 is arrival for an imported company: the last step, reached past the two it skips.
   function go(n) {
     step = n;
-    for (let i = 1; i <= 4; i++) panes[i].toggleAttribute("hidden", i !== n);
+    const at = n === 5 ? 4 : n;
+    for (let i = 1; i <= 5; i++) panes[i].toggleAttribute("hidden", i !== n);
     for (let i = 0; i < 4; i++) {
-      steps[i].className = i + 1 === n ? "on" : i + 1 < n ? "done" : "";
+      steps[i].className = i + 1 === at ? "on" : i + 1 < at ? "done" : "";
     }
     scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -346,10 +376,13 @@
         ? checkRow({ icon: "ok", title: t().loggedIn, value: "pro" }, t().copy)
         : checkRow({ icon: "bad", title: t().loggedOut, detail: t().loggedOutWhy, cmd: ["claude auth login"] }, t().copy));
     document.getElementById("toCompany").disabled = !signedIn;
+    document.getElementById("toImport").disabled = !signedIn;
     document.getElementById("recheck").hidden = signedIn;
   }
   document.getElementById("recheck").addEventListener("click", () => { signedIn = true; renderChecks(); });
   document.getElementById("toCompany").addEventListener("click", () => go(2));
+  // The file picker is the system's; the sample goes straight to what it finds.
+  document.getElementById("toImport").addEventListener("click", () => go(5));
   renderChecks();
 
   /* ── 3. species picker ───────────────────────────────────────── */

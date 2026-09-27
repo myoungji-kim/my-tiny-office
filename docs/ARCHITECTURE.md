@@ -576,6 +576,16 @@ Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/my-tiny-office.db
 
 `MY_TINY_OFFICE_DB_PATH` overrides the location.
 
+### Moving to another computer
+
+Export writes a consistent copy of the database while the app runs
+(`VACUUM INTO`). Import runs the migrations on the file, backs the current
+database up beside it, and swaps it in; it never merges two companies. The
+file carries the company and nothing of the machine: Claude Code stays signed
+in or out on its own, and a workspace path or a runtime session id from the
+old computer is kept but reconciled on launch — a missing folder or session
+becomes a state the user resolves, never a deletion.
+
 ### Initialization
 
 Opening the database creates the file and its directory if they are missing,

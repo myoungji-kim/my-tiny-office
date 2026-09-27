@@ -22,8 +22,8 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/settings.html` | The company's Claude Code, language, where the data lives |
-| `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session |
+| `ui/settings.html` | The company's Claude Code, language, where the data lives, moving it |
+| `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
@@ -425,16 +425,25 @@ to earn their place.
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인. Folder trust is not here: it is per project |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
-| 데이터 | The database file's path, with 복사 |
+| 데이터 | The database file's path, with 복사; 내보내기 and 가져오기 for moving to another computer |
 | 버전 | The app's version |
 
 What the company decides — its name, areas, roles, memory — is on the company
 screen, not here.
 
+**Moving is a copy of the whole file.** 내보내기 saves it; 가져오기 replaces this
+company with the file's — nothing is merged — after backing this one up, and
+the confirm dialog says both. What belongs to the computer does not travel:
+the Claude Code sign-in, project folders, folder trust and running sessions.
+Each is asked for where it is used — a project whose folder is not here says
+so and asks for it, a task whose session stayed behind starts again —
+nothing is deleted. connect.html shows both.
+
 ## First run
 
 ```text
 앱 실행 → Claude Code 확인 (설치 · 로그인) → 회사 만들기 → 첫 직원 고용 → 사무실 도착 → 업무 맡기기
+                                      └→ 내보낸 파일로 시작 → 사무실 도착 (다시 할 것)
 ```
 
 **Claude Code comes first.** Nothing in the office works without an agent to
@@ -444,6 +453,11 @@ user: it detects, explains and waits (see Agent connection). Every employee
 hired afterwards works through it; there is no per-employee login.
 
 It does not ask for a team.
+
+**A company can arrive in a file.** After the Claude Code check, 내보낸 파일로
+시작 imports one instead and skips the company and the first hire; arrival
+then lists what this computer still has to do — folders to choose again,
+tasks whose sessions stayed on the old one.
 
 It ends at the **first employee**, not at the company. A user dropped into an
 empty office has nothing to look at, and the office is the product. Every field
