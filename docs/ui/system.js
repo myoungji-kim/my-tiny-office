@@ -560,6 +560,7 @@ const WORDS = {
       inArea: (n) => "이 분야 기억 " + n,
       gainArea: (name, area) => withParticle(area, "이", "가") + " " + name + "의 전문 분야가 돼요",
       carried: (a, b) => "업무마다 들고 가는 기억 " + a + "자 → " + b + "자",
+      onLeave: "휴가 중이에요. 돌아와서 맡는 업무부터 이 기억을 들고 가요.",
       cancel: "취소", teach: "알려주기", save: "저장",
     },
   },
@@ -598,6 +599,7 @@ const WORDS = {
       inArea: (n) => n + " here",
       gainArea: (name, area) => area + " becomes one of " + name + "'s areas",
       carried: (a, b) => "Carried into every task " + a + " → " + b + " chars",
+      onLeave: "They are on leave. They carry this from the first task after they are back.",
       cancel: "Cancel", teach: "Teach", save: "Save",
     },
   },
@@ -1127,6 +1129,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
         lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainArea(p.name, areaName(state.area))}</span>`);
       }
     }
+    if (p?.status === "vacation") lines.push(`<span class="hint">${w.onLeave}</span>`);
     const before = p ? liveChars(p) : isCompany() ? carried : null;
     if (before !== null) lines.push(`<span class="hint">${w.carried(before, before + len)}</span>`);
     const box = $("[data-effect]");

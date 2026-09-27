@@ -170,7 +170,8 @@ leave, return and reconnect happen in place. An action the domain forbids is
 shown **disabled with a one-line reason**, not
 hidden; the rule is the thing worth teaching. 기억 가르치기 is offered in every
 state because it is not a transition: it changes what someone knows, not what
-they are doing.
+they are doing. Taught to someone on leave, the dialog says they carry it from
+the first task after they are back.
 
 ## Projects
 
