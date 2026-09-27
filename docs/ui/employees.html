@@ -701,9 +701,10 @@
     for (const m of p.memories) m.flash = false;
   }
 
-  function teach(p, area = null, then = null) {
+  function teach(p, area = null, then = null, from = null) {
     openTeach({
       to: p,
+      from,
       area: area ?? (filter !== "all" ? filter : null),
       onSave: ({ memory }) => {
         p.memories.unshift({ ...memory, used: 0, fresh: true, flash: true });
@@ -1124,7 +1125,7 @@
     modal.querySelector("[data-tellnow]")?.addEventListener("click", () => {
       const keep = picked;
       closeAssign();
-      teach(p, task.area, () => openAssign(p, keep));
+      teach(p, task.area, () => openAssign(p, keep), task.title);
     });
     // Re-rendering must not pull focus out of the list: only the first paint
     // sends it to Cancel, afterwards it returns to the row just picked.

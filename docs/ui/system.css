@@ -737,3 +737,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .d-d { margin: 5px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
 
 .dlg-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+.source { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 14px; color: var(--muted); cursor: pointer; }
+
+.source input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }

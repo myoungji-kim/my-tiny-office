@@ -546,11 +546,11 @@ const WORDS = {
       subTo: "업무마다 이 기억을 함께 들고 가요.",
       subCompany: "모든 직원이 함께 알게 돼요.",
       subPick: "고른 사람의 전문 분야가 돼요.",
-      who: "받는 사람", area: "분야", text: "내용", from: "어디서 알게 됐나요",
+      who: "받는 사람", area: "분야", text: "내용",
       placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
       hint: "한두 문장이 좋아요.",
       areaHint: "찾는 분야가 없나요?", areaHintLink: "회사 › 분야·역할에서 추가하기",
-      told: "직접 알려줌", nowTask: (x) => "지금 하는 업무 · " + x,
+      source: (x) => "출처: " + x,
       inArea: (n) => "이 분야 기억 " + n,
       gainArea: (name, area) => withParticle(area, "이", "가") + " " + name + "의 전문 분야가 돼요",
       carried: (a, b) => "업무마다 들고 가는 기억 " + a + "자 → " + b + "자",
@@ -578,11 +578,11 @@ const WORDS = {
       subTo: "They carry this into every task.",
       subCompany: "Everyone will know it.",
       subPick: "It becomes their area.",
-      who: "Who", area: "Area", text: "What to remember", from: "Where it came from",
+      who: "Who", area: "Area", text: "What to remember",
       placeholder: "e.g. The payments table is partitioned by month.",
       hint: "A sentence or two is best.",
       areaHint: "Not the right area?", areaHintLink: "Add one in Company › Areas & roles",
-      told: "Told directly", nowTask: (x) => "Current task · " + x,
+      source: (x) => "Came from " + x,
       inArea: (n) => n + " here",
       gainArea: (name, area) => area + " becomes one of " + name + "'s areas",
       carried: (a, b) => "Carried into every task " + a + " → " + b + " chars",
@@ -959,7 +959,9 @@ function withParticle(word, afterFinal, afterVowel) {
   return word + (hasBatchim(word) ? afterFinal : afterVowel);
 }
 
-function openTeach({ to = null, area = null, edit = null, carried = null, areas = null, onSave }) {
+// `from` is the task it was opened from, if any; that is where the memory came
+// from. Anywhere else it was told directly.
+function openTeach({ to = null, area = null, from = null, edit = null, carried = null, areas = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].teach;
   const list = areas ?? Object.entries(WORDS[lang].areas).map(([key, label]) => ({ key, label }));
@@ -987,10 +989,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
         <textarea class="textarea" id="teachText" rows="3" maxlength="${MAX}" placeholder="${w.placeholder}"></textarea>
         <span class="field-foot"><span class="hint">${w.hint}</span><span class="count" data-count></span></span>
       </div>
-      <div class="field" data-fromfield>
-        <label class="label" for="teachFrom">${w.from}</label>
-        <span class="select-wrap"><select class="select" id="teachFrom"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
-      </div>
+      <label class="source" data-source hidden><input type="checkbox" id="teachFrom" checked /><span></span></label>
     </div>
     <div class="m-sec" data-effect></div>
     <div class="m-foot">
@@ -1001,7 +1000,12 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
   document.body.append(scrim);
   const $ = (sel) => scrim.querySelector(sel);
   const text = $("#teachText");
-  const fromSel = $("#teachFrom");
+  const source = edit ? edit.from : from;
+  const keepSource = $("#teachFrom");
+  if (source) {
+    $("[data-source]").hidden = false;
+    $("[data-source] span").textContent = w.source(local(source));
+  }
   const returnTo = document.activeElement;
   text.value = edit ? local(edit.text) : "";
 
@@ -1047,7 +1051,6 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
         state.to = STAFF.find((p) => p.id === b.dataset.pick);
         for (const x of box.querySelectorAll("[data-pick]")) x.setAttribute("aria-checked", String(x === b));
         paintHead();
-        paintFrom();
         paintEffect();
       });
     }
@@ -1068,16 +1071,6 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
         paintEffect();
       });
     }
-  }
-
-  function paintFrom() {
-    const options = [{ value: "", label: w.told }];
-    const task = person()?.task;
-    if (task) options.push({ value: "task", label: w.nowTask(local(task)) });
-    if (edit?.from) options.push({ value: "kept", label: local(edit.from) });
-    fromSel.innerHTML = options.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
-    fromSel.value = edit?.from ? "kept" : "";
-    $("[data-fromfield]").hidden = options.length === 1;
   }
 
   function paintEffect() {
@@ -1112,7 +1105,6 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
   paintHead();
   paintPicks();
   paintAreas();
-  paintFrom();
   paintEffect();
 
   text.addEventListener("input", paintEffect);
@@ -1120,8 +1112,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
   for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
   $("[data-ok]").addEventListener("click", () => {
-    const from = fromSel.value === "task" ? person().task : fromSel.value === "kept" ? edit.from : null;
-    const memory = { area: isCompany() ? null : state.area, text: text.value.trim(), from };
+    const memory = { area: isCompany() ? null : state.area, text: text.value.trim(), from: source && keepSource.checked ? source : null };
     const target = state.to;
     close();
     onSave({ to: target, memory });

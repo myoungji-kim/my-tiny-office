@@ -371,8 +371,12 @@ only what is already filled in:
 | 회사 전체에 알려주기 | The whole company; company memory has no area |
 
 The dialog asks for an **area**, because a memory is always expertise in
-something; the **text**, a sentence or two; and optionally **where it came
-from** — told directly, or the task they are on. Before anything is saved it
+something, and the **text**, a sentence or two. **Where it came from is not
+asked**: the place it was opened from decides. Opened from a task — 지금
+알려주기 today, a task's popover or a review later — that task is the source,
+shown as one line (출처: 결제 내역 페이지네이션) the player can uncheck.
+Opened anywhere else, it was told directly and the line does not appear.
+Correcting a memory keeps the source it had. Before anything is saved it
 says what the teaching does: when this is their first memory in an area,
 *품질이 모카의 전문 분야가 돼요*, and always how much more they will carry into
 every task (195자 → 215자). The payoff and the cost are both part of the
