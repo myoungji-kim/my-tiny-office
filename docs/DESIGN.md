@@ -429,10 +429,11 @@ dialog says so before it happens. Their page opens next, where the first thing
 to do is teach them. Until they have done anything, 지금 says 방금 입사했어요
 rather than inventing a last task.
 
-**A role is written, not picked.** The common titles are offered as
-suggestions (Backend Engineer, Product Manager, DBA…), but a company that needs
-a Game Server Engineer writes one. No rule hangs on the role — expertise and
-review come from memory — so there is no list for the company to manage.
+**Roles are the company's list.** Hiring picks one; the company adds, renames
+and deletes them on the 규칙 tab, like its areas of expertise. A role is a job
+title, written the same in either language. Everyone has one, so the last role
+cannot be deleted, and one with people in it asks what they become first. No
+game rule hangs on a role — expertise and review come from memory.
 
 ### Managing a person
 
@@ -458,7 +459,7 @@ and the company's name at the top of the sidebar leads there too.
 | --- | --- |
 | 개요 | The company's name (editable here), four running totals with this week's gain, the people and how long each has been here, finished projects, the latest milestones |
 | 연혁 | Milestones by month, newest first |
-| 규칙 | The areas list and company memory — the two things the company owns rather than any one person |
+| 규칙 | Expertise, roles and company memory — what the company owns rather than any one person. The two lists are edited in place |
 
 **Totals, not a dashboard.** Four numbers and a weekly gain, no charts. A
 finished project is kept as its name, its span, its task count and the

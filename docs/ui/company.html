@@ -134,6 +134,8 @@
   .area-form .hint { flex-basis: 100%; margin: 0; color: var(--bad-ink); }
 
   .area-n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .none { font-size: 14px; color: var(--faint); }
 </style>
 
 <div class="app">
@@ -227,6 +229,13 @@
           </div>
           <div class="panel">
             <div class="panel-hd">
+              <h2 data-t="rolesTitle">역할</h2>
+              <p data-t="rolesSub">고용할 때 고르는 직함이에요.</p>
+            </div>
+            <div class="panel-bd" id="roleTable"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
               <h2 data-t="companyTitle">회사 기억</h2>
               <p data-t="companySub">모든 직원이 함께 알고 있어요.</p>
             </div>
@@ -280,6 +289,12 @@
       moveTitle: (area) => "‘" + area + "’ 분야 지우기",
       moveSub: (n) => "이 분야에 기억이 " + n + "개 있어요. 지우기 전에 옮길 곳을 골라요.",
       moveTo: "옮길 분야", moveAndRemove: "옮기고 지우기",
+      rolesTitle: "역할", rolesSub: "고용할 때 고르는 직함이에요. 직원마다 하나씩 있어요.",
+      addRole: "역할 추가", roleMenu: "역할 메뉴", roleName: "역할 이름", rolePlaceholder: "예: Game Server Engineer",
+      peopleCount: (n) => n + "명", nobodyInRole: "아직 아무도 없어요",
+      moveRoleTitle: (r) => "‘" + r + "’ 역할 지우기",
+      moveRoleSub: (n) => "이 역할인 직원이 " + n + "명 있어요. 지우기 전에 바꿀 역할을 골라요.",
+      moveRoleTo: "바꿀 역할", changeAndRemove: "바꾸고 지우기",
       companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
       fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌", usedTimes: (n) => n + "회 참조", justTaught: "방금 알려줌",
     },
@@ -321,6 +336,12 @@
       moveTitle: (area) => "Delete ‘" + area + "’",
       moveSub: (n) => n + " memories are in this area. Choose where they go first.",
       moveTo: "Move them to", moveAndRemove: "Move and delete",
+      rolesTitle: "Roles", rolesSub: "The titles you hire for. Everyone has one.",
+      addRole: "Add a role", roleMenu: "Role actions", roleName: "Role name", rolePlaceholder: "e.g. Game Server Engineer",
+      peopleCount: (n) => (n === 1 ? "1 person" : n + " people"), nobodyInRole: "Nobody yet",
+      moveRoleTitle: (r) => "Delete ‘" + r + "’",
+      moveRoleSub: (n) => (n === 1 ? "1 person has" : n + " people have") + " this role. Choose what they become first.",
+      moveRoleTo: "Change them to", changeAndRemove: "Change and delete",
       companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
       fromWhere: (x) => "from " + x, toldDirectly: "Told directly", usedTimes: (n) => "used " + n + "×", justTaught: "Just taught",
     },
@@ -516,123 +537,161 @@
     .join("");
 
   /* ── rules ───────────────────────────────────────────────────── */
+  // Both lists the company owns are edited the same way: add at the foot, and a
+  // row's ⋯ renames it or deletes it, asking where its contents go first.
+  function listEditor(cfg) {
+    let editing = null;
+    const form = () => `<form class="area-form" data-form>
+        <input class="input" maxlength="${cfg.max}" autocomplete="off" placeholder="${cfg.placeholder}" aria-label="${cfg.nameLabel}" />
+        <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
+        <button class="btn btn-secondary btn-md" type="button" data-cancel>${t().cancel}</button>
+        <p class="hint" data-taken hidden>${t().nameTaken}</p>
+      </form>`;
+
+    function render() {
+      const table = cfg.table;
+      table.replaceChildren();
+      for (const x of cfg.items) {
+        if (editing === x) {
+          table.insertAdjacentHTML("beforeend", form());
+          continue;
+        }
+        const who = cfg.members(x);
+        const row = document.createElement("div");
+        row.className = "area-row";
+        row.innerHTML = `
+          <span class="area-name"></span>
+          <span class="knows">${who.length ? who.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("") : cfg.empty(x)}</span>
+          <span class="area-n">${cfg.count(x)}</span>
+          <button class="ibtn ibtn-sm" type="button" data-menu aria-label="${cfg.menuLabel}" aria-expanded="false">${ICON.more}</button>`;
+        row.querySelector(".area-name").textContent = cfg.label(x);
+        row.querySelectorAll(".who > span").forEach((box, i) => box.append(spriteCanvas(who[i].species, 20)));
+        row.querySelector("[data-menu]").addEventListener("click", (e) => menu(e.currentTarget, x));
+        table.append(row);
+      }
+      if (editing === "new") table.insertAdjacentHTML("beforeend", form());
+      else {
+        table.insertAdjacentHTML("beforeend", `<button class="mem-add" type="button" data-add>${ICON.plus}${cfg.addLabel}</button>`);
+        table.querySelector("[data-add]").addEventListener("click", () => { editing = "new"; render(); });
+      }
+      wire();
+      cfg.after?.();
+    }
+
+    function wire() {
+      const f = cfg.table.querySelector("[data-form]");
+      if (!f) return;
+      const x = editing === "new" ? null : editing;
+      const input = f.querySelector("input");
+      input.value = x ? cfg.label(x) : "";
+      input.focus();
+      input.select();
+      f.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const label = input.value.trim();
+        if (!label) return;
+        const taken = cfg.items.some((y) => y !== x && cfg.label(y) === label);
+        f.querySelector("[data-taken]").hidden = !taken;
+        if (taken) return;
+        if (x && label !== cfg.label(x)) cfg.rename(x, label);
+        if (!x) cfg.create(label);
+        editing = null;
+        render();
+      });
+      f.querySelector("[data-cancel]").addEventListener("click", () => { editing = null; render(); });
+    }
+
+    function menu(btn, x) {
+      const n = cfg.holds(x);
+      const others = cfg.items.filter((y) => y !== x);
+      const items = [{ label: t().rename, icon: ICON.pen, run: () => { editing = x; render(); } }];
+      // A list everyone needs one of keeps its last row.
+      if (others.length || !cfg.keepLast) {
+        items.push(
+          n
+            ? {
+                label: t().removeArea, icon: ICON.trash, bad: true,
+                run: () => openMoveDialog({
+                  title: cfg.moveTitle(cfg.label(x)),
+                  sub: cfg.moveSub(n),
+                  label: cfg.moveLabel,
+                  options: others.map((y) => ({ value: cfg.label(y), label: cfg.label(y) })),
+                  cancel: t().cancel,
+                  confirm: cfg.moveConfirm,
+                  onConfirm: (into) => { cfg.remove(x, others.find((y) => cfg.label(y) === into)); render(); },
+                }),
+              }
+            : { label: t().removeArea, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => { cfg.remove(x, null); render(); } },
+        );
+      }
+      openRowMenu(btn, items, { keep: t().keep });
+    }
+
+    return { render };
+  }
+
   // A default area speaks both languages; one the player named or renamed is
   // their text, shown as written in either.
   const areaLabel = (a) => a.label ?? t().areas[a.name];
-  const byName = (name) => AREAS.find((a) => a.name === name);
   const teachAreas = () => AREAS.map((a) => ({ key: a.name, label: areaLabel(a) }));
   const knowersOf = (name) => people.filter((p) => areasOf(p).includes(name));
   const countOf = (name) => sum((p) => p.memories.filter((m) => m.area === name).length);
-  let editingArea = null;
 
-  function areaForm() {
-    return `<form class="area-form" data-areaform>
-      <input class="input" maxlength="20" autocomplete="off" placeholder="${t().areaPlaceholder}" aria-label="${t().areaName}" />
-      <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
-      <button class="btn btn-secondary btn-md" type="button" data-cancelarea>${t().cancel}</button>
-      <p class="hint" data-taken hidden>${t().nameTaken}</p>
-    </form>`;
-  }
-
-  function renderAreas() {
+  function renderNotices() {
     const uncovered = AREAS.filter((a) => !knowersOf(a.name).length);
-    document.getElementById("ruleNotices").innerHTML = uncovered.length
+    const box = document.getElementById("ruleNotices");
+    box.innerHTML = uncovered.length
       ? `<div class="notice notice-warn">
           <span class="n-ic">${ICON.alert}</span>
-          <span class="n-tx">
-            <b></b>
-            <span>${t().nobodyKnowsWhy}</span>
-          </span>
+          <span class="n-tx"><b></b><span>${t().nobodyKnowsWhy}</span></span>
           <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-pick="${uncovered[0].name}">${t().pickSomeone}</button></span>
         </div>`
       : "";
-    if (uncovered.length) document.querySelector("#ruleNotices b").textContent = t().nobodyKnowsArea(uncovered.map(areaLabel));
-
-    const areaTable = document.getElementById("areaTable");
-    areaTable.replaceChildren();
-    for (const a of AREAS) {
-      if (editingArea === a.name) {
-        areaTable.insertAdjacentHTML("beforeend", areaForm());
-        continue;
-      }
-      const knowers = knowersOf(a.name);
-      const row = document.createElement("div");
-      row.className = "area-row";
-      row.innerHTML = `
-        <span class="area-name"></span>
-        <span class="knows">${
-          knowers.length
-            ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
-            : `<button class="nobody" type="button" data-pick="${a.name}">${t().nobodyKnows}</button>`
-        }</span>
-        <span class="area-n">${t().memCount(countOf(a.name))}</span>
-        <button class="ibtn ibtn-sm" type="button" data-areamenu="${a.name}" aria-label="${t().areaMenu}" aria-expanded="false">${ICON.more}</button>`;
-      row.querySelector(".area-name").textContent = areaLabel(a);
-      row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(spriteCanvas(knowers[i].species, 20)));
-      areaTable.appendChild(row);
-    }
-    areaTable.insertAdjacentHTML(
-      "beforeend",
-      editingArea === "new" ? areaForm() : `<button class="mem-add" type="button" data-addarea>${ICON.plus}${t().addArea}</button>`,
-    );
-    wireAreaForm();
+    if (uncovered.length) box.querySelector("b").textContent = t().nobodyKnowsArea(uncovered.map(areaLabel));
   }
 
-  function wireAreaForm() {
-    const form = document.querySelector("[data-areaform]");
-    if (!form) return;
-    const a = editingArea === "new" ? null : byName(editingArea);
-    const input = form.querySelector("input");
-    input.value = a ? areaLabel(a) : "";
-    input.focus();
-    input.select();
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const label = input.value.trim();
-      if (!label) return;
-      const taken = AREAS.some((x) => x !== a && areaLabel(x) === label);
-      form.querySelector("[data-taken]").hidden = !taken;
-      if (taken) return;
-      if (a && label !== areaLabel(a)) a.label = label;
-      if (!a) AREAS.push({ name: "custom-" + Date.now(), label });
-      editingArea = null;
-      renderAreas();
-    });
-    form.querySelector("[data-cancelarea]").addEventListener("click", () => {
-      editingArea = null;
-      renderAreas();
-    });
-  }
+  const areas = listEditor({
+    table: document.getElementById("areaTable"),
+    items: AREAS,
+    max: 20,
+    label: areaLabel,
+    rename: (a, label) => { a.label = label; },
+    create: (label) => AREAS.push({ name: "custom-" + Date.now(), label }),
+    members: (a) => knowersOf(a.name),
+    count: (a) => t().memCount(countOf(a.name)),
+    empty: (a) => `<button class="nobody" type="button" data-pick="${a.name}">${t().nobodyKnows}</button>`,
+    holds: (a) => countOf(a.name),
+    remove: (a, into) => {
+      for (const p of people) for (const m of p.memories) if (m.area === a.name) m.area = into?.name ?? null;
+      AREAS.splice(AREAS.indexOf(a), 1);
+    },
+    after: renderNotices,
+    addLabel: t().addArea, menuLabel: t().areaMenu, nameLabel: t().areaName, placeholder: t().areaPlaceholder,
+    moveTitle: t().moveTitle, moveSub: t().moveSub, moveLabel: t().moveTo, moveConfirm: t().moveAndRemove,
+  });
 
-  function areaMenu(btn) {
-    const a = byName(btn.dataset.areamenu);
-    const n = countOf(a.name);
-    openRowMenu(btn, [
-      { label: t().rename, icon: ICON.pen, run: () => { editingArea = a.name; renderAreas(); } },
-      n
-        ? { label: t().removeArea, icon: ICON.trash, bad: true, run: () => openMove(a) }
-        : { label: t().removeArea, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => removeArea(a, null) },
-    ], { keep: t().keep });
-  }
-
-  function removeArea(a, into) {
-    for (const p of people) for (const m of p.memories) if (m.area === a.name) m.area = into;
-    AREAS.splice(AREAS.indexOf(a), 1);
-    renderAreas();
-  }
-
-  // An area with memory in it is not deleted outright: the memory goes somewhere first.
-  function openMove(a) {
-    openMoveDialog({
-      title: t().moveTitle(areaLabel(a)),
-      sub: t().moveSub(countOf(a.name)),
-      label: t().moveTo,
-      options: AREAS.filter((x) => x !== a).map((x) => ({ value: x.name, label: areaLabel(x) })),
-      cancel: t().cancel,
-      confirm: t().moveAndRemove,
-      onConfirm: (into) => removeArea(a, into),
-    });
-  }
+  // A role is a job title, written the same in either language.
+  const ROLE_LIST = ROLES.map((label) => ({ label }));
+  const inRole = (r) => people.filter((p) => p.role === r.label);
+  const roles = listEditor({
+    table: document.getElementById("roleTable"),
+    items: ROLE_LIST,
+    max: 32,
+    keepLast: true,
+    label: (r) => r.label,
+    rename: (r, label) => { for (const p of inRole(r)) p.role = label; r.label = label; },
+    create: (label) => ROLE_LIST.push({ label }),
+    members: inRole,
+    count: (r) => t().peopleCount(inRole(r).length),
+    empty: () => `<span class="none">${t().nobodyInRole}</span>`,
+    holds: (r) => inRole(r).length,
+    remove: (r, into) => {
+      for (const p of inRole(r)) p.role = into.label;
+      ROLE_LIST.splice(ROLE_LIST.indexOf(r), 1);
+    },
+    addLabel: t().addRole, menuLabel: t().roleMenu, nameLabel: t().roleName, placeholder: t().rolePlaceholder,
+    moveTitle: t().moveRoleTitle, moveSub: t().moveRoleSub, moveLabel: t().moveRoleTo, moveConfirm: t().changeAndRemove,
+  });
 
   const memCard = (m) => `<div class="mem${m.flash ? " is-new" : ""}">
       <span class="mem-t">${tx(m.text)}</span>
@@ -649,7 +708,8 @@
     for (const m of companyMemories) m.flash = false;
   }
 
-  renderAreas();
+  areas.render();
+  roles.render();
   renderCompanyMem();
 
   const fresh = (memory) => ({ ...memory, used: 0, fresh: true, flash: true });
@@ -662,7 +722,7 @@
         areas: teachAreas(),
         onSave: ({ to, memory }) => {
           to.memories.unshift(fresh(memory));
-          renderAreas();
+          areas.render();
         },
       });
     }
@@ -677,12 +737,6 @@
         },
       });
     }
-    if (e.target.closest("[data-addarea]")) {
-      editingArea = "new";
-      renderAreas();
-    }
-    const menu = e.target.closest("[data-areamenu]");
-    if (menu) areaMenu(menu);
   });
 
   /* ── tabs ────────────────────────────────────────────────────── */

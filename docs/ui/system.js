@@ -533,7 +533,7 @@ const WORDS = {
     hire: {
       title: "직원 고용", sub: "새 동료가 빈 책상에 앉아요.",
       species: "어떤 친구인가요", name: "이름", nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
-      role: "역할", roleHint: "목록에 없으면 직접 적어요.", team: "팀", noTeam: "팀 없음", cancel: "취소",
+      role: "역할", team: "팀", noTeam: "팀 없음", cancel: "취소",
       editTitle: "정보 바꾸기", editSub: "외형과 이름, 역할, 팀을 바꿔요.", save: "저장",
       simulated: "시뮬레이션 직원으로 시작해요. 실제로 일하게 하려면 고용한 뒤 Claude Code를 연결해요.",
       hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
@@ -565,7 +565,7 @@ const WORDS = {
     hire: {
       title: "Hire", sub: "Someone new takes a free desk.",
       species: "Who are they?", name: "Name", nameHint: "Shorter is better. You can change it later.",
-      role: "Role", roleHint: "Not listed? Write your own.", team: "Team", noTeam: "No team", cancel: "Cancel",
+      role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
       simulated: "They start simulated. Connect Claude Code after hiring to put them to real work.",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
@@ -766,7 +766,8 @@ function spriteCanvas(species, px) {
 }
 
 // `teams` is the company's list as [{ key, label }] when the caller holds it.
-function openHire({ team = null, teams = null, edit = null, onSave }) {
+// `roles` likewise, as titles.
+function openHire({ team = null, teams = null, roles = null, edit = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].hire;
   const local = (v) => (v && typeof v === "object" ? v[lang] : v);
@@ -791,9 +792,7 @@ function openHire({ team = null, teams = null, edit = null, onSave }) {
       </div>
       <div class="field">
         <label class="label" for="hireRole">${w.role}</label>
-        <input class="input" id="hireRole" list="hireRoles" maxlength="32" autocomplete="off" />
-        <datalist id="hireRoles"></datalist>
-        <span class="hint">${w.roleHint}</span>
+        <span class="select-wrap"><select class="select" id="hireRole"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
       </div>
       <div class="field">
         <label class="label" for="hireTeam">${w.team}</label>
@@ -811,9 +810,10 @@ function openHire({ team = null, teams = null, edit = null, onSave }) {
   const name = $("#hireName");
   const returnTo = document.activeElement;
 
-  // Suggestions, not a list to pick from: a title is the company's own.
-  for (const r of ROLES) $("#hireRoles").append(new Option(r));
-  $("#hireRole").value = edit ? edit.role : ROLES[0];
+  const roleList = roles ?? ROLES;
+  // Someone may hold a title the list no longer has; it stays theirs to keep.
+  for (const r of edit && !roleList.includes(edit.role) ? [edit.role, ...roleList] : roleList) $("#hireRole").append(new Option(r, r));
+  if (edit) $("#hireRole").value = edit.role;
   // A team is optional: a tiny office may not have one yet.
   $("#hireTeam").append(new Option(w.noTeam, ""));
   for (const x of teams ?? Object.entries(WORDS[lang].teams).map(([key, label]) => ({ key, label }))) $("#hireTeam").append(new Option(x.label, x.key));
@@ -848,7 +848,7 @@ function openHire({ team = null, teams = null, edit = null, onSave }) {
   function sync() {
     const n = name.value.trim();
     $("[data-ok]").textContent = edit ? w.save : w.hireAs(n);
-    $("[data-ok]").disabled = !(state.species && n && $("#hireRole").value.trim());
+    $("[data-ok]").disabled = !(state.species && n);
   }
 
   function close() {
@@ -862,12 +862,11 @@ function openHire({ team = null, teams = null, edit = null, onSave }) {
 
   sync();
   name.addEventListener("input", sync);
-  $("#hireRole").addEventListener("input", sync);
   scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
   for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
   $("[data-ok]").addEventListener("click", () => {
-    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value.trim(), team: $("#hireTeam").value || null };
+    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value || null };
     close();
     onSave(hired);
   });
