@@ -219,6 +219,7 @@
     <li><strong>Claude Code 확인이 먼저입니다.</strong> 직원은 에이전트로 일하고, 에이전트 없이 할 수 있는 일은 없습니다. 준비될 때까지 다음으로 넘어가지 않습니다.</li>
     <li><strong>로그인은 대신 해주지 않습니다.</strong> 확인하고, 터미널에서 할 일을 보여주고, 기다립니다. 토큰 입력칸은 없습니다.</li>
     <li>확인은 <strong>회사 전체에 한 번</strong>입니다. 이후에 뽑는 직원은 따로 연결하지 않습니다.</li>
+    <li>사이드바의 회사 바꾸기에서 여는 <strong>새 회사 만들기는 회사 이름부터, 가져오기는 도착부터</strong>입니다. 이 컴퓨터의 Claude Code는 이미 확인했습니다.</li>
     <li><strong>기존 회사를 가져와서 시작할 수 있습니다.</strong> 다른 컴퓨터에서 옮겨 올 때입니다. Claude Code 확인은 그래도 먼저이고, 회사와 직원 단계는 건너뜁니다. 파일에 없는 것 — 이 컴퓨터의 폴더, 예전 세션 — 은 도착 화면에서 말합니다.</li>
     <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다. 팀은 묻지 않습니다.</li>
     <li>이름은 사용자가 짓습니다 — <strong>i18n을 거치지 않는 텍스트</strong>입니다.</li>
@@ -383,6 +384,11 @@
   document.getElementById("toCompany").addEventListener("click", () => go(2));
   // The file picker is the system's; the sample goes straight to what it finds.
   document.getElementById("toImport").addEventListener("click", () => go(5));
+
+  // From the sidebar, Claude Code is already checked: a new company starts at
+  // its name, an import at what arrived.
+  const entry = { "#new": 2, "#import": 5 }[location.hash];
+  if (entry) { signedIn = true; renderChecks(); go(entry); }
   renderChecks();
 
   /* ── 3. species picker ───────────────────────────────────────── */

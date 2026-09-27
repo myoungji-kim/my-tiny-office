@@ -22,7 +22,7 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/settings.html` | The company's Claude Code, language, where the data lives, moving it |
+| `ui/settings.html` | The company's Claude Code, language, the open company's file, export and import |
 | `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -79,8 +79,12 @@ blockers, recent activity, team workload.
 ```
 
 One floating white panel on a grey page. The sidebar is fixed width and carries
-the company's name (which leads to the company screen), the menu, and the
-active company's roster.
+the company's name (which leads to the company screen) with a switcher beside
+it, the menu, and the active company's roster. The switcher lists every
+company on this computer — each is a file of its own and nothing crosses
+between them — then 새 회사 만들기 and 기존 회사 가져오기. From there a new
+company starts first run at its name and an import at arrival: this computer's
+Claude Code is already checked.
 
 Five places, and the office is the first:
 
@@ -425,19 +429,19 @@ to earn their place.
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인. Folder trust is not here: it is per project |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
-| 데이터 | The database file's path, with 복사; 내보내기 and 가져오기 for moving to another computer |
+| 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 버전 | The app's version |
 
 What the company decides — its name, areas, roles, memory — is on the company
 screen, not here.
 
-**Moving is a copy of the whole file.** 내보내기 saves it; 가져오기 replaces this
-company with the file's — nothing is merged — after backing this one up, and
-the confirm dialog says both. What belongs to the computer does not travel:
-the Claude Code sign-in, project folders, folder trust and running sessions.
-Each is asked for where it is used — a project whose folder is not here says
-so and asks for it, a task whose session stayed behind starts again —
-nothing is deleted. connect.html shows both.
+**A company moves as its file.** 내보내기 saves the open company's; 가져오기
+adds the file's company as one more, chosen in the system's file dialog — it
+never replaces or merges, so it asks nothing. What belongs to the computer
+does not travel: the Claude Code sign-in, project folders, folder trust and
+running sessions. Each is asked for where it is used — a project whose folder
+is not here says so and asks for it, a task whose session stayed behind starts
+again — and nothing is deleted. connect.html shows both.
 
 ## First run
 
@@ -515,6 +519,9 @@ the measured runtime surface.
   working, approval, done and held, plus the blocked mark, and time taken rather
   than progress derived from `estimatedDuration`. Projects need their status
   and priority, and employees the `reviewing` status.
+- **The code opens one database.** `src/infrastructure/persistence/database.ts`
+  opens a single `my-tiny-office.db`; a file per company, the list of them, and
+  the language and last company in `settings.json` are not built yet.
 - **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
   are the likeliest lever: hiring already needs a free one.
 - **A 내 차례 / Needs you inbox**, holding reviews waiting on the user, blocked

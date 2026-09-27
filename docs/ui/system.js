@@ -527,6 +527,7 @@ const STATUS = {
 const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+    companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
@@ -558,6 +559,7 @@ const WORDS = {
   },
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+    companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
     status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
@@ -1139,6 +1141,37 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
   });
   (to === null && !edit ? $("[data-pick]") : text).focus({ preventScroll: true });
 }
+
+/* ═══ switching company ═══ */
+// Every company on this computer is a file of its own. The names are the
+// user's, so they are never translated.
+const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 프로젝트 랩" }, { name: "동아리 앱" }];
+
+(() => {
+  const CHEVRON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5L8 10l3.5-3.5"/></svg>';
+  const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>';
+  const PLUS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>';
+  const DOWN = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8M4.6 7.4L8 10.8l3.4-3.4M3 13.5h10"/></svg>';
+  // An empty slot keeps the other names in line with the open one.
+  const BLANK = '<svg viewBox="0 0 16 16"></svg>';
+
+  const mount = () => {
+    const lang = uiLang();
+    const w = WORDS[lang].companies;
+    const suffix = lang === "en" ? "?lang=en" : "";
+    for (const b of document.querySelectorAll(".side-switch")) {
+      b.innerHTML = CHEVRON;
+      b.setAttribute("aria-label", w.switch);
+      b.addEventListener("click", () => openRowMenu(b, [
+        ...COMPANIES.map((c) => ({ label: c.name, icon: c.open ? CHECK : BLANK, run: () => {} })),
+        { label: w.create, icon: PLUS, run: () => { location.href = "first-run.html" + suffix + "#new"; } },
+        { label: w.import, icon: DOWN, run: () => { location.href = "first-run.html" + suffix + "#import"; } },
+      ]));
+    }
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
+  else mount();
+})();
 
 /* ═══ the sample-page bar ═══ */
 // Not part of the design: it only exists so the samples can be walked through.

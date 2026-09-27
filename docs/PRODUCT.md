@@ -69,7 +69,8 @@ office. The screens are in DESIGN.md.
 - review and approve
 - teach a memory
 - manage teams, roles and areas of expertise
-- move the company to another computer: export, import
+- keep several companies, switch between them, and move one to another
+  computer: export, import
 
 ## Office Progression
 

@@ -564,27 +564,33 @@ Store identifiers and configuration references, not secret credentials.
 
 ### Database location
 
-Each user has their own database. The default location is the operating
-system's per-user data directory, not the project folder, so switching
-branches or deleting the checkout never destroys a user's company.
+Each company is a database of its own, so companies never mix and one moves
+by copying its file. They live in the operating system's per-user data
+directory, not the project folder, so switching branches or deleting the
+checkout never destroys a user's company.
 
 ```text
-Windows   %LOCALAPPDATA%\my-tiny-office\my-tiny-office.db
-macOS     ~/Library/Application Support/my-tiny-office/my-tiny-office.db
-Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/my-tiny-office.db
+Windows   %LOCALAPPDATA%\my-tiny-office\
+macOS     ~/Library/Application Support/my-tiny-office/
+Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/
+
+  settings.json        language, the company opened last
+  companies/<id>.db    one per company
 ```
 
-`MY_TINY_OFFICE_DB_PATH` overrides the location.
+The list of companies is the `companies` folder; each file names its own
+company. `MY_TINY_OFFICE_DATA_DIR` overrides the directory.
 
-### Moving to another computer
+### Moving a company
 
-Export writes a consistent copy of the database while the app runs
-(`VACUUM INTO`). Import runs the migrations on the file, backs the current
-database up beside it, and swaps it in; it never merges two companies. The
-file carries the company and nothing of the machine: Claude Code stays signed
-in or out on its own, and a workspace path or a runtime session id from the
-old computer is kept but reconciled on launch — a missing folder or session
-becomes a state the user resolves, never a deletion.
+Export writes a consistent copy of the open company's database while the app
+runs (`VACUUM INTO`). Import runs the migrations on a copy of the chosen file
+and adds it to `companies/`; it never replaces or merges. A file whose
+company is already here asks whether to replace that one. The file carries
+the company and nothing of the machine: Claude Code stays signed in or out on
+its own, and a workspace path or a runtime session id from another computer is
+kept but reconciled on launch — a missing folder or session becomes a state
+the user resolves, never a deletion.
 
 ### Initialization
 
