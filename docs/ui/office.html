@@ -133,7 +133,6 @@
     </div>
 
     <div class="body">
-      <div id="runtime"></div>
       <div class="stage">
         <div class="room-wrap">
           <canvas class="room" aria-hidden="true" id="room" width="864" height="384"></canvas>
@@ -208,9 +207,7 @@
       tasks: { paging: "결제 내역 페이지네이션", orderType: "주문 상태 타입 좁히기", webhook: "결제 웹훅 서명 검증" },
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
       sinceToday: "오늘부터",
-      runtimeOff: "Claude Code 로그인이 풀렸어요",
-      runtimeOffWhy: "하던 업무와 기억은 그대로예요. 터미널에서 claude auth login을 실행한 뒤 다시 확인해 주세요. 그때까지 새 업무는 시작하지 않아요.",
-      recheck: "다시 확인", cannotStart: "Claude Code가 멈춰서 지금은 새 업무를 시작할 수 없어요.", justBack: "휴가에서 막 돌아왔어요",
+      justBack: "휴가에서 막 돌아왔어요",
     },
     en: {
       ...WORDS.en,
@@ -247,9 +244,7 @@
       tasks: { paging: "Paginate the payment history", orderType: "Narrow the order status type", webhook: "Verify the payment webhook signature" },
       reviewKey: "Review", reviewingNow: "Reviewing",
       sinceToday: "Since today",
-      runtimeOff: "Claude Code signed out",
-      runtimeOffWhy: "Tasks in progress and everything remembered are untouched. Run claude auth login in a terminal, then check again. Nothing new starts until then.",
-      recheck: "Check again", cannotStart: "Claude Code has stopped, so nothing new can start right now.", justBack: "Just back from leave",
+      justBack: "Just back from leave",
     },
   };
 
@@ -482,30 +477,6 @@
       <span class="c-nums">${nums}</span>`;
   }
 
-  /* ── the company's Claude Code ─────────────────────────────── */
-  // When it stops for the whole company it is one line above the floor, not a
-  // mark on everyone. The sample shows it at ?claude=off.
-  let runtimeOff = new URLSearchParams(location.search).get("claude") === "off";
-  function renderRuntime() {
-    const box = document.getElementById("runtime");
-    box.hidden = !runtimeOff;
-    box.innerHTML = runtimeOff
-      ? `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span>
-          <span class="n-tx"><b>${t().runtimeOff}</b><span>${t().runtimeOffWhy}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-recheck>${t().recheck}</button></span></div>`
-      : "";
-    box.querySelector("[data-recheck]")?.addEventListener("click", () => {
-      runtimeOff = false;
-      renderRuntime();
-      // the sample bar's switch follows
-      const u = new URL(location.href);
-      u.searchParams.delete("claude");
-      history.replaceState(null, "", u);
-      document.querySelector("#devbar [data-state]")?.setAttribute("aria-pressed", "false");
-    });
-  }
-  renderRuntime();
-
   /* ── today ───────────────────────────────────────────────────── */
   // Each row is a domain event worded by the dictionary. What waits on the
   // user carries the way to it; nothing else asks for anything.
@@ -720,7 +691,7 @@
     const acts = (p.agentLost
       ? [RECONNECT, ...ACTIONS[p.status].map((a) => ({ ...a, key: false }))]
       : ACTIONS[p.status]
-    ).map((a) => (runtimeOff && a.starts && !a.off ? { ...a, off: t().cannotStart } : a));
+    ).map((a) => (RUNTIME.off && a.starts && !a.off ? { ...a, off: t().runtime.cannotStart } : a));
     const rows = acts
       .map((a) => {
         const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");

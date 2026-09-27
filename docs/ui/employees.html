@@ -564,11 +564,13 @@
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
     document.getElementById("pnMem").textContent = p.memories.length;
     document.getElementById("pnStyle").textContent = p.style.length;
-    // Leave forbids new work; the button stays, disabled, with the reason beside it.
+    // Leave, or Claude Code stopping, forbids new work; the button stays,
+    // disabled, with the reason beside it.
     const away = p.status === "vacation";
-    document.getElementById("pAssign").disabled = away;
-    document.getElementById("pAssignWhy").hidden = !away;
-    document.getElementById("pAssignWhy").textContent = away ? t().cannotAssign : "";
+    const blocked = away || RUNTIME.off;
+    document.getElementById("pAssign").disabled = blocked;
+    document.getElementById("pAssignWhy").hidden = !blocked;
+    document.getElementById("pAssignWhy").textContent = away ? t().cannotAssign : RUNTIME.off ? t().runtime.cannotStart : "";
     for (const b of document.querySelectorAll("[data-ptab]")) b.setAttribute("aria-selected", String(b.dataset.ptab === tab));
     for (const el of document.querySelectorAll(".js-ptab")) el.hidden = el.id !== "pt-" + tab;
     document.title = "Tiny Office · " + p.name;
@@ -1264,5 +1266,6 @@
     window.scrollTo(0, 0);
   }
   window.addEventListener("hashchange", route);
+  document.addEventListener("runtimeback", () => { if (shown) renderPerson(shown); });
   route();
 </script>

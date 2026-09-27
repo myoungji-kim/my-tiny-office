@@ -529,6 +529,11 @@ const WORDS = {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
     companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
     agentLost: "에이전트 연결이 끊겼어요", copied: "복사했어요",
+    runtime: {
+      off: "Claude Code 로그인이 풀렸어요",
+      offWhy: "하던 업무와 기억은 그대로예요. 터미널에서 claude auth login을 실행한 뒤 다시 확인해 주세요. 그때까지 새 업무는 시작하지 않아요.",
+      recheck: "다시 확인", cannotStart: "Claude Code가 멈춰서 지금은 새 업무를 시작할 수 없어요.",
+    },
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
@@ -562,6 +567,11 @@ const WORDS = {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
     companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
     agentLost: "The agent disconnected", copied: "Copied",
+    runtime: {
+      off: "Claude Code signed out",
+      offWhy: "Tasks in progress and everything remembered are untouched. Run claude auth login in a terminal, then check again. Nothing new starts until then.",
+      recheck: "Check again", cannotStart: "Claude Code has stopped, so nothing new can start right now.",
+    },
     status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
@@ -1152,6 +1162,38 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
   (to === null && !edit ? $("[data-pick]") : text).focus({ preventScroll: true });
 }
 
+/* ═══ the company's Claude Code, on every screen ═══ */
+// When it stops for the whole company, every screen says so in one line above
+// its content and nothing new starts. The sample puts it there with ?claude=off.
+const RUNTIME = { off: new URLSearchParams(location.search).get("claude") === "off" };
+
+function runtimeBack() {
+  RUNTIME.off = false;
+  document.getElementById("runtimeLine")?.remove();
+  const u = new URL(location.href);
+  u.searchParams.delete("claude");
+  history.replaceState(null, "", u);
+  document.querySelector("#devbar [data-state]")?.setAttribute("aria-pressed", "false");
+  document.dispatchEvent(new Event("runtimeback"));
+}
+
+(() => {
+  const mount = () => {
+    const body = document.querySelector(".app .body");
+    if (!RUNTIME.off || !body) return;
+    const w = WORDS[uiLang()].runtime;
+    const line = document.createElement("div");
+    line.id = "runtimeLine";
+    line.className = "notice notice-bad";
+    line.innerHTML = `<span class="n-ic">${PLUG}</span><span class="n-tx"><b>${w.off}</b><span>${w.offWhy}</span></span>
+      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${w.recheck}</button></span>`;
+    line.querySelector("button").addEventListener("click", runtimeBack);
+    body.prepend(line);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
+  else mount();
+})();
+
 /* ═══ copying a command ═══ */
 // Whichever screen shows a command, its copy button takes the command without
 // the prompt, one line each.
@@ -1248,7 +1290,7 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
     }
 
     // A state the sample can be put in, where the page has one to show.
-    if (here === "office") {
+    if (["office", "projects", "employees", "company", "settings"].includes(here)) {
       const label = document.createElement("span");
       label.className = "grouplabel";
       label.textContent = lang === "en" ? "State" : "상태";
