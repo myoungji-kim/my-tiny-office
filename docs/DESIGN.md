@@ -156,9 +156,9 @@ lifted when it is not zero, and when it started; a done one carries its record
 — tasks done and days taken — and when it finished. There is no board across
 all projects: the office shows who is on what, and the list shows where work
 waits on the user. A planned row reads 시작 전 where the start date would be.
-The 대기 and 진행 중 tabs are ranked: rows sort by the project's priority and
-lead with the task cards' flag, and the project's header carries it too. Held
-and done projects decide nothing, so they show none.
+Every tab is ranked: rows sort by the project's priority and lead with the
+task cards' flag, and the project's header carries it too. A held project
+keeps its place for when it resumes.
 
 A project's page is its board under a header with its name, its status, where
 it lives, a `⋯` and 새 업무. The `⋯` follows the project's status:

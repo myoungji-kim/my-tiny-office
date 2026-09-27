@@ -16,10 +16,7 @@
 
   /* ═══ the list of projects ═══ */
 
-  #projList .row-item { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.7fr) 110px; }
-
-  /* Planned and active projects are ranked, so their rows lead with it. */
-  #projList.ranked .row-item { grid-template-columns: 58px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.7fr) 110px; }
+  #projList .row-item { grid-template-columns: 58px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.7fr) 110px; }
 
   .pr-name { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -275,9 +272,9 @@
       desc: { ko: "운영팀이 주문과 환불을 한 화면에서 봐요.", en: "One screen for support to see orders and refunds." },
       reason: { ko: "결제 개편을 먼저 끝내기로", en: "Payments rework comes first" } },
     // A finished project is kept as its record: its span and how much was done.
-    { id: "login", status: "done", since: "2026. 4. 14.", doneOn: "2026. 5. 29.", tasks: 14, name: { ko: "로그인 개편", en: "Login rework" }, folder: "~/Projects/tinysoft" },
-    { id: "deploy", status: "done", since: "2026. 2. 1.", doneOn: "2026. 3. 20.", tasks: 9, name: { ko: "배포 파이프라인", en: "Deploy pipeline" }, folder: "~/Projects/infra" },
-    { id: "first", status: "done", since: "2026. 1. 18.", doneOn: "2026. 2. 27.", tasks: 6, name: { ko: "첫 API", en: "First API" }, folder: "~/Projects/tinysoft" },
+    { id: "login", status: "done", priority: "high", since: "2026. 4. 14.", doneOn: "2026. 5. 29.", tasks: 14, name: { ko: "로그인 개편", en: "Login rework" }, folder: "~/Projects/tinysoft" },
+    { id: "deploy", status: "done", priority: "normal", since: "2026. 2. 1.", doneOn: "2026. 3. 20.", tasks: 9, name: { ko: "배포 파이프라인", en: "Deploy pipeline" }, folder: "~/Projects/infra" },
+    { id: "first", status: "done", priority: "normal", since: "2026. 1. 18.", doneOn: "2026. 2. 27.", tasks: 6, name: { ko: "첫 API", en: "First API" }, folder: "~/Projects/tinysoft" },
   ];
 
   // backlog → working → approval → done, and held off to the side.
@@ -704,19 +701,16 @@
     document.getElementById("headSub").textContent = t().headSub(active.length, waiting);
 
     const list = document.getElementById("projList");
-    // Whoever is free takes from the highest-ranked project first, so the
-    // list is in that order wherever it still decides something.
-    const ranked = filter === "planned" || filter === "active";
-    const rows = PROJECTS.filter((p) => p.status === filter);
-    if (ranked) rows.sort((a, b) => RANK[a.priority] - RANK[b.priority]);
-    list.classList.toggle("ranked", ranked);
+    // Whoever is free takes from the highest-ranked project first, so every
+    // tab is in that order.
+    const rows = PROJECTS.filter((p) => p.status === filter).sort((a, b) => RANK[a.priority] - RANK[b.priority]);
     list.innerHTML = rows.length ? "" : `<p class="list-empty">${t().listEmpty[filter]}</p>`;
     for (const p of rows) {
       const a = document.createElement("a");
       a.className = "row-item";
       a.href = "#" + p.id;
       const done = p.status === "done";
-      a.innerHTML = `${ranked ? prioMark(p.priority) : ""}
+      a.innerHTML = `${prioMark(p.priority)}
         <span><span class="pr-name">${tx(p.name)}</span>${p.desc ? `<span class="pr-desc">${tx(p.desc)}</span>` : ""}</span>
         <span class="pr-folder mono">${p.folder ?? t().noFolder}</span>
         <span class="pr-counts">${done ? t().record(p.tasks, daysBetween(p.since, p.doneOn)) : t().counts(countOf(p))}</span>
@@ -741,7 +735,7 @@
     chip.className = "chip " + STATUS_CHIP[p.status];
     chip.innerHTML = projectMark(p.status) + t().filters[p.status];
     // A project with no folder cannot be worked in; a planned one says so in its notice instead.
-    document.getElementById("pjSub").innerHTML = [writable(p) ? prioMark(p.priority) : "", p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
+    document.getElementById("pjSub").innerHTML = [prioMark(p.priority), p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
       .filter(Boolean).join(" · ");
     document.getElementById("pjNewTask").hidden = !writable(p);
 
