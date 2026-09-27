@@ -54,6 +54,33 @@ If reviews turn out to be easy to miss, the answer is a "내 차례 / Needs you"
 inbox that also holds blocked employees and lost agent connections — not a list
 of PRs.
 
+## The board
+
+A column is a status a task rests in, ordered the way work moves. The columns
+are therefore the domain's own statuses, not a set the screen invented, and
+moving between them is a transition — assign, start, approve — rather than
+another status.
+
+**In progress and Review differ by who the task waits on.** In progress means
+the employee is doing it: the meter fills from the clock and the player waits.
+Review means their work is finished and a decision is missing, and three of
+the four shapes a review takes need the player — pick a reviewer, approve, or
+answer a change request. Only "someone is reviewing" is another employee
+working, and even then the task is past its assignee.
+
+That is the axis the board is built on: left to right is a handoff, not just
+time. Review is the column that stops if the player ignores it.
+
+**Blocked is not a column.** A task is always blocked *out of* whichever
+status it is in — blocked in review because nobody can review that area,
+blocked in progress because the agent stopped. It rides on the card as a mark
+and a reason, so the board never has to guess which kind of stuck it means.
+
+Which statuses exist is the domain's call, and three places currently disagree:
+`docs/GAMEPLAY.md` lists six, `src/domain/task.ts` implements four, and the
+board shows five plus the blocked mark. That needs settling in the domain, and
+the board follows it rather than the other way round.
+
 ## Visual Direction
 
 Cozy Scandinavian office + simple pixel-art illustration + developer dashboard
