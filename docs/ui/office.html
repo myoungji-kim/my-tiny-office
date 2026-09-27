@@ -93,20 +93,14 @@
       <div class="head-row">
         <span>
           <h1 data-t="title">사무실</h1>
-          <span class="sub" data-t="sub">백엔드팀 · 책상 6석 중 5석 사용</span>
+          <span class="sub" id="headSub"></span>
         </span>
         <div class="head-right">
           <span class="ghost-note" data-t="date">2026. 9. 26. (토) 10:24</span>
         </div>
       </div>
 
-      <div class="tabs">
-        <button class="tab" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.4"/></svg><span data-t="tabs.all">전체</span><span class="n">5</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h7"/></svg><span data-t="tabs.backend">백엔드팀</span><span class="n">3</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2.5" width="12" height="11" rx="1.4"/><path d="M2 6h12"/></svg><span data-t="tabs.frontend">프론트엔드팀</span><span class="n">2</span></button>
-        <button class="tab"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg><span data-t="tabs.lounge">휴게실</span><span class="n">0</span></button>
-        <button class="tab" data-a="addRoom" aria-label="방 추가" style="color:var(--faint)">+</button>
-      </div>
+      <div class="tabs" id="tabs"></div>
     </div>
 
     <div class="body">
@@ -122,6 +116,10 @@
 </div>
 
 <div class="pop" id="pop" role="dialog" aria-label="직원 행동"></div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
 
 <script>
   /* ── pixel tiles ─────────────────────────────────────────────── */
@@ -148,8 +146,20 @@
       ...WORDS.ko,
       hireDesk: "빈 책상에 직원 채우기",
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
-      title: "사무실", sub: "백엔드팀 · 책상 6석 중 5석 사용", date: "2026. 9. 26. (토) 10:24",
-      tabs: { all: "전체", backend: "백엔드팀", frontend: "프론트엔드팀", lounge: "휴게실" },
+      title: "사무실", date: "2026. 9. 26. (토) 10:24",
+      tabs: { all: "전체", lounge: "휴게실" },
+      deskSub: (used, seats) => "책상 " + seats + "석 중 " + used + "석 사용",
+      loungeSub: "일이 없는 사람은 여기 있어요.",
+      loungeEmpty: "지금은 아무도 없어요.",
+      atLounge: "휴게실",
+      addRoomTitle: "방 추가", addRoomWhich: "어떤 방을 만들까요?", makeRoom: "방 만들기", cancel: "취소",
+      forTeam: "어느 팀",
+      rooms: {
+        team: "팀 방", teamWhy: "팀 자리를 한곳에 모아요.",
+        meeting: "회의실", meetingWhy: "리뷰를 같이 보는 자리예요.",
+        server: "서버실", serverWhy: "직원이 8명이 되면 열려요.",
+        lounge: "휴게실", loungeWhy: "이미 있어요.",
+      },
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
       minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
       notStarted: "시작 전", waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
@@ -168,8 +178,20 @@
       ...WORDS.en,
       hireDesk: "Fill this desk",
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
-      title: "Office", sub: "Backend · 5 of 6 desks in use", date: "Sat, Sep 26, 2026 · 10:24",
-      tabs: { all: "All", backend: "Backend", frontend: "Frontend", lounge: "Lounge" },
+      title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
+      tabs: { all: "All", lounge: "Lounge" },
+      deskSub: (used, seats) => used + " of " + seats + " desks in use",
+      loungeSub: "Whoever has no work to do is here.",
+      loungeEmpty: "Nobody is here right now.",
+      atLounge: "Lounge",
+      addRoomTitle: "Add a room", addRoomWhich: "What kind of room?", makeRoom: "Add the room", cancel: "Cancel",
+      forTeam: "Which team",
+      rooms: {
+        team: "Team room", teamWhy: "Keeps one team together.",
+        meeting: "Meeting room", meetingWhy: "Somewhere to go through a review together.",
+        server: "Server room", serverWhy: "Opens at eight employees.",
+        lounge: "Lounge", loungeWhy: "You already have one.",
+      },
       work: "WORK", noTask: "Nothing assigned", away: "Away",
       minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
       notStarted: "Not started", waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",
@@ -206,71 +228,152 @@
   // available or on vacation. The actions offered follow from that alone.
   const label = (k) => t().status[k];
 
-  // The nickname is the player's; the species only picks a sprite.
-  const people = [
-    { id: "p1", name: "모카", species: "cat", role: "Backend Engineer", team: "backend", col: 3, row: 3,
-      status: "working", task: { key: "pay", spent: 22, total: 30 } },
-    { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer", team: "frontend", col: 8, row: 3,
-      status: "working", task: { key: "login", spent: 12, total: 25 } },
-    { id: "p3", name: "단풍", species: "deer", role: "Product Manager", team: "backend", col: 13, row: 3,
-      status: "ready", task: { key: "docs", spent: 0, total: 20 } },
-    { id: "p4", name: "삐약", species: "chick", role: "DBA", team: "backend", col: 3, row: 6,
-      status: "available", last: "lastIndex" },
-    { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer", team: "frontend", col: 8, row: 6,
-      status: "vacation", back: "backIn" },
+  // Who these people are is the company's answer, not this screen's. The floor
+  // adds only where each of them sits and what is on their desk today.
+  const DESKS = [
+    { id: "p1", col: 3, row: 3, task: { key: "pay", spent: 22, total: 30 } },
+    { id: "p2", col: 8, row: 3, task: { key: "login", spent: 12, total: 25 } },
+    { id: "p3", col: 13, row: 3, task: { key: "docs", spent: 0, total: 20 } },
+    { id: "p4", col: 3, row: 6, last: "lastIndex" },
+    { id: "p5", col: 8, row: 6, back: "backIn" },
     { id: null, col: 13, row: 6 },
   ];
+  const fromCompany = new Map(STAFF.map((p) => [p.id, p]));
+  const people = DESKS.map((d) => (d.id ? { ...fromCompany.get(d.id), ...d } : d));
   const staffed = people.filter((p) => p.id);
   const byId = new Map(staffed.map((p) => [p.id, p]));
   const pct = (p) => (p.task ? Math.round((p.task.spent / p.task.total) * 100) : 0);
 
-  /* ── the room ────────────────────────────────────────────────── */
+  /* ── rooms ───────────────────────────────────────────────────── */
+  // A tab is a room. The whole floor is one of them, each team has its own,
+  // and the lounge is where anyone without work to do ends up.
+
   const S = 3, T = 48;
-  const room = document.getElementById("room");
-  const ctx = room.getContext("2d");
+  const canvas = document.getElementById("room");
+  const ctx = canvas.getContext("2d");
+  const overlay = document.getElementById("overlay");
   ctx.imageSmoothingEnabled = false;
-  for (let y = 0; y < 8; y++) for (let x = 0; x < 18; x++) paint(ctx, TILES.floor, S, x * T, y * T);
-  for (let x = 0; x < 18; x++) paint(ctx, TILES.wall, S, x * T, 0);
-  for (const [t, x, y] of [["window",2,0],["window",3,0],["board",8,0],["board",9,0],["shelf",14,0],["plant",0,7],["plant",17,7]])
-    paint(ctx, TILES[t], S, x * T, y * T);
-  for (const p of people) {
-    const dx = p.col * T, dy = p.row * T;
-    paint(ctx, CHAIR, S, dx, dy - T);
-    if (p.id) paint(ctx, SPECIES.get(p.species).sprite, S, dx, dy - T, skin(SPECIES.get(p.species)));
-    paint(ctx, TILES.deskL, S, dx, dy);
-    paint(ctx, TILES.deskR, S, dx + T, dy);
-    paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: p.status === "working" ? P.M : P.o });
+
+  const tabs = document.getElementById("tabs");
+  const TEAMS = [...new Set(staffed.map((p) => p.team))];
+  const inLounge = (p) => p.status === "available";
+  const atDesk = (p) => p.status === "working" || p.status === "ready";
+  const headcount = (key) =>
+    key === "all" ? staffed.length : key === "lounge" ? staffed.filter(inLounge).length : staffed.filter((p) => p.team === key).length;
+
+  let room = "all";
+
+  // The whole floor keeps the seats it was drawn with; a team room lays its
+  // own out, three to a row.
+  function seatsOf(key) {
+    if (key === "all") return people;
+    const mine = people.filter((p) => p.id && p.team === key);
+    return mine.map((p, i) => ({ ...p, col: 3 + (i % 3) * 5, row: 3 + Math.floor(i / 3) * 3 }));
   }
 
-  const overlay = document.getElementById("overlay");
-  for (const p of people) {
+  function drawRoom(w, h, deco) {
+    canvas.width = w * T;
+    canvas.height = h * T;
+    ctx.imageSmoothingEnabled = false;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) paint(ctx, TILES.floor, S, x * T, y * T);
+    for (let x = 0; x < w; x++) paint(ctx, TILES.wall, S, x * T, 0);
+    for (const [tile, x, y] of deco) paint(ctx, TILES[tile], S, x * T, y * T);
+    overlay.innerHTML = "";
+  }
+
+  function mark(p, x, y, name, state) {
     const btn = document.createElement("button");
     btn.className = "desk";
     btn.type = "button";
-    if (p.id) btn.dataset.id = p.id;
-    btn.style.left = p.col * T - 4 + "px";
-    btn.style.top = p.row * T - T - 6 + "px";
+    if (p?.id) btn.dataset.id = p.id;
+    btn.style.left = x * T - 4 + "px";
+    btn.style.top = y * T - T - 6 + "px";
     btn.style.width = 2 * T + 8 + "px";
     btn.style.height = 2 * T + 10 + "px";
-    btn.setAttribute("aria-label", p.id ? p.name : t().emptyDesk);
-    if (p.id) btn.addEventListener("click", (e) => open(p.id, btn, e.detail === 0));
+    btn.setAttribute("aria-label", p?.id ? p.name : t().emptyDesk);
+    if (p?.id) btn.addEventListener("click", (e) => open(p.id, btn, e.detail === 0));
     overlay.appendChild(btn);
 
     const tag = document.createElement("span");
     tag.className = "tag";
-    tag.style.left = p.col * T + T + "px";
-    tag.style.top = p.row * T + T + 4 + "px";
-    tag.textContent = p.id ? p.name : t().emptySeat;
-    if (!p.id) tag.style.opacity = ".7";
+    tag.style.left = x * T + T + "px";
+    tag.style.top = y * T + T + 4 + "px";
+    tag.textContent = name;
+    if (!p?.id || !atDesk(p)) tag.style.opacity = ".7";
     overlay.appendChild(tag);
-    if (!p.id) continue;
+    if (!state) return;
 
     const bub = document.createElement("span");
     bub.className = "bub";
-    bub.style.left = p.col * T + T + "px";
-    bub.style.top = p.row * T - T - 24 + "px";
-    bub.innerHTML = '<span class="dot ' + p.status + '"></span>' + label(p.status);
+    bub.style.left = x * T + T + "px";
+    bub.style.top = y * T - T - 24 + "px";
+    // Someone in the lounge is available; the bubble only says where they are.
+    bub.innerHTML = '<span class="dot ' + (state === "lounge" ? "available" : state) + '"></span>' + (state === "lounge" ? t().atLounge : label(state));
     overlay.appendChild(bub);
+  }
+
+  function drawDesks(key) {
+    const seats = seatsOf(key);
+    const w = Math.max(...seats.map((p) => p.col)) + 5;
+    const h = Math.max(...seats.map((p) => p.row)) + 2;
+    const deco = [["window", 2, 0], ["window", 3, 0], ["board", 8, 0], ["board", 9, 0], ["shelf", 14, 0], ["plant", 0, h - 1], ["plant", w - 1, h - 1]]
+      .filter(([, x, y]) => x < w && y < h);
+    drawRoom(w, h, deco);
+
+    for (const p of seats) {
+      const dx = p.col * T, dy = p.row * T;
+      const here = p.id && atDesk(p);
+      paint(ctx, CHAIR, S, dx, dy - T);
+      if (here) paint(ctx, SPECIES.get(p.species).sprite, S, dx, dy - T, skin(SPECIES.get(p.species)));
+      paint(ctx, TILES.deskL, S, dx, dy);
+      paint(ctx, TILES.deskR, S, dx + T, dy);
+      paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: p.status === "working" ? P.M : P.o });
+      // An empty chair still belongs to someone, and the tag says where they went.
+      mark(p, p.col, p.row, p.id ? p.name : t().emptySeat, p.id ? (inLounge(p) ? "lounge" : p.status) : null);
+    }
+  }
+
+  function drawLounge() {
+    const here = staffed.filter(inLounge);
+    drawRoom(13, 6, [["window", 2, 0], ["coffee", 8, 0], ["shelf", 11, 0], ["plant", 0, 5], ["plant", 12, 5], ["table", 7, 3]]);
+    paint(ctx, TILES.sofaL, S, 4 * T, 3 * T);
+    paint(ctx, TILES.sofaR, S, 5 * T, 3 * T);
+    // Drawn after the sofa and low enough to sit in it rather than behind it.
+    here.forEach((p, i) => {
+      const col = 4 + (i % 2), row = 3;
+      paint(ctx, SPECIES.get(p.species).sprite, S, col * T, row * T - 10 * S, skin(SPECIES.get(p.species)));
+      mark(p, col - 0.5, row, p.name, p.status);
+    });
+  }
+
+  function render() {
+    tabs.innerHTML = "";
+    for (const key of ["all", ...TEAMS, "lounge"]) {
+      const b = document.createElement("button");
+      b.className = "tab";
+      b.setAttribute("aria-selected", String(key === room));
+      b.innerHTML = `<span>${key === "all" || key === "lounge" ? t().tabs[key] : t().teams[key]}</span><span class="n">${headcount(key)}</span>`;
+      b.addEventListener("click", () => { room = key; close(); render(); });
+      tabs.appendChild(b);
+    }
+    const add = document.createElement("button");
+    add.className = "tab";
+    add.style.color = "var(--faint)";
+    add.setAttribute("aria-label", t().addRoom);
+    add.textContent = "+";
+    add.addEventListener("click", openAddRoom);
+    tabs.appendChild(add);
+
+    if (room === "lounge") drawLounge();
+    else drawDesks(room);
+
+    const seats = room === "lounge" ? [] : seatsOf(room);
+    document.getElementById("headSub").textContent =
+      room === "lounge"
+        ? t().loungeSub
+        : t().deskSub(seats.filter((p) => p.id).length, seats.length);
+
+    drawCards();
   }
 
   /* ── sidebar roster ──────────────────────────────────────────── */
@@ -308,32 +411,47 @@
   }
 
   const teams = document.getElementById("teams");
-  for (const team of ["backend", "frontend"]) {
-    const group = staffed.filter((p) => p.team === team);
-    const wrap = document.createElement("div");
-    wrap.style.marginBottom = "18px";
-    wrap.innerHTML = `<div class="grp"><h2>${t().teams[team]}</h2><span class="cnt">${group.length}</span></div>`;
-    const grid = document.createElement("div");
-    grid.className = "cards";
-    for (const p of group) {
-      const c = document.createElement("div");
-      c.className = "card";
-      if (p.status === "vacation") c.style.opacity = ".72";
-      c.innerHTML = cardInner(p);
-      c.addEventListener("click", (e) => open(p.id, c, e.detail === 0));
-      grid.appendChild(c);
-      drawAvatar(c.querySelector("canvas"), p.species);
+
+  function drawCards() {
+    teams.innerHTML = "";
+    const groups =
+      room === "lounge" ? [["lounge", staffed.filter(inLounge)]]
+      : room === "all" ? TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])
+      : [[room, staffed.filter((p) => p.team === room)]];
+
+    for (const [key, group] of groups) {
+      const wrap = document.createElement("div");
+      wrap.style.marginBottom = "18px";
+      const heading = key === "lounge" ? t().tabs.lounge : t().teams[key];
+      wrap.innerHTML = `<div class="grp"><h2>${heading}</h2><span class="cnt">${group.length}</span></div>`;
+      const grid = document.createElement("div");
+      grid.className = "cards";
+      for (const p of group) {
+        const c = document.createElement("div");
+        c.className = "card";
+        if (p.status === "vacation") c.style.opacity = ".72";
+        c.innerHTML = cardInner(p);
+        c.addEventListener("click", (e) => open(p.id, c, e.detail === 0));
+        grid.appendChild(c);
+        drawAvatar(c.querySelector("canvas"), p.species);
+      }
+      if (!group.length) {
+        const e = document.createElement("p");
+        e.className = "col-empty";
+        e.textContent = t().loungeEmpty;
+        grid.appendChild(e);
+      }
+      if (key !== "lounge" && group.length) {
+        const add = document.createElement("button");
+        add.className = "addcard";
+        add.type = "button";
+        add.innerHTML =
+          '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' + t().hireDesk;
+        grid.appendChild(add);
+      }
+      wrap.appendChild(grid);
+      teams.appendChild(wrap);
     }
-    if (team === "backend") {
-      const add = document.createElement("button");
-      add.className = "addcard";
-      add.type = "button";
-      add.innerHTML =
-        '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' + t().hireDesk;
-      grid.appendChild(add);
-    }
-    wrap.appendChild(grid);
-    teams.appendChild(wrap);
   }
 
   /* ── anchored popover ────────────────────────────────────────── */
@@ -466,4 +584,86 @@
   });
   addEventListener("resize", () => { if (anchor) place(anchor); });
   addEventListener("scroll", () => { if (anchor) place(anchor); }, true);
+
+  /* ── adding a room ───────────────────────────────────────────── */
+  // What can be built is a fact about the company, so the rows that cannot say
+  // why rather than disappearing.
+
+  const scrim = document.getElementById("scrim");
+  const dialog = document.getElementById("modal");
+  const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
+
+  const KINDS = [
+    { key: "team", open: () => TEAMS.length < Object.keys(t().teams).length },
+    { key: "meeting", open: () => true },
+    { key: "server", open: () => staffed.length >= 8 },
+    { key: "lounge", open: () => false },
+  ];
+
+  function renderAddRoom() {
+    const kind = dialog.dataset.kind || "team";
+    const spare = Object.keys(t().teams).filter((k) => !TEAMS.includes(k));
+
+    dialog.setAttribute("aria-label", t().addRoomTitle);
+    dialog.innerHTML = `
+      <div class="m-hd">
+        <span style="flex:1;min-width:0"><span class="m-t">${t().addRoomTitle}</span></span>
+      </div>
+
+      <div class="m-sec">
+        <span class="label">${t().addRoomWhich}</span>
+        <div role="radiogroup" style="margin-top:8px">
+          ${KINDS.map(({ key, open }) => `
+            <button class="pick" type="button" role="radio" aria-checked="${key === kind}" data-kind="${key}"${open() ? "" : " disabled"}>
+              <span class="radio"></span>
+              <span class="pick-t">${t().rooms[key]}</span>
+              <span></span><span class="pick-m">${t().rooms[key + "Why"]}</span>
+            </button>`).join("")}
+        </div>
+
+        ${kind === "team" ? `
+          <div class="field">
+            <span class="label">${t().forTeam}</span>
+            <span class="select-wrap">
+              <select class="select" id="roomTeam">
+                ${spare.map((k) => `<option value="${k}">${t().teams[k]}</option>`).join("")}
+              </select>
+              ${chevron}
+            </span>
+          </div>` : ""}
+      </div>
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
+        <button class="btn btn-primary btn-md" data-make>${t().makeRoom}</button>
+      </div>`;
+
+    for (const b of dialog.querySelectorAll("[data-kind]")) {
+      b.addEventListener("click", () => {
+        dialog.dataset.kind = b.dataset.kind;
+        renderAddRoom();
+        dialog.querySelector(`[data-kind="${b.dataset.kind}"]`).focus();
+      });
+    }
+    dialog.querySelector("[data-close]").addEventListener("click", closeModal);
+    dialog.querySelector("[data-make]").addEventListener("click", closeModal);
+  }
+
+  function openAddRoom() {
+    close();
+    delete dialog.dataset.kind;
+    scrim.hidden = false;
+    renderAddRoom();
+    dialog.querySelector(".pick").focus({ preventScroll: true });
+  }
+
+  function closeModal() {
+    scrim.hidden = true;
+  }
+
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeModal(); });
+
+  render();
+
 </script>

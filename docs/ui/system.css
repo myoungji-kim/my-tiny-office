@@ -289,6 +289,8 @@ body:has(> .app) { padding: 22px 18px 40px; }
 
 .req { color: var(--bad); }
 
+.col-empty { font-size: 13px; color: var(--line-2); padding: 7px 2px; }
+
 .folder {
     display: flex; align-items: center; gap: 10px;
     border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px;
@@ -491,6 +493,10 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .pick-t { display: block; font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .pick-m { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.pick:disabled { opacity: .5; cursor: default; }
+
+.pick:disabled:hover { border-color: var(--line); background: var(--surface); }
 
 .pick-new { border-style: dashed; color: var(--muted); }
 
