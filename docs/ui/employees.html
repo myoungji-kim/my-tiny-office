@@ -278,6 +278,7 @@
         <div class="head-right">
           <button class="btn btn-secondary btn-lg" id="pTeach"><span data-t="teach">기억 가르치기</span></button>
           <button class="btn btn-primary btn-lg" id="pAssign"><span data-t="giveWork">업무 맡기기</span></button>
+          <button class="ibtn" id="pMore" type="button" data-a="personMenu" aria-label="직원 메뉴" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg></button>
         </div>
       </div>
 
@@ -339,13 +340,17 @@
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
       areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
-      nothingAssigned: "맡은 업무가 없어요", justJoined: "방금 입사했어요",
+      nothingAssigned: "맡은 업무가 없어요", justJoined: "방금 입사했어요", justBack: "휴가에서 막 돌아왔어요",
       allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
       edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
       styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
       headSub: (n, teams) => n + "명 · 팀 " + teams + "개",
       tabs: { list: "목록", org: "조직도", memory: "기억" },
+      editInfo: "정보 바꾸기", sendOnLeave: "휴가 보내기", comeBack: "복귀 처리", dismiss: "내보내기", keepThem: "계속 두기",
+      leaveWhy: (task) => "‘" + task + "’" + (hasBatchim(task) ? "은" : "는") + " 대기열로 돌아가요.",
+      dismissTitle: (n) => withParticle(n, "을", "를") + " 내보낼까요?",
+      dismissBody: "맡은 업무는 대기열로 돌아가고, 알려준 기억도 함께 떠나요. 회사 연혁의 합류 기록은 남아요.",
       noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
       teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
       moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
@@ -381,13 +386,17 @@
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
       areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
-      nothingAssigned: "Nothing assigned", justJoined: "Just joined",
+      nothingAssigned: "Nothing assigned", justJoined: "Just joined", justBack: "Just back from leave",
       allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
       edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
       styleSub: "Carried into every task, whatever the area.", stylePlaceholder: "e.g. Keep commits small",
       headSub: (n, teams) => n + " people · " + teams + " teams",
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
+      editInfo: "Edit details", sendOnLeave: "Send on leave", comeBack: "Bring back", dismiss: "Let them go", keepThem: "Keep them",
+      leaveWhy: (task) => "‘" + task + "’ goes back to the backlog.",
+      dismissTitle: (n) => "Let " + n + " go?",
+      dismissBody: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire.",
       noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
       teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
       moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
@@ -467,6 +476,7 @@
     x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
     task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
     hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
+    sun: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.8"/><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1"/></svg>',
     swap: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>',
     more: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg>',
     pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
@@ -568,7 +578,7 @@
       ? `<span class="k">${t().currentTask}</span><span class="now-task">${tx(p.task)}</span>`
       : p.back
       ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
-      : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;
+      : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.returned ? t().justBack : p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;
 
     document.getElementById("ovLeft").innerHTML = `
       <div class="panel">
@@ -708,6 +718,48 @@
 
   document.getElementById("pTeach").addEventListener("click", () => teach(shown));
   document.getElementById("pAssign").addEventListener("click", () => openAssign(shown));
+
+  /* ── managing a person ───────────────────────────────────────── */
+  // Leave and return are the domain's own transitions; letting someone go is
+  // the one that cannot be undone, so it asks in a dialog.
+  document.getElementById("pMore").addEventListener("click", (e) => {
+    const p = shown;
+    const away = p.status === "vacation";
+    openRowMenu(e.currentTarget, [
+      {
+        label: t().editInfo, icon: ICON.pen,
+        run: () => openHire({
+          edit: p,
+          teams: TEAMS.map((x) => ({ key: x.key, label: teamLabel(x) })),
+          onSave: (h) => { Object.assign(p, h); rerenderPeople(); renderMembers(); },
+        }),
+      },
+      away
+        ? { label: t().comeBack, icon: ICON.sun, run: () => {
+            Object.assign(p, { status: "available", back: null, returned: true });
+            rerenderPeople(); renderMembers();
+          } }
+        : { label: t().sendOnLeave, icon: ICON.sun, confirm: p.task ? t().leaveWhy(tx(p.task)) : null, run: () => {
+            Object.assign(p, { status: "vacation", task: null, returned: false, back: { ko: "복귀 날짜 미정", en: "No return date yet" } });
+            rerenderPeople(); renderMembers();
+          } },
+      {
+        label: t().dismiss, icon: ICON.trash, bad: true,
+        run: () => openConfirm({
+          title: t().dismissTitle(p.name),
+          body: t().dismissBody,
+          cancel: t().keepThem,
+          confirm: t().dismiss,
+          onConfirm: () => {
+            people.splice(people.indexOf(p), 1);
+            renderMembers();
+            location.hash = "";
+            rerenderPeople();
+          },
+        }),
+      },
+    ], { keep: t().keep });
+  });
   document.getElementById("pTabs").addEventListener("click", (e) => {
     const b = e.target.closest("[data-ptab]");
     if (b) location.hash = shown.id + (b.dataset.ptab === "overview" ? "" : "/" + b.dataset.ptab);

@@ -711,3 +711,29 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .picked { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: 14px; color: var(--muted); }
 
 .picked b { color: var(--ink); font-weight: 600; }
+
+/* ═══ confirm dialogs ═══ */
+
+.dlg {
+    display: flex; align-items: flex-start; gap: 13px; width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px;
+    box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 18px 48px rgb(20 20 25 / .17);
+}
+
+.d-ic {
+    width: 34px; height: 34px; border-radius: 999px; flex: none;
+    display: grid; place-items: center; background: var(--sunk); color: var(--muted);
+}
+
+.d-ic svg { width: 16px; height: 16px; }
+
+.dlg-bad .d-ic { background: var(--bad-soft); color: var(--bad-ink); }
+
+.d-body { min-width: 0; flex: 1; }
+
+.d-t { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.45; }
+
+.d-d { margin: 5px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+.dlg-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

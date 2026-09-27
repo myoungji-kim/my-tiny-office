@@ -141,17 +141,9 @@
 
     <div class="field">
       <label class="label" for="rl" data-t="roleLabel">역할</label>
-      <span class="select-wrap">
-        <select class="select select-lg" id="rl">
-          <option>Backend Engineer</option>
-          <option>Frontend Engineer</option>
-          <option>Product Manager</option>
-          <option>DBA</option>
-          <option>DevOps Engineer</option>
-          <option>QA Engineer</option>
-        </select>
-        <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
-      </span>
+      <input class="input input-lg" id="rl" list="rlRoles" maxlength="32" autocomplete="off" value="Backend Engineer" />
+      <datalist id="rlRoles"></datalist>
+      <span class="hint" data-t="roleHint">목록에 없으면 직접 적어요.</span>
     </div>
 
     <div class="acts">
@@ -259,7 +251,7 @@
       speciesLabel: "어떤 친구인가요",
       nameLabel: "이름",
       nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
-      roleLabel: "역할",
+      roleLabel: "역할", roleHint: "목록에 없으면 직접 적어요.",
       back: "뒤로",
       hire: "고용하기",
       opened: "사무실이 열렸어요",
@@ -284,7 +276,7 @@
       speciesLabel: "Who are they?",
       nameLabel: "Name",
       nameHint: "Shorter is better. You can change it later.",
-      roleLabel: "Role",
+      roleLabel: "Role", roleHint: "Not listed? Write your own.",
       back: "Back",
       hire: "Hire",
       opened: "Your office is open",
@@ -327,6 +319,7 @@
   const picked = document.getElementById("picked");
   const hireBtn = document.getElementById("hire");
   const nameInput = document.getElementById("nm");
+  for (const r of ROLES) document.getElementById("rlRoles").append(new Option(r));
 
   for (const c of CAST) {
     const b = document.createElement("button");
@@ -347,8 +340,10 @@
 
   // A nickname the player did not write is not their employee, so the button
   // waits for both.
-  const sync = () => { hireBtn.disabled = !(chosen && nameInput.value.trim()); };
+  const roleInput = document.getElementById("rl");
+  const sync = () => { hireBtn.disabled = !(chosen && nameInput.value.trim() && roleInput.value.trim()); };
   nameInput.addEventListener("input", sync);
+  roleInput.addEventListener("input", sync);
 
   /* ── 3. arrival ──────────────────────────────────────────────── */
   document.getElementById("toHire").addEventListener("click", () => go(2));
@@ -356,7 +351,7 @@
 
   function rerenderArrival() {
     const name = nameInput.value.trim();
-    const role = document.getElementById("rl").value;
+    const role = roleInput.value.trim();
     const co = document.getElementById("co").value.trim() || t().companyFallback;
 
     document.getElementById("openSub").textContent = `${co} · ${t().headcount(1)}`;

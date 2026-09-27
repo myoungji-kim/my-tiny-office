@@ -429,6 +429,25 @@ dialog says so before it happens. Their page opens next, where the first thing
 to do is teach them. Until they have done anything, 지금 says 방금 입사했어요
 rather than inventing a last task.
 
+**A role is written, not picked.** The common titles are offered as
+suggestions (Backend Engineer, Product Manager, DBA…), but a company that needs
+a Game Server Engineer writes one. No rule hangs on the role — expertise and
+review come from memory — so there is no list for the company to manage.
+
+### Managing a person
+
+A person's page has a `⋯` beside its buttons:
+
+| | |
+| --- | --- |
+| 정보 바꾸기 | The hire dialog again, filled in: species, name, role, team |
+| 휴가 보내기 / 복귀 처리 | If they are on a task, it says first that the task goes back to the backlog |
+| 내보내기 | A confirm dialog, because it cannot be undone |
+
+Letting someone go returns their task to the backlog and takes what they were
+taught with them; the company's history keeps their hire. After leave, 지금 says
+휴가에서 막 돌아왔어요 rather than calling the return a finished task.
+
 ## Company
 
 The office shows what is happening now; the company shows what has happened
