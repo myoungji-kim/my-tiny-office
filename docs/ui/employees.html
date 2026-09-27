@@ -244,7 +244,7 @@
           <span class="sub" id="headSub"></span>
         </span>
         <div class="head-right">
-          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="hire">직원 고용</span></button>
+          <button class="btn btn-primary btn-lg" id="hireBtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="hire">직원 고용</span></button>
         </div>
       </div>
 
@@ -344,7 +344,7 @@
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
       areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
-      nothingAssigned: "맡은 업무가 없어요",
+      nothingAssigned: "맡은 업무가 없어요", justJoined: "방금 입사했어요",
       allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
       edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
@@ -383,7 +383,7 @@
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
       areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
-      nothingAssigned: "Nothing assigned",
+      nothingAssigned: "Nothing assigned", justJoined: "Just joined",
       allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
       edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
@@ -486,29 +486,37 @@
 
   /* ── sidebar roster ──────────────────────────────────────────── */
   const members = document.getElementById("members");
-  mountRoster(members, (p) => { location.hash = p.id; });
+  function renderMembers() {
+    members.replaceChildren();
+    mountRoster(members, (p) => { location.hash = p.id; });
+  }
+
   /* ── header ──────────────────────────────────────────────────── */
-  const totalMem = people.reduce((n, p) => n + p.memories.length, 0);
-  document.getElementById("nList").textContent = people.length;
-  document.getElementById("nMem").textContent = totalMem;
-  document.getElementById("headSub").textContent =
-    t().headSub(people.length, people.filter((p) => p.dept === "dev").length, people.filter((p) => p.dept === "product").length);
+  function renderCounts() {
+    document.getElementById("nList").textContent = people.length;
+    document.getElementById("nMem").textContent = people.reduce((n, p) => n + p.memories.length, 0);
+    document.getElementById("headSub").textContent =
+      t().headSub(people.length, people.filter((p) => p.dept === "dev").length, people.filter((p) => p.dept === "product").length);
+  }
 
   /* ── roster ──────────────────────────────────────────────────── */
   const roster = document.getElementById("roster");
-  for (const p of people) {
-    const areas = areasOf(p);
-    const b = document.createElement("a");
-    b.className = "row-item";
-    b.href = "#" + p.id;
-    b.innerHTML = `
-      <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-      <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
-      <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
-      <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
-      <span class="r-mem">${t().memCountShort(p.memories.length)}</span>`;
-    b.querySelector(".r-av").prepend(avatar(p.species, 40));
-    roster.appendChild(b);
+  function renderRoster() {
+    roster.replaceChildren();
+    for (const p of people) {
+      const areas = areasOf(p);
+      const b = document.createElement("a");
+      b.className = "row-item";
+      b.href = "#" + p.id;
+      b.innerHTML = `
+        <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+        <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
+        <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
+        <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
+        <span class="r-mem">${t().memCountShort(p.memories.length)}</span>`;
+      b.querySelector(".r-av").prepend(avatar(p.species, 40));
+      roster.appendChild(b);
+    }
   }
 
   /* ── person ──────────────────────────────────────────────────── */
@@ -561,7 +569,7 @@
       ? `<span class="k">${t().currentTask}</span><span class="now-task">${tx(p.task)}</span>`
       : p.back
       ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
-      : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${t().lastFinished} · ${tx(p.last)}</span>`;
+      : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;
 
     document.getElementById("ovLeft").innerHTML = `
       <div class="panel">
@@ -766,42 +774,78 @@
     { name: "dev", teams: ["backend", "frontend"] },
     { name: "product", teams: ["planning", "design"] },
   ];
-  for (const d of DEPTS) {
-    const inDept = people.filter((p) => p.dept === d.name);
-    const box = document.createElement("div");
-    box.className = "dept";
-    box.innerHTML = `<div class="dept-hd"><h2>${t().depts[d.name]}</h2><span class="cnt">${inDept.length}</span></div>`;
-    const teams = document.createElement("div");
-    teams.className = "teams";
-    for (const team of d.teams) {
-      const inTeam = inDept.filter((p) => p.team === team);
-      const wrap = document.createElement("div");
-      wrap.innerHTML = `<div class="team-hd"><h3>${t().teams[team]}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
-      const grid = document.createElement("div");
-      grid.className = "tgrid";
-      for (const p of inTeam) {
-        const c = document.createElement("button");
-        c.className = "tcard";
-        c.type = "button";
-        c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(p.memories.length)}</span></span>`;
-        c.querySelector(".t-av").prepend(avatar(p.species, 36));
-        c.addEventListener("click", () => { location.hash = p.id; });
-        grid.appendChild(c);
+  function renderOrg() {
+    org.replaceChildren();
+    for (const d of DEPTS) {
+      const inDept = people.filter((p) => p.dept === d.name);
+      const box = document.createElement("div");
+      box.className = "dept";
+      box.innerHTML = `<div class="dept-hd"><h2>${t().depts[d.name]}</h2><span class="cnt">${inDept.length}</span></div>`;
+      const teams = document.createElement("div");
+      teams.className = "teams";
+      for (const team of d.teams) {
+        const inTeam = inDept.filter((p) => p.team === team);
+        const wrap = document.createElement("div");
+        wrap.innerHTML = `<div class="team-hd"><h3>${t().teams[team]}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
+        const grid = document.createElement("div");
+        grid.className = "tgrid";
+        for (const p of inTeam) {
+          const c = document.createElement("button");
+          c.className = "tcard";
+          c.type = "button";
+          c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+            <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(p.memories.length)}</span></span>`;
+          c.querySelector(".t-av").prepend(avatar(p.species, 36));
+          c.addEventListener("click", () => { location.hash = p.id; });
+          grid.appendChild(c);
+        }
+        if (!inTeam.length) {
+          const v = document.createElement("button");
+          v.className = "vacant";
+          v.type = "button";
+          v.dataset.hire = team;
+          v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
+          grid.appendChild(v);
+        }
+        wrap.appendChild(grid);
+        teams.appendChild(wrap);
       }
-      if (!inTeam.length) {
-        const v = document.createElement("button");
-        v.className = "vacant";
-        v.type = "button";
-        v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
-        grid.appendChild(v);
-      }
-      wrap.appendChild(grid);
-      teams.appendChild(wrap);
+      box.appendChild(teams);
+      org.appendChild(box);
     }
-    box.appendChild(teams);
-    org.appendChild(box);
   }
+
+  /* ── hiring ──────────────────────────────────────────────────── */
+  // The samples' today.
+  const TODAY = "2026. 9. 26.";
+
+  function hire(team = null) {
+    openHire({
+      team,
+      onSave: (h) => {
+        const p = {
+          ...h, id: "p" + (people.length + 1), status: "available", joined: TODAY,
+          done: 0, reviews: 0, style: [], memories: [],
+        };
+        people.push(p);
+        renderCounts();
+        renderRoster();
+        renderOrg();
+        renderMembers();
+        location.hash = p.id;
+      },
+    });
+  }
+  document.getElementById("hireBtn").addEventListener("click", () => hire());
+  org.addEventListener("click", (e) => {
+    const v = e.target.closest("[data-hire]");
+    if (v) hire(v.dataset.hire);
+  });
+
+  renderMembers();
+  renderCounts();
+  renderRoster();
+  renderOrg();
 
   /* ── memory tab ──────────────────────────────────────────────── */
   const notices = document.getElementById("memNotices");

@@ -383,6 +383,27 @@ A memory's `⋯` corrects it (고치기, the same dialog) or deletes it. There i
 no archive: what is not worth carrying is not worth keeping. Deleting asks
 once more in place, because it cannot be undone.
 
+### Hiring
+
+First-run hires the first person in its own steps. Every hire after that opens
+one dialog: who they are (species), their name, their role and their team. The
+button waits for a species and a name the player wrote, and says who it hires
+(*호두 고용하기*), because an employee the player did not name is not theirs.
+
+| Opened from | Already filled in |
+| --- | --- |
+| 직원 고용 on the people screen | Nothing |
+| An empty team on the org chart | The team |
+| 빈 책상에 직원 채우기 in the office | The team; the new person sits at the free desk |
+
+**Hiring needs a free desk.** When every desk is taken, the office's card says
+빈 책상이 없어요 and cannot be pressed.
+
+A new hire starts simulated, with no memory and no way of working, and the
+dialog says so before it happens. Their page opens next, where the first thing
+to do is teach them. Until they have done anything, 지금 says 방금 입사했어요
+rather than inventing a last task.
+
 ## Company
 
 The office shows what is happening now; the company shows what has happened

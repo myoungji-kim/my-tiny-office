@@ -700,3 +700,24 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .hint a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 
 .hint a:hover { color: var(--brand-ink); }
+
+/* ═══ the species picker ═══ */
+
+.species {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px;
+    max-height: 196px; overflow: auto; padding: 4px;
+    border: 1px solid var(--line); border-radius: var(--r-card); background: var(--subtle);
+}
+
+.sp {
+    aspect-ratio: 1; border: 1px solid transparent; border-radius: 10px;
+    background: var(--surface); cursor: pointer; display: grid; place-items: center; padding: 0;
+}
+
+.sp:hover { border-color: var(--line-2); }
+
+.sp[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); }
+
+.picked { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: 14px; color: var(--muted); }
+
+.picked b { color: var(--ink); font-weight: 600; }

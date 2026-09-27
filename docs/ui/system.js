@@ -530,6 +530,13 @@ const WORDS = {
     status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
+    hire: {
+      title: "직원 고용", sub: "새 동료가 빈 책상에 앉아요.",
+      species: "어떤 친구인가요", name: "이름", nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
+      role: "역할", team: "팀", cancel: "취소",
+      simulated: "시뮬레이션 직원으로 시작해요. 실제로 일하게 하려면 고용한 뒤 Claude Code를 연결해요.",
+      hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
+    },
     teach: {
       titleTo: (name) => name + "에게 알려주기",
       titleCompany: "회사 전체에 알려주기",
@@ -554,6 +561,13 @@ const WORDS = {
     status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
+    hire: {
+      title: "Hire", sub: "Someone new takes a free desk.",
+      species: "Who are they?", name: "Name", nameHint: "Shorter is better. You can change it later.",
+      role: "Role", team: "Team", cancel: "Cancel",
+      simulated: "They start simulated. Connect Claude Code after hiring to put them to real work.",
+      hireAs: (n) => (n ? "Hire " + n : "Hire"),
+    },
     teach: {
       titleTo: (name) => "Teach " + name,
       titleCompany: "Tell the whole company",
@@ -730,6 +744,122 @@ function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
   menuPop.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - menuPop.offsetHeight - edge)) + "px";
 }
 
+/* ═══ hiring ═══ */
+// Every "hire" after the first opens this dialog; first-run keeps its own
+// steps. Like teaching, it stores nothing itself: the new person goes to onSave.
+
+const ROLES = ["Backend Engineer", "Frontend Engineer", "Product Manager", "DBA", "DevOps Engineer", "QA Engineer"];
+const TEAM_DEPT = { backend: "dev", frontend: "dev", planning: "product", design: "product" };
+
+function spriteCanvas(species, px) {
+  const c = document.createElement("canvas");
+  c.width = c.height = px;
+  const g = c.getContext("2d");
+  g.imageSmoothingEnabled = false;
+  const sp = SPECIES.get(species);
+  const scale = Math.max(1, Math.floor(px / 16));
+  const pad = Math.floor((px - 16 * scale) / 2);
+  paint(g, sp.sprite, scale, pad, pad, skin(sp));
+  return c;
+}
+
+function openHire({ team = null, onSave }) {
+  const lang = uiLang();
+  const w = WORDS[lang].hire;
+  const local = (v) => (v && typeof v === "object" ? v[lang] : v);
+  const state = { species: null };
+
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+    <div class="m-hd">
+      <span class="m-av" data-av></span>
+      <span style="flex:1;min-width:0"><span class="m-t">${w.title}</span><span class="m-s">${w.sub}</span></span>
+      <button class="ibtn" type="button" data-close aria-label="${w.cancel}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
+    </div>
+    <div class="m-sec">
+      <span class="label">${w.species}</span>
+      <div class="species" data-cast></div>
+      <div class="picked" data-picked></div>
+      <div class="field">
+        <label class="label" for="hireName">${w.name}</label>
+        <input class="input" id="hireName" maxlength="12" autocomplete="off" />
+        <span class="hint">${w.nameHint}</span>
+      </div>
+      <div class="field">
+        <label class="label" for="hireRole">${w.role}</label>
+        <span class="select-wrap"><select class="select" id="hireRole"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
+      </div>
+      <div class="field">
+        <label class="label" for="hireTeam">${w.team}</label>
+        <span class="select-wrap"><select class="select" id="hireTeam"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
+      </div>
+    </div>
+    <div class="m-sec"><span class="hint" style="margin:0">${w.simulated}</span></div>
+    <div class="m-foot">
+      <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
+      <button class="btn btn-primary btn-md" type="button" data-ok disabled></button>
+    </div>
+  </div>`;
+  document.body.append(scrim);
+  const $ = (sel) => scrim.querySelector(sel);
+  const name = $("#hireName");
+  const returnTo = document.activeElement;
+
+  for (const r of ROLES) $("#hireRole").append(new Option(r, r));
+  for (const [key, label] of Object.entries(WORDS[lang].teams)) $("#hireTeam").append(new Option(label, key));
+  if (team) $("#hireTeam").value = team;
+
+  const cast = $("[data-cast]");
+  for (const c of CAST) {
+    const b = document.createElement("button");
+    b.className = "sp";
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", local(c.species));
+    b.append(spriteCanvas(c.key, 34));
+    b.addEventListener("click", () => {
+      state.species = c;
+      for (const x of cast.children) x.setAttribute("aria-pressed", String(x === b));
+      $("[data-picked]").innerHTML = `<b>${local(c.species)}</b><span>${local(c.family)}</span>`;
+      $("[data-av]").replaceChildren(spriteCanvas(c.key, 32));
+      name.placeholder = local(c);
+      sync();
+    });
+    cast.append(b);
+  }
+
+  // A nickname the player did not write is not their employee, so the button
+  // waits for both.
+  function sync() {
+    const n = name.value.trim();
+    $("[data-ok]").textContent = w.hireAs(n);
+    $("[data-ok]").disabled = !(state.species && n);
+  }
+
+  function close() {
+    scrim.remove();
+    document.removeEventListener("keydown", onKey);
+    returnTo?.focus?.({ preventScroll: true });
+  }
+  function onKey(e) {
+    if (e.key === "Escape") close();
+  }
+
+  sync();
+  name.addEventListener("input", sync);
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
+  for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  $("[data-ok]").addEventListener("click", () => {
+    const t = $("#hireTeam").value;
+    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: t, dept: TEAM_DEPT[t] };
+    close();
+    onSave(hired);
+  });
+  cast.firstElementChild.focus({ preventScroll: true });
+}
+
 /* ═══ teaching ═══ */
 // Every place that says "teach" opens this one dialog; where it was opened
 // from decides only what is already filled in. `to` is someone from STAFF,
@@ -806,13 +936,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
       box.innerHTML = '<svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>';
       return;
     }
-    const c = document.createElement("canvas");
-    c.width = c.height = 32;
-    const g = c.getContext("2d");
-    g.imageSmoothingEnabled = false;
-    const sp = SPECIES.get(p.species);
-    paint(g, sp.sprite, 2, 0, 0, skin(sp));
-    box.append(c);
+    box.append(spriteCanvas(p.species, 32));
   }
 
   function paintHead() {

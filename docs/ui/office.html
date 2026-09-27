@@ -144,7 +144,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      hireDesk: "빈 책상에 직원 채우기",
+      hireDesk: "빈 책상에 직원 채우기", noDesk: "빈 책상이 없어요", justHired: "방금 입사",
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
       tabs: { all: "전체", lounge: "휴게실" },
@@ -176,7 +176,7 @@
     },
     en: {
       ...WORDS.en,
-      hireDesk: "Fill this desk",
+      hireDesk: "Fill this desk", noDesk: "No free desk", justHired: "Just joined",
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
       tabs: { all: "All", lounge: "Lounge" },
@@ -403,7 +403,12 @@
   }
 
   /* ── sidebar roster ──────────────────────────────────────────── */
-  mountRoster(document.getElementById("members"), (p, el, viaKey) => open(p.id, el, viaKey));
+  function renderMembers() {
+    const box = document.getElementById("members");
+    box.replaceChildren();
+    mountRoster(box, (p, el, viaKey) => open(p.id, el, viaKey));
+  }
+  renderMembers();
   /* ── team cards ──────────────────────────────────────────────── */
   function cardInner(p) {
     const v = pct(p);
@@ -473,12 +478,39 @@
         add.className = "addcard";
         add.type = "button";
         add.innerHTML =
-          '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' + t().hireDesk;
+          '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' +
+          (freeDesk() < 0 ? t().noDesk : t().hireDesk);
+        add.disabled = freeDesk() < 0;
+        add.addEventListener("click", () => hireAt(key));
         grid.appendChild(add);
       }
       wrap.appendChild(grid);
       teams.appendChild(wrap);
     }
+  }
+
+  /* ── hiring ──────────────────────────────────────────────────── */
+  // Hiring needs a free desk, and the new person sits at it.
+  const freeDesk = () => DESKS.findIndex((d) => !d.id);
+
+  function hireAt(team) {
+    openHire({
+      team,
+      onSave: (h) => {
+        const i = freeDesk();
+        if (i < 0) return;
+        const base = { ...h, id: "p" + (STAFF.length + 1), status: "available", memories: [], style: [], done: 0, reviews: 0 };
+        STAFF.push(base);
+        fromCompany.set(base.id, base);
+        Object.assign(DESKS[i], { id: base.id, last: "justHired" });
+        const p = { ...base, ...DESKS[i] };
+        people[i] = p;
+        staffed.push(p);
+        byId.set(p.id, p);
+        renderMembers();
+        render();
+      },
+    });
   }
 
   /* ── anchored popover ────────────────────────────────────────── */
