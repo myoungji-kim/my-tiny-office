@@ -532,7 +532,8 @@ Every employee works through Claude Code, so there is no fake work to fall
 back on. When the runtime stops — logged out, uninstalled, a session dropped —
 the office says so and keeps everything: the employee, their memory, their
 task. A runtime that stops for the company is one line at the top of the
-office, and nothing new starts until it is back. A dropped session stops only
+office, with 다시 확인, and nothing new starts until it is back: 업무 맡기기 and
+다시 연결 are disabled with that reason. A dropped session stops only
 its employee: **status is the dot at bottom-right; a dropped agent is a red mark
 at top-left**, with no mark while it works, and the task card carries the
 blocked mark. The mark is the same wherever the person is — office card,
