@@ -286,8 +286,9 @@
       freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
-      keepsGoing: "지금 하고 있는 일이라, 바꾼 내용으로 이어서 해요.",
-      handOver: (n) => n + subjectParticle(n) + " 이어받고, 지금까지 한 작업은 넘어가지 않아요.",
+      keepsGoing: "하던 것을 멈추고, 바뀐 내용으로 이어서 해요. 해 둔 작업은 그대로 있어요.",
+      handOver: (n) => n + subjectParticle(n) + " 처음부터 다시 시작해요. 폴더에 해 둔 작업은 그대로 남아요.",
+      sendChange: "바뀐 내용 전달",
       backToBacklog: "대기열로 돌아가고, 지금까지 한 작업은 남지 않아요.",
       folderLocked: "진행 중에는 폴더를 옮길 수 없어요. 보류한 뒤에 바꿔요.",
       whenResumed: (n) => "다시 진행하면 " + n + subjectParticle(n) + " 맡아요.",
@@ -347,8 +348,9 @@
       freeNow: (n) => n + " is free and starts on it right away.",
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
-      keepsGoing: "Someone is on it, so they carry on with what you changed.",
-      handOver: (n) => n + " takes it over, and nothing done so far carries across.",
+      keepsGoing: "They stop what they are doing and carry on with the change. Their work so far stays.",
+      handOver: (n) => n + " starts over. Whatever is already in the folder stays.",
+      sendChange: "Send the change",
       backToBacklog: "It goes back to the backlog, and nothing done so far is kept.",
       folderLocked: "A task in progress cannot move folder. Hold it first.",
       whenResumed: (n) => n + " picks it up when it resumes.",
@@ -842,7 +844,7 @@
 
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
-        <button class="btn btn-primary btn-md" data-save>${editing ? t().save : t().create}</button>
+        <button class="btn btn-primary btn-md" data-save>${running ? t().sendChange : editing ? t().save : t().create}</button>
       </div>`;
 
     // What the dialog promised is what the board shows, on a new task and on

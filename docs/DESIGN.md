@@ -124,11 +124,16 @@ what happened, and one waiting for approval is finished too — the answer there
 is to approve it, send it back or hold it. Neither offers an edit.
 
 **A task in progress is redirected, not re-specified.** Someone is working in
-that project's folder right now, so telling them something different is a
-normal thing to do and the dialog says they carry on with it. Moving the task
-to another project is not: that is a different folder, and the field is locked
-with the way around it — hold the task first. Handing it to someone else is
-allowed and says its price, which is that nothing done so far carries across.
+that project's folder right now, and telling them something different is an
+ordinary thing to do: the run stops, the conversation resumes with the change,
+and what is already written stays where it is. The button says it is sending
+the change rather than saving it, because that is what happens. Moving the task
+to another project is not ordinary — that is a different folder — so the field
+is locked with the way around it, which is to hold the task first. Handing it
+to someone else starts a new session, so the work begins again with only the
+folder carried over, and the dialog says so before it happens.
+
+`docs/ARCHITECTURE.md` has the two commands this maps to.
 
 Where a task sits keeps following from who is on it: give a queued task to
 someone free and it starts, take the assignee away from one in progress and it

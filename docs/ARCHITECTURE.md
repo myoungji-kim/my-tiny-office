@@ -326,6 +326,29 @@ A `--print` run returns JSON carrying `session_id`, `result`, `is_error`,
 `total_cost_usd`. That is the whole `AgentStatus` surface without parsing
 terminal output.
 
+### Changing a task that is already running
+
+The player can correct a task while an agent is working on it, which the
+interface calls `sendTask`. There is no command that speaks into a run in
+progress, so the mapping is two of the commands above:
+
+```text
+claude stop <id>            # the run ends, the conversation is kept
+claude --resume <session-id> "<what changed>"
+```
+
+The agent keeps what it knows and what it has already written to the folder.
+What is lost is the turn it was in the middle of, which is why the dialog's
+button says it is sending the change rather than saving it.
+
+**Handing the task to a different employee is not this.** A session belongs to
+one employee's agent, so the work starts again in a new session, with only the
+folder carried over. The board says so before it happens.
+
+**The project of a running task cannot change.** The session was launched in
+that workspace, and a different project is a different folder. The task is
+held first, which ends the run.
+
 ### Memory reaches the model through the system prompt
 
 `--append-system-prompt` (and `--append-system-prompt-file`) is the mechanism.
