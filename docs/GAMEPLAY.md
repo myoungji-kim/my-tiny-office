@@ -7,7 +7,7 @@ Each employee has:
 - identity
 - avatar
 - role
-- department
+- team
 - specialty
 - memories
 - personality

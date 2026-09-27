@@ -623,31 +623,15 @@
 
   // An area with memory in it is not deleted outright: the memory goes somewhere first.
   function openMove(a) {
-    const others = AREAS.filter((x) => x !== a);
-    const scrim = document.createElement("div");
-    scrim.className = "scrim";
-    scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
-      <div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t"></span><span class="m-s">${t().moveSub(countOf(a.name))}</span></span></div>
-      <div class="m-sec">
-        <label class="label" for="moveTo">${t().moveTo}</label>
-        <span class="select-wrap"><select class="select" id="moveTo"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
-      </div>
-      <div class="m-foot">
-        <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
-        <button class="btn btn-danger btn-md" type="button" data-ok>${t().moveAndRemove}</button>
-      </div>
-    </div>`;
-    scrim.querySelector(".m-t").textContent = t().moveTitle(areaLabel(a));
-    const select = scrim.querySelector("#moveTo");
-    for (const x of others) select.append(new Option(areaLabel(x), x.name));
-    const close = () => { scrim.remove(); document.removeEventListener("keydown", onKey); };
-    const onKey = (e) => { if (e.key === "Escape") close(); };
-    document.body.append(scrim);
-    document.addEventListener("keydown", onKey);
-    scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
-    scrim.querySelector("[data-close]").addEventListener("click", close);
-    scrim.querySelector("[data-ok]").addEventListener("click", () => { close(); removeArea(a, select.value); });
-    scrim.querySelector("[data-close]").focus();
+    openMoveDialog({
+      title: t().moveTitle(areaLabel(a)),
+      sub: t().moveSub(countOf(a.name)),
+      label: t().moveTo,
+      options: AREAS.filter((x) => x !== a).map((x) => ({ value: x.name, label: areaLabel(x) })),
+      cancel: t().cancel,
+      confirm: t().moveAndRemove,
+      onConfirm: (into) => removeArea(a, into),
+    });
   }
 
   const memCard = (m) => `<div class="mem${m.flash ? " is-new" : ""}">

@@ -242,7 +242,6 @@ Keep these concerns separated:
 Domain
   ├── Company
   ├── Employee
-  ├── Department
   ├── Team
   ├── Project
   ├── Task

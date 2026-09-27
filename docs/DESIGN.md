@@ -382,6 +382,24 @@ A memory's `⋯` corrects it (고치기, the same dialog) or deletes it. There i
 no archive: what is not worth carrying is not worth keeping. Deleting asks
 once more in place, because it cannot be undone.
 
+### Teams
+
+A company is organised in teams and nothing above them. There are no
+departments: a tiny office does not need a second level, and a person's line
+reads *Backend Engineer · 백엔드팀*.
+
+Teams are managed on the org chart, where they are shown. 팀 추가 at the foot
+names a new one; a team's `⋯` renames it or deletes it; a person's `⋯` moves
+them to another team.
+
+- A default team speaks both languages. One the player names or renames is
+  shown as written, like a nickname.
+- A team with people in it is not deleted outright: a dialog asks which team
+  they move to. An empty one asks once more in place. The last team cannot be
+  deleted, because everyone belongs somewhere.
+- A team is organisation, a room is space. Making a team does not build its
+  room; the office's 방 추가 offers the teams that do not have one yet.
+
 ### Hiring
 
 First-run hires the first person in its own steps. Every hire after that opens

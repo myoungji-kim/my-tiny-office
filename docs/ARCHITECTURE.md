@@ -118,7 +118,7 @@ An Agent is an execution capability attached to an Employee.
 Employee
 ├── identity
 ├── role
-├── department
+├── team
 ├── memories
 ├── personality
 ├── availability
@@ -177,7 +177,6 @@ Company
 ├── name
 ├── description
 ├── workspace(s)
-├── departments
 ├── teams
 ├── employees
 ├── projects
@@ -191,7 +190,7 @@ Employee
 ├── companyId
 ├── name
 ├── role
-├── departmentId
+├── teamId
 ├── personality
 ├── availability
 └── agentId?

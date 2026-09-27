@@ -597,7 +597,7 @@ const WORDS = {
 
 const STAFF = [
   { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
-    dept: "dev", team: "backend", status: "working", joined: "2026. 3. 2.",
+    team: "backend", status: "working", joined: "2026. 3. 2.",
     task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
     style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }, { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }],
     memories: [
@@ -607,7 +607,7 @@ const STAFF = [
       { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 }
     ] },
   { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
-    dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
+    team: "frontend", status: "working", joined: "2026. 4. 15.",
     task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
     style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }, { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }],
     memories: [
@@ -615,7 +615,7 @@ const STAFF = [
       { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
     ] },
   { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
-    dept: "product", team: "planning", status: "ready", joined: "2026. 2. 20.",
+    team: "planning", status: "ready", joined: "2026. 2. 20.",
     task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
     style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }, { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }],
     memories: [
@@ -623,7 +623,7 @@ const STAFF = [
       { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
     ] },
   { id: "p4", name: "삐약", species: "chick", role: "DBA",
-    dept: "dev", team: "backend", status: "available", joined: "2026. 5. 8.",
+    team: "backend", status: "available", joined: "2026. 5. 8.",
     last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" }, done: 19, reviews: 6,
     style: [{ ko: "마이그레이션은 두 번 확인해", en: "Check migrations twice" }],
     memories: [
@@ -636,7 +636,7 @@ const STAFF = [
       { area: "security", text: { ko: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", en: "Never concatenate user input into a query." }, from: null, used: 0 },
     ] },
   { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
-    dept: "dev", team: "frontend", status: "vacation", joined: "2026. 1. 12.",
+    team: "frontend", status: "vacation", joined: "2026. 1. 12.",
     back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
     style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }, { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }],
     memories: [
@@ -749,7 +749,6 @@ function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
 // steps. Like teaching, it stores nothing itself: the new person goes to onSave.
 
 const ROLES = ["Backend Engineer", "Frontend Engineer", "Product Manager", "DBA", "DevOps Engineer", "QA Engineer"];
-const TEAM_DEPT = { backend: "dev", frontend: "dev", planning: "product", design: "product" };
 
 function spriteCanvas(species, px) {
   const c = document.createElement("canvas");
@@ -763,7 +762,8 @@ function spriteCanvas(species, px) {
   return c;
 }
 
-function openHire({ team = null, onSave }) {
+// `teams` is the company's list as [{ key, label }] when the caller holds it.
+function openHire({ team = null, teams = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].hire;
   const local = (v) => (v && typeof v === "object" ? v[lang] : v);
@@ -807,7 +807,7 @@ function openHire({ team = null, onSave }) {
   const returnTo = document.activeElement;
 
   for (const r of ROLES) $("#hireRole").append(new Option(r, r));
-  for (const [key, label] of Object.entries(WORDS[lang].teams)) $("#hireTeam").append(new Option(label, key));
+  for (const x of teams ?? Object.entries(WORDS[lang].teams).map(([key, label]) => ({ key, label }))) $("#hireTeam").append(new Option(x.label, x.key));
   if (team) $("#hireTeam").value = team;
 
   const cast = $("[data-cast]");
@@ -852,12 +852,45 @@ function openHire({ team = null, onSave }) {
   for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
   $("[data-ok]").addEventListener("click", () => {
-    const t = $("#hireTeam").value;
-    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: t, dept: TEAM_DEPT[t] };
+    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value };
     close();
     onSave(hired);
   });
   cast.firstElementChild.focus({ preventScroll: true });
+}
+
+/* ═══ moving things out before a delete ═══ */
+// Deleting a row that still holds something asks where it goes first.
+
+function openMoveDialog({ title, sub, label, options, cancel, confirm, onConfirm }) {
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+    <div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t"></span><span class="m-s"></span></span></div>
+    <div class="m-sec">
+      <label class="label" for="moveTo"></label>
+      <span class="select-wrap"><select class="select" id="moveTo"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-secondary btn-md" type="button" data-close></button>
+      <button class="btn btn-danger btn-md" type="button" data-ok></button>
+    </div>
+  </div>`;
+  const $ = (sel) => scrim.querySelector(sel);
+  $(".m-t").textContent = title;
+  $(".m-s").textContent = sub;
+  $(".label").textContent = label;
+  $("[data-close]").textContent = cancel;
+  $("[data-ok]").textContent = confirm;
+  for (const o of options) $("#moveTo").append(new Option(o.label, o.value));
+  const close = () => { scrim.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  document.body.append(scrim);
+  document.addEventListener("keydown", onKey);
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
+  $("[data-close]").addEventListener("click", close);
+  $("[data-ok]").addEventListener("click", () => { const v = $("#moveTo").value; close(); onConfirm(v); });
+  $("[data-close]").focus();
 }
 
 /* ═══ teaching ═══ */

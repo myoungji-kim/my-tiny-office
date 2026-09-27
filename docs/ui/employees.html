@@ -35,7 +35,7 @@
 
   .r-role { display: block; font-size: 14px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .r-dept { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-team { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .r-mem { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
@@ -139,21 +139,23 @@
 
   .org { display: flex; flex-direction: column; gap: 18px; }
 
-  .dept { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+  .team-box { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
 
-  .dept-hd { display: flex; align-items: center; gap: 9px; padding: 12px 15px; background: var(--subtle); border-bottom: 1px solid var(--line); }
+  .team-box-hd { display: flex; align-items: center; gap: 9px; min-height: 50px; padding: 8px 10px 8px 15px; background: var(--subtle); border-bottom: 1px solid var(--line); }
 
-  .dept-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
+  .team-box-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
+
+  .team-box-hd .ibtn { margin-left: auto; }
+
+  .team-bd { padding: 14px 15px; }
+
+  .team-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1; }
+
+  .team-form .input { flex: 1 1 200px; }
+
+  .team-form .hint { flex-basis: 100%; margin: 0; color: var(--bad-ink); }
 
   .cnt { font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
-
-  .teams { padding: 14px 15px; display: flex; flex-direction: column; gap: 14px; }
-
-  .team-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
-
-  .team-hd h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
-
-  .team-line { flex: 1; height: 1px; background: var(--line); }
 
   .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr)); }
 
@@ -164,6 +166,14 @@
   }
 
   .tcard:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgb(20 20 25 / .06); }
+
+  .tcard-wrap { position: relative; }
+
+  .tcard-wrap .tcard { padding-right: 40px; }
+
+  .tcard-wrap .ibtn-sm { position: absolute; top: 50%; right: 8px; margin-top: -14px; opacity: 0; }
+
+  .tcard-wrap:hover .ibtn-sm, .tcard-wrap .ibtn-sm:focus-visible, .tcard-wrap .ibtn-sm[aria-expanded="true"] { opacity: 1; }
 
   .t-av { position: relative; width: 36px; height: 36px; border-radius: 10px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
@@ -332,10 +342,13 @@
       edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
       styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
-      headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
+      headSub: (n, teams) => n + "명 · 팀 " + teams + "개",
       tabs: { list: "목록", org: "조직도", memory: "기억" },
-      depts: { dev: "개발본부", product: "프로덕트" },
-      memory: "기억", memCount: (n) => "기억 " + n, memCountShort: (n) => "<b>" + n + "</b>개 기억",
+      teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
+      teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
+      moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
+      removeTeamTitle: (team) => "‘" + team + "’ 지우기", removeTeamSub: (n) => "팀원이 " + n + "명 있어요. 지우기 전에 옮길 팀을 골라요.",
+      memory: "기억", memCountShort: (n) => "<b>" + n + "</b>개 기억",
       currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
       doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
       timesUsed: "기억이 쓰인 횟수", times: (n) => n + "회",
@@ -371,10 +384,13 @@
       edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
       styleSub: "Carried into every task, whatever the area.", stylePlaceholder: "e.g. Keep commits small",
-      headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
+      headSub: (n, teams) => n + " people · " + teams + " teams",
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
-      depts: { dev: "Engineering", product: "Product" },
-      memory: "Memory", memCount: (n) => n + " memories", memCountShort: (n) => "<b>" + n + "</b> memories",
+      teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
+      teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
+      moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
+      removeTeamTitle: (team) => "Delete ‘" + team + "’", removeTeamSub: (n) => n + (n === 1 ? " person is" : " people are") + " in this team. Choose where they go first.",
+      memory: "Memory", memCountShort: (n) => "<b>" + n + "</b> memories",
       currentTask: "Current task", onLeave: "On leave", lastFinished: "Last finished", joined: "Joined",
       doneAndReviews: "Tasks · reviews", counts: (a, b) => a + " · " + b,
       timesUsed: "Memories referenced", times: (n) => n + "×",
@@ -418,8 +434,12 @@
 
   /* ── data ────────────────────────────────────────────────────── */
 
-  // The company's list, in its order.
+  // The company's lists, in its order.
   const AREA_KEYS = Object.keys(WORDS.ko.areas);
+  const TEAMS = Object.keys(WORDS.ko.teams).map((key) => ({ key }));
+  const teamOf = (key) => TEAMS.find((x) => x.key === key);
+  const teamLabel = (x) => x.label ?? t().teams[x.key];
+  const teamName = (key) => teamLabel(teamOf(key));
 
   const backlog = [
     { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
@@ -444,6 +464,7 @@
     x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
     task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
     hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
+    swap: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>',
     more: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg>',
     pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
     trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 4.4h10.4M6.2 4.4V2.8h3.6v1.6M4.2 4.4l.7 8.8h6.2l.7-8.8"/></svg>',
@@ -471,7 +492,7 @@
     document.getElementById("nList").textContent = people.length;
     document.getElementById("nMem").textContent = people.reduce((n, p) => n + p.memories.length, 0);
     document.getElementById("headSub").textContent =
-      t().headSub(people.length, people.filter((p) => p.dept === "dev").length, people.filter((p) => p.dept === "product").length);
+      t().headSub(people.length, TEAMS.length);
   }
 
   /* ── roster ──────────────────────────────────────────────────── */
@@ -486,7 +507,7 @@
       b.innerHTML = `
         <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
         <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
-        <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
+        <span class="r-team">${teamName(p.team)}</span>
         <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
         <span class="r-mem">${t().memCountShort(p.memories.length)}</span>`;
       b.querySelector(".r-av").prepend(spriteCanvas(p.species, 40));
@@ -528,7 +549,7 @@
   function renderHead(p) {
     document.getElementById("pAv").replaceChildren(spriteCanvas(p.species, 56));
     document.getElementById("pName").textContent = p.name;
-    document.getElementById("pRole").textContent = p.role + " · " + t().depts[p.dept] + " · " + t().teams[p.team];
+    document.getElementById("pRole").textContent = p.role + " · " + teamName(p.team);
     const chip = document.getElementById("pChip");
     chip.className = "chip " + p.status;
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
@@ -744,59 +765,163 @@
   }
 
   /* ── org chart ───────────────────────────────────────────────── */
+  // Teams are the only level. A default team speaks both languages; one the
+  // player names is shown as written.
   const org = document.getElementById("org");
-  const DEPTS = [
-    { name: "dev", teams: ["backend", "frontend"] },
-    { name: "product", teams: ["planning", "design"] },
-  ];
+  let editingTeam = null;
+
+  const teamForm = () => `<form class="team-form" data-teamform>
+      <input class="input" maxlength="16" autocomplete="off" placeholder="${t().teamPlaceholder}" aria-label="${t().teamName}" />
+      <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
+      <button class="btn btn-secondary btn-md" type="button" data-cancelteam>${t().cancel}</button>
+      <p class="hint" data-taken hidden>${t().nameTaken}</p>
+    </form>`;
+
   function renderOrg() {
     org.replaceChildren();
-    for (const d of DEPTS) {
-      const inDept = people.filter((p) => p.dept === d.name);
+    for (const team of TEAMS) {
+      const inTeam = people.filter((p) => p.team === team.key);
       const box = document.createElement("div");
-      box.className = "dept";
-      box.innerHTML = `<div class="dept-hd"><h2>${t().depts[d.name]}</h2><span class="cnt">${inDept.length}</span></div>`;
-      const teams = document.createElement("div");
-      teams.className = "teams";
-      for (const team of d.teams) {
-        const inTeam = inDept.filter((p) => p.team === team);
+      box.className = "team-box";
+      box.innerHTML =
+        editingTeam === team.key
+          ? `<div class="team-box-hd">${teamForm()}</div>`
+          : `<div class="team-box-hd"><h2></h2><span class="cnt">${inTeam.length}</span>
+              <button class="ibtn ibtn-sm" type="button" data-teammenu="${team.key}" aria-label="${t().teamMenu}" aria-expanded="false">${ICON.more}</button></div>`;
+      box.querySelector("h2")?.append(teamLabel(team));
+      const grid = document.createElement("div");
+      grid.className = "tgrid";
+      for (const p of inTeam) {
         const wrap = document.createElement("div");
-        wrap.innerHTML = `<div class="team-hd"><h3>${t().teams[team]}</h3><span class="cnt">${inTeam.length}</span><span class="team-line"></span></div>`;
-        const grid = document.createElement("div");
-        grid.className = "tgrid";
-        for (const p of inTeam) {
-          const c = document.createElement("button");
-          c.className = "tcard";
-          c.type = "button";
-          c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-            <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(p.memories.length)}</span></span>`;
-          c.querySelector(".t-av").prepend(spriteCanvas(p.species, 36));
-          c.addEventListener("click", () => { location.hash = p.id; });
-          grid.appendChild(c);
-        }
-        if (!inTeam.length) {
-          const v = document.createElement("button");
-          v.className = "vacant";
-          v.type = "button";
-          v.dataset.hire = team;
-          v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
-          grid.appendChild(v);
-        }
-        wrap.appendChild(grid);
-        teams.appendChild(wrap);
+        wrap.className = "tcard-wrap";
+        wrap.innerHTML = `<button class="tcard" type="button" data-open="${p.id}">
+            <span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+            <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role}</span></span>
+          </button>
+          <button class="ibtn ibtn-sm" type="button" data-move="${p.id}" aria-label="${t().personMenu}" aria-expanded="false">${ICON.more}</button>`;
+        wrap.querySelector(".t-av").prepend(spriteCanvas(p.species, 36));
+        grid.append(wrap);
       }
-      box.appendChild(teams);
-      org.appendChild(box);
+      if (!inTeam.length) {
+        const v = document.createElement("button");
+        v.className = "vacant";
+        v.type = "button";
+        v.dataset.hire = team.key;
+        v.innerHTML = `${ICON.plus}<span>${t().nobodyYet}</span>`;
+        grid.append(v);
+      }
+      const bd = document.createElement("div");
+      bd.className = "team-bd";
+      bd.append(grid);
+      box.append(bd);
+      org.append(box);
     }
+    org.insertAdjacentHTML(
+      "beforeend",
+      editingTeam === "new" ? `<div class="team-box"><div class="team-box-hd">${teamForm()}</div></div>` : `<button class="mem-add" type="button" data-addteam>${ICON.plus}${t().addTeam}</button>`,
+    );
+    wireTeamForm();
   }
+
+  function wireTeamForm() {
+    const form = org.querySelector("[data-teamform]");
+    if (!form) return;
+    const team = editingTeam === "new" ? null : teamOf(editingTeam);
+    const input = form.querySelector("input");
+    input.value = team ? teamLabel(team) : "";
+    input.focus();
+    input.select();
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const label = input.value.trim();
+      if (!label) return;
+      const taken = TEAMS.some((x) => x !== team && teamLabel(x) === label);
+      form.querySelector("[data-taken]").hidden = !taken;
+      if (taken) return;
+      if (team && label !== teamLabel(team)) team.label = label;
+      if (!team) TEAMS.push({ key: "team-" + Date.now(), label });
+      editingTeam = null;
+      rerenderPeople();
+    });
+    form.querySelector("[data-cancelteam]").addEventListener("click", () => {
+      editingTeam = null;
+      renderOrg();
+    });
+  }
+
+  function removeTeam(team, into) {
+    for (const p of people) if (p.team === team.key) p.team = into;
+    TEAMS.splice(TEAMS.indexOf(team), 1);
+    rerenderPeople();
+  }
+
+  function teamMenu(btn) {
+    const team = teamOf(btn.dataset.teammenu);
+    const members = people.filter((p) => p.team === team.key).length;
+    const others = TEAMS.filter((x) => x !== team);
+    const items = [{ label: t().renameTeam, icon: ICON.pen, run: () => { editingTeam = team.key; renderOrg(); } }];
+    // The last team stays: everyone has to belong somewhere.
+    if (others.length) {
+      items.push(
+        members
+          ? {
+              label: t().remove, icon: ICON.trash, bad: true,
+              run: () => openMoveDialog({
+                title: t().removeTeamTitle(teamLabel(team)),
+                sub: t().removeTeamSub(members),
+                label: t().moveToTeam,
+                options: others.map((x) => ({ value: x.key, label: teamLabel(x) })),
+                cancel: t().cancel,
+                confirm: t().moveAndRemove,
+                onConfirm: (into) => removeTeam(team, into),
+              }),
+            }
+          : { label: t().remove, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => removeTeam(team, null) },
+      );
+    }
+    openRowMenu(btn, items, { keep: t().keep });
+  }
+
+  function moveMenu(btn) {
+    const p = people.find((x) => x.id === btn.dataset.move);
+    openRowMenu(
+      btn,
+      TEAMS.filter((x) => x.key !== p.team).map((x) => ({
+        label: t().moveInto(teamLabel(x)),
+        icon: ICON.swap,
+        run: () => { p.team = x.key; rerenderPeople(); },
+      })),
+    );
+  }
+
+  org.addEventListener("click", (e) => {
+    const open = e.target.closest("[data-open]");
+    if (open) location.hash = open.dataset.open;
+    const menu = e.target.closest("[data-teammenu]");
+    if (menu) teamMenu(menu);
+    const move = e.target.closest("[data-move]");
+    if (move) moveMenu(move);
+    if (e.target.closest("[data-addteam]")) {
+      editingTeam = "new";
+      renderOrg();
+    }
+  });
 
   /* ── hiring ──────────────────────────────────────────────────── */
   // The samples' today.
   const TODAY = "2026. 9. 26.";
 
+  function rerenderPeople() {
+    renderCounts();
+    renderRoster();
+    renderOrg();
+    if (shown) renderPerson(shown);
+  }
+
   function hire(team = null) {
     openHire({
       team,
+      teams: TEAMS.map((x) => ({ key: x.key, label: teamLabel(x) })),
       onSave: (h) => {
         const p = {
           ...h, id: "p" + (people.length + 1), status: "available", joined: TODAY,
@@ -873,7 +998,7 @@
         <span class="m-av"></span>
         <span style="flex:1;min-width:0">
           <span class="m-t">${t().assignTitle(p.name)}</span>
-          <span class="m-s">${p.role} · ${t().teams[p.team]}</span>
+          <span class="m-s">${p.role} · ${teamName(p.team)}</span>
         </span>
       </div>
 
