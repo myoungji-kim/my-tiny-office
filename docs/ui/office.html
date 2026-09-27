@@ -549,7 +549,7 @@
     for (const [key, group] of groups) {
       const wrap = document.createElement("div");
       wrap.style.marginBottom = "18px";
-      const heading = key === "noTeam" ? t().noTeam : t().teams[key] ?? t().rooms[key];
+      const heading = key === "noTeam" ? t().noTeam : t().teams[key] ?? roomName(roomOf(key));
       wrap.innerHTML = `<div class="grp"><h2>${heading}</h2><span class="cnt">${group.length}</span></div>`;
       const grid = document.createElement("div");
       grid.className = "cards";
