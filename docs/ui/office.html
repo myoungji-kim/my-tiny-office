@@ -170,8 +170,9 @@
       },
       cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
       actionOf: (n) => n + " 행동",
-      tasks: { pay: "결제 API 에러 응답 구조 변경", login: "로그인 폼 구현", docs: "API 문서 작성" },
-      lastIndex: "인덱스 튜닝 완료", backIn: "3일 후 복귀",
+      tasks: { pay: "결제 API 에러 응답 구조 변경", login: "로그인 폼 구현", docs: "API 문서 작성", webhook: "결제 웹훅 서명 검증" },
+      reviewKey: "검토", reviewingNow: "검토 중인 업무",
+      backIn: "3일 후 복귀",
     },
     en: {
       ...WORDS.en,
@@ -201,8 +202,9 @@
       },
       cannotAssign: "They cannot take work while on leave.",
       actionOf: (n) => "Actions for " + n,
-      tasks: { pay: "Change the payment API error shape", login: "Build the login form", docs: "Write the API docs" },
-      lastIndex: "Finished tuning indexes", backIn: "Back in 3 days",
+      tasks: { pay: "Change the payment API error shape", login: "Build the login form", docs: "Write the API docs", webhook: "Verify the payment webhook signature" },
+      reviewKey: "Review", reviewingNow: "Reviewing",
+      backIn: "Back in 3 days",
     },
   };
 
@@ -222,8 +224,8 @@
   applyStatic();
 
   /* ── data ────────────────────────────────────────────────────── */
-  // Status mirrors the domain: an employee is working, available or on
-  // vacation. The actions offered follow from that alone.
+  // Status mirrors the domain: an employee is working, reviewing someone
+  // else's work, available or on vacation. The actions offered follow from that alone.
   const label = (k) => t().status[k];
 
   // Who these people are is the company's answer, not this screen's. The floor
@@ -232,7 +234,7 @@
     { id: "p1", col: 3, row: 3, task: { key: "pay", spent: 22 } },
     { id: "p2", col: 8, row: 3, task: { key: "login", spent: 12 } },
     { id: "p3", col: 13, row: 3, task: { key: "docs", spent: 4 } },
-    { id: "p4", col: 3, row: 6, last: "lastIndex" },
+    { id: "p4", col: 3, row: 6, review: { key: "webhook", spent: 6 } },
     { id: "p5", col: 8, row: 6, back: "backIn" },
     { id: null, col: 13, row: 6 },
   ];
@@ -254,7 +256,7 @@
   const tabs = document.getElementById("tabs");
   const TEAMS = [...new Set(staffed.map((p) => p.team))].filter(Boolean);
   const inLounge = (p) => p.status === "available";
-  const atDesk = (p) => p.status === "working";
+  const atDesk = (p) => p.status === "working" || p.status === "reviewing";
 
   const ROOMS = [
     { key: "all", kind: "all" },
@@ -410,10 +412,12 @@
   function cardInner(p) {
     const nums =
       p.status === "working" ? `<span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b>`
+      : p.status === "reviewing" ? `<span>${t().spent(p.review.spent)}</span><b>${t().status.reviewing}</b>`
       : p.status === "available" ? `<span>${t()[p.last]}</span><b>${t().waiting}</b>`
       : `<span>${t()[p.back]}</span><b>${t().onLeave}</b>`;
     const line =
       p.status === "working" ? t().tasks[p.task.key]
+      : p.status === "reviewing" ? t().tasks[p.review.key]
       : p.status === "available" ? t().noTask
       : t().away;
     return `
@@ -425,7 +429,7 @@
       <span class="c-name">${p.name}</span>
       <span class="c-role">${p.role}</span>
       <span class="c-rule"></span>
-      <span class="c-k">${t().work}</span>
+      <span class="c-k">${p.status === "reviewing" ? t().reviewKey : t().work}</span>
       <span class="c-task">${line}</span>
       <span class="c-nums">${nums}</span>`;
   }
@@ -522,6 +526,10 @@
       { icon: I.swap, label: t().actions.reassign },
       TEACH,
     ],
+    reviewing: [
+      { icon: I.info, label: t().actions.detail, key: true },
+      TEACH,
+    ],
     available: [
       { icon: I.plus, label: t().actions.assign, key: true },
       TEACH,
@@ -541,6 +549,9 @@
     if (p.status === "working")
       return `<span class="c-k">${t().inProgress}</span><span class="c-task">${t().tasks[p.task.key]}</span>
         <span class="p-nums"><span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b></span>`;
+    if (p.status === "reviewing")
+      return `<span class="c-k">${t().reviewingNow}</span><span class="c-task">${t().tasks[p.review.key]}</span>
+        <span class="p-nums"><span>${t().spent(p.review.spent)}</span><b>${t().status.reviewing}</b></span>`;
     if (p.status === "available")
       return `<span class="c-k">${t().lastDone}</span><span class="c-task">${t()[p.last]}</span>
         <span class="p-nums"><span>${t().deskFree}</span><b>${t().waiting}</b></span>`;

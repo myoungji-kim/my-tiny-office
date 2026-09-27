@@ -54,7 +54,7 @@ value is missing, add a token.
 | `--brand` | `#5b5bd6` | Focus rings. **Not** buttons |
 | `--brand-soft` | `#ecebfb` | Area chips, quoted memory, selected rows |
 | `--ok` / `--ok-soft` | `#2fae62` / `#e4f6ec` | `available`, completed |
-| `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | A colleague's review |
+| `--info` / `--info-soft` | `#3b82f6` / `#e8f0fe` | `reviewing`, a colleague's review |
 | `--warn` / `--warn-soft` | `#eaa221` / `#fdf1dd` | `working` |
 | `--bad` / `--bad-soft` | `#e5484d` / `#fdeaea` | Destructive, changes requested |
 
@@ -169,6 +169,7 @@ and greyscale.
 | Status | Colour | Dot |
 | --- | --- | --- |
 | `working` | `--warn` | Filled, with a ring |
+| `reviewing` | `--info` | Hollow ring |
 | `available` | `--ok` | Filled |
 | `vacation` | `--faint` | Short dash |
 

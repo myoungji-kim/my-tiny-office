@@ -267,10 +267,12 @@
   // Time is what a task has actually taken, never a share of an estimate: with
   // a real agent doing the work nobody knows when it ends.
   const TASKS = [
+    // an agent that stopped: blocked is a mark, not a place
     { id: "t1", project: "pay", area: "db", priority: "high", status: "working", who: "p1", spent: 23,
-      title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" } },
+      title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" },
+      blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" } },
 
-    { id: "t2", project: "pay", area: "security", priority: "high", status: "working", who: "p5", spent: 41,
+    { id: "t2", project: "pay", area: "security", priority: "high", status: "working", who: "p3", spent: 41,
       title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" },
       peer: { by: "p4", state: "reviewing" } },
 
@@ -297,11 +299,6 @@
 
     { id: "t9", project: "pay", area: "product", priority: "normal", status: "done", who: "p3", spent: 26,
       title: { ko: "환불 정책 문서화", en: "Write down the refund policy" } },
-
-    // an agent that stopped: blocked is a mark, not a place
-    { id: "t10", project: "pay", area: "types", priority: "normal", status: "working", who: "p2", spent: 5,
-      title: { ko: "결제 타입 정의 정리", en: "Tidy the payment type definitions" },
-      blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" } },
 
     // parked with their project, and picked up again when it resumes
     { id: "t11", project: "admin", area: "product", priority: "normal", status: "held", who: "p3", spent: 12, withProject: true,
@@ -374,8 +371,9 @@
         editProject: "프로젝트 수정", removeProject: "프로젝트 삭제",
         startProject: "시작하기", holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
       },
-      whySeat: (a) => a + " 기억이 있어요",
       pickWho: (a) => a + " 검토를 누구에게 받을까요?",
+      reviewerFree: "지금 비어 있어요 · 바로 봐요", reviewerBusy: (w, reviewing) => w + (reviewing ? " 검토하는 중" : " 하는 중") + " · 끝나고 봐요", reviewerAway: "휴가 중",
+      peerQueued: (n) => n + subjectParticle(n) + " 검토할 차례를 기다려요",
       changesAsked: (s) => "보완 요청 · " + s,
       reworkTitle: "무엇을 보완할까요?", reworkLabel: "보완할 내용", reworkPlaceholder: "재시도할 수 있는 실패는 따로 나눠 주세요",
       reworkNow: (n) => n + subjectParticle(n) + " 하던 세션을 이어서 바로 고쳐요. 아직 아무 데도 반영되지 않았어요.",
@@ -467,8 +465,9 @@
         editProject: "Edit project", removeProject: "Delete project",
         startProject: "Start", holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
       },
-      whySeat: (a) => "has " + a + " memories",
       pickWho: (a) => "Who should look at the " + a + " side?",
+      reviewerFree: "Free now · looks right away", reviewerBusy: (w, reviewing) => (reviewing ? "Reviewing " : "On ") + w + " · looks after", reviewerAway: "On leave",
+      peerQueued: (n) => n + " looks once they are free",
       changesAsked: (s) => "Sent back · " + s,
       reworkTitle: "What should change?", reworkLabel: "What to change", reworkPlaceholder: "Split out the retryable failures",
       reworkNow: (n) => n + " picks the same session back up and fixes it now. Nothing has been applied anywhere.",
@@ -591,6 +590,9 @@
     if (task.blocked) return { cls: "blocked", svg: icon.none, text: tx(task.blocked) };
     if (task.changes) return { cls: "changes", svg: icon.back, text: t().changesAsked(tx(task.changes)) };
     if (!task.peer) return null;
+    if (task.peer.state === "queued") {
+      return { cls: "peer", svg: icon.eye, text: t().peerQueued(byId.get(task.peer.by).name) };
+    }
     if (task.peer.state === "reviewing") {
       return { cls: "peer", svg: icon.eye, text: t().peerReviewing(byId.get(task.peer.by).name, areaLabel(task.area)) };
     }
@@ -805,16 +807,27 @@
     return b;
   }
 
+  // What someone is on right now, in the words of the work itself.
+  const busyWith = (p) =>
+    TASKS.find((k) => k.who === p.id && k.status === "working")?.title ?? p.task ?? p.review;
+
+  // A review is work too: someone free starts looking now, someone busy looks
+  // once they are done, and nobody on leave can be asked.
   function reviewerRow(task, p) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "mrow";
-    b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${t().whySeat(areaLabel(task.area))}</span></span>`;
+    const state = away(p) ? t().reviewerAway : free(p) ? t().reviewerFree : t().reviewerBusy(tx(busyWith(p)), p.status === "reviewing");
+    b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${state}</span></span>`;
     b.querySelector(".w-av").appendChild(spriteCanvas(p.species, 20));
+    b.disabled = away(p);
     b.addEventListener("click", () => {
-      task.peer = { by: p.id, state: "reviewing" };
+      const now = free(p);
+      task.peer = { by: p.id, state: now ? "reviewing" : "queued" };
+      if (now) p.status = "reviewing";
       close();
       render();
+      renderMembers();
     });
     return b;
   }
@@ -971,9 +984,14 @@
   /* ── sidebar roster ──────────────────────────────────────────── */
   // The board has no per-person view of its own, so a pick opens that person
   // on the people screen.
-  mountRoster(document.getElementById("members"), (p) => {
-    location.href = "employees.html" + (lang === "en" ? "?lang=en" : "") + "#" + p.id;
-  });
+  function renderMembers() {
+    const box = document.getElementById("members");
+    box.replaceChildren();
+    mountRoster(box, (p) => {
+      location.href = "employees.html" + (lang === "en" ? "?lang=en" : "") + "#" + p.id;
+    });
+  }
+  renderMembers();
   /* ── making a task ───────────────────────────────────────────── */
   // The one choice worth making carefully is the area, because it decides who
   // can review the work later. So the dialog answers that while it is being

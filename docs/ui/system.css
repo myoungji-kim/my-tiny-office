@@ -140,11 +140,15 @@ button { font: inherit; color: inherit; }
 
 .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
 
+.dot.reviewing { background: transparent; border: 2px solid var(--info); }
+
 .dot.available { background: var(--ok); }
 
 .dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
 
 .chip.working { background: var(--warn-soft); color: var(--warn-ink); }
+
+.chip.reviewing { background: var(--info-soft); color: var(--info-ink); }
 
 .chip.available { background: var(--ok-soft); color: var(--ok-ink); }
 

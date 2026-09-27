@@ -9,7 +9,7 @@ Each employee has:
 - a team, or none
 - memories, and the expertise that follows from them
 - a way of working (일하는 방식)
-- a status: working, available or on leave
+- a status: working, reviewing, available or on leave
 - a current task
 - an Agent — Claude Code — that does the work; without a working one they cannot take a task
 
@@ -45,7 +45,8 @@ An employee outlives a failed agent: when the runtime is unavailable or their
 session drops they stay, with their memory and their task, and nothing new
 starts until the user brings it back.
 
-One employee works on one task at a time.
+One employee works on one thing at a time, and a review is one: reviewing a
+colleague's task keeps them from starting their own.
 
 ## Company Ownership
 
@@ -127,8 +128,10 @@ being worked on.
 
 When a task's area calls for another pair of eyes, the office suggests a
 colleague who has been taught that area — expertise comes from memory, not
-from a field — and the two of them settle it while the work is still open. If
-nobody has been taught the area, there is nobody to suggest, and the user
+from a field — and the two of them settle it while the work is still open.
+Whoever does the work carries on meanwhile. A reviewer who is free starts
+looking now; one who is busy looks once they finish; nobody on leave is asked.
+If nobody has been taught the area, there is nobody to suggest, and the user
 sees that.
 
 What the user decides is the last step, not the verdict: whether the finished
@@ -155,6 +158,7 @@ PR #4821 — Payment API error response change
 The office suggests a reviewer by the task's area, from the people who have
 been taught it. Where a review stands:
 - suggested — the area asks for a second pair of eyes, nobody picked yet
+- queued — a colleague is picked and looks once free
 - reviewing — a colleague is looking
 - settled — they are done, and the work carries on or is corrected
 

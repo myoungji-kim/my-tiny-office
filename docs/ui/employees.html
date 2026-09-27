@@ -316,7 +316,7 @@
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
       areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
-      nothingAssigned: "맡은 업무가 없어요", justJoined: "방금 입사했어요", justBack: "휴가에서 막 돌아왔어요",
+      nothingAssigned: "맡은 업무가 없어요", reviewingNow: "검토 중인 업무", justJoined: "방금 입사했어요", justBack: "휴가에서 막 돌아왔어요",
       allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
       edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
@@ -364,7 +364,7 @@
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
       areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
-      nothingAssigned: "Nothing assigned", justJoined: "Just joined", justBack: "Just back from leave",
+      nothingAssigned: "Nothing assigned", reviewingNow: "Reviewing", justJoined: "Just joined", justBack: "Just back from leave",
       allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
       edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
@@ -568,6 +568,8 @@
   function renderOverview(p) {
     const now = p.task
       ? `<span class="k">${t().currentTask}</span><span class="now-task">${tx(p.task)}</span>`
+      : p.review
+      ? `<span class="k">${t().reviewingNow}</span><span class="now-task">${tx(p.review)}</span>`
       : p.back
       ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
       : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.returned ? t().justBack : p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;

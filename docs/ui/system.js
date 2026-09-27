@@ -513,6 +513,7 @@ const SPECIES = new Map(CAST.map((c) => [c.key, c]));
 
 const STATUS = {
   working:   { color: "var(--warn)" },
+  reviewing: { color: "var(--info)" },
   available: { color: "var(--ok)" },
   vacation:  { color: "var(--faint)" },
 };
@@ -526,7 +527,7 @@ const STATUS = {
 const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
-    status: { working: "업무 중", available: "대기 중", vacation: "휴가 중" },
+    status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     hire: {
@@ -557,7 +558,7 @@ const WORDS = {
   },
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
-    status: { working: "Working", available: "Free", vacation: "On leave" },
+    status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
     hire: {
@@ -622,8 +623,8 @@ const STAFF = [
       { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
     ] },
   { id: "p4", name: "삐약", species: "chick", role: "DBA",
-    team: "backend", status: "available", joined: "2026. 5. 8.",
-    last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" }, done: 19, reviews: 6,
+    team: "backend", status: "reviewing", joined: "2026. 5. 8.",
+    review: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, done: 19, reviews: 6,
     style: [{ ko: "마이그레이션은 두 번 확인해", en: "Check migrations twice" }],
     memories: [
       { area: "db", text: { ko: "마이그레이션은 항상 되돌릴 수 있게 써요.", en: "Always write a migration you can roll back." }, from: { ko: "스키마 롤백이 안 된 사고", en: "the rollback that would not roll back" }, used: 11 },
