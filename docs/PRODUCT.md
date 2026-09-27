@@ -77,12 +77,11 @@ office. The screens are in DESIGN.md.
 The direction, not yet a design:
 
 1. One room / one desk / one employee
-2. Team rooms
-3. Meeting room
-4. Server area
-5. More desks
-6. Specialized spaces
-7. Full software company
+2. More desks
+3. Full software company
+
+Rooms are not built: a team's room, the meeting room and the lounge follow
+from who is doing what.
 
 ## Localization
 

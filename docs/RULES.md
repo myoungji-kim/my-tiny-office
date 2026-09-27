@@ -27,7 +27,8 @@ another first. No rule hangs on a role: expertise and review come from memory.
 **A team is optional, and there is nothing above it.** A company of one has no
 reason to have a team, so the first hire starts without one; teams appear when
 the work splits. Removing a team moves its people to another team or to none.
-A team is organisation, not space — making one does not build its room.
+A team is organisation first: its room in the office appears with its first
+person, and no room is built by hand.
 
 **Leave and letting go.** Sending someone on leave returns their task to the
 backlog, and nobody on leave can be given work. Letting someone go returns
@@ -144,7 +145,8 @@ being worked on.
 When a task's area calls for another pair of eyes, the office suggests a
 colleague who has been taught that area — expertise comes from memory, not
 from a field — and the two of them settle it while the work is still open.
-Whoever does the work carries on meanwhile. A reviewer who is free starts
+Whoever does the work carries on meanwhile, at their desk; the reviewer sits in
+the meeting room until it is done. A reviewer who is free starts
 looking now; one who is busy looks once they finish; nobody on leave is asked.
 If nobody has been taught the area, there is nobody to suggest, and the user
 sees that.

@@ -64,7 +64,7 @@ blockers, recent activity, team workload.
 │ ⌂ My Tiny ⌄ │ 사무실                  2026. 9. 26. (토) 10:24 │
 │   Office    │ 책상 6석 중 5석 사용                            │
 │             ├──────────────────────────────────────────────┤
-│ 사무실      │ 전체 · 백엔드팀 · 프론트엔드팀 · 휴게실 · +    │
+│ 사무실      │ 전체 · 백엔드팀 · 프론트엔드팀 · 회의실 · 휴게실 │
 │ 프로젝트    ├──────────────────────────────────────────────┤
 │ 직원        │ ┌──────────────────────────────────────────┐ │
 │ 회사        │ │        office tilemap (canvas)           │ │
@@ -113,7 +113,13 @@ at 3× (48px tiles), with one outline colour for furniture and characters so it
 reads as one scene. Names and status labels are DOM elements over the canvas;
 the sprite rules are in the style guide.
 
-A tab is a room: the whole floor, each team's room, the lounge. The whole floor
+A tab is a room, and every room follows from the company — none is built by
+hand: the whole floor, a room for each team that has people, the meeting room,
+the lounge. Whoever has no task is in the lounge. **Whoever is reviewing sits
+in the meeting room**, at a table of their own — one per review under way, so
+there are as many as there are reviews and none when nobody reviews — and
+goes back when it is done; the floor shows their desk empty with 회의실 above
+it, as it shows 휴게실 for the lounge. The whole floor
 groups cards by team, with anyone without a team first under 팀 없음. A team's
 cards end in 빈 책상에 직원 채우기, which hires into the free desk and reads
 빈 책상이 없어요 when none is left.
@@ -124,7 +130,8 @@ Under the floor, above the cards, **오늘** lists what happened in the office,
 newest first: who started what, a colleague starting a review, a memory drawn
 on, work finished and waiting on the user, work applied, someone going on
 leave. Each row is a domain event worded by the dictionary, with its time. The
-feed follows the room — a team's room and the lounge show the people in them —
+feed follows the room — a team's room the meeting room and the lounge show the people in
+them —
 and shows six before 더 보기. Only what waits on the user carries an action, the way to it
 (승인하러 가기, and 보러 가기 for an agent that stopped); the rest is there to
 be read.
@@ -406,7 +413,7 @@ another team or takes them off theirs. People without a team come first under
 팀 없음, which cannot be renamed or deleted.
 
 A default team speaks both languages; one the user names is shown as
-written. The office's 방 추가 offers the teams that have no room yet.
+written. A team gets its room in the office when it has its first person.
 
 ### Hiring
 
