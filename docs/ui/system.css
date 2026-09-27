@@ -156,10 +156,6 @@ button { font: inherit; color: inherit; }
 
 /* ═══ notices, empty states, dialogs ═══ */
 
-.notice-warn { border-color: var(--warn-line); }
-
-.notice-bad { border-color: var(--bad-line); }
-
 .n-ic {
     width: 22px; height: 22px; border-radius: 999px; flex: none; margin-top: 1px;
     display: grid; place-items: center; background: var(--sunk); color: var(--muted);
@@ -181,9 +177,22 @@ button { font: inherit; color: inherit; }
   border-radius: var(--r-card); padding: 13px 14px;
 }
 
+/* after the base rule, which sets the same border and background */
+.notice-warn { border-color: var(--warn-line); }
+
+.notice-bad { border-color: var(--bad-line); }
+
+/* The whole company cannot start work. One at a time, above every screen, and
+   filled because it outranks everything else on it. */
+.notice-stop { background: var(--bad-soft); border-color: var(--bad-line); }
+
+.notice-stop .n-tx b { color: var(--bad-ink); }
+
 .notice-warn .n-ic { background: var(--warn-soft); color: var(--warn-ink); }
 
 .notice-bad .n-ic { background: var(--bad-soft); color: var(--bad-ink); }
+
+.notice-stop .n-ic { background: var(--surface); color: var(--bad-ink); }
 
 .modal {
       width: 100%; max-width: 486px; max-height: 100%; overflow: auto;

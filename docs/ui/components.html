@@ -365,7 +365,7 @@
       <div class="notice notice-ok">
         <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg></span>
         <span class="n-tx"><b>두부가 로그인 폼 구현을 끝냈어요</b><span>25분 걸렸어요 · PR이 리뷰를 기다리고 있어요</span></span>
-        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">PR 보기</button></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">업무 상세</button></span>
       </div>
 
       <div class="notice notice-warn">
@@ -380,7 +380,13 @@
         <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 연결</button></span>
       </div>
 
-      <div class="locked"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg><span>직원을 고용하면 업무를 맡길 수 있어요. 방은 지금 만들어 둬도 돼요.</span></div>
+      <div class="notice notice-stop">
+        <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z"/><path d="M8 11.8V14"/></svg></span>
+        <span class="n-tx"><b>Claude Code 로그인이 풀렸어요</b><span>하던 업무와 기억은 그대로예요. 다시 로그인하기 전까지 새 업무는 시작하지 않아요.</span></span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">다시 확인</button></span>
+      </div>
+
+      <div class="locked"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.2" y="7" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg><span>직원을 고용하면 업무를 맡길 수 있어요. 프로젝트는 지금 만들어 둬도 돼요.</span></div>
     </div>
 
     <h3>언제 무엇을 쓰나</h3>
@@ -388,6 +394,7 @@
     <div class="spec"><code>ok</code><span>방금 끝난 일. <strong>결과</strong>를 말합니다 — "완료됨"이 아니라 무엇이 끝났는지.</span></div>
     <div class="spec"><code>warn</code><span>아직 고장은 아니지만 봐야 하는 일. 무엇을 확인하면 되는지 적습니다.</span></div>
     <div class="spec"><code>bad</code><span>실패했거나 끊어진 일. <strong>데이터가 무사한지 먼저 말합니다.</strong></span></div>
+    <div class="spec"><code>stop</code><span>회사 전체가 새 일을 못 하는 때 — Claude Code 로그인이 풀렸을 때. <strong>모든 화면 맨 위에 하나만</strong>, 다른 무엇보다 먼저 읽히도록 배경까지 채웁니다. 한 사람, 한 업무의 실패에는 쓰지 않습니다.</span></div>
     <div class="spec"><code>.locked</code><span>아직 쓸 수 없는 영역. 왜 잠겼는지와 <strong>지금 할 수 있는 것</strong>을 같이 적습니다.</span></div>
   </section>
 
@@ -406,11 +413,10 @@
       </div>
       <div class="empty">
         <span class="e-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.5M10 2v3.5M4.2 5.5h7.6v3a3.8 3.8 0 0 1-7.6 0z"/><path d="M8 12.3V14"/></svg></span>
-        <b>아직 연결된 에이전트가 없어요</b>
-        <p>직원에게 Claude Code를 연결하면 맡긴 업무를 실제로 처리해요. 연결 없이도 게임은 돌아가요.</p>
+        <b>아직 프로젝트가 없어요</b>
+        <p>프로젝트를 만들면 업무를 적어 두고 직원에게 맡길 수 있어요. 폴더는 나중에 정해도 돼요.</p>
         <span class="e-acts">
-          <button class="btn btn-secondary btn-sm" type="button">연결하기</button>
-          <button class="btn btn-ghost btn-sm" type="button">그냥 둘러보기</button>
+          <button class="btn btn-secondary btn-sm" type="button">새 프로젝트</button>
         </span>
       </div>
     </div>
@@ -428,7 +434,7 @@
         <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
         <div class="d-body">
           <p class="d-t">모카를 내보낼까요?</p>
-          <p class="d-d">진행 중이던 업무는 대기 상태로 돌아가고 자리가 비워져요. 알려준 기억도 함께 떠나요.</p>
+          <p class="d-d">진행 중이던 업무는 대기열로 돌아가요. 알려준 기억도 함께 떠나요.</p>
           <div class="dlg-acts">
             <button class="btn btn-secondary btn-md" type="button" autofocus>계속 두기</button>
             <button class="btn btn-danger btn-md" type="button">내보내기</button>
@@ -438,11 +444,11 @@
       <div class="dlg">
         <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
         <div class="d-body">
-          <p class="d-t">백엔드팀 전체에 이 업무를 맡길까요?</p>
-          <p class="d-d">지금 대기 중인 직원 2명이 같은 업무를 나눠 받아요.</p>
+          <p class="d-t">이 프로젝트를 마칠까요?</p>
+          <p class="d-d">끝내지 않은 업무 1건은 그대로 닫혀요. 회사 연혁과 개요에 남아요.</p>
           <div class="dlg-acts">
             <button class="btn btn-secondary btn-md" type="button">취소</button>
-            <button class="btn btn-primary btn-md" type="button">2명에게 맡기기</button>
+            <button class="btn btn-primary btn-md" type="button">완료 처리</button>
           </div>
         </div>
       </div>
@@ -453,7 +459,7 @@
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div style="font-size:17px;font-weight:600">모카를 내보낼까요?</div>
-        <div style="font-size:14px;color:var(--muted);margin-top:4px">진행 중이던 업무는 대기 상태로 돌아가요.</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">진행 중이던 업무는 대기열로 돌아가요.</div>
         <div class="row" style="margin-top:10px">
           <button class="btn btn-secondary btn-sm" type="button">계속 두기</button>
           <button class="btn btn-danger btn-sm" type="button">내보내기</button>
@@ -598,6 +604,39 @@
   </section>
 
   <section>
+    <h2>Agent mark</h2>
+    <p class="note">
+      에이전트가 멈춘 사람에게 붙는 표식입니다. <strong>상태가 아닙니다</strong> — 상태 점은 오른쪽 아래 그대로 두고,
+      표식은 반대쪽 왼쪽 위에 붙습니다. 멀쩡할 때는 아무것도 없습니다. 줄 안에서는 <code>inline</code>으로 씁니다.
+      모든 화면이 공용 <code>agentMark()</code> 하나로 그립니다.
+    </p>
+    <div class="row" id="markDemo" style="align-items:center;gap:18px"></div>
+  </section>
+
+  <section>
+    <h2>Checks &amp; commands</h2>
+    <p class="note">
+      앱 밖에서 할 일을 확인하는 줄입니다. 통과·막힘·대기 셋이고, 막힌 줄은 <strong>무엇을 하면 되는지</strong>와
+      붙여넣을 명령을 줍니다. 명령은 <strong>복사</strong>되고, 복사는 <code>$</code>를 뺀 명령만 담습니다.
+      공용 <code>checkRow()</code> 하나로 그립니다.
+    </p>
+    <div class="modal" style="max-width:520px;box-shadow:none;border:1px solid var(--line)"><div class="m-sec" id="checkDemo"></div></div>
+  </section>
+
+  <section>
+    <h2>Lists</h2>
+    <p class="note">
+      행마다 자기 페이지로 가는 목록입니다 — 직원, 프로젝트. <strong>열은 고정 비율</strong>이라 같은 칸이 모든 행에서 같은 자리에 섭니다.
+      페이지에서는 맨 위 <code>crumb</code>로 목록에 돌아갑니다.
+    </p>
+    <a class="crumb" href="#"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg><span>직원 목록</span></a>
+    <div class="list">
+      <a class="row-item" href="#" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 84px"><span><b>모카</b></span><span>백엔드팀</span><span>4개 기억</span></a>
+      <a class="row-item" href="#" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 84px"><span><b>단풍</b></span><span>기획팀</span><span>2개 기억</span></a>
+    </div>
+  </section>
+
+  <section>
     <h2>Rules</h2>
     <ul style="margin:0;padding-left:20px;line-height:2">
       <li>화면당 <strong>primary 하나</strong>. 그 화면의 대상에 대한 행동이어야 합니다.</li>
@@ -673,16 +712,9 @@
     "첫 직원을 고용하면 사무실에 자리를 잡고 바로 업무를 받을 수 있어요.": "Hire your first and they take a desk, ready for work straight away.",
     "아직 연결된 에이전트가 없어요": "No agent connected yet",
     "직원에게 Claude Code를 연결하면 맡긴 업무를 실제로 처리해요. 연결 없이도 게임은 돌아가요.": "Connect Claude Code to an employee and they do the work for real. The game runs either way.",
-    "연결하기": "Connect",
-    "그냥 둘러보기": "Just look around",
     "모카를 내보낼까요?": "Let Mocha go?",
-    "진행 중이던 업무는 대기 상태로 돌아가고 자리가 비워져요. 알려준 기억도 함께 떠나요.": "Their task goes back to the queue and the desk empties. What you taught them leaves with them.",
     "계속 두기": "Keep them",
     "내보내기": "Let them go",
-    "백엔드팀 전체에 이 업무를 맡길까요?": "Give this task to the whole backend team?",
-    "지금 대기 중인 직원 2명이 같은 업무를 나눠 받아요.": "The 2 people currently free will split it.",
-    "2명에게 맡기기": "Give it to 2 people",
-    "진행 중이던 업무는 대기 상태로 돌아가요.": "Their task goes back to the queue.",
     "정말 삭제하시겠습니까?": "Are you sure you want to delete?",
     "이 작업은 되돌릴 수 없습니다.": "This action cannot be undone.",
     "확인": "OK",
@@ -694,8 +726,58 @@
     "새 업무 만들기": "Create a task",
     "이 업무 맡기기": "Assign this",
     "데이터베이스": "Database",
-    "아키텍처": "Architecture"
+    "아키텍처": "Architecture",
+    "업무 상세": "Task details",
+    "Claude Code 로그인이 풀렸어요": "Claude Code signed out",
+    "하던 업무와 기억은 그대로예요. 다시 로그인하기 전까지 새 업무는 시작하지 않아요.": "Tasks in progress and everything remembered are untouched. New tasks wait until you sign in again.",
+    "다시 확인": "Check again",
+    "직원을 고용하면 업무를 맡길 수 있어요. 프로젝트는 지금 만들어 둬도 돼요.": "Hire someone to give out work. Projects can be set up now.",
+    "아직 프로젝트가 없어요": "No projects yet",
+    "프로젝트를 만들면 업무를 적어 두고 직원에게 맡길 수 있어요. 폴더는 나중에 정해도 돼요.": "Make a project to write work down and hand it out. The folder can come later.",
+    "새 프로젝트": "New project",
+    "진행 중이던 업무는 대기열로 돌아가요. 알려준 기억도 함께 떠나요.": "Their task goes back to the backlog. What you taught them leaves with them.",
+    "이 프로젝트를 마칠까요?": "Finish this project?",
+    "끝내지 않은 업무 1건은 그대로 닫혀요. 회사 연혁과 개요에 남아요.": "1 unfinished task closes as it is. It stays in the company's history and overview.",
+    "완료 처리": "Finish",
+    "진행 중이던 업무는 대기열로 돌아가요.": "Their task goes back to the backlog.",
+    "직원 목록": "All people",
+    "백엔드팀": "Backend",
+    "기획팀": "Planning",
+    "4개 기억": "4 memories",
+    "2개 기억": "2 memories",
+    "업무 중": "Working",
+    "Claude Code 설치됨": "Claude Code installed",
+    "로그인됨": "Signed in",
+    "로그인이 필요해요": "Sign-in needed",
+    "터미널에서 한 번 로그인해요. 브라우저가 열려요.": "Sign in once from a terminal. A browser will open.",
+    "로그인": "Sign-in",
+    "앞 단계를 끝내면 확인해요.": "Checked once the step above is done.",
+    "복사": "Copy"
   };
+
+  // drawn with the shared helpers, so this page shows exactly what the screens do
+  (() => {
+    const mark = document.getElementById("markDemo");
+    const avatar = (species, lost, status) => {
+      const a = document.createElement("span");
+      a.className = "c-av";
+      a.innerHTML = `<span class="c-live" style="background:${STATUS[status].color}"></span>${lost ? agentMark() : ""}`;
+      a.prepend(spriteCanvas(species, 34));
+      return a;
+    };
+    mark.append(avatar("bunny", false, "working"), avatar("cat", true, "working"));
+    const inline = document.createElement("span");
+    inline.className = "bub";
+    inline.style.position = "static";
+    inline.style.transform = "none";
+    inline.innerHTML = `<span class="dot working"></span>업무 중${agentMark(true)}`;
+    mark.append(inline);
+    document.getElementById("checkDemo").innerHTML = [
+      { icon: "ok", title: "Claude Code 설치됨", value: "2.1.283" },
+      { icon: "bad", title: "로그인이 필요해요", detail: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", cmd: ["claude auth login"] },
+      { icon: "wait", title: "로그인", detail: "앞 단계를 끝내면 확인해요." },
+    ].map((c) => checkRow(c, "복사")).join("");
+  })();
 
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
   if (lang === "en") {

@@ -203,6 +203,7 @@ Shapes are in `ui/components.html`. The rules:
 | `notice-ok` | Something finished | **What** finished, not that it finished |
 | `notice-warn` | Not broken, but worth a look | What to check |
 | `notice-bad` | Failed or disconnected | **Whether the data survived**, first |
+| `notice-stop` | The whole company cannot start work — Claude Code signed out | That the work survived, and the one step that brings it back. Filled, one at a time, above every screen |
 | `.locked` | An area is not usable yet | Why, and what *can* be done now |
 
 A failure notice that does not say what happened to the user's work is not

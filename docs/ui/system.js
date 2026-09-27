@@ -1205,7 +1205,7 @@ function runtimeBack() {
     const w = WORDS[uiLang()].runtime;
     const line = document.createElement("div");
     line.id = "runtimeLine";
-    line.className = "notice notice-bad";
+    line.className = "notice notice-stop";
     line.innerHTML = `<span class="n-ic">${PLUG}</span><span class="n-tx"><b>${w.off}</b><span>${w.offWhy}</span></span>
       <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${w.recheck}</button></span>`;
     line.querySelector("button").addEventListener("click", runtimeBack);
@@ -1310,8 +1310,9 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
       nav.append(sep());
     }
 
-    // A state the sample can be put in, where the page has one to show.
-    if (["office", "projects", "employees", "company", "settings"].includes(here)) {
+    // A state the sample can be put in. It is on every page so the bar never
+    // moves; the screens show it, and it carries across all of them.
+    {
       const label = document.createElement("span");
       label.className = "grouplabel";
       label.textContent = lang === "en" ? "State" : "상태";

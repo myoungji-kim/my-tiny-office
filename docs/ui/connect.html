@@ -266,8 +266,8 @@
   withNote(blocked, t().stateLoggedOut, panel([CHECKS.installed(), CHECKS.loggedOut()], false), t().noteLoggedOut);
 
   document.getElementById("stopped").innerHTML = `
-    <div class="notice notice-bad">
-      <span class="n-ic">${I.x}</span>
+    <div class="notice notice-stop">
+      <span class="n-ic">${I.plug}</span>
       <span class="n-tx"><b>${t().stopped}</b><span>${t().stoppedWhy}</span></span>
       <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().recheck}</button></span>
     </div>`;
