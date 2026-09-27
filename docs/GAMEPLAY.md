@@ -84,7 +84,7 @@ Review happens inside `working`, not after it: a task being reviewed is still
 being worked on.
 
 When a task's area calls for another pair of eyes, the office suggests a
-colleague who has been taught that area — review seats come from memory, not
+colleague who has been taught that area — expertise comes from memory, not
 from a field — and the two of them settle it while the work is still open. If
 nobody has been taught the area, there is nobody to suggest, and the player
 sees that.
@@ -126,14 +126,19 @@ None of these is a task status. The task is `working` throughout, and moves to
 Expertise is taught, not grown. An employee does not fill a skill bar; the
 player tells them something worth keeping, and it stays with them.
 
-A memory has an area, the text itself, and the work it came from:
+A memory has an area of expertise, the text itself, and the work it came from:
 
 - Database — "복합 인덱스는 컬럼 순서가 중요해요" — from the slow payment lookup
-- Process — "PR은 리뷰 하나만 받아도 머지해요" — from the payment webhook task
+- Security — "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요" — told directly
 
-The areas are the ones an employee can be given a review seat in: Architecture,
-Type safety, Database, Security, Localization, Product, Quality — and Process,
-which everyone can hold but no one reviews for.
+The company starts with seven areas — Architecture, Type safety, Database,
+Security, Localization, Product, Quality — and can add, rename or delete its
+own. An area becomes someone's expertise when they are taught something in it,
+and that is also what lets them review a PR in it.
+
+A rule about how work is done ("PR은 300줄을 넘기지 않아요") is not expertise.
+It is that person's 일하는 방식, or company memory when everyone should follow
+it; neither has an area.
 
 A memory is used, not just stored: when an employee references one, the
 activity feed says so. Without that, teaching is only a notes field.

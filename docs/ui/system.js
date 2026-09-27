@@ -528,7 +528,7 @@ const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
     status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
-    areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
+    areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     teach: {
       titleTo: (name) => name + "에게 알려주기",
@@ -537,14 +537,14 @@ const WORDS = {
       titleEdit: "기억 고치기",
       subTo: "업무마다 이 기억을 함께 들고 가요.",
       subCompany: "모든 직원이 함께 알게 돼요.",
-      subPick: "알려준 사람이 이 분야 리뷰를 맡을 수 있어요.",
+      subPick: "고른 사람의 전문 분야가 돼요.",
       who: "받는 사람", area: "분야", text: "내용", from: "어디서 알게 됐나요",
       placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
       hint: "한두 문장이 좋아요.",
       areaHint: "찾는 분야가 없나요?", areaHintLink: "회사 › 규칙에서 추가하기",
       told: "직접 알려줌", nowTask: (x) => "지금 하는 업무 · " + x,
       inArea: (n) => "이 분야 기억 " + n,
-      gainSeat: (name, area) => "이제 " + withParticle(name, "이", "가") + " " + area + " 리뷰를 맡을 수 있어요",
+      gainArea: (name, area) => withParticle(area, "이", "가") + " " + name + "의 전문 분야가 돼요",
       carried: (a, b) => "업무마다 들고 가는 기억 " + a + "자 → " + b + "자",
       cancel: "취소", teach: "알려주기", save: "저장",
     },
@@ -552,7 +552,7 @@ const WORDS = {
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
     status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
-    areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
+    areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
     teach: {
       titleTo: (name) => "Teach " + name,
@@ -561,14 +561,14 @@ const WORDS = {
       titleEdit: "Edit this memory",
       subTo: "They carry this into every task.",
       subCompany: "Everyone will know it.",
-      subPick: "Whoever you teach can review this area.",
+      subPick: "It becomes their area.",
       who: "Who", area: "Area", text: "What to remember", from: "Where it came from",
       placeholder: "e.g. The payments table is partitioned by month.",
       hint: "A sentence or two is best.",
       areaHint: "Not the right area?", areaHintLink: "Add one in Company › Rules",
       told: "Told directly", nowTask: (x) => "Current task · " + x,
       inArea: (n) => n + " here",
-      gainSeat: (name, area) => name + " can now review " + area,
+      gainArea: (name, area) => area + " becomes one of " + name + "'s areas",
       carried: (a, b) => "Carried into every task " + a + " → " + b + " chars",
       cancel: "Cancel", teach: "Teach", save: "Save",
     },
@@ -585,31 +585,28 @@ const STAFF = [
   { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
     dept: "dev", team: "backend", status: "working", joined: "2026. 3. 2.",
     task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
-    style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }],
+    style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }, { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }],
     memories: [
       { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
       { area: "db", text: { ko: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", en: "The payments table is partitioned by month. Never write a full scan." }, from: null, used: 9 },
       { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", en: "No Date.now() in the domain layer. The current time arrives as an argument." }, from: { ko: "PR #4102", en: "PR #4102" }, used: 22 },
-      { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 },
-      { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 }
+      { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 }
     ] },
   { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
     dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
     task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
-    style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }],
+    style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }, { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }],
     memories: [
       { area: "l10n", text: { ko: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", en: "Never track Hangul. It pulls the jamo of a syllable apart." }, from: { ko: "사이드바 자간이 깨진 이슈", en: "the broken sidebar tracking" }, used: 18 },
       { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
-      { area: "process", text: { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }, from: null, used: 12 },
     ] },
   { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
     dept: "product", team: "planning", status: "ready", joined: "2026. 2. 20.",
     task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
-    style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }],
+    style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }, { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }],
     memories: [
       { area: "product", text: { ko: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", en: "Keep a task under 30 minutes. Longer means it is really two." }, from: null, used: 15 },
       { area: "product", text: { ko: "PR 설명에는 무엇을 했는지가 아니라 왜 했는지를 적어요.", en: "A PR description says why, not what." }, from: null, used: 8 },
-      { area: "process", text: { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }, from: { ko: "금요일 배포가 말썽이던 주", en: "the week Friday deploys went wrong" }, used: 3 },
     ] },
   { id: "p4", name: "삐약", species: "chick", role: "DBA",
     dept: "dev", team: "backend", status: "available", joined: "2026. 5. 8.",
@@ -627,10 +624,9 @@ const STAFF = [
   { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
     dept: "dev", team: "frontend", status: "vacation", joined: "2026. 1. 12.",
     back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
-    style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }],
+    style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }, { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }],
     memories: [
       { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },
-      { area: "process", text: { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }, from: { ko: "배포가 한 번 깨진 날", en: "the day a deploy broke" }, used: 21 },
     ] },
 ];
 
@@ -738,7 +734,7 @@ function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
 // Every place that says "teach" opens this one dialog; where it was opened
 // from decides only what is already filled in. `to` is someone from STAFF,
 // "company", or null to let the player choose. `areas` is the company's list
-// as [{ key, label, seat }] when the caller holds it. The dialog stores
+// as [{ key, label }] when the caller holds it. The dialog stores
 // nothing itself: it hands the memory to onSave.
 
 function uiLang() {
@@ -751,13 +747,10 @@ function withParticle(word, afterFinal, afterVowel) {
   return word + (final ? afterFinal : afterVowel);
 }
 
-// 프로세스 is worth knowing, but no PR asks for it.
-const SEATLESS_AREAS = ["process"];
-
 function openTeach({ to = null, area = null, edit = null, carried = null, areas = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].teach;
-  const list = areas ?? Object.entries(WORDS[lang].areas).map(([key, label]) => ({ key, label, seat: !SEATLESS_AREAS.includes(key) }));
+  const list = areas ?? Object.entries(WORDS[lang].areas).map(([key, label]) => ({ key, label }));
   const areaName = (a) => list.find((x) => x.key === a)?.label ?? "";
   const local = (v) => (v && typeof v === "object" ? v[lang] : v ?? "");
   const MAX = 200;
@@ -886,11 +879,11 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
     $("[data-count]").textContent = text.value.length + "/" + MAX;
     const lines = [];
     const p = person();
-    // A first memory in a review area is what gives someone that seat.
-    if (p && state.area && list.find((x) => x.key === state.area)?.seat) {
+    // A first memory in an area is what makes it theirs.
+    if (p && state.area) {
       const knows = p.memories.some((m) => m !== edit && m.area === state.area);
       if (!knows) {
-        lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainSeat(p.name, areaName(state.area))}</span>`);
+        lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainArea(p.name, areaName(state.area))}</span>`);
       }
     }
     const before = p ? liveChars(p) : isCompany() ? carried : null;

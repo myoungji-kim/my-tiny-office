@@ -109,17 +109,13 @@
   .flow:empty { display: none; }
 
   .area-row {
-    display: grid; grid-template-columns: minmax(0, 170px) 76px minmax(0, 1fr) auto 28px;
+    display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr) auto 28px;
     align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
   }
 
   .area-row:last-of-type { border-bottom: none; }
 
   .area-name { font-size: 15px; font-weight: 600; }
-
-  .seat { font-size: 13px; color: var(--muted); }
-
-  .seat.no { color: var(--faint); }
 
   .knows { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 
@@ -131,15 +127,11 @@
 
   .nobody:hover { text-decoration: underline; }
 
-  .none { font-size: 14px; color: var(--faint); }
-
   .area-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 
   .area-form .input { flex: 1 1 200px; }
 
   .area-form .hint { flex-basis: 100%; margin: 0; color: var(--bad-ink); }
-
-  .lost { color: var(--bad-ink); }
 
   .area-n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 </style>
@@ -295,15 +287,13 @@
         memories: (m) => "가르친 기억이 " + m.n + "개가 됐어요",
         project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
       },
-      areasTitle: "분야", areasSub: "회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.",
-      reviewArea: "리뷰 분야", noReview: "리뷰 없음", nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
+      areasTitle: "전문 분야", areasSub: "우리 회사가 다루는 분야예요. 직원에게 알려준 기억은 모두 이 중 하나에 속해요.",
+      nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
       memCount: (n) => "기억 " + n,
       nobodyKnowsArea: (list) => list.join(" · ") + (hasBatchim(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
-      nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
-      pickSomeone: "알려줄 직원 고르기", nobodyYet: "아직 아는 사람이 없어요",
+      nobodyKnowsWhy: "이 분야 업무는 참고할 기억 없이 시작하고, PR 리뷰를 맡을 사람도 없어요. 누구에게든 한 줄 알려주면 시작돼요.",
+      pickSomeone: "알려줄 직원 고르기",
       areaMenu: "분야 메뉴", areaName: "분야 이름", areaPlaceholder: "예: 게임 서버", nameTaken: "이미 있는 이름이에요.",
-      seatOn: "리뷰 분야로 두기", seatOff: "리뷰 분야 끄기",
-      seatOffWhy: (names, area) => josa(names.join(", "), "이", "가") + " 더 이상 " + area + " 리뷰를 맡지 않아요.",
       removeArea: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       moveTitle: (area) => "‘" + area + "’ 분야 지우기",
       moveSub: (n) => "이 분야에 기억이 " + n + "개 있어요. 지우기 전에 옮길 곳을 골라요.",
@@ -338,15 +328,13 @@
         memories: (m) => m.n + " memories taught",
         project: (m) => "Finished ‘" + m.name + "’<span> · " + m.days + " days</span>",
       },
-      areasTitle: "Areas", areasSub: "The company owns this list. A PR asks for one of them.",
-      reviewArea: "Review seat", noReview: "No seat", nobodyKnows: "Nobody knows this", addArea: "Add an area",
+      areasTitle: "Expertise", areasSub: "What this company works in. Every memory taught belongs to one of these.",
+      nobodyKnows: "Nobody knows this", addArea: "Add an area",
       memCount: (n) => n + " memories",
       nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
-      nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
-      pickSomeone: "Pick someone to teach", nobodyYet: "Nobody yet",
+      nobodyKnowsWhy: "Work here starts with nothing to draw on, and nobody can review it. Teach anyone one line to start.",
+      pickSomeone: "Pick someone to teach",
       areaMenu: "Area actions", areaName: "Area name", areaPlaceholder: "e.g. Game server", nameTaken: "That name is taken.",
-      seatOn: "Make it a review seat", seatOff: "Stop reviewing it",
-      seatOffWhy: (names, area) => names.join(", ") + " will no longer review " + area + ".",
       removeArea: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       moveTitle: (area) => "Delete ‘" + area + "’",
       moveSub: (n) => n + " memories are in this area. Choose where they go first.",
@@ -378,18 +366,8 @@
   let companyName = "My Tiny Office";
   const FOUNDED = day("2026. 1. 12.");
 
-  // The company owns this list. A review seat is an area a PR can ask for;
-  // 프로세스 is worth knowing but nobody reviews for it.
-  const AREAS = [
-    { name: "arch", seat: true },
-    { name: "types", seat: true },
-    { name: "db", seat: true },
-    { name: "security", seat: true },
-    { name: "l10n", seat: true },
-    { name: "product", seat: true },
-    { name: "quality", seat: true },
-    { name: "process", seat: false },
-  ];
+  // The company owns this list; an area gets a label once the player names it.
+  const AREAS = Object.keys(WORDS.ko.areas).map((name) => ({ name }));
 
   const companyMemories = [
     { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
@@ -560,19 +538,14 @@
   // their text, shown as written in either.
   const areaLabel = (a) => a.label ?? t().areas[a.name];
   const byName = (name) => AREAS.find((a) => a.name === name);
-  const teachAreas = () => AREAS.map((a) => ({ key: a.name, label: areaLabel(a), seat: a.seat }));
+  const teachAreas = () => AREAS.map((a) => ({ key: a.name, label: areaLabel(a) }));
   const knowersOf = (name) => people.filter((p) => areasOf(p).includes(name));
   const countOf = (name) => sum((p) => p.memories.filter((m) => m.area === name).length);
   let editingArea = null;
 
-  function areaForm(a) {
-    const seat = a ? a.seat : true;
+  function areaForm() {
     return `<form class="area-form" data-areaform>
       <input class="input" maxlength="20" autocomplete="off" placeholder="${t().areaPlaceholder}" aria-label="${t().areaName}" />
-      <div class="opts" role="radiogroup" aria-label="${t().reviewArea}">
-        <button class="opt" type="button" role="radio" data-seat="1" aria-checked="${seat}">${t().reviewArea}</button>
-        <button class="opt" type="button" role="radio" data-seat="0" aria-checked="${!seat}">${t().noReview}</button>
-      </div>
       <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
       <button class="btn btn-secondary btn-md" type="button" data-cancelarea>${t().cancel}</button>
       <p class="hint" data-taken hidden>${t().nameTaken}</p>
@@ -580,7 +553,7 @@
   }
 
   function renderAreas() {
-    const uncovered = AREAS.filter((a) => a.seat && !knowersOf(a.name).length);
+    const uncovered = AREAS.filter((a) => !knowersOf(a.name).length);
     document.getElementById("ruleNotices").innerHTML = uncovered.length
       ? `<div class="notice notice-warn">
           <span class="n-ic">${ICON.alert}</span>
@@ -597,7 +570,7 @@
     areaTable.replaceChildren();
     for (const a of AREAS) {
       if (editingArea === a.name) {
-        areaTable.insertAdjacentHTML("beforeend", areaForm(a));
+        areaTable.insertAdjacentHTML("beforeend", areaForm());
         continue;
       }
       const knowers = knowersOf(a.name);
@@ -605,13 +578,10 @@
       row.className = "area-row";
       row.innerHTML = `
         <span class="area-name"></span>
-        <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
         <span class="knows">${
           knowers.length
             ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
-            : a.seat
-            ? `<button class="nobody" type="button" data-pick="${a.name}">${t().nobodyKnows}</button>`
-            : `<span class="none">${t().nobodyYet}</span>`
+            : `<button class="nobody" type="button" data-pick="${a.name}">${t().nobodyKnows}</button>`
         }</span>
         <span class="area-n">${t().memCount(countOf(a.name))}</span>
         <button class="ibtn ibtn-sm" type="button" data-areamenu="${a.name}" aria-label="${t().areaMenu}" aria-expanded="false">${ICON.more}</button>`;
@@ -621,7 +591,7 @@
     }
     areaTable.insertAdjacentHTML(
       "beforeend",
-      editingArea === "new" ? areaForm(null) : `<button class="mem-add" type="button" data-addarea>${ICON.plus}${t().addArea}</button>`,
+      editingArea === "new" ? areaForm() : `<button class="mem-add" type="button" data-addarea>${ICON.plus}${t().addArea}</button>`,
     );
     wireAreaForm();
   }
@@ -634,13 +604,6 @@
     input.value = a ? areaLabel(a) : "";
     input.focus();
     input.select();
-    let seat = a ? a.seat : true;
-    for (const b of form.querySelectorAll("[data-seat]")) {
-      b.addEventListener("click", () => {
-        seat = b.dataset.seat === "1";
-        for (const x of form.querySelectorAll("[data-seat]")) x.setAttribute("aria-checked", String(x === b));
-      });
-    }
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const label = input.value.trim();
@@ -648,12 +611,8 @@
       const taken = AREAS.some((x) => x !== a && areaLabel(x) === label);
       form.querySelector("[data-taken]").hidden = !taken;
       if (taken) return;
-      if (a) {
-        if (label !== areaLabel(a)) a.label = label;
-        a.seat = seat;
-      } else {
-        AREAS.push({ name: "custom-" + Date.now(), label, seat });
-      }
+      if (a && label !== areaLabel(a)) a.label = label;
+      if (!a) AREAS.push({ name: "custom-" + Date.now(), label });
       editingArea = null;
       renderAreas();
     });
@@ -665,18 +624,9 @@
 
   function areaMenu(btn) {
     const a = byName(btn.dataset.areamenu);
-    const knowers = knowersOf(a.name);
     const n = countOf(a.name);
     openRowMenu(btn, [
       { label: t().rename, icon: ICON.pen, run: () => { editingArea = a.name; renderAreas(); } },
-      a.seat
-        ? {
-            label: t().seatOff, icon: ICON.eye,
-            // Turning a seat off takes it from whoever holds it, so say who.
-            confirm: knowers.length ? t().seatOffWhy(knowers.map((p) => p.name), areaLabel(a)) : null,
-            run: () => { a.seat = false; renderAreas(); },
-          }
-        : { label: t().seatOn, icon: ICON.eye, run: () => { a.seat = true; renderAreas(); } },
       n
         ? { label: t().removeArea, icon: ICON.trash, bad: true, run: () => openMove(a) }
         : { label: t().removeArea, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => removeArea(a, null) },
@@ -692,7 +642,6 @@
   // An area with memory in it is not deleted outright: the memory goes somewhere first.
   function openMove(a) {
     const others = AREAS.filter((x) => x !== a);
-    const knowers = knowersOf(a.name);
     const scrim = document.createElement("div");
     scrim.className = "scrim";
     scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
@@ -700,7 +649,6 @@
       <div class="m-sec">
         <label class="label" for="moveTo">${t().moveTo}</label>
         <span class="select-wrap"><select class="select" id="moveTo"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
-        ${a.seat && knowers.length ? `<p class="hint lost"></p>` : ""}
       </div>
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
@@ -710,8 +658,6 @@
     scrim.querySelector(".m-t").textContent = t().moveTitle(areaLabel(a));
     const select = scrim.querySelector("#moveTo");
     for (const x of others) select.append(new Option(areaLabel(x), x.name));
-    select.value = others.find((x) => x.name === "process")?.name ?? others[0].name;
-    scrim.querySelector(".lost")?.append(t().seatOffWhy(knowers.map((p) => p.name), areaLabel(a)));
     const close = () => { scrim.remove(); document.removeEventListener("keydown", onKey); };
     const onKey = (e) => { if (e.key === "Escape") close(); };
     document.body.append(scrim);

@@ -356,9 +356,9 @@
       currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
       doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
       timesUsed: "기억이 쓰인 횟수", times: (n) => n + "회",
-      canReview: "리뷰할 수 있는 분야",
-      canReviewWhy: "이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.",
-      noReviewYet: "아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.",
+      expertise: "전문 분야",
+      expertiseWhy: "알려준 기억이 있는 분야예요. 이 분야 PR 리뷰도 맡을 수 있어요.",
+      noExpertise: "아직 전문 분야가 없어요. 무엇이든 알려주면 거기서 시작돼요.",
       carried: "업무마다 함께 들고 가요", chars: (n) => n + "자",
       fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
       neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
@@ -395,9 +395,9 @@
       currentTask: "Current task", onLeave: "On leave", lastFinished: "Last finished", joined: "Joined",
       doneAndReviews: "Tasks · reviews", counts: (a, b) => a + " · " + b,
       timesUsed: "Memories referenced", times: (n) => n + "×",
-      canReview: "Can review",
-      canReviewWhy: "They hold memory here, so they can be named a reviewer.",
-      noReviewYet: "No review areas yet. Teach them anything and they can take that seat.",
+      expertise: "Expertise",
+      expertiseWhy: "Areas they have been taught. They can review PRs here too.",
+      noExpertise: "No expertise yet. Teach them anything and it starts there.",
       carried: "Carried into every task", chars: (n) => n + " chars",
       fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
       neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
@@ -435,19 +435,8 @@
 
   /* ── data ────────────────────────────────────────────────────── */
 
-  // The company owns this list. A review seat is an area a PR can ask for;
-  // 프로세스 is worth knowing but nobody reviews for it.
-  const AREAS = [
-    { name: "arch", seat: true },
-    { name: "types", seat: true },
-    { name: "db", seat: true },
-    { name: "security", seat: true },
-    { name: "l10n", seat: true },
-    { name: "product", seat: true },
-    { name: "quality", seat: true },
-    { name: "process", seat: false },
-  ];
-  const REVIEW_AREAS = AREAS.filter((a) => a.seat).map((a) => a.name);
+  // The company's list, in its order.
+  const AREA_KEYS = Object.keys(WORDS.ko.areas);
 
   const backlog = [
     { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
@@ -491,8 +480,7 @@
   const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
 
   // In the company's order, so an area does not jump to the top when first taught.
-  const areasOf = (p) => AREAS.map((a) => a.name).filter((a) => p.memories.some((m) => m.area === a));
-  const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
+  const areasOf = (p) => AREA_KEYS.filter((a) => p.memories.some((m) => m.area === a));
   const usedOf = (p) => p.memories.reduce((n, m) => n + m.used, 0);
   const charsOf = (p) => p.memories.reduce((n, m) => n + tx(m.text).length, 0);
 
@@ -509,7 +497,7 @@
   /* ── roster ──────────────────────────────────────────────────── */
   const roster = document.getElementById("roster");
   for (const p of people) {
-    const areas = reviewAreasOf(p);
+    const areas = areasOf(p);
     const b = document.createElement("a");
     b.className = "row-item";
     b.href = "#" + p.id;
@@ -589,7 +577,7 @@
         </div>
       </div>`;
 
-    const seats = reviewAreasOf(p);
+    const seats = areasOf(p);
     const top = [...p.memories].sort(byUse).slice(0, 3);
     document.getElementById("ovRight").innerHTML = `
       <div class="panel">
@@ -597,14 +585,14 @@
         <div class="panel-bd">${top.length ? top.map((m) => memCard(m)).join("") : `<p class="empty-line">${t().noMemory}</p>`}</div>
       </div>
       <div class="panel">
-        <div class="panel-hd"><h2>${t().canReview}</h2></div>
+        <div class="panel-hd"><h2>${t().expertise}</h2></div>
         <div class="panel-bd">
           ${
             seats.length
               ? `<span class="areas">${seats
                   .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
-                  .join("")}</span><p class="why">${t().canReviewWhy}</p>`
-              : `<p class="why" style="margin:0">${t().noReviewYet}</p>`
+                  .join("")}</span><p class="why">${t().expertiseWhy}</p>`
+              : `<p class="why" style="margin:0">${t().noExpertise}</p>`
           }
         </div>
       </div>`;
@@ -627,11 +615,9 @@
         ? areas
             .map((a) => {
               const list = live.filter((m) => m.area === a).sort(byUse);
-              const seat = REVIEW_AREAS.includes(a);
-              const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
               return `<div class="mem-group">
                 <div class="mem-hd">
-                  <span class="area-chip"${style}>${t().areas[a]}</span>
+                  <span class="area-chip">${t().areas[a]}</span>
                   <span class="mem-line"></span>
                   <span class="count">${list.length}</span>
                 </div>

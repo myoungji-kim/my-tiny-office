@@ -279,35 +279,50 @@ A memory belongs to one employee, or to the company when everyone should know
 it. Company-scoped, never global: this follows the same ownership chain as an
 agent session.
 
-### Areas
+### Expertise (전문 분야)
 
-An area is the vocabulary that memory, tasks and PR review all share. **The
-company owns the list**, not the engine — a studio that cares about 게임 서버
-should be able to say so.
+An area of expertise is the vocabulary that memory, tasks and PR review share.
+**The company owns the list**, not the engine — a studio that cares about
+게임 서버 should be able to say so. From a person's side it reads as what they
+are expert in: 모카의 전문 분야 — 데이터베이스, 아키텍처.
+
+Expertise is taught, never assigned. A role (DBA) and a team (백엔드팀) are
+what the player decides someone is; an area becomes theirs only when they are
+taught something in it. Tying the two together would make DBA mean "already
+knows databases" and take away the reason to teach.
+
+What someone is told falls into one of three places, and only one has an area:
+
+| | What | Area |
+| --- | --- | --- |
+| 기억 | Expert knowledge — "복합 인덱스는 컬럼 순서가 중요해요" | Always |
+| 일하는 방식 | How this person works — "테스트를 먼저 써" | None |
+| 회사 기억 | What everyone follows — "커밋은 conventional prefix로" | None |
+
+There is no 프로세스 area: a rule about how work is done is a way of working,
+not expertise.
+
+Review follows from expertise without being explained on screen: whoever has
+been taught an area can review a PR in it. Every area counts; there are no
+seats to turn on or off.
 
 The list lives on the company's 규칙 tab as a coverage table rather than in
 settings, because the useful question is never "what areas exist" but "who
-knows this one". An area that is a *review seat* can be asked for by a PR;
-프로세스 is worth knowing and nobody reviews for it.
+knows this one". Two things are worth saying out loud:
 
-Review eligibility falls out of memory: an employee who holds memory in an area
-can take that seat. Two things are worth saying out loud:
-
-- an area **no employee knows**, so that PR cannot be reviewed — the 규칙 tab
-  leads with it, and its button opens teaching with the area already chosen
+- an area **no employee knows** — its work starts with nothing to draw on and
+  nobody can review it. The 규칙 tab leads with it, and its button opens
+  teaching with the area already chosen
 - a memory that has **never been referenced**, which is either wrong or was
   given to the wrong person — the people screen's memory tab leads with it
 
 The list is changed where it is shown. 분야 추가하기 opens a row at the foot of
-the table for a name and whether it is a review seat; each row's `⋯` renames
-it, turns its seat on or off, or deletes it.
+the table for a name; each row's `⋯` renames it or deletes it.
 
-- The eight default areas speak both languages. One the player adds or renames
+- The seven default areas speak both languages. One the player adds or renames
   is their text, shown as written in either, like a nickname.
-- Turning a seat off says first who loses it.
 - An area with memory in it is not deleted outright: a dialog asks where that
-  memory goes, and names who loses the seat. An empty one asks once more in
-  place.
+  memory goes. An empty one asks once more in place.
 - Memory and tasks point at an area by id, so a rename changes nothing else.
 
 Areas are made only here. The teaching dialog offers the list as it stands and
@@ -356,11 +371,11 @@ only what is already filled in:
 | 알려줄 직원 고르기 on the 규칙 tab | The area; the player picks who |
 | 회사 전체에 알려주기 | The whole company; company memory has no area |
 
-The dialog asks for an **area**, because review seats come from areas; the
-**text**, a sentence or two; and optionally **where it came from** — told
-directly, or the task they are on. Before anything is saved it says what the
-teaching does: when this is their first memory in a review area, *이제 모카가
-품질 리뷰를 맡을 수 있어요*, and always how much more they will carry into
+The dialog asks for an **area**, because a memory is always expertise in
+something; the **text**, a sentence or two; and optionally **where it came
+from** — told directly, or the task they are on. Before anything is saved it
+says what the teaching does: when this is their first memory in an area,
+*품질이 모카의 전문 분야가 돼요*, and always how much more they will carry into
 every task (195자 → 215자). The payoff and the cost are both part of the
 decision.
 
