@@ -101,7 +101,7 @@ button { font: inherit; color: inherit; }
 .mrow {
     display: flex; align-items: center; gap: 10px; width: 100%;
     height: 36px; padding-inline: 10px; border: none; border-radius: 9px;
-    background: none; text-align: left; font: inherit; font-size: 14.5px; color: var(--ink);
+    background: none; text-align: left; font: inherit; font-size: 15px; color: var(--ink);
     cursor: pointer;
   }
 
@@ -125,7 +125,7 @@ button { font: inherit; color: inherit; }
 
 /* ═══ status ═══ */
 
-.chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; flex: none; }
+.chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 13px; font-weight: 600; flex: none; }
 
 .tag {
     position: absolute; left: 50%; transform: translateX(-50%);
@@ -168,9 +168,9 @@ button { font: inherit; color: inherit; }
 
 .n-tx { min-width: 0; flex: 1; }
 
-.n-tx b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.45; }
+.n-tx b { display: block; font-size: 15px; font-weight: 600; line-height: 1.45; }
 
-.n-tx span { display: block; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.n-tx span { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; }
 
 .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
 
@@ -269,7 +269,7 @@ body:has(> .app) { padding: 22px 18px 40px; }
 .input, .select { height: 38px; padding-block: 0; }
 
 /* onboarding asks for very little, so its fields can afford to be large */
-.input-lg, .select-lg { height: 44px; font-size: 15.5px; }
+.input-lg, .select-lg { height: 44px; font-size: 15px; }
 
 .select { appearance: none; -webkit-appearance: none; padding-right: 34px; cursor: pointer; }
 
@@ -292,7 +292,7 @@ body:has(> .app) { padding: 22px 18px 40px; }
 
 .folder > svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
 
-.folder .path { flex: 1; min-width: 0; font-family: var(--mono); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder .path { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .folder .path.empty { color: var(--faint); font-family: var(--sans); }
 
@@ -336,7 +336,7 @@ body:has(> .app) { padding: 22px 18px 40px; }
 .lang { display: contents; }
 
 .langscope {
-    margin: -6px 0 22px; font-size: 13.5px; color: var(--faint);
+    margin: -6px 0 22px; font-size: 14px; color: var(--faint);
     display: flex; flex-direction: column; gap: 1px;
   }
 
@@ -425,9 +425,9 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .p-av { position: relative; width: 38px; height: 38px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-.p-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.p-name { display: block; font-size: 17px; font-weight: 600; line-height: 1.3; }
 
-.p-role { display: block; font-size: 13.5px; color: var(--faint); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p-role { display: block; font-size: 14px; color: var(--faint); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .p-rule { height: 1px; background: var(--line); margin: 0 10px; }
 
@@ -435,7 +435,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .p-state .track { margin-top: 9px; }
 
-.p-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+.p-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 
 .p-nums b { font-weight: 600; color: var(--ink); flex: none; }
 
@@ -456,9 +456,9 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .m-hd { display: flex; align-items: center; gap: 12px; padding: 18px 20px 16px; border-bottom: 1px solid var(--line); }
 
-.m-t { display: block; font-size: 17.5px; font-weight: 600; line-height: 1.35; }
+.m-t { display: block; font-size: 17px; font-weight: 600; line-height: 1.35; }
 
-.m-s { display: block; font-size: 13.5px; color: var(--muted); }
+.m-s { display: block; font-size: 14px; color: var(--muted); }
 
 .m-sec { padding: 15px 20px; border-bottom: 1px solid var(--line); }
 
@@ -484,7 +484,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .pick[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--brand); }
 
-.pick-t { display: block; font-size: 14.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-t { display: block; font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .pick-m { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
@@ -496,7 +496,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .k .kn { color: var(--ink); font-variant-numeric: tabular-nums; }
 
-.area-chip { font-size: 12.5px; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: var(--brand-soft); color: var(--brand-ink); white-space: nowrap; }
+.area-chip { font-size: 13px; font-weight: 600; border-radius: 999px; padding: 2px 8px; background: var(--brand-soft); color: var(--brand-ink); white-space: nowrap; }
 
 .bad-ex { border: 1px dashed var(--bad); border-radius: 12px; padding: 14px; background: var(--bad-soft); }
 
@@ -586,13 +586,13 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .c-k { display: block; font-size: 12px; font-weight: 600; color: var(--faint); }
 
-.c-task { display: block; font-size: 14.5px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-task { display: block; font-size: 15px; font-weight: 500; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .meter { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 11px; }
 
 .meter i { display: block; height: 100%; border-radius: 999px; }
 
-.c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
+.c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 
 .c-nums b { font-weight: 600; color: var(--ink); flex: none; }
 
