@@ -114,6 +114,21 @@ without a folder is allowed, because naming the work usually comes before
 deciding where it lives, and the dialog says what that costs: the tasks can be
 written down, but nobody can start them.
 
+### Correcting and removing
+
+The same dialogs correct what they made. A task's popover and a project's `⋯`
+open them filled in, and the button says save instead of create.
+
+**A finished task is the record of what happened**, so it is neither edited nor
+deleted; the rest is the player's to change. Where a task sits still follows
+from who is on it: give a queued task to someone free and it starts, take the
+assignee away from one in progress and it goes back to the backlog.
+
+**Removing says what is being thrown away, unless nothing has happened yet.** A
+task in the backlog is gone on the spot — nobody has touched it. Past that,
+work was done, so the dialog names what is lost: an agent stopped mid-task,
+finished work that was never applied, a project taking its tasks with it.
+
 **Whether the folder belongs to the project or to the employee is unsettled.**
 `docs/ARCHITECTURE.md` §11 gives each project a workspace; *Agent connection*
 below gives each employee one. The board assumes the project, because a task
