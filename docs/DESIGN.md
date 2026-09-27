@@ -145,7 +145,10 @@ they are doing.
 ## Projects
 
 The projects screen is a list, like people: 대기 · 진행 중 · 보류 · 완료 tabs, and
-every row opens that project's board at its own address (`#pay`). An active or
+every row opens that project's board at its own address (`#pay`). Each status
+has one mark, by shape as well as colour, used on its tab and beside the
+project's name: 대기 a hollow ring, 진행 중 the working dot, 보류 a pause, 완료 a
+check. An active or
 held row carries its folder, how many tasks sit in each column, with 승인 대기
 lifted when it is not zero, and when it started; a done one carries its record
 — tasks done and days taken — and when it finished. There is no board across

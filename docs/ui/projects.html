@@ -38,6 +38,18 @@
 
   .chip.planned { background: none; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
 
+  /* A project's status reads by shape as well as colour, the same in the tabs
+     and beside its name. */
+  .pmark { width: 10px; height: 10px; flex: none; display: inline-grid; place-items: center; }
+
+  .pmark.planned { border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--faint); width: 8px; height: 8px; }
+
+  .pmark svg { width: 10px; height: 10px; }
+
+  .pmark.held { color: var(--muted); }
+
+  .pmark.done { color: var(--ok); }
+
   @media (max-width: 860px) {
     #projList .row-item { grid-template-columns: minmax(0, 1fr) auto; }
     .pr-folder, .pr-counts { display: none; }
@@ -363,6 +375,7 @@
         startProject: "시작하기", holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
       },
       whySeat: (a) => a + " 기억이 있어요",
+      pickWho: (a) => a + " 검토를 누구에게 받을까요?",
       noSeat: "이 분야를 아는 사람을 먼저 만들어야 해요",
       blocked: "막힘",
       newTaskTitle: "새 업무",
@@ -449,6 +462,7 @@
         startProject: "Start", holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
       },
       whySeat: (a) => "has " + a + " memories",
+      pickWho: (a) => "Who should look at the " + a + " side?",
       noSeat: "Someone has to learn this area first",
       blocked: "Blocked",
       newTaskTitle: "New task",
@@ -645,7 +659,7 @@
       const b = document.createElement("button");
       b.className = "tab";
       b.setAttribute("aria-selected", String(f === filter));
-      b.innerHTML = `<span>${t().filters[f]}</span><span class="n">${PROJECTS.filter((p) => p.status === f).length}</span>`;
+      b.innerHTML = `${projectMark(f)}<span>${t().filters[f]}</span><span class="n">${PROJECTS.filter((p) => p.status === f).length}</span>`;
       b.addEventListener("click", () => { filter = f; render(); });
       tabs.appendChild(b);
     }
@@ -671,12 +685,17 @@
   }
 
   const STATUS_CHIP = { planned: "planned", active: "working", held: "vacation", done: "available" };
+  const projectMark = (status) =>
+    status === "active" ? `<span class="dot working"></span>`
+    : status === "held" ? `<span class="pmark held">${icon.pause}</span>`
+    : status === "done" ? `<span class="pmark done">${icon.check}</span>`
+    : `<span class="pmark planned"></span>`;
 
   function renderProject(p) {
     document.getElementById("pjName").textContent = tx(p.name);
     const chip = document.getElementById("pjChip");
     chip.className = "chip " + STATUS_CHIP[p.status];
-    chip.textContent = t().filters[p.status];
+    chip.innerHTML = projectMark(p.status) + t().filters[p.status];
     // A project with no folder cannot be worked in; a planned one says so in its notice instead.
     document.getElementById("pjSub").innerHTML = [p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
       .filter(Boolean).join(" · ");
@@ -775,18 +794,37 @@
     return b;
   }
 
-  function reviewerRow(p, area) {
+  function reviewerRow(task, p) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "mrow";
-    b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${t().whySeat(areaLabel(area))}</span></span>`;
+    b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${t().whySeat(areaLabel(task.area))}</span></span>`;
     b.querySelector(".w-av").appendChild(spriteCanvas(p.species, 20));
-    b.addEventListener("click", close);
+    b.addEventListener("click", () => {
+      task.peer = { by: p.id, state: "reviewing" };
+      close();
+      render();
+    });
     return b;
   }
 
-  function open(task, el, viaKey) {
-    if (anchor === el && pop.hasAttribute("data-open")) { close(); return; }
+  // Who may review is who has been taught the area, never the one doing the work.
+  function reviewChoices(task, acts, say) {
+    const seats = reviewersFor(task.area).filter((p) => p.id !== task.who);
+    if (seats.length) {
+      for (const p of seats) acts.appendChild(reviewerRow(task, p));
+      return;
+    }
+    say("p-why", t().noSeat);
+    const go = document.createElement("a");
+    go.className = "mrow";
+    go.href = "employees.html";
+    go.textContent = t().actions.open;
+    acts.appendChild(go);
+  }
+
+  function open(task, el, viaKey, picking = false) {
+    if (anchor === el && pop.hasAttribute("data-open") && !picking) { close(); return; }
 
     document.querySelectorAll("[data-id]").forEach((n) => {
       n.setAttribute("aria-expanded", String(n.dataset.id === task.id));
@@ -828,18 +866,17 @@
     if (task.status === "working" && live) {
       // The system offers the review; it knows the area and who was taught it.
       if (task.peer?.state === "suggested") {
-        const seats = reviewersFor(task.area);
-        if (seats.length) for (const p of seats) acts.appendChild(reviewerRow(p, task.area));
-        else {
-          say("p-why", t().noSeat);
-          const go = document.createElement("a");
-          go.className = "mrow";
-          go.href = "employees.html";
-          go.textContent = t().actions.open;
-          acts.appendChild(go);
-        }
+        reviewChoices(task, acts, say);
+      } else if (!task.peer && picking) {
+        say("p-why", t().pickWho(areaLabel(task.area)));
+        reviewChoices(task, acts, say);
       } else if (!task.peer) {
-        acts.appendChild(menu(t().actions.pickPeer));
+        const ask = document.createElement("button");
+        ask.type = "button";
+        ask.className = "mrow";
+        ask.textContent = t().actions.pickPeer;
+        ask.addEventListener("click", () => open(task, el, viaKey, true));
+        acts.appendChild(ask);
       }
     }
 
