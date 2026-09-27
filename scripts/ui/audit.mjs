@@ -396,12 +396,13 @@ console.log("a button is the size of its place");
   const PLACES = [
     ['<div class="head-right">', "btn-lg"],
     ['<div class="m-foot">', "btn-md"],
+    ['<span class="n-acts">', "btn-sm"],
   ];
   for (const p of PAGES) {
     for (const [open, want] of PLACES) {
       let at = 0;
       while ((at = src[p].indexOf(open, at)) !== -1) {
-        const end = src[p].indexOf("</div>", at);
+        const end = src[p].indexOf(open.startsWith("<span") ? "</span>" : "</div>", at);
         for (const b of src[p].slice(at, end).matchAll(/class="btn ([^"]*)"/g)) {
           if (!b[1].split(/\s+/).includes(want)) flag(`${p}: a button in ${open.match(/"([^"]+)"/)[1]} is ${b[1]}, not ${want}`);
         }
