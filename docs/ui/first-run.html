@@ -205,17 +205,6 @@
   // Every sprite shares one body. Only the seven head rows change, so twenty
   // species still read as one family.
 
-  function avatar(sp, px) {
-    const el = document.createElement("canvas");
-    el.width = el.height = px;
-    const g = el.getContext("2d");
-    g.imageSmoothingEnabled = false;
-    const scale = Math.max(1, Math.floor(px / 16));
-    const pad = Math.floor((px - 16 * scale) / 2);
-    paint(g, sp.sprite, scale, pad, pad, skin(sp));
-    return el;
-  }
-
   /* ── a glance at what this is ────────────────────────────────── */
 
   // Three of the cast at desks, so the first screen shows the game instead of
@@ -345,7 +334,7 @@
     b.type = "button";
     b.setAttribute("aria-pressed", "false");
     b.setAttribute("aria-label", tx(c.species));
-    b.appendChild(avatar(c, 34));
+    b.appendChild(spriteCanvas(c.key, 34));
     b.addEventListener("click", () => {
       chosen = c;
       for (const x of grid.children) x.setAttribute("aria-pressed", String(x === b));
@@ -379,7 +368,7 @@
         <span class="h-role">${role}</span>
       </span>
       <span class="chip sim">${t().simulated}</span>`;
-    box.querySelector(".h-av").prepend(avatar(chosen, 52));
+    box.querySelector(".h-av").prepend(spriteCanvas(chosen.key, 52));
   }
 
   hireBtn.addEventListener("click", () => {

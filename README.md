@@ -38,7 +38,7 @@ My Tiny Office
 
 ## Core Loop
 
-Create company → Hire → Assign work → Work → Collaborate → Complete → Train → Grow → Expand
+Create company → Hire → Assign work → Work → Collaborate → Complete → Teach → Grow → Expand
 
 ## Localization
 

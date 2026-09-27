@@ -871,10 +871,14 @@ function uiLang() {
   return new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
 }
 
-function withParticle(word, afterFinal, afterVowel) {
+// Whether the last syllable has a final consonant, which picks 이/가, 을/를, 은/는.
+function hasBatchim(word) {
   const c = word.charCodeAt(word.length - 1);
-  const final = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
-  return word + (final ? afterFinal : afterVowel);
+  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+}
+
+function withParticle(word, afterFinal, afterVowel) {
+  return word + (hasBatchim(word) ? afterFinal : afterVowel);
 }
 
 function openTeach({ to = null, area = null, edit = null, carried = null, areas = null, onSave }) {

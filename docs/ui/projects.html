@@ -98,7 +98,6 @@
 
   .r-line { display: flex; align-items: center; gap: 6px; font-size: 13px; }
 
-  .r-line.pending { color: var(--warn-ink); }
   .r-line.changes { color: var(--bad-ink); }
   .r-line.blocked { color: var(--bad-ink); }
 
@@ -391,10 +390,6 @@
   applyStatic();
 
   // 을/를 and 이/가 depend on the last syllable of the word in front of them.
-  const hasBatchim = (word) => {
-    const c = word.charCodeAt(word.length - 1);
-    return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
-  };
   const subjectParticle = (word) => (lang === "en" ? "" : hasBatchim(word) ? "이" : "가");
   const areaLabel = (a) => t().areas[a];
   const areaObject = (a) => (lang === "en" ? areaLabel(a) : areaLabel(a) + (hasBatchim(areaLabel(a)) ? "을" : "를"));
@@ -409,17 +404,6 @@
   const reviewersFor = (area) => STAFF.filter((p) => seatsOf(p).includes(area));
   const byId = new Map(STAFF.map((p) => [p.id, p]));
 
-  const avatar = (species, size) => {
-    const c = document.createElement("canvas");
-    c.width = c.height = size;
-    const ctx = c.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    const sp = SPECIES.get(species);
-    const scale = Math.max(1, Math.floor(size / 16));
-    const pad = Math.floor((size - 16 * scale) / 2);
-    paint(ctx, sp.sprite, scale, pad, pad, skin(sp));
-    return c;
-  };
 
   /* ── the board ───────────────────────────────────────────────── */
 
@@ -504,7 +488,7 @@
         ${time ? `<span class="w-time">${icon.clock}${time}</span>` : `<span class="prio ${task.priority}">${icon.flag}${t().priority[task.priority]}</span>`}
       </span>`;
 
-    if (who) b.querySelector(".w-av").appendChild(avatar(who.species, 20));
+    if (who) b.querySelector(".w-av").appendChild(spriteCanvas(who.species, 20));
     b.title = tx(project.name);
     b.addEventListener("click", (e) => open(task, b, e.detail === 0));
     return b;
@@ -582,7 +566,7 @@
     b.type = "button";
     b.className = "mrow";
     b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${t().whySeat(areaLabel(area))}</span></span>`;
-    b.querySelector(".w-av").appendChild(avatar(p.species, 20));
+    b.querySelector(".w-av").appendChild(spriteCanvas(p.species, 20));
     b.addEventListener("click", close);
     return b;
   }
@@ -605,7 +589,7 @@
       </div>
       <span class="p-rule"></span>`;
 
-    if (who) pop.querySelector(".p-av").appendChild(avatar(who.species, 38));
+    if (who) pop.querySelector(".p-av").appendChild(spriteCanvas(who.species, 38));
     else pop.querySelector(".p-av").textContent = "—";
 
     const acts = document.createElement("div");

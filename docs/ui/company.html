@@ -239,24 +239,6 @@
 </div>
 
 <script>
-  function avatar(species, px) {
-    const el = document.createElement("canvas");
-    el.width = el.height = px;
-    const g = el.getContext("2d");
-    g.imageSmoothingEnabled = false;
-    const sp = SPECIES.get(species);
-    const scale = Math.max(1, Math.floor(px / 16));
-    const pad = Math.floor((px - 16 * scale) / 2);
-    paint(g, sp.sprite, scale, pad, pad, skin(sp));
-    return el;
-  }
-
-  const hasBatchim = (word) => {
-    const c = word.charCodeAt(word.length - 1);
-    return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
-  };
-  const josa = (w, withFinal, without) => w + (hasBatchim(w) ? withFinal : without);
-
   /* ── i18n ────────────────────────────────────────────────────── */
   // The company's name, nicknames and project names are absent: the player wrote them.
   const TEXT = {
@@ -279,11 +261,11 @@
       recentTitle: "최근 이정표", allHistory: "연혁 전체 보기",
       miles: {
         founded: () => "회사를 세웠어요",
-        joined: (m) => m.nth === 1 ? "첫 직원 " + josa(m.who.name, "이", "가") + " 합류했어요" : josa(m.who.name, "이", "가") + " 합류했어요<span> · " + m.nth + "번째 직원</span>",
-        team: (m) => josa(WORDS.ko.teams[m.team], "이", "가") + " 생겼어요",
-        firstTask: (m) => josa(m.who.name, "이", "가") + " 첫 업무를 마쳤어요<span> · " + m.task.ko + "</span>",
+        joined: (m) => m.nth === 1 ? "첫 직원 " + withParticle(m.who.name, "이", "가") + " 합류했어요" : withParticle(m.who.name, "이", "가") + " 합류했어요<span> · " + m.nth + "번째 직원</span>",
+        team: (m) => withParticle(WORDS.ko.teams[m.team], "이", "가") + " 생겼어요",
+        firstTask: (m) => withParticle(m.who.name, "이", "가") + " 첫 업무를 마쳤어요<span> · " + m.task.ko + "</span>",
         tasks: (m) => "완료한 업무가 " + m.n + "건을 넘었어요",
-        firstReview: (m) => josa(m.who.name, "이", "가") + " 첫 리뷰를 마쳤어요",
+        firstReview: (m) => withParticle(m.who.name, "이", "가") + " 첫 리뷰를 마쳤어요",
         memories: (m) => "가르친 기억이 " + m.n + "개가 됐어요",
         project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
       },
@@ -486,7 +468,7 @@
     a.href = "employees.html" + suffix + "#" + p.id;
     a.innerHTML = `<span class="mate-av"></span><span class="mate-n"></span><span class="mate-d">${t().daysWith(daysSince(day(p.joined)))}</span>`;
     a.querySelector(".mate-n").textContent = p.name;
-    a.querySelector(".mate-av").appendChild(avatar(p.species, 44));
+    a.querySelector(".mate-av").appendChild(spriteCanvas(p.species, 44));
     crew.appendChild(a);
   }
 
@@ -504,7 +486,7 @@
     const faces = row.querySelector(".faces");
     for (const id of f.crew) {
       const s = document.createElement("span");
-      s.appendChild(avatar(who(id).species, 20));
+      s.appendChild(spriteCanvas(who(id).species, 20));
       faces.appendChild(s);
     }
     finishedBox.appendChild(row);
@@ -586,7 +568,7 @@
         <span class="area-n">${t().memCount(countOf(a.name))}</span>
         <button class="ibtn ibtn-sm" type="button" data-areamenu="${a.name}" aria-label="${t().areaMenu}" aria-expanded="false">${ICON.more}</button>`;
       row.querySelector(".area-name").textContent = areaLabel(a);
-      row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
+      row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(spriteCanvas(knowers[i].species, 20)));
       areaTable.appendChild(row);
     }
     areaTable.insertAdjacentHTML(

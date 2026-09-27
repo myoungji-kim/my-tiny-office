@@ -175,27 +175,26 @@ Avoid:
 
 ```text
 ┌─────────────┬──────────────────────────────────────────────┐
-│ MY TINY     │ 사무실                      [ + 직원 고용 ]   │
-│ OFFICE      │ 백엔드팀 · 책상 6석 중 5석 사용                │
+│ ⌂ My Tiny   │ 사무실                  2026. 9. 26. (토) 10:24 │
+│   Office    │ 책상 6석 중 5석 사용                            │
 │             ├──────────────────────────────────────────────┤
-│ 홈          │ 전체 · 백엔드팀 · 프론트엔드팀 · 휴게실 · +    │
-│ 사무실      ├──────────────────────────────────────────────┤
-│ 프로젝트    │ ┌──────────────────────────────────────────┐ │
-│ PR·코드리뷰 │ │        office tilemap (canvas)           │ │
-│ 직원        │ │   desks · characters · status bubbles    │ │
-│             │ └──────────────────────────────────────────┘ │
-│ ─────────   │                                              │
-│ workspace   │ 백엔드팀 3                                    │
-│ · 모카      │ ┌────────┐ ┌────────┐ ┌────────┐ ┌ ─ ─ ─ ┐  │
-│ · 두부      │ │ card   │ │ card   │ │ card   │   + 채용    │
-│ · 단풍      │ └────────┘ └────────┘ └────────┘ └ ─ ─ ─ ┘  │
-│ ─────────   │                                              │
+│ 사무실      │ 전체 · 백엔드팀 · 프론트엔드팀 · 휴게실 · +    │
+│ 프로젝트    ├──────────────────────────────────────────────┤
+│ 직원        │ ┌──────────────────────────────────────────┐ │
+│ 회사        │ │        office tilemap (canvas)           │ │
+│ ─────────   │ │   desks · characters · status bubbles    │ │
+│ · 모카      │ └──────────────────────────────────────────┘ │
+│ · 두부      │ 백엔드팀 3                                    │
+│ · 단풍      │ ┌────────┐ ┌────────┐ ┌────────┐ ┌ ─ ─ ─ ┐  │
+│             │ │ card   │ │ card   │ │ card   │  빈 책상  │
+│ ─────────   │ └────────┘ └────────┘ └────────┘ └ ─ ─ ─ ┘  │
 │ 설정        │ 프론트엔드팀 2                                │
 └─────────────┴──────────────────────────────────────────────┘
 ```
 
 The app is one floating white panel on a grey page. The sidebar is fixed width
-and carries navigation plus the active company's roster. The main column is
+and carries the company's name (which leads to the company screen), navigation
+and the active company's roster. The main column is
 header → room tabs → office → team cards.
 
 There is no permanent inspector panel. Selecting a desk, a roster row or an

@@ -212,25 +212,12 @@
   // Every sprite shares one body. Only the seven head rows change, so twenty
   // species still read as one family.
 
-  function avatar(species, px) {
-    const el = document.createElement("canvas");
-    el.width = el.height = px;
-    const g = el.getContext("2d");
-    g.imageSmoothingEnabled = false;
-    const sp = SPECIES.get(species);
-    const scale = Math.max(1, Math.floor(px / 16));
-    const pad = Math.floor((px - 16 * scale) / 2);
-    paint(g, sp.sprite, scale, pad, pad, skin(sp));
-    return el;
-  }
-
   const I = {
     check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg>',
     x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
     dash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h8"/></svg>',
     plug: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z"/><path d="M8 11.8V14"/></svg>',
     folder: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.8 4h4.2l1.4 1.8h6.8V13H1.8z"/></svg>',
-    info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg>',
     refresh: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 7A5.2 5.2 0 1 0 12 11.2"/><path d="M13.4 3.4v3.8h-3.8"/></svg>',
   };
 
@@ -294,18 +281,6 @@
 
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
   const t = () => TEXT[lang];
-  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
-  const applyStatic = () => {
-    for (const el of document.querySelectorAll("[data-t]")) {
-      const v = dig(t(), el.dataset.t);
-      if (typeof v === "string") el.textContent = v;
-    }
-    for (const el of document.querySelectorAll("[data-a]")) {
-      const v = dig(t(), el.dataset.a);
-      if (typeof v === "string") el.setAttribute("aria-label", v);
-    }
-  };
-
   const EMP = { name: "모카", species: "cat", role: "Backend Engineer" };
 
   /* ── the connection modal, in one state ──────────────────────── */
@@ -400,7 +375,7 @@
         <button class="btn btn-secondary btn-md" type="button">${t().later}</button>
         <button class="btn btn-primary btn-md" type="button"${ready ? "" : " disabled"}>${t().connect}</button>
       </div>`;
-    el.querySelector(".m-av").appendChild(avatar(EMP.species, 44));
+    el.querySelector(".m-av").appendChild(spriteCanvas(EMP.species, 44));
     return el;
   }
 
@@ -516,7 +491,7 @@
         <span class="rl">${opts.role}</span>
       </span>
       <span class="chip ${opts.chip}">${opts.chipText}</span>`;
-    el.querySelector(".av-demo").prepend(avatar(opts.species, 40));
+    el.querySelector(".av-demo").prepend(spriteCanvas(opts.species, 40));
     return el;
   };
 
@@ -532,7 +507,7 @@
     wrap.innerHTML = `<span class="bubble">
         <span class="dot working"></span>${t().status.working}${connectedNow ? `<span class="live-ic">${I.plug}</span>` : ""}
       </span>`;
-    const c = avatar(species, 48);
+    const c = spriteCanvas(species, 48);
     c.style.imageRendering = "pixelated";
     wrap.appendChild(c);
     bubbles.appendChild(wrap);

@@ -543,17 +543,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .member .av { width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); display: grid; place-items: center; }
 
-.badge {
-    min-width: 19px; height: 19px; padding-inline: 6px; border-radius: 999px;
-    background: var(--bad); color: #fff; font-size: 12px; font-weight: 700;
-    display: grid; place-items: center; font-variant-numeric: tabular-nums;
-  }
-
 .rule { height: 1px; background: var(--line-2); margin: 14px 4px; }
-
-.ws-hd { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; margin-bottom: 4px; }
-
-.ws-hd span { font-size: 14px; color: var(--muted); }
 
 .main { display: flex; flex-direction: column; min-width: 0; }
 
