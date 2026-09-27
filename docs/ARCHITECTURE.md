@@ -363,6 +363,17 @@ What changed is that worktree's diff. Approving commits it to `mto/<task>`;
 nothing is pushed. Whether the project folder's trust covers a worktree under
 it is still to be measured against the CLI, as the mappings above were.
 
+### External tools are read while working and written on approval
+
+A session uses the MCP servers the user has connected to Claude Code; the app
+lists them (`claude mcp list`) and never handles their credentials. During a
+task the session runs with those servers' write tools disallowed
+(`--disallowedTools`), and the prompt asks the agent to end with the writes it
+would make, as drafts. Approving resumes the session with exactly those tools
+allowed and asks it to make exactly those writes. Which tools count as writes,
+and whether `--disallowedTools` takes MCP tool names, are still to be
+measured.
+
 ### Two things happen outside the app
 
 Neither can be done for the user, and both need a screen that says so.

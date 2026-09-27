@@ -233,7 +233,7 @@ so above everything.
 | Panel | Holds | From |
 | --- | --- | --- |
 | 지금 하는 일 | The agent's latest steps — reading, editing, running — and its last words | The runtime's event stream |
-| 바뀐 것 | Every file with lines added and removed; a file opens to its diff | The task's worktree |
+| 바뀐 것 | Every file with lines added and removed, a file opening to its diff; then 승인하면 바깥에 쓸 것 — each draft write to an outside tool, by tool and target | The task's worktree, and the agent's drafts |
 | 검토 | Where the review stands and what was said | The task's PullRequest |
 | 업무 설명 | What the task is for | The task |
 | 들고 간 기억 | Everything the person carries, ✓ on what they report drawing on | The person's memory |
@@ -242,7 +242,8 @@ so above everything.
 
 The page follows the status: a queued task shows only what it is and who will
 take it; one waiting for approval leads with what changed and says what
-approving does — it commits to the task's branch, nothing is pushed; a done
+approving does — it commits to the task's branch and makes the drafted writes
+outside, nothing is pushed; a done
 one is its record, with the commit.
 
 ### The two dialogs
@@ -462,7 +463,7 @@ to earn their place.
 
 | Panel | Holds |
 | --- | --- |
-| Claude Code | The same check as first run — installed, logged in — with 다시 확인. Folder trust is not here: it is per project |
+| Claude Code | The same check as first run — installed, logged in — with 다시 확인, and the outside tools it is connected to. Folder trust is not here: it is per project |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 이 회사 삭제 | Set apart in red, last before the version |
@@ -571,6 +572,9 @@ the measured runtime surface.
 - **The code opens one database.** `src/infrastructure/persistence/database.ts`
   opens a single `my-tiny-office.db`; a file per company, the list of them, and
   the language and last company in `settings.json` are not built yet.
+- **Which outside tools a company may use.** Every company's agents reach the
+  same tools Claude Code is connected to. Choosing them per company would need
+  a list in the company's settings and a matching `--allowedTools` per session.
 - **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
   are the likeliest lever: hiring already needs a free one.
 - **A 내 차례 / Needs you inbox.** Today's feed already carries what waits on

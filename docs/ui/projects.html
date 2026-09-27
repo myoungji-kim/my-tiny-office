@@ -90,6 +90,18 @@
 
   .tk-mem.used svg { color: var(--ok); }
 
+  .ob-hd { display: block; font-size: 12px; font-weight: 600; color: var(--faint); margin: 14px 0 4px; }
+
+  .ob { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+
+  .ob:last-of-type { border-bottom: none; }
+
+  .ob-where { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--sunk); border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+
+  .ob-tx b { display: block; font-weight: 600; }
+
+  .ob-tx span { color: var(--muted); }
+
   .tk-apply { display: block; font-size: 13px; color: var(--muted); margin-top: 10px; }
 
   .tk-apply code { font-family: var(--mono); color: var(--ink); }
@@ -368,6 +380,10 @@
         { at: "10:12", kind: "edit", what: "src/payments/history.test.ts" },
         { at: "10:08", kind: "edit", what: "src/payments/history.ts" },
         { at: "10:03", kind: "read", what: "src/db/schema.ts" },
+        { at: "10:02", kind: "fetch", what: "Jira · PAY-212" },
+      ],
+      outbound: [
+        { where: "Jira", target: "PAY-212", what: { ko: "댓글 · 커서 기반으로 바꿨어요. 페이지당 50건이에요.", en: "Comment · Switched to a cursor. 50 per page." } },
       ],
       said: { ko: "offset은 페이지가 깊어질수록 느려서 커서 기반으로 바꾸는 중이에요.", en: "Offsets slow down the deeper the page, so I am switching to a cursor." },
       files: [
@@ -425,6 +441,10 @@
         ] },
         { file: "src/api/payments.ts", add: 9, del: 12 },
         { file: "docs/api/errors.md", add: 21, del: 4 },
+      ],
+      outbound: [
+        { where: "Confluence", target: { ko: "결제 API · 에러 응답", en: "Payments API · Errors" }, what: { ko: "새 응답 구조와 재시도 규칙으로 고친 본문", en: "Body rewritten for the new shape and the retry rule" } },
+        { where: "Jira", target: "PAY-198", what: { ko: "상태 · 진행 중 → 검토 완료", en: "Status · In progress → Reviewed" } },
       ],
       thread: [
         { by: "p4", text: { ko: "재시도할 수 있는 실패는 따로 나눠 주세요.", en: "Split out the failures that can be retried." } },
@@ -563,9 +583,10 @@
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
         attach: "터미널에서 직접 보기", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
         said: (n) => n + "의 말", notStarted: "아직 아무도 시작하지 않았어요.",
-        applyWhat: (b) => "승인하면 <code>" + b + "</code> 브랜치에 커밋해요. push는 하지 않아요.",
+        applyWhat: (b, n) => "승인하면 <code>" + b + "</code> 브랜치에 커밋" + (n ? "하고, 바깥에 쓸 " + n + "건을 반영해요" : "해요") + ". push는 하지 않아요.",
         applied: (b, c) => "<code>" + b + "</code> 브랜치에 커밋했어요 · <code>" + c + "</code>",
-        steps: { read: "읽는 중", edit: "수정", run: "실행" },
+        steps: { read: "읽는 중", edit: "수정", run: "실행", fetch: "가져옴" },
+        outbound: "승인하면 바깥에 쓸 것", outboundDone: "바깥에 쓴 것",
         took: (m) => m + "분 걸림",
         logs: {
           created: () => "만듦", lost: () => "에이전트 연결이 끊김", applied: () => "승인해서 반영함",
@@ -678,9 +699,10 @@
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
         attach: "Watch it in a terminal", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
         said: (n) => n + " says", notStarted: "Nobody has started it yet.",
-        applyWhat: (b) => "Approving commits to the <code>" + b + "</code> branch. Nothing is pushed.",
+        applyWhat: (b, n) => "Approving commits to the <code>" + b + "</code> branch" + (n ? " and makes the " + n + " writes outside" : "") + ". Nothing is pushed.",
         applied: (b, c) => "Committed to <code>" + b + "</code> · <code>" + c + "</code>",
-        steps: { read: "Reading", edit: "Edited", run: "Ran" },
+        steps: { read: "Reading", edit: "Edited", run: "Ran", fetch: "Fetched" },
+        outbound: "Written outside on approval", outboundDone: "Written outside",
         took: (m) => "took " + m + " min",
         logs: {
           created: () => "Created", lost: () => "The agent disconnected", applied: () => "Approved and applied",
@@ -884,6 +906,7 @@
     read: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
     edit: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
     run: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5"/></svg>',
+    fetch: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 9.4l2.8-2.8M7 4.6l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L10.7 8.3M9 11.4l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2"/></svg>',
     used: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
     unused: '<svg viewBox="0 0 16 16"></svg>',
   };
@@ -920,10 +943,14 @@
       : "";
 
     const changes = task.status === "backlog" ? "" : panel(k.changed,
-      (task.files?.length
-        ? task.files.map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
+      (task.files?.length || task.outbound?.length
+        ? (task.files ?? []).map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
+          + (task.outbound?.length
+            ? `<span class="ob-hd">${task.status === "done" ? k.outboundDone : k.outbound}</span>`
+              + task.outbound.map((o) => `<div class="ob"><span class="ob-where">${o.where}</span><span class="ob-tx"><b>${tx(o.target)}</b><span>${tx(o.what)}</span></span></div>`).join("")
+            : "")
         : `<p class="col-empty" style="margin:0">${k.noChanges}</p>`)
-      + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task))}</span>` : "")
+      + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task), task.outbound?.length ?? 0)}</span>` : "")
       + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : ""));
 
     const note = noteFor(task);
