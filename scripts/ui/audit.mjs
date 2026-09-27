@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const PAGES = ["index", "first-run", "office", "projects", "employees", "connect", "components", "characters"];
 const src = Object.fromEntries(PAGES.map((p) => [p, readFileSync(`docs/ui/${p}.html`, "utf8")]));
@@ -359,6 +359,29 @@ console.log("shared markup, shared styling");
   for (const value of named) {
     for (const cls of value.split(/\s+/).filter(Boolean)) {
       if (!styledSomewhere(cls)) flag(`system.js writes .${cls}, which system.css does not style`);
+    }
+  }
+}
+console.log("");
+
+
+/* ── 15. the menu goes to the screen it names ── */
+// A place with a screen must be reachable from every other screen. An href of
+// "#" is only for the page you are already on, and for a place not built yet.
+console.log("the menu goes somewhere");
+{
+  const SCREENS = ["office", "projects", "employees"];
+  const TARGET = { office: "office.html", projects: "projects.html", people: "employees.html", company: "company.html", settings: "settings.html" };
+
+  for (const p of SCREENS) {
+    for (const m of src[p].matchAll(/<a ([^>]*)>([\s\S]*?)<\/a>/g)) {
+      const place = m[2].match(/data-t="nav\.([a-z]+)"/)?.[1];
+      if (!place) continue;
+      const target = TARGET[place];
+      if (!target || !existsSync(`docs/ui/${target}`)) continue;
+      if (m[1].includes("aria-current")) continue;
+      const href = m[1].match(/href="([^"]*)"/)?.[1];
+      if (href !== target) flag(`${p}: the menu's ${place} goes to ${href}, not ${target}`);
     }
   }
 }
