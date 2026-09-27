@@ -365,7 +365,9 @@
       feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
       referenced: (who, mem) => withParticle(who, "이", "가") + " <q>" + mem + "</q>" + (hasBatchim(mem) ? "을" : "를") + " 참고했어요",
       assignTitle: (n) => n + (hasBatchim(n) ? "이" : "가") + " 맡을 업무",
-      backlog: "대기 중인 업무", newTask: "새 업무 만들기", minutes: (m) => m + "분",
+      backlog: "대기 중인 업무", fProject: "프로젝트", fTitle: "제목", fTitlePlaceholder: "결제 API 에러 응답 구조 변경",
+      fDesc: "설명", fDescPlaceholder: "무엇을 바꾸는지 한두 줄", fArea: "분야", fPriority: "우선순위",
+      priority: { low: "낮음", normal: "보통", high: "높음" }, newTask: "새 업무 만들기", minutes: (m) => m + "분",
       broughtAlong: "이 업무에 쓸 만한 기억", broughtWhy: "기억은 전부 들고 가요. 그중 이 업무 분야와 관련된 것만 보여줘요.",
       noAreaMemory: (a) => a + " 기억이 없어요",
       noAreaMemoryWhy: (n) => n + (hasBatchim(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
@@ -411,7 +413,9 @@
       feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
       referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
       assignTitle: (n) => "Work for " + n,
-      backlog: "Waiting", newTask: "Create a task", minutes: (m) => m + " min",
+      backlog: "Waiting", fProject: "Project", fTitle: "Title", fTitlePlaceholder: "Change the payment API error shape",
+      fDesc: "Description", fDescPlaceholder: "A line or two on what changes", fArea: "Area", fPriority: "Priority",
+      priority: { low: "Low", normal: "Normal", high: "High" }, newTask: "Create a task", minutes: (m) => m + " min",
       broughtAlong: "What they know that helps here", broughtWhy: "They carry all of it. These are the ones in this task's area.",
       noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
       noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
@@ -456,6 +460,12 @@
   ];
 
   const people = STAFF;
+
+  // The same two projects the board shows.
+  const PROJECTS = [
+    { id: "pay", name: { ko: "결제 개편", en: "Payments rework" } },
+    { id: "order", name: { ko: "주문 v2", en: "Orders v2" } },
+  ];
 
   const feed = [
     { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "12분 전", en: "12 min ago" } },
@@ -1049,15 +1059,50 @@
   const scrim = document.getElementById("scrim");
   const modal = document.getElementById("modal");
   let assignee = null;
-  let picked = backlog[0].id;
+  let picked = null;
+  // A task being made here, before it exists: the same fields as the board's
+  // new-task dialog, less the assignee, who is already chosen.
+  let draft = null;
+  const newDraft = () => ({ title: "", desc: "", project: PROJECTS[0].id, area: AREA_KEYS[0], priority: "normal" });
 
   let firstPaint = true;
+  const chevron = '<svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg>';
+  const options = (list, value) => list.map(([v, label]) => `<option value="${v}"${v === value ? " selected" : ""}>${label}</option>`).join("");
 
-  function renderAssign() {
+  function draftForm() {
+    return `<div class="m-sec">
+        <span class="k">${t().newTask}</span>
+        <div class="field" style="margin-top:0">
+          <label class="label" for="naProject">${t().fProject}</label>
+          <span class="select-wrap"><select class="select" id="naProject">${options(PROJECTS.map((x) => [x.id, tx(x.name)]), draft.project)}</select>${chevron}</span>
+        </div>
+        <div class="field">
+          <label class="label" for="naTitle">${t().fTitle} <span class="req">*</span></label>
+          <input class="input" id="naTitle" placeholder="${t().fTitlePlaceholder}" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="label" for="naDesc">${t().fDesc}</label>
+          <textarea class="textarea" id="naDesc" placeholder="${t().fDescPlaceholder}"></textarea>
+        </div>
+        <div class="grid2" style="gap:14px">
+          <div class="field">
+            <label class="label" for="naArea">${t().fArea}</label>
+            <span class="select-wrap"><select class="select" id="naArea">${options(AREA_KEYS.map((a) => [a, t().areas[a]]), draft.area)}</select>${chevron}</span>
+          </div>
+          <div class="field">
+            <label class="label" for="naPrio">${t().fPriority}</label>
+            <span class="select-wrap"><select class="select" id="naPrio">${options(["low", "normal", "high"].map((k) => [k, t().priority[k]]), draft.priority)}</select>${chevron}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderAssign(focus = null) {
     const p = assignee;
-    const task = backlog.find((t) => t.id === picked);
+    const task = picked === "new" ? null : backlog.find((x) => x.id === picked);
+    const area = task ? task.area : draft.area;
     // The point of teaching shows up here: what this person brings to this task.
-    const useful = task ? p.memories.filter((m) => m.area === task.area).sort((x, y) => y.used - x.used) : [];
+    const useful = p.memories.filter((m) => m.area === area).sort((x, y) => y.used - x.used);
 
     modal.innerHTML = `
       <div class="m-hd">
@@ -1088,56 +1133,82 @@
         </button>
       </div>
 
-      ${
-        task
-          ? `<div class="m-sec">
-               <span class="k">${t().broughtAlong} <span class="kn">${useful.length}</span></span>
-               <p class="hint" style="margin:-2px 0 10px">${t().broughtWhy}</p>
-               ${
-                 useful.length
-                   ? useful.map(memCard).join("")
-                   : `<div class="notice notice-warn">
-                        <span class="n-ic">${ICON.alert}</span>
-                        <span class="n-tx">
-                          <b>${t().noAreaMemory(t().areas[task.area])}</b>
-                          <span>${t().noAreaMemoryWhy(p.name)}</span>
-                        </span>
-                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tellnow>${t().tellNow}</button></span>
-                      </div>`
-               }
-             </div>`
-          : ""
-      }
+      ${task ? "" : draftForm()}
+
+      <div class="m-sec">
+        <span class="k">${t().broughtAlong} <span class="kn">${useful.length}</span></span>
+        <p class="hint" style="margin:-2px 0 10px">${t().broughtWhy}</p>
+        ${
+          useful.length
+            ? useful.map((m) => memCard(m)).join("")
+            : `<div class="notice notice-warn">
+                 <span class="n-ic">${ICON.alert}</span>
+                 <span class="n-tx">
+                   <b>${t().noAreaMemory(t().areas[area])}</b>
+                   <span>${t().noAreaMemoryWhy(p.name)}</span>
+                 </span>
+                 <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tellnow>${t().tellNow}</button></span>
+               </div>`
+        }
+      </div>
 
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
-        <button class="btn btn-primary btn-md" type="button">${task ? t().assignThis : t().createAndAssign}</button>
+        <button class="btn btn-primary btn-md" type="button" data-assignok>${task ? t().assignThis : t().createAndAssign}</button>
       </div>`;
 
     modal.querySelector(".m-av").appendChild(spriteCanvas(p.species, 44));
     modal.querySelectorAll("[data-task]").forEach((b) =>
       b.addEventListener("click", () => {
         picked = b.dataset.task;
-        renderAssign();
+        if (picked === "new" && !draft) draft = newDraft();
+        renderAssign(picked === "new" ? "#naTitle" : null);
       }),
     );
     modal.querySelector("[data-close]").addEventListener("click", closeAssign);
+
+    const ok = modal.querySelector("[data-assignok]");
+    if (!task) {
+      const title = modal.querySelector("#naTitle");
+      const desc = modal.querySelector("#naDesc");
+      title.value = draft.title;
+      desc.value = draft.desc;
+      ok.disabled = !draft.title.trim();
+      title.addEventListener("input", () => { draft.title = title.value; ok.disabled = !draft.title.trim(); });
+      desc.addEventListener("input", () => { draft.desc = desc.value; });
+      modal.querySelector("#naProject").addEventListener("change", (e) => { draft.project = e.target.value; });
+      modal.querySelector("#naPrio").addEventListener("change", (e) => { draft.priority = e.target.value; });
+      // The area decides what they bring, so changing it redraws that part.
+      modal.querySelector("#naArea").addEventListener("change", (e) => { draft.area = e.target.value; renderAssign("#naArea"); });
+    }
+    ok.addEventListener("click", () => {
+      // A task made here goes straight to them; one from the backlog leaves it.
+      if (task) backlog.splice(backlog.indexOf(task), 1);
+      Object.assign(p, { task: task ? task.title : draft.title.trim(), status: "ready", returned: false });
+      draft = null;
+      closeAssign();
+      rerenderPeople();
+      renderMembers();
+    });
+
     // Teaching here returns to the same task, which now shows what was taught.
     modal.querySelector("[data-tellnow]")?.addEventListener("click", () => {
       const keep = picked;
       closeAssign();
-      teach(p, task.area, () => openAssign(p, keep), task.title);
+      teach(p, area, () => openAssign(p, keep), task ? task.title : null);
     });
     // Re-rendering must not pull focus out of the list: only the first paint
-    // sends it to Cancel, afterwards it returns to the row just picked.
-    const back = modal.querySelector(`[data-task="${picked}"]`);
+    // sends it to Cancel, afterwards it returns to what was just used.
+    const back = focus ? modal.querySelector(focus) : modal.querySelector(`[data-task="${picked}"]`);
     (firstPaint || !back ? modal.querySelector("[data-close]") : back).focus({ preventScroll: true });
     firstPaint = false;
   }
 
   function openAssign(p, keep = null) {
     assignee = p;
-    picked = keep ?? backlog[0].id;
+    picked = keep ?? backlog[0]?.id ?? "new";
+    if (picked !== "new") draft = null;
+    else if (!draft) draft = newDraft();
     firstPaint = true;
     scrim.hidden = false;
     renderAssign();

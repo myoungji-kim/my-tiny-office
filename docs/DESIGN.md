@@ -358,6 +358,12 @@ When they have none, the modal says so and offers to teach them right there.
 That is the moment the player actually has the context to teach. Teaching from
 there comes back to the same task, which now lists what was just taught.
 
+새 업무 만들기 opens the board's new-task fields in place — project, title,
+description, area, priority — without the assignee, who is already chosen.
+Changing the area redraws what they bring, so the player sees before creating
+it whether this person has anything to draw on. A task made here goes straight
+to them; one picked from the backlog leaves it.
+
 ### Teaching
 
 Every "teach" in the game opens one dialog. Where it was opened from decides
