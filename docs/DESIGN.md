@@ -92,9 +92,32 @@ it is in — an agent that stopped, a dependency that never arrived. It rides on
 the card as a mark and a reason, so the board never has to guess which kind of
 stuck it means.
 
-Which statuses exist is the domain's call. `docs/GAMEPLAY.md` and
-`src/domain/task.ts` both predate this and need to catch up: the board shows
-backlog, working, approval, done and held, plus the blocked mark.
+Which statuses exist is the domain's call. `src/domain/task.ts` predates this
+and needs to catch up: the board shows backlog, working, approval, done and
+held, plus the blocked mark.
+
+### The two dialogs
+
+**A dialog answers what a choice means, while the choice is being made.** Both
+dialogs on the board re-render on every selection so they can say it.
+
+New task asks for the project, the title, the area, the priority and the
+assignee. The area decides who may review the work later, so the dialog names
+those people instead of leaving it to be discovered in the approval column. The
+assignee defaults to whoever is free — that is how the backlog works — and
+naming a person says what it costs: someone free starts right away, someone
+busy queues behind their current work, and someone on leave cannot be chosen at
+all.
+
+New project asks for a name and the folder the office works in. A project
+without a folder is allowed, because naming the work usually comes before
+deciding where it lives, and the dialog says what that costs: the tasks can be
+written down, but nobody can start them.
+
+**Whether the folder belongs to the project or to the employee is unsettled.**
+`docs/ARCHITECTURE.md` §11 gives each project a workspace; *Agent connection*
+below gives each employee one. The board assumes the project, because a task
+names a project and an agent has to run somewhere. One of the two has to go.
 
 ## Visual Direction
 
