@@ -1,4 +1,4 @@
-import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, TaskId } from "./ids";
+import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, RoleId, TaskId, TeamId } from "./ids";
 import type { MemoryKind } from "./memory";
 import type { Priority } from "./project";
 import type { Blocker } from "./task";
@@ -22,7 +22,13 @@ interface EmployeeEvent extends DomainEventBase {
 
 export interface EmployeeHired extends EmployeeEvent {
   readonly type: "EmployeeHired";
-  readonly role: string;
+  readonly roleId: RoleId;
+  readonly teamId: TeamId | undefined;
+}
+
+export interface EmployeeMoved extends EmployeeEvent {
+  readonly type: "EmployeeMoved";
+  readonly teamId: TeamId | undefined;
 }
 
 export interface EmployeeWentOnLeave extends EmployeeEvent {
@@ -149,6 +155,7 @@ export type DomainEvent =
   | MemoryRemoved
   | CompanyCreated
   | EmployeeHired
+  | EmployeeMoved
   | EmployeeWentOnLeave
   | EmployeeReturned
   | ProjectCreated

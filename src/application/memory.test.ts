@@ -11,12 +11,15 @@ import {
   createInMemoryEmployeeRepository,
   createInMemoryMemoryRepository,
   createInMemoryProjectRepository,
+  createInMemoryRoleRepository,
   createInMemoryTaskRepository,
+  createInMemoryTeamRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
 import { addArea, forgetMemory, removeArea, renameArea, teachMemory } from "./memory";
 import { createProject } from "./project";
 import { createTask } from "./task";
+import { firstRole } from "./test-context";
 
 const companyId = toCompanyId("c");
 let ctx: AppContext;
@@ -30,6 +33,8 @@ beforeEach(async () => {
     tasks: createInMemoryTaskRepository(),
     areas: createInMemoryAreaRepository(),
     memories: createInMemoryMemoryRepository(),
+    roles: createInMemoryRoleRepository(),
+    teams: createInMemoryTeamRepository(),
     now: () => 1_700_000_000_000 + counter,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,
@@ -40,7 +45,7 @@ beforeEach(async () => {
 const areaByStart = async (starting: string) => (await ctx.areas.findByCompany(companyId)).find((a) => a.starting === starting)!;
 
 async function hire() {
-  const hired = await hireEmployee(ctx, { companyId, name: "모카", role: "Backend Engineer" });
+  const hired = await hireEmployee(ctx, { companyId, name: "모카", species: "cat", roleId: await firstRole(ctx, companyId) });
   assert(hired.ok);
   return hired.value.employee;
 }

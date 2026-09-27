@@ -9,6 +9,8 @@ export type TaskId = Branded<string, "TaskId">;
 export type EventId = Branded<string, "EventId">;
 export type AreaId = Branded<string, "AreaId">;
 export type MemoryId = Branded<string, "MemoryId">;
+export type RoleId = Branded<string, "RoleId">;
+export type TeamId = Branded<string, "TeamId">;
 
 export const toCompanyId = (value: string): CompanyId => value as CompanyId;
 export const toEmployeeId = (value: string): EmployeeId => value as EmployeeId;
@@ -17,3 +19,5 @@ export const toTaskId = (value: string): TaskId => value as TaskId;
 export const toEventId = (value: string): EventId => value as EventId;
 export const toAreaId = (value: string): AreaId => value as AreaId;
 export const toMemoryId = (value: string): MemoryId => value as MemoryId;
+export const toRoleId = (value: string): RoleId => value as RoleId;
+export const toTeamId = (value: string): TeamId => value as TeamId;

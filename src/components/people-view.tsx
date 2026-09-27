@@ -1,19 +1,21 @@
 import { hireEmployeeAction } from "../app/actions";
 import type { Dictionary } from "../i18n";
-import type { EmployeeView } from "../server/view-model";
+import type { EmployeeView, RoleView } from "../server/view-model";
 
 import { ActionForm } from "./action-form";
-import { Field, TextInput } from "./fields";
+import { Field, Select, TextInput } from "./fields";
 import { StatusBadge, employeeStatus } from "./status";
 
 export function PeopleView({
   t,
   companyId,
   employees,
+  roles,
 }: {
   readonly t: Dictionary;
   readonly companyId: string;
   readonly employees: readonly EmployeeView[];
+  readonly roles: readonly RoleView[];
 }) {
   return (
     <>
@@ -68,7 +70,13 @@ export function PeopleView({
               <TextInput name="name" required placeholder={t.people.namePlaceholder} />
             </Field>
             <Field label={t.people.role}>
-              <TextInput name="role" required placeholder={t.people.rolePlaceholder} />
+              <Select name="roleId" defaultValue={roles[0]?.id}>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </Select>
             </Field>
           </div>
         </ActionForm>

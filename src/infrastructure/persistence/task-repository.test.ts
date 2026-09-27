@@ -3,12 +3,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { Company } from "../../domain/company";
 import type { Employee } from "../../domain/employee";
-import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
+import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId } from "../../domain/ids";
 import type { Project } from "../../domain/project";
 import type { Task } from "../../domain/task";
 
 import { createSqliteCompanyRepository } from "./company-repository";
 import { createSqliteEmployeeRepository } from "./employee-repository";
+import { createSqliteRoleRepository } from "./organisation-repository";
 import { createSqliteProjectRepository } from "./project-repository";
 import { createSqliteTaskRepository } from "./task-repository";
 import { createTestDatabase, type TestDatabase } from "./test-database";
@@ -19,7 +20,9 @@ const mocha: Employee = {
   id: toEmployeeId("mocha"),
   companyId: company.id,
   name: "모카",
-  role: "Backend Engineer",
+  species: "cat",
+  roleId: toRoleId("r"),
+  teamId: undefined,
   availability: "available",
   leaveSince: undefined,
   hiredAt: t0,
@@ -65,6 +68,7 @@ let database: TestDatabase;
 beforeEach(async () => {
   database = createTestDatabase();
   await createSqliteCompanyRepository(database.handle.db).save(company);
+  await createSqliteRoleRepository(database.handle.db).save({ id: toRoleId("r"), companyId: company.id, name: "Backend Engineer", createdAt: t0 });
   await createSqliteEmployeeRepository(database.handle.db).save(mocha);
   await createSqliteProjectRepository(database.handle.db).save(pay);
 });

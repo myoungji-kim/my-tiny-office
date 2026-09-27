@@ -10,7 +10,9 @@ import {
   createInMemoryMemoryRepository,
   createInMemoryEmployeeRepository,
   createInMemoryProjectRepository,
+  createInMemoryRoleRepository,
   createInMemoryTaskRepository,
+  createInMemoryTeamRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
 
@@ -26,6 +28,8 @@ function createContext(): AppContext {
     tasks: createInMemoryTaskRepository(),
     areas: createInMemoryAreaRepository(),
     memories: createInMemoryMemoryRepository(),
+    roles: createInMemoryRoleRepository(),
+    teams: createInMemoryTeamRepository(),
     now: () => foundedAt,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,

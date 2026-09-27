@@ -13,10 +13,13 @@ import {
   createInMemoryMemoryRepository,
   createInMemoryEmployeeRepository,
   createInMemoryProjectRepository,
+  createInMemoryRoleRepository,
   createInMemoryTaskRepository,
+  createInMemoryTeamRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
 import { allowCommand, createProject, finishProject, holdProject, startProject } from "./project";
+import { firstRole } from "./test-context";
 import { applyTask, assignTask, createTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
 
 const minute = 60_000;
@@ -36,6 +39,8 @@ beforeEach(async () => {
     tasks: createInMemoryTaskRepository(),
     areas: createInMemoryAreaRepository(),
     memories: createInMemoryMemoryRepository(),
+    roles: createInMemoryRoleRepository(),
+    teams: createInMemoryTeamRepository(),
     now: () => now,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,
@@ -51,7 +56,7 @@ async function project(options: { folder?: string; start?: boolean; priority?: "
 }
 
 async function hire(name: string): Promise<Employee> {
-  const hired = await hireEmployee(ctx, { companyId, name, role: "Backend Engineer" });
+  const hired = await hireEmployee(ctx, { companyId, name, species: "cat", roleId: await firstRole(ctx, companyId) });
   assert(hired.ok);
   return hired.value.employee;
 }

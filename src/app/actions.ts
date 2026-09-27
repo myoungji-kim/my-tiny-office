@@ -10,7 +10,8 @@ import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
 import { createProject } from "../application/project";
 import { assignTask, createTask } from "../application/task";
-import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
+import { SPECIES, type Species } from "../domain/employee";
+import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, type CompanyId } from "../domain/ids";
 import type { Priority } from "../domain/project";
 import { companyContext, createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
@@ -35,6 +36,12 @@ function contextOf(formData: FormData): AppContext | undefined {
   const id = text(formData, "companyId");
   const files = getCompanyFiles();
   return files.has(id) ? companyContext(toCompanyId(id), files) : undefined;
+}
+
+// Until the species picker is on this screen, a hire gets the first sprite nobody has.
+async function nextSpecies(ctx: AppContext, companyId: CompanyId): Promise<Species> {
+  const taken = new Set((await ctx.employees.findByCompany(companyId)).map((e) => e.species));
+  return SPECIES.find((s) => !taken.has(s)) ?? SPECIES[0];
 }
 
 function priority(formData: FormData): Priority {
@@ -69,8 +76,8 @@ export async function hireEmployeeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const name = text(formData, "name");
-  const role = text(formData, "role");
-  if (name === "" || role === "") {
+  const roleId = text(formData, "roleId");
+  if (name === "" || roleId === "") {
     return { error: "employeeFieldsRequired" };
   }
 
@@ -82,7 +89,8 @@ export async function hireEmployeeAction(
   const result = await hireEmployee(ctx, {
     companyId: toCompanyId(text(formData, "companyId")),
     name,
-    role,
+    roleId: toRoleId(roleId),
+    species: await nextSpecies(ctx, toCompanyId(text(formData, "companyId"))),
   });
   if (!result.ok) {
     return { error: result.reason };

@@ -25,7 +25,7 @@ beforeEach(async () => {
     assert((await createTask(ctx, { companyId, projectId: made.value.project.id, title, priority: "normal" })).ok);
   }
   for (const name of ["모카", "두부"]) {
-    assert((await hireEmployee(ctx, { companyId, name, role: "Engineer" })).ok);
+    assert((await hireEmployee(ctx, { companyId, name, species: "cat", roleId: (await ctx.roles.findByCompany(companyId))[0].id })).ok);
   }
 });
 

@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm";
 
 import type { EmployeeRepository } from "../../application/repositories";
 import type { Employee } from "../../domain/employee";
-import { toCompanyId, toEmployeeId } from "../../domain/ids";
+import { toCompanyId, toEmployeeId, toRoleId, toTeamId } from "../../domain/ids";
 
 import type { AppDatabase } from "./database";
 import { employees } from "./schema";
@@ -14,7 +14,9 @@ function toEmployee(row: EmployeeRow): Employee {
     id: toEmployeeId(row.id),
     companyId: toCompanyId(row.companyId),
     name: row.name,
-    role: row.role,
+    species: row.species,
+    roleId: toRoleId(row.roleId),
+    teamId: row.teamId === null ? undefined : toTeamId(row.teamId),
     availability: row.availability,
     leaveSince: row.leaveSince ?? undefined,
     hiredAt: row.hiredAt,
@@ -26,7 +28,9 @@ function toRow(employee: Employee): typeof employees.$inferInsert {
     id: employee.id,
     companyId: employee.companyId,
     name: employee.name,
-    role: employee.role,
+    species: employee.species,
+    roleId: employee.roleId,
+    teamId: employee.teamId ?? null,
     availability: employee.availability,
     leaveSince: employee.leaveSince ?? null,
     hiredAt: employee.hiredAt,

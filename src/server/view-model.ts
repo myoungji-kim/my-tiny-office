@@ -20,6 +20,11 @@ export interface EmployeeView {
   readonly workingOn: string | undefined;
 }
 
+export interface RoleView {
+  readonly id: string;
+  readonly name: string;
+}
+
 export interface ProjectView {
   readonly id: string;
   readonly name: string;
@@ -51,6 +56,7 @@ export interface OfficeView {
       }
     | undefined;
   readonly employees: readonly EmployeeView[];
+  readonly roles: readonly RoleView[];
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }
@@ -59,6 +65,7 @@ const empty: OfficeView = {
   companies: [],
   company: undefined,
   employees: [],
+  roles: [],
   projects: [],
   tasks: [],
 };
@@ -99,6 +106,8 @@ export async function loadOffice(
   const employees = await ctx.employees.findByCompany(company.id);
   const tasks = await ctx.tasks.findByCompany(company.id);
   const projects = await ctx.projects.findByCompany(company.id);
+  const roles = await ctx.roles.findByCompany(company.id);
+  const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
   const nameById = new Map(employees.map((employee) => [employee.id, employee.name]));
@@ -119,10 +128,11 @@ export async function loadOffice(
     employees: employees.map((employee) => ({
       id: employee.id,
       name: employee.name,
-      role: employee.role,
+      role: roleName.get(employee.roleId) ?? "",
       availability: employee.availability,
       workingOn: workingTitleById.get(employee.id),
     })),
+    roles: roles.map((role) => ({ id: role.id, name: role.name })),
     projects: projects.map((project) => ({
       id: project.id,
       name: project.name,

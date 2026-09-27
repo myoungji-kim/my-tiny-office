@@ -40,7 +40,6 @@ export const ko: Dictionary = {
     name: "이름",
     namePlaceholder: "민수",
     role: "역할",
-    rolePlaceholder: "백엔드 개발자",
     empty: "아직 직원이 없어요.",
     workingOn: "진행 중",
   },

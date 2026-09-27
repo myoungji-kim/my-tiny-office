@@ -7,7 +7,9 @@ import type {
   EmployeeRepository,
   MemoryRepository,
   ProjectRepository,
+  RoleRepository,
   TaskRepository,
+  TeamRepository,
 } from "./repositories";
 
 export type TransactionRunner = <T>(work: () => Promise<T>) => Promise<T>;
@@ -19,6 +21,8 @@ export interface AppContext {
   readonly tasks: TaskRepository;
   readonly areas: AreaRepository;
   readonly memories: MemoryRepository;
+  readonly roles: RoleRepository;
+  readonly teams: TeamRepository;
   readonly now: () => Timestamp;
   readonly newId: () => string;
   readonly withTransaction: TransactionRunner;

@@ -1,14 +1,26 @@
-import type { EmployeeHired, EmployeeReturned, EmployeeWentOnLeave } from "./events";
-import type { CompanyId, EmployeeId, EventId } from "./ids";
+import type { EmployeeHired, EmployeeMoved, EmployeeReturned, EmployeeWentOnLeave } from "./events";
+import type { CompanyId, EmployeeId, EventId, RoleId, TeamId } from "./ids";
 import type { Timestamp } from "./time";
 
 export type Availability = "available" | "onLeave";
+
+// The species only decides the sprite; it is never spelled out beside the name.
+export const SPECIES = [
+  "cat", "fox", "squirrel", "bunny", "dog", "bear", "panda", "mouse", "hamster", "koala",
+  "chick", "owl", "sheep", "hedgehog", "duck", "penguin", "pig", "cow", "deer", "frog",
+] as const;
+export type Species = (typeof SPECIES)[number];
+
+export const isSpecies = (value: string): value is Species => (SPECIES as readonly string[]).includes(value);
+export const MAX_EMPLOYEE_NAME = 20;
 
 export interface Employee {
   readonly id: EmployeeId;
   readonly companyId: CompanyId;
   readonly name: string;
-  readonly role: string;
+  readonly species: Species;
+  readonly roleId: RoleId;
+  readonly teamId: TeamId | undefined;
   readonly availability: Availability;
   readonly leaveSince: Timestamp | undefined;
   readonly hiredAt: Timestamp;
@@ -18,30 +30,39 @@ export interface HireEmployeeInput {
   readonly id: EmployeeId;
   readonly companyId: CompanyId;
   readonly name: string;
-  readonly role: string;
+  readonly species: Species;
+  readonly roleId: RoleId;
+  readonly teamId?: TeamId;
 }
 
-export interface HireEmployeeResult {
-  readonly employee: Employee;
-  readonly events: readonly [EmployeeHired];
-}
+export type HireEmployeeResult =
+  | { readonly ok: true; readonly employee: Employee; readonly events: readonly [EmployeeHired] }
+  | { readonly ok: false; readonly reason: "employeeNameRequired" | "employeeNameTooLong" };
 
+// Hiring has no cap: every hire brings a desk.
 export function hireEmployee(
   input: HireEmployeeInput,
   eventId: EventId,
   now: Timestamp,
 ): HireEmployeeResult {
+  const name = input.name.trim();
+  if (name === "") return { ok: false, reason: "employeeNameRequired" };
+  if (name.length > MAX_EMPLOYEE_NAME) return { ok: false, reason: "employeeNameTooLong" };
+
   const employee: Employee = {
     id: input.id,
     companyId: input.companyId,
-    name: input.name,
-    role: input.role,
+    name,
+    species: input.species,
+    roleId: input.roleId,
+    teamId: input.teamId,
     availability: "available",
     leaveSince: undefined,
     hiredAt: now,
   };
 
   return {
+    ok: true,
     employee,
     events: [
       {
@@ -51,9 +72,17 @@ export function hireEmployee(
         companyId: employee.companyId,
         employeeId: employee.id,
         employeeName: employee.name,
-        role: employee.role,
+        roleId: employee.roleId,
+        teamId: employee.teamId,
       },
     ],
+  };
+}
+
+export function moveToTeam(employee: Employee, teamId: TeamId | undefined, eventId: EventId, now: Timestamp): { readonly employee: Employee; readonly events: readonly [EmployeeMoved] } {
+  return {
+    employee: { ...employee, teamId },
+    events: [{ eventId, type: "EmployeeMoved", occurredAt: now, companyId: employee.companyId, employeeId: employee.id, employeeName: employee.name, teamId }],
   };
 }
 

@@ -38,7 +38,6 @@ export const en = {
     name: "Name",
     namePlaceholder: "Min-su",
     role: "Role",
-    rolePlaceholder: "Backend Developer",
     empty: "No employees yet.",
     workingOn: "Working on",
   },

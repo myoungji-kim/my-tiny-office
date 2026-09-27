@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Employee } from "./employee";
-import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "./ids";
+import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId } from "./ids";
 import { pickUps } from "./pick-up";
 import type { Priority, Project, ProjectStatus } from "./project";
 import type { Task, TaskStatus } from "./task";
@@ -12,7 +12,9 @@ const person = (id: string, availability: Employee["availability"] = "available"
   id: toEmployeeId(id),
   companyId,
   name: id,
-  role: "Engineer",
+  species: "cat",
+  roleId: toRoleId("r"),
+  teamId: undefined,
   availability,
   leaveSince: undefined,
   hiredAt: 0,

@@ -56,7 +56,8 @@ async function seedEmployee(companyId: CompanyId) {
   const hired = await hireEmployee(ctx, {
     companyId,
     name: "Min-su",
-    role: "Backend Developer",
+    species: "cat",
+    roleId: (await ctx.roles.findByCompany(companyId))[0].id,
   });
   assert(hired.ok);
   return hired.value.employee;
@@ -99,7 +100,7 @@ describe("loadOffice", () => {
       {
         id: expect.any(String),
         name: "Min-su",
-        role: "Backend Developer",
+        role: "Backend Engineer",
         availability: "available",
         workingOn: undefined,
       },

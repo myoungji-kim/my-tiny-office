@@ -11,6 +11,7 @@ import { toCompanyId } from "../../domain/ids";
 import { migrateDatabase } from "./database";
 import { createSqliteEmployeeRepository } from "./employee-repository";
 import { createSqliteAreaRepository } from "./memory-repository";
+import { createSqliteRoleRepository } from "./organisation-repository";
 import { createSqliteProjectRepository } from "./project-repository";
 import * as schema from "./schema";
 import { createSqliteTaskRepository } from "./task-repository";
@@ -68,6 +69,13 @@ describe("moving to projects", () => {
 
     const people = await createSqliteEmployeeRepository(db).findByCompany(toCompanyId("c"));
     expect(people.map((e) => [e.id, e.availability])).toEqual([["mocha", "available"], ["tofu", "onLeave"]]);
+
+    // each keeps the title they held, as a role of the company, next to the six it starts with
+    const roles = await createSqliteRoleRepository(db).findByCompany(toCompanyId("c"));
+    const titleOf = (id: string) => roles.find((r) => r.id === people.find((e) => e.id === id)!.roleId)?.name;
+    expect([titleOf("mocha"), titleOf("tofu")]).toEqual(["Backend Developer", "Frontend Developer"]);
+    expect(roles.map((r) => r.name)).toEqual(expect.arrayContaining(["Backend Engineer", "QA Engineer", "Backend Developer"]));
+    expect(people.every((e) => e.species === "cat" && e.teamId === undefined)).toBe(true);
 
     const areas = await createSqliteAreaRepository(db).findByCompany(toCompanyId("c"));
     expect(areas.map((a) => a.starting)).toEqual(["architecture", "typeSafety", "database", "security", "localization", "product", "quality"]);

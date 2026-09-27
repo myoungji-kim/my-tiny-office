@@ -1,7 +1,8 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, TaskId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, RoleId, TaskId, TeamId } from "../domain/ids";
 import type { Area, Memory } from "../domain/memory";
+import type { Role, Team } from "../domain/organisation";
 import type { Project } from "../domain/project";
 import type { Task } from "../domain/task";
 
@@ -12,7 +13,9 @@ import type {
   EmployeeRepository,
   MemoryRepository,
   ProjectRepository,
+  RoleRepository,
   TaskRepository,
+  TeamRepository,
 } from "./repositories";
 
 export const withoutTransaction: TransactionRunner = (work) => work();
@@ -104,3 +107,5 @@ function createInMemoryList<TId, TItem extends { readonly id: TId; readonly comp
 
 export const createInMemoryAreaRepository = (): AreaRepository => createInMemoryList<AreaId, Area>();
 export const createInMemoryMemoryRepository = (): MemoryRepository => createInMemoryList<MemoryId, Memory>();
+export const createInMemoryRoleRepository = (): RoleRepository => createInMemoryList<RoleId, Role>();
+export const createInMemoryTeamRepository = (): TeamRepository => createInMemoryList<TeamId, Team>();

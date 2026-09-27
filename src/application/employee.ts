@@ -1,6 +1,6 @@
 import * as employeeDomain from "../domain/employee";
 import type { DomainEvent } from "../domain/events";
-import { toEmployeeId, toEventId, type CompanyId, type EmployeeId } from "../domain/ids";
+import { toEmployeeId, toEventId, type CompanyId, type EmployeeId, type RoleId, type TeamId } from "../domain/ids";
 import { returnToBacklog } from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
@@ -8,41 +8,34 @@ import type { AppContext, UseCaseResult } from "./context";
 export interface HireEmployeeInput {
   readonly companyId: CompanyId;
   readonly name: string;
-  readonly role: string;
+  readonly species: employeeDomain.Species;
+  readonly roleId: RoleId;
+  readonly teamId?: TeamId;
 }
 
-export type HireEmployeeFailure = "companyNotFound";
+export type HireEmployeeFailure =
+  | "companyNotFound"
+  | "roleNotFound"
+  | "teamNotFound"
+  | "employeeNameRequired"
+  | "employeeNameTooLong";
 
-export type HireEmployeeResult = UseCaseResult<
-  { readonly employee: employeeDomain.Employee },
-  HireEmployeeFailure
->;
+export type HireEmployeeResult = UseCaseResult<{ readonly employee: employeeDomain.Employee }, HireEmployeeFailure>;
 
-export async function hireEmployee(
-  ctx: AppContext,
-  input: HireEmployeeInput,
-): Promise<HireEmployeeResult> {
-  const now = ctx.now();
-
-  const company = await ctx.companies.findById(input.companyId);
-  if (company === undefined) {
-    return { ok: false, reason: "companyNotFound" };
+export async function hireEmployee(ctx: AppContext, input: HireEmployeeInput): Promise<HireEmployeeResult> {
+  if ((await ctx.companies.findById(input.companyId)) === undefined) return { ok: false, reason: "companyNotFound" };
+  if (!(await ctx.roles.findByCompany(input.companyId)).some((r) => r.id === input.roleId)) {
+    return { ok: false, reason: "roleNotFound" };
+  }
+  if (input.teamId !== undefined && !(await ctx.teams.findByCompany(input.companyId)).some((t) => t.id === input.teamId)) {
+    return { ok: false, reason: "teamNotFound" };
   }
 
-  const { employee, events } = employeeDomain.hireEmployee(
-    {
-      id: toEmployeeId(ctx.newId()),
-      companyId: input.companyId,
-      name: input.name,
-      role: input.role,
-    },
-    toEventId(ctx.newId()),
-    now,
-  );
+  const hired = employeeDomain.hireEmployee({ ...input, id: toEmployeeId(ctx.newId()) }, toEventId(ctx.newId()), ctx.now());
+  if (!hired.ok) return hired;
 
-  await ctx.employees.save(employee);
-
-  return { ok: true, value: { employee }, events };
+  await ctx.employees.save(hired.employee);
+  return { ok: true, value: { employee: hired.employee }, events: hired.events };
 }
 
 export type LeaveFailure = "employeeNotFound" | "employeeOnLeave" | "employeeNotOnLeave";

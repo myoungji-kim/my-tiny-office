@@ -1,7 +1,8 @@
 import { sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-import type { Availability } from "../../domain/employee";
+import { SPECIES, type Availability } from "../../domain/employee";
+import { SUGGESTED_TEAMS } from "../../domain/organisation";
 import { STARTING_AREAS, type MemoryKind } from "../../domain/memory";
 import type { Priority, ProjectStatus } from "../../domain/project";
 import type { TaskStatus } from "../../domain/task";
@@ -21,6 +22,36 @@ export const companies = sqliteTable("companies", {
   foundedAt: integer("founded_at").notNull(),
 });
 
+export const roles = sqliteTable(
+  "roles",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    name: text("name").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [index("idx_roles_company").on(table.companyId)],
+);
+
+export const teams = sqliteTable(
+  "teams",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    suggested: text("suggested", { enum: SUGGESTED_TEAMS }),
+    name: text("name"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_teams_company").on(table.companyId),
+    check("teams_named", sql`${table.suggested} is not null or ${table.name} is not null`),
+  ],
+);
+
 export const employees = sqliteTable(
   "employees",
   {
@@ -29,7 +60,11 @@ export const employees = sqliteTable(
       .notNull()
       .references(() => companies.id),
     name: text("name").notNull(),
-    role: text("role").notNull(),
+    species: text("species", { enum: SPECIES }).notNull(),
+    roleId: text("role_id")
+      .notNull()
+      .references(() => roles.id),
+    teamId: text("team_id").references(() => teams.id),
     availability: text("availability", { enum: availabilities }).notNull(),
     leaveSince: integer("leave_since"),
     hiredAt: integer("hired_at").notNull(),

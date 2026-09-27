@@ -1,7 +1,7 @@
 import { assert, describe, expect, it } from "vitest";
 
 import type { Employee } from "./employee";
-import { toCompanyId, toEmployeeId, toEventId, toProjectId, toTaskId } from "./ids";
+import { toCompanyId, toEmployeeId, toEventId, toProjectId, toRoleId, toTaskId } from "./ids";
 import {
   applyTask,
   assignTask,
@@ -27,7 +27,9 @@ const mocha: Employee = {
   id: toEmployeeId("mocha"),
   companyId,
   name: "모카",
-  role: "Backend Engineer",
+  species: "cat",
+  roleId: toRoleId("r"),
+  teamId: undefined,
   availability: "available",
   leaveSince: undefined,
   hiredAt: t0,
