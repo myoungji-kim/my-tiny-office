@@ -637,15 +637,18 @@
   // Only transitions the domain allows from this state. The first row is the
   // one the user came here for. Teaching is not a transition, so it is
   // offered in every state.
+  // Where each desk's work lives on the board.
+  const TASK_AT = { paging: "pay/t1", orderType: "order/t3", webhook: "pay/t2" };
+
   const TEACH = { icon: I.book, label: t().actions.teach, teach: true };
   const ACTIONS = {
     working: [
-      { icon: I.info, label: t().actions.detail, key: true },
+      { icon: I.info, label: t().actions.detail, key: true, detail: true },
       { icon: I.swap, label: t().actions.reassign },
       TEACH,
     ],
     reviewing: [
-      { icon: I.info, label: t().actions.detail, key: true },
+      { icon: I.info, label: t().actions.detail, key: true, detail: true },
       TEACH,
     ],
     available: [
@@ -692,7 +695,7 @@
     const rows = acts
       .map((a) => {
         const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");
-        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}${a.teach ? " data-teach" : ""}>${a.icon}${a.label}</button>`;
+        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}${a.teach ? " data-teach" : ""}${a.detail ? " data-detail" : ""}>${a.icon}${a.label}</button>`;
         return a.off ? row + `<p class="p-why">${a.off}</p>` : row;
       })
       .join("");
@@ -715,6 +718,9 @@
       <div class="p-rule"></div>
       <div class="p-acts">${rows}</div>`;
     drawAvatar(pop.querySelector("canvas"), p.species);
+    pop.querySelector("[data-detail]")?.addEventListener("click", () => {
+      location.href = "projects.html" + (lang === "en" ? "?lang=en" : "") + "#" + TASK_AT[(p.task ?? p.review).key];
+    });
     pop.querySelector("[data-teach]").addEventListener("click", () => {
       close();
       openTeach({ to: fromCompany.get(p.id), onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }) });

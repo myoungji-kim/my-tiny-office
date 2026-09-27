@@ -36,6 +36,66 @@
 
   .proj-title { display: flex; align-items: center; gap: 10px; }
 
+  /* ═══ a task's page ═══ */
+
+  .tk-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+
+  .tk-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  .step { display: grid; grid-template-columns: 44px 16px minmax(0, 1fr); gap: 10px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-at { font-family: var(--mono); font-size: 12px; color: var(--faint); padding-top: 2px; }
+
+  .step-ic { display: grid; place-items: center; color: var(--muted); padding-top: 2px; }
+
+  .step-ic svg { width: 14px; height: 14px; }
+
+  .step.latest .step-ic { color: var(--warn); }
+
+  .step-tx { color: var(--muted); min-width: 0; }
+
+  .step-tx code { font-family: var(--mono); font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
+
+  .said { display: block; margin-top: 12px; background: var(--sunk); border-radius: 9px; padding: 9px 11px; font-size: 14px; line-height: 1.5; }
+
+  .said b { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+
+  .file { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid var(--line); background: none; text-align: left; font: inherit; cursor: pointer; }
+
+  .file:last-of-type { border-bottom: none; }
+
+  .file-path { font-family: var(--mono); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .file-add { font-size: 13px; color: var(--ok-ink); font-variant-numeric: tabular-nums; }
+
+  .file-del { font-size: 13px; color: var(--bad-ink); font-variant-numeric: tabular-nums; }
+
+  .diff { margin: 0 0 8px; padding: 9px 11px; border-radius: 9px; background: var(--sunk); font-family: var(--mono); font-size: 12.5px; line-height: 1.6; overflow-x: auto; }
+
+  .diff .d-add { color: var(--ok-ink); }
+
+  .diff .d-del { color: var(--bad-ink); }
+
+  .msg { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 9px; padding: 7px 0; font-size: 14px; }
+
+  .msg b { display: block; font-size: 13px; }
+
+  .tk-mem { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; font-size: 14px; color: var(--muted); }
+
+  .tk-mem svg { width: 13px; height: 13px; flex: none; margin-top: 3px; }
+
+  .tk-mem.used { color: var(--ink); }
+
+  .tk-mem.used svg { color: var(--ok); }
+
+  .tk-apply { display: block; font-size: 13px; color: var(--muted); margin-top: 10px; }
+
+  .tk-apply code { font-family: var(--mono); color: var(--ink); }
+
+  @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
+
   .chip.planned { background: none; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
 
   /* A project's status reads by shape as well as colour, the same in the tabs
@@ -243,10 +303,22 @@
       </div>
     </div>
 
+    <div class="head" id="taskHead" hidden>
+      <a class="crumb" id="tkCrumb" href="#"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg><span id="tkCrumbName"></span></a>
+      <div class="head-row">
+        <span style="min-width:0">
+          <span class="proj-title"><h1 id="tkTitle"></h1><span class="chip" id="tkChip"></span></span>
+          <span class="sub" id="tkSub"></span>
+        </span>
+        <div class="head-right" id="tkActs"></div>
+      </div>
+    </div>
+
     <div class="body">
       <div class="list" id="projList"></div>
       <div id="pjNotice"></div>
       <div class="board" id="board"></div>
+      <div id="taskView" hidden></div>
     </div>
   </div>
 </div>
@@ -287,11 +359,53 @@
     // an agent that stopped: blocked is a mark, not a place
     { id: "t1", project: "pay", area: "db", priority: "high", status: "working", who: "p1", spent: 23,
       title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" },
-      blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" } },
+      blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" },
+      desc: { ko: "결제 내역을 한 번에 다 불러오지 않게 페이지로 나눠요.", en: "Stop loading the whole payment history at once; page it." },
+      session: "434e0703", usedMem: [0, 2],
+      steps: [
+        { at: "10:17", kind: "read", what: "src/payments/history.ts" },
+        { at: "10:15", kind: "run", what: "npm test -- history", note: { ko: "2개 실패", en: "2 failing" } },
+        { at: "10:12", kind: "edit", what: "src/payments/history.test.ts" },
+        { at: "10:08", kind: "edit", what: "src/payments/history.ts" },
+        { at: "10:03", kind: "read", what: "src/db/schema.ts" },
+      ],
+      said: { ko: "offset은 페이지가 깊어질수록 느려서 커서 기반으로 바꾸는 중이에요.", en: "Offsets slow down the deeper the page, so I am switching to a cursor." },
+      files: [
+        { file: "src/payments/history.ts", add: 24, del: 6, diff: [
+          "   export async function listPayments(db, userId, opts) {",
+          "-    const rows = await db.select().from(payments).where(eq(payments.userId, userId));",
+          "+    const rows = await db.select().from(payments)",
+          "+      .where(and(eq(payments.userId, userId), lt(payments.id, opts.cursor ?? MAX_ID)))",
+          "+      .orderBy(desc(payments.id))",
+          "+      .limit(opts.limit + 1);",
+          "     return page(rows, opts.limit);",
+        ] },
+        { file: "src/payments/history.test.ts", add: 31, del: 0 },
+      ],
+      log: [
+        { at: "09:58", kind: "created" },
+        { at: "10:01", kind: "started", who: "p1" },
+        { at: "10:18", kind: "lost" },
+      ] },
 
     { id: "t2", project: "pay", area: "security", priority: "high", status: "working", who: "p3", spent: 41,
       title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" },
-      peer: { by: "p4", state: "reviewing" } },
+      peer: { by: "p4", state: "reviewing" },
+      session: "9c1f27b2",
+      steps: [
+        { at: "10:22", kind: "edit", what: "src/webhooks/verify.ts" },
+        { at: "10:19", kind: "run", what: "npm test -- webhooks", note: { ko: "통과", en: "passing" } },
+      ],
+      files: [{ file: "src/webhooks/verify.ts", add: 18, del: 3 }],
+      thread: [
+        { by: "p4", text: { ko: "서명 비교는 문자열 ===가 아니라 timingSafeEqual로 해 주세요.", en: "Compare the signature with timingSafeEqual, not ===." } },
+        { by: "p3", text: { ko: "바꿨어요. 길이가 다르면 먼저 거절해요.", en: "Done. Different lengths are rejected first." } },
+      ],
+      log: [
+        { at: "09:40", kind: "created" },
+        { at: "09:43", kind: "started", who: "p3" },
+        { at: "10:12", kind: "reviewStarted", who: "p4" },
+      ] },
 
     { id: "t3", project: "order", area: "types", priority: "normal", status: "working", who: "p2", spent: 8,
       title: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" },
@@ -299,7 +413,29 @@
 
     { id: "t4", project: "pay", area: "arch", priority: "normal", status: "approval", who: "p1", spent: 52,
       title: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" },
-      peer: { by: "p4", state: "done" } },
+      peer: { by: "p4", state: "done" },
+      desc: { ko: "에러 응답을 { code, message, retryable } 하나로 맞춰요.", en: "Give every error response one shape: { code, message, retryable }." },
+      session: "5d02aa91", usedMem: [2],
+      files: [
+        { file: "src/api/errors.ts", add: 42, del: 17, diff: [
+          "-export function toResponse(err) { return { error: err.message }; }",
+          "+export function toResponse(err: AppError): ErrorBody {",
+          "+  return { code: err.code, message: err.message, retryable: RETRYABLE.has(err.code) };",
+          "+}",
+        ] },
+        { file: "src/api/payments.ts", add: 9, del: 12 },
+        { file: "docs/api/errors.md", add: 21, del: 4 },
+      ],
+      thread: [
+        { by: "p4", text: { ko: "재시도할 수 있는 실패는 따로 나눠 주세요.", en: "Split out the failures that can be retried." } },
+        { by: "p1", text: { ko: "retryable 필드로 나눴어요.", en: "Split them with a retryable field." } },
+      ],
+      log: [
+        { at: "09:02", kind: "created" },
+        { at: "09:08", kind: "started", who: "p1" },
+        { at: "09:31", kind: "reviewDone", who: "p4" },
+        { at: "10:00", kind: "finished", who: "p1", took: 52 },
+      ] },
 
     { id: "t5", project: "order", area: "db", priority: "normal", status: "approval", who: "p4", spent: 19,
       title: { ko: "주문 테이블 인덱스 정리", en: "Tidy the order table indexes" } },
@@ -315,7 +451,14 @@
       reason: { ko: "테스트 범위를 먼저 정하고 다시 하기로", en: "Parked until we agree what to cover" } },
 
     { id: "t9", project: "pay", area: "product", priority: "normal", status: "done", who: "p3", spent: 26,
-      title: { ko: "환불 정책 문서화", en: "Write down the refund policy" } },
+      title: { ko: "환불 정책 문서화", en: "Write down the refund policy" },
+      commit: "3f2a91c",
+      files: [{ file: "docs/policy/refunds.md", add: 64, del: 0 }],
+      log: [
+        { at: "09:10", kind: "started", who: "p3" },
+        { at: "09:36", kind: "finished", who: "p3", took: 26 },
+        { at: "09:40", kind: "applied" },
+      ] },
 
     // parked with their project, and picked up again when it resumes
     { id: "t11", project: "admin", area: "product", priority: "normal", status: "held", who: "p3", spent: 12, withProject: true,
@@ -384,7 +527,7 @@
         assign: "담당자 지정", pickPeer: "검토 붙이기",
         approve: "승인하고 반영", rework: "보완 요청", hold: "보류",
         resume: "다시 진행", teach: "이걸 기억시키기", open: "직원 화면에서 보기",
-        edit: "업무 수정", removeTask: "업무 삭제",
+        detail: "업무 상세", edit: "업무 수정", removeTask: "업무 삭제",
         editProject: "프로젝트 수정", removeProject: "프로젝트 삭제",
         startProject: "시작하기", holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
       },
@@ -413,6 +556,25 @@
       freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
+      lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.", reconnect: "다시 연결", copy: "복사",
+      tk: {
+        now: "지금 하는 일", did: "한 일", changed: "바뀐 것", review: "검토", desc: "업무 설명",
+        mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
+        memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
+        attach: "터미널에서 직접 보기", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
+        said: (n) => n + "의 말", notStarted: "아직 아무도 시작하지 않았어요.",
+        applyWhat: (b) => "승인하면 <code>" + b + "</code> 브랜치에 커밋해요. push는 하지 않아요.",
+        applied: (b, c) => "<code>" + b + "</code> 브랜치에 커밋했어요 · <code>" + c + "</code>",
+        steps: { read: "읽는 중", edit: "수정", run: "실행" },
+        took: (m) => m + "분 걸림",
+        logs: {
+          created: () => "만듦", lost: () => "에이전트 연결이 끊김", applied: () => "승인해서 반영함",
+          started: (e) => e.name + subjectParticle(e.name) + " 시작",
+          reviewStarted: (e) => e.name + subjectParticle(e.name) + " 검토를 시작",
+          reviewDone: (e) => e.name + subjectParticle(e.name) + " 검토를 마침",
+          finished: (e) => e.name + subjectParticle(e.name) + " 마침 · " + e.took + "분",
+        },
+      },
       keepsGoing: "하던 것을 멈추고, 바뀐 내용으로 이어서 해요. 해 둔 작업은 그대로 있어요.",
       handOver: (n) => n + subjectParticle(n) + " 처음부터 다시 시작해요. 폴더에 해 둔 작업은 그대로 남아요.",
       sendChange: "바뀐 내용 전달",
@@ -480,7 +642,7 @@
         assign: "Assign", pickPeer: "Ask for a review",
         approve: "Approve and apply", rework: "Send back", hold: "Hold",
         resume: "Resume", teach: "Teach them this", open: "Open in People",
-        edit: "Edit task", removeTask: "Delete task",
+        detail: "Task details", edit: "Edit task", removeTask: "Delete task",
         editProject: "Edit project", removeProject: "Delete project",
         startProject: "Start", holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
       },
@@ -509,6 +671,25 @@
       freeNow: (n) => n + " is free and starts on it right away.",
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
+      lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.", reconnect: "Reconnect", copy: "Copy",
+      tk: {
+        now: "Doing now", did: "What was done", changed: "What changed", review: "Review", desc: "About this task",
+        mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
+        memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
+        attach: "Watch it in a terminal", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
+        said: (n) => n + " says", notStarted: "Nobody has started it yet.",
+        applyWhat: (b) => "Approving commits to the <code>" + b + "</code> branch. Nothing is pushed.",
+        applied: (b, c) => "Committed to <code>" + b + "</code> · <code>" + c + "</code>",
+        steps: { read: "Reading", edit: "Edited", run: "Ran" },
+        took: (m) => "took " + m + " min",
+        logs: {
+          created: () => "Created", lost: () => "The agent disconnected", applied: () => "Approved and applied",
+          started: (e) => e.name + " started",
+          reviewStarted: (e) => e.name + " started reviewing",
+          reviewDone: (e) => e.name + " finished reviewing",
+          finished: (e) => e.name + " finished · " + e.took + " min",
+        },
+      },
       keepsGoing: "They stop what they are doing and carry on with the change. Their work so far stays.",
       handOver: (n) => n + " starts over. Whatever is already in the folder stays.",
       sendChange: "Send the change",
@@ -578,6 +759,7 @@
   const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
 
   let project = null;
+  let taskId = null;
   let filter = "active";
   const board = document.getElementById("board");
   const tabs = document.getElementById("tabs");
@@ -680,13 +862,148 @@
 
   function render() {
     const p = here();
+    const task = taskId ? TASKS.find((k) => k.id === taskId) : null;
+    // a task removed from its own page leaves for its board
+    if (taskId && !task) { location.hash = project; return; }
     document.querySelector(".head").hidden = !!p;
-    document.getElementById("projHead").hidden = !p;
+    document.getElementById("projHead").hidden = !p || !!task;
+    document.getElementById("taskHead").hidden = !task;
     document.getElementById("projList").hidden = !!p;
-    document.getElementById("pjNotice").hidden = !p;
-    board.hidden = !p;
-    if (p) renderProject(p);
+    document.getElementById("pjNotice").hidden = !p || !!task;
+    document.getElementById("taskView").hidden = !task;
+    board.hidden = !p || !!task;
+    if (task) renderTask(p, task);
+    else if (p) renderProject(p);
     else renderList();
+  }
+
+  /* ── one task's page ─────────────────────────────────────────── */
+  // What the agent reports and what the folder shows, around the same actions
+  // the task's popover offers.
+  const TASK_ICON = {
+    read: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
+    edit: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
+    run: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5"/></svg>',
+    used: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
+    unused: '<svg viewBox="0 0 16 16"></svg>',
+  };
+  const branchOf = (task) => "mto/" + task.id;
+  const panel = (title, body) => `<div class="panel"><div class="panel-hd"><h2>${title}</h2></div><div class="panel-bd">${body}</div></div>`;
+
+  function renderTask(p, task) {
+    const who = task.who ? byId.get(task.who) : null;
+    const k = t().tk;
+    document.getElementById("tkCrumb").href = "#" + p.id;
+    document.getElementById("tkCrumbName").textContent = tx(p.name);
+    document.getElementById("tkTitle").textContent = tx(task.title);
+    const chip = document.getElementById("tkChip");
+    chip.className = "chip " + ({ working: "working", approval: "reviewing", done: "available", held: "vacation" }[task.status] ?? "planned");
+    chip.textContent = t().columns[task.status];
+    document.getElementById("tkSub").innerHTML = [
+      `<span class="area-chip">${areaLabel(task.area)}</span>`,
+      `<span class="prio ${task.priority}">${icon.flag}${t().priority[task.priority]}</span>`,
+      who ? who.name : t().unassigned,
+      task.status === "working" ? t().spent(task.spent) : task.spent !== undefined && task.status !== "backlog" ? k.took(task.spent) : "",
+    ].filter(Boolean).join(" · ");
+    renderTaskActions(p, task);
+
+    const blocked = task.blocked && task.status === "working"
+      ? `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${tx(task.blocked)}</b><span>${t().lostWhy}</span></span>
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().reconnect}</button></span></div>`
+      : "";
+
+    const steps = task.steps?.length
+      ? panel(task.status === "working" ? k.now : k.did, task.steps.map((s, i) => `
+          <div class="step${i === 0 && task.status === "working" ? " latest" : ""}"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
+            <span class="step-tx">${k.steps[s.kind]} <code>${s.what}</code>${s.note ? " · " + tx(s.note) : ""}</span></div>`).join("")
+          + (task.said && who ? `<span class="said"><b>${k.said(who.name)}</b>${tx(task.said)}</span>` : ""))
+      : "";
+
+    const changes = task.status === "backlog" ? "" : panel(k.changed,
+      (task.files?.length
+        ? task.files.map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
+        : `<p class="col-empty" style="margin:0">${k.noChanges}</p>`)
+      + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task))}</span>` : "")
+      + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : ""));
+
+    const note = noteFor(task);
+    const review = task.status === "backlog" ? "" : panel(k.review,
+      (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}${note.text}</span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
+      + (task.thread ?? []).map((m) => `<div class="msg"><span class="w-av" data-av="${m.by}"></span><span><b>${byId.get(m.by).name}</b>${tx(m.text)}</span></div>`).join(""));
+
+    const main = task.status === "approval" || task.status === "done" ? [changes, review, steps] : [steps, changes, review];
+
+    const mine = who ? who.memories : [];
+    const memory = panel(who ? k.mem(mine.length) : k.memAhead,
+      who
+        ? mine.map((m, i) => { const used = task.usedMem?.includes(i); return `<div class="tk-mem${used ? " used" : ""}">${used ? TASK_ICON.used : TASK_ICON.unused}<span>${tx(m.text)}</span></div>`; }).join("")
+          + `<span class="hint">${k.memHow}</span>`
+        : `<p class="col-empty" style="margin:0">${k.memNobody}</p>`);
+
+    const side = [
+      task.desc ? panel(k.desc, `<span style="font-size:14px">${tx(task.desc)}</span>`) : "",
+      task.status === "backlog" ? panel(k.desc, `<span style="font-size:14px">${k.notStarted} ${who ? "" : t().whoTakes}</span>`) : "",
+      memory,
+      task.log?.length ? panel(k.log, task.log.map((l) => `<div class="kv"><span>${l.at}</span><b style="font-weight:500">${k.logs[l.kind]({ name: l.who ? byId.get(l.who).name : "", took: l.took })}</b></div>`).join("")) : "",
+      task.session ? panel(k.session, `
+        <div class="kv"><span>${k.folder}</span><b class="mono">${p.folder}/.worktrees/${task.id}</b></div>
+        <div class="kv"><span>branch</span><b class="mono">${branchOf(task)}</b></div>
+        <span class="hint">${k.attach}</span>
+        <div class="cmd"><pre><span class="p">$</span> claude attach ${task.session}</pre><button class="copy" type="button">${t().copy}</button></div>`) : "",
+    ];
+
+    const view = document.getElementById("taskView");
+    view.innerHTML = `${blocked}<div class="tk-grid" style="${blocked ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    for (const av of view.querySelectorAll("[data-av]")) av.appendChild(spriteCanvas(byId.get(av.dataset.av).species, 20));
+    for (const b of view.querySelectorAll("[data-file]")) {
+      b.addEventListener("click", () => {
+        const c = task.files[b.dataset.file];
+        const open = b.nextElementSibling?.classList.contains("diff");
+        if (open) return b.nextElementSibling.remove();
+        if (!c.diff) return;
+        const pre = document.createElement("pre");
+        pre.className = "diff";
+        pre.innerHTML = c.diff.map((l) => `<span class="${l[0] === "+" ? "d-add" : l[0] === "-" ? "d-del" : ""}">${l.replace(/</g, "&lt;")}</span>`).join("\n");
+        b.after(pre);
+      });
+    }
+  }
+
+  // The header carries what the task's popover offers, as page buttons.
+  function renderTaskActions(p, task) {
+    const box = document.getElementById("tkActs");
+    box.innerHTML = "";
+    const live = p.status === "active";
+    const button = (label, kind, run) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn btn-lg " + (kind === "primary" ? "btn-primary" : "btn-secondary");
+      b.textContent = label;
+      b.addEventListener("click", run);
+      box.appendChild(b);
+      return b;
+    };
+    if (task.status === "backlog" && live) button(t().actions.assign, "primary", () => assignTask(task));
+    if (task.status === "working" && live) {
+      button(t().actions.edit, "secondary", () => openEditTask(task));
+      if (!task.peer) { const ask = button(t().actions.pickPeer, "secondary", () => open(task, ask, false, true)); }
+    }
+    if (task.status === "approval" && p.status !== "done") {
+      button(t().actions.hold, "secondary", () => askHoldTask(task));
+      button(t().actions.rework, "secondary", () => askRework(task));
+      button(t().actions.approve, "primary", () => approveTask(task));
+    }
+    if (task.status === "held" && live) button(t().actions.resume, "primary", () => resumeTask(task));
+    if (task.status !== "done" && writable(p)) {
+      const more = document.createElement("button");
+      more.className = "ibtn";
+      more.type = "button";
+      more.dataset.id = "task-more";
+      more.setAttribute("aria-label", t().actions.removeTask);
+      more.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12" cy="8" r="1.4"/></svg>';
+      more.addEventListener("click", () => openMenu(more, [menu(t().actions.removeTask, "bad", () => askRemoveTask(task))]));
+      box.prepend(more);
+    }
   }
 
   function renderList() {
@@ -956,7 +1273,13 @@
       acts.appendChild(menu(t().actions.removeTask, "bad", () => askRemoveTask(task)));
     }
 
-    if (acts.children.length) pop.appendChild(acts);
+    const detail = document.createElement("a");
+    detail.className = "mrow";
+    detail.href = "#" + task.project + "/" + task.id;
+    detail.textContent = t().actions.detail;
+    detail.addEventListener("click", close);
+    acts.prepend(detail);
+    pop.appendChild(acts);
 
     anchor = el;
     pop.setAttribute("data-open", "");
@@ -1371,8 +1694,9 @@
     dialog.querySelector("#ntWho").focus({ preventScroll: true });
   }
 
+  // Approving commits the task's worktree to its own branch; pushing stays the user's.
   function approveTask(task) {
-    Object.assign(task, { status: "done", changes: undefined });
+    Object.assign(task, { status: "done", changes: undefined, commit: Math.random().toString(16).slice(2, 9) });
     render();
   }
 
@@ -1494,7 +1818,9 @@
   // The list is the page; a project's board has an address of its own.
   function route() {
     close();
-    project = PROJECTS.some((p) => p.id === location.hash.slice(1)) ? location.hash.slice(1) : null;
+    const [pid, tid] = location.hash.slice(1).split("/");
+    project = PROJECTS.some((p) => p.id === pid) ? pid : null;
+    taskId = project && TASKS.some((k) => k.id === tid && k.project === pid) ? tid : null;
     if (project) filter = here().status;
     render();
   }

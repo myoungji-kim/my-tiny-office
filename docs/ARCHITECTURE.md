@@ -346,9 +346,22 @@ account for the answer:
 → "복합 인덱스는 컬럼 순서가 중요하며, (a,b)와 (b,a)는 다른 인덱스다."
 ```
 
-This is what the employees screen assumes: **the memories in the task's area are
-selected and carried into that task**, not dumped wholesale. Company memory can
-take the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
+This is what the employees screen assumes: **everything an employee has been
+taught is carried into every task**, whatever its area. Company memory can take
+the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
+
+The prompt numbers each memory and asks the agent to end by listing the
+numbers it drew on. That list is what the office reports as referenced: the
+agent's own account, not a trace.
+
+### Every task works in its own worktree
+
+Two tasks in one project would otherwise write into the same folder. Each task
+runs in `git worktree add <folder>/.worktrees/<task> -b mto/<task>`, listed in
+the repository's `.git/info/exclude` so the user's history never sees it.
+What changed is that worktree's diff. Approving commits it to `mto/<task>`;
+nothing is pushed. Whether the project folder's trust covers a worktree under
+it is still to be measured against the CLI, as the mappings above were.
 
 ### Two things happen outside the app
 

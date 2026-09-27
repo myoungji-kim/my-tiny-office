@@ -114,8 +114,13 @@ Statuses:
 - held — parked by the user, with the reason kept
 
 A task is never started or completed by hand. Work is picked up by whoever is
-free, and it stops at `approval` because applying it — pushing, writing,
-deploying — is the one step the office does not take on its own.
+free, and it stops at `approval` because applying it is the one step the
+office does not take on its own.
+
+**Every task works apart and lands on its own branch.** A task runs in a
+worktree of its project's repository, so two people in one project never write
+over each other and what changed is always one task's. Approving commits that
+work to the task's branch; pushing, merging and deploying stay the user's.
 
 **Time is what the work has taken, not a share of an estimate.** With a real
 agent doing the work nobody knows when it ends, so a task carries how long it
@@ -218,7 +223,9 @@ An area nobody knows is a gap: its work starts with nothing to draw on and
 nobody can review it.
 
 A memory is used, not just stored: when an employee references one, the
-activity feed says so. Without that, teaching is only a notes field.
+activity feed says so. Without that, teaching is only a notes field. Which
+memories were drawn on is what the agent reports at the end of a task — its
+own account, not a proof.
 
 Memory has no cap, but it does have a cost: everything taught is carried into
 every task, whatever its area, as a person brings everything they know. A

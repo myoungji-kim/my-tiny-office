@@ -222,6 +222,29 @@ start button: the user says what the work is and who should do it.
   each with when they would look — now, after what they are on, or not while
   on leave — and the one they are on underneath.
 
+### A task's page
+
+Every task has a page under its project's board (`#pay/t1`), reached from the
+task's popover, the office popover's 업무 상세, and back through the crumb to the
+board. Its header carries the task's status, area, priority, who and time, and
+the same actions its popover offers, as page buttons; an agent that stopped says
+so above everything.
+
+| Panel | Holds | From |
+| --- | --- | --- |
+| 지금 하는 일 | The agent's latest steps — reading, editing, running — and its last words | The runtime's event stream |
+| 바뀐 것 | Every file with lines added and removed; a file opens to its diff | The task's worktree |
+| 검토 | Where the review stands and what was said | The task's PullRequest |
+| 업무 설명 | What the task is for | The task |
+| 들고 간 기억 | Everything the person carries, ✓ on what they report drawing on | The person's memory |
+| 기록 | Created, started, sent back, held, disconnected, finished, applied | Domain events |
+| 세션 | The worktree, its branch, and `claude attach` to watch it in a terminal | The session |
+
+The page follows the status: a queued task shows only what it is and who will
+take it; one waiting for approval leads with what changed and says what
+approving does — it commits to the task's branch, nothing is pushed; a done
+one is its record, with the commit.
+
 ### The two dialogs
 
 **A dialog answers what a choice means, while the choice is being made.** Both
