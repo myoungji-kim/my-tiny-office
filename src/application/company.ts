@@ -5,6 +5,7 @@ import { startingAreas, STARTING_AREAS } from "../domain/memory";
 import { startingRoles, STARTING_ROLES } from "../domain/organisation";
 
 import type { AppContext } from "./context";
+import { recordMilestones } from "./history";
 
 export interface CreateCompanyInput {
   // Given when the company must match a file already chosen for it.
@@ -37,6 +38,7 @@ export async function createCompany(
   for (const role of startingRoles(company.id, STARTING_ROLES.map(() => toRoleId(ctx.newId())), now)) {
     await ctx.roles.save(role);
   }
+  await recordMilestones(ctx, company.id, events);
 
   return { company, events };
 }

@@ -4,6 +4,7 @@ import { toEmployeeId, toEventId, type CompanyId, type EmployeeId, type RoleId, 
 import { returnToBacklog } from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
+import { recordMilestones } from "./history";
 
 export interface HireEmployeeInput {
   readonly companyId: CompanyId;
@@ -35,6 +36,7 @@ export async function hireEmployee(ctx: AppContext, input: HireEmployeeInput): P
   if (!hired.ok) return hired;
 
   await ctx.employees.save(hired.employee);
+  await recordMilestones(ctx, input.companyId, hired.events);
   return { ok: true, value: { employee: hired.employee }, events: hired.events };
 }
 

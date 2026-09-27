@@ -3,6 +3,7 @@ import { toAreaId, toEventId, toMemoryId, type AreaId, type CompanyId, type Empl
 import * as memoryDomain from "../domain/memory";
 
 import type { AppContext, UseCaseResult } from "./context";
+import { recordMilestones } from "./history";
 
 export interface TeachInput {
   readonly companyId: CompanyId;
@@ -30,6 +31,7 @@ export async function teachMemory(
   const taught = memoryDomain.teach({ ...input, id: toMemoryId(ctx.newId()) }, toEventId(ctx.newId()), ctx.now());
   if (!taught.ok) return taught;
   await ctx.memories.save(taught.value);
+  await recordMilestones(ctx, input.companyId, taught.events);
   return { ok: true, value: { memory: taught.value }, events: taught.events };
 }
 

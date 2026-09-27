@@ -4,37 +4,11 @@ import { toCompanyId } from "../domain/ids";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
-import {
-  createInMemoryAreaRepository,
-  createInMemoryCompanyRepository,
-  createInMemoryMemoryRepository,
-  createInMemoryEmployeeRepository,
-  createInMemoryProjectRepository,
-  createInMemoryRoleRepository,
-  createInMemoryTaskRepository,
-  createInMemoryTeamRepository,
-  withoutTransaction,
-} from "./in-memory-repositories";
+import { createTestContext } from "./test-context";
 
 const foundedAt = 1_700_000_000_000;
 
-function createContext(): AppContext {
-  let counter = 0;
-
-  return {
-    companies: createInMemoryCompanyRepository(),
-    employees: createInMemoryEmployeeRepository(),
-    projects: createInMemoryProjectRepository(),
-    tasks: createInMemoryTaskRepository(),
-    areas: createInMemoryAreaRepository(),
-    memories: createInMemoryMemoryRepository(),
-    roles: createInMemoryRoleRepository(),
-    teams: createInMemoryTeamRepository(),
-    now: () => foundedAt,
-    newId: () => `id-${(counter += 1)}`,
-    withTransaction: withoutTransaction,
-  };
-}
+const createContext = (): AppContext => createTestContext(() => foundedAt);
 
 describe("createCompany", () => {
   it("returns a company with a generated id", async () => {

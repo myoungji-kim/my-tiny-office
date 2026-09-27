@@ -3,6 +3,7 @@ import { toEventId, toProjectId, type CompanyId, type ProjectId } from "../domai
 import * as projectDomain from "../domain/project";
 
 import type { AppContext, UseCaseResult } from "./context";
+import { recordMilestones } from "./history";
 
 type ProjectResult<TFailure extends string> = UseCaseResult<{ readonly project: projectDomain.Project }, TFailure>;
 
@@ -64,13 +65,16 @@ export const reopenProject = (ctx: AppContext, projectId: ProjectId) =>
   changeProject(ctx, projectId, async (p) => projectDomain.reopenProject(p, eventId(ctx), ctx.now()));
 
 // Open work is what is in progress or waiting for approval; unstarted work closes as it is.
-export const finishProject = (ctx: AppContext, projectId: ProjectId) =>
-  changeProject(ctx, projectId, async (p) => {
+export async function finishProject(ctx: AppContext, projectId: ProjectId) {
+  const result = await changeProject(ctx, projectId, async (p) => {
     const open = (await ctx.tasks.findByCompany(p.companyId)).filter(
       (t) => t.projectId === p.id && (t.status === "working" || t.status === "approval"),
     ).length;
     return projectDomain.finishProject(p, open, eventId(ctx), ctx.now());
   });
+  if (result.ok) await recordMilestones(ctx, result.value.project.companyId, result.events);
+  return result;
+}
 
 export const allowCommand = (ctx: AppContext, projectId: ProjectId, command: string) =>
   changeProject(ctx, projectId, async (p) => projectDomain.allowCommand(p, command, eventId(ctx), ctx.now()));

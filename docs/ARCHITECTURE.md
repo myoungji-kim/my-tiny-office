@@ -204,7 +204,18 @@ AgentSession
 ├── status
 ├── startedAt
 └── lastActivityAt
+
+Area          the company's own list; seven to start, named by the dictionary
+Memory        expertise (an area) · style · company (no employee)
+Role · Team   the company's lists; a role is required, a team is not
+Review        the in-app PullRequest: suggested · queued · reviewing · settled
+Milestone     the history, only ever added to, names kept as they were
 ```
+
+`src/domain` has these as plain values and pure transitions; the pick-up
+(`pick-up.ts`) decides who starts what next, a waiting review first. Use cases
+in `src/application` load, call the domain, save, and record the milestones the
+events earn (`history.ts`).
 
 The important relationship is:
 

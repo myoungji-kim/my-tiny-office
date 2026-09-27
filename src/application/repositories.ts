@@ -1,8 +1,10 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, RoleId, TaskId, TeamId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, ReviewId, RoleId, TaskId, TeamId } from "../domain/ids";
 import type { Area, Memory } from "../domain/memory";
+import type { RecordedMilestone } from "../domain/milestone";
 import type { Role, Team } from "../domain/organisation";
+import type { Review } from "../domain/review";
 import type { Project } from "../domain/project";
 import type { Task } from "../domain/task";
 
@@ -46,6 +48,18 @@ export interface TeamRepository {
   findByCompany(companyId: CompanyId): Promise<readonly Team[]>;
   save(team: Team): Promise<void>;
   remove(id: TeamId): Promise<void>;
+}
+
+export interface ReviewRepository {
+  findById(id: ReviewId): Promise<Review | undefined>;
+  findByCompany(companyId: CompanyId): Promise<readonly Review[]>;
+  save(review: Review): Promise<void>;
+}
+
+// History is only ever added to.
+export interface MilestoneRepository {
+  findByCompany(companyId: CompanyId): Promise<readonly RecordedMilestone[]>;
+  add(milestone: RecordedMilestone): Promise<void>;
 }
 
 export interface MemoryRepository {

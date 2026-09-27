@@ -1,4 +1,4 @@
-import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, RoleId, TaskId, TeamId } from "./ids";
+import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, ReviewId, RoleId, TaskId, TeamId } from "./ids";
 import type { MemoryKind } from "./memory";
 import type { Priority } from "./project";
 import type { Blocker } from "./task";
@@ -147,7 +147,33 @@ export interface MemoryRemoved extends DomainEventBase {
   readonly employeeId: EmployeeId | undefined;
 }
 
+interface ReviewEvent extends DomainEventBase {
+  readonly reviewId: ReviewId;
+  readonly taskId: TaskId;
+}
+export interface ReviewSuggested extends ReviewEvent {
+  readonly type: "ReviewSuggested";
+}
+export interface ReviewQueued extends ReviewEvent {
+  readonly type: "ReviewQueued";
+  readonly reviewerId: EmployeeId;
+  readonly reviewerName: string;
+}
+export interface ReviewStarted extends ReviewEvent {
+  readonly type: "ReviewStarted";
+  readonly reviewerId: EmployeeId;
+  readonly reviewerName: string;
+}
+export interface ReviewSettled extends ReviewEvent {
+  readonly type: "ReviewSettled";
+  readonly reviewerId: EmployeeId;
+}
+
 export type DomainEvent =
+  | ReviewSuggested
+  | ReviewQueued
+  | ReviewStarted
+  | ReviewSettled
   | AreaAdded
   | AreaRenamed
   | AreaRemoved

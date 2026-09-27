@@ -10,6 +10,7 @@ import { toCompanyId } from "../../domain/ids";
 
 import { migrateDatabase } from "./database";
 import { createSqliteEmployeeRepository } from "./employee-repository";
+import { createSqliteMilestoneRepository } from "./history-repository";
 import { createSqliteAreaRepository } from "./memory-repository";
 import { createSqliteRoleRepository } from "./organisation-repository";
 import { createSqliteProjectRepository } from "./project-repository";
@@ -76,6 +77,14 @@ describe("moving to projects", () => {
     expect([titleOf("mocha"), titleOf("tofu")]).toEqual(["Backend Developer", "Frontend Developer"]);
     expect(roles.map((r) => r.name)).toEqual(expect.arrayContaining(["Backend Engineer", "QA Engineer", "Backend Developer"]));
     expect(people.every((e) => e.species === "cat" && e.teamId === undefined)).toBe(true);
+
+    // what the history can know exactly: the founding, and each hire with the first called out
+    const history = await createSqliteMilestoneRepository(db).findByCompany(toCompanyId("c"));
+    expect(history).toMatchObject([
+      { kind: "founded", at: t0 },
+      { kind: "joined", employeeName: "모카", first: true },
+      { kind: "joined", employeeName: "두부", first: false },
+    ]);
 
     const areas = await createSqliteAreaRepository(db).findByCompany(toCompanyId("c"));
     expect(areas.map((a) => a.starting)).toEqual(["architecture", "typeSafety", "database", "security", "localization", "product", "quality"]);

@@ -4,7 +4,9 @@ import { check, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-cor
 import { SPECIES, type Availability } from "../../domain/employee";
 import { SUGGESTED_TEAMS } from "../../domain/organisation";
 import { STARTING_AREAS, type MemoryKind } from "../../domain/memory";
+import type { MilestoneKind } from "../../domain/milestone";
 import type { Priority, ProjectStatus } from "../../domain/project";
+import type { ReviewState } from "../../domain/review";
 import type { TaskStatus } from "../../domain/task";
 
 // Listing the values here keeps the schema in sync with the domain unions:
@@ -186,4 +188,62 @@ export const memories = sqliteTable(
     check("memories_area", sql`(${table.kind} = 'expertise') = (${table.areaId} is not null)`),
     check("memories_owner", sql`(${table.kind} = 'company') = (${table.employeeId} is null)`),
   ],
+);
+
+const reviewStates = ["suggested", "queued", "reviewing", "settled"] as const satisfies readonly ReviewState[];
+const milestoneKinds = [
+  "founded",
+  "joined",
+  "teamFormed",
+  "firstTaskDone",
+  "tasksDone",
+  "firstReview",
+  "memories",
+  "projectFinished",
+] as const satisfies readonly MilestoneKind[];
+
+export const reviews = sqliteTable(
+  "reviews",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id),
+    reviewerId: text("reviewer_id").references(() => employees.id),
+    state: text("state", { enum: reviewStates }).notNull(),
+    createdAt: integer("created_at").notNull(),
+    startedAt: integer("started_at"),
+    settledAt: integer("settled_at"),
+  },
+  (table) => [
+    index("idx_reviews_company").on(table.companyId),
+    check("reviews_state", sql`${table.state} in ('suggested', 'queued', 'reviewing', 'settled')`),
+    check("reviews_reviewer", sql`${table.state} = 'suggested' or ${table.reviewerId} is not null`),
+    check("reviews_started", sql`${table.state} not in ('reviewing', 'settled') or ${table.startedAt} is not null`),
+    check("reviews_settled", sql`${table.state} <> 'settled' or ${table.settledAt} is not null`),
+  ],
+);
+
+// The history keeps names as they were, and points at no row that may go.
+export const milestones = sqliteTable(
+  "milestones",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    kind: text("kind", { enum: milestoneKinds }).notNull(),
+    at: integer("at").notNull(),
+    employeeId: text("employee_id"),
+    employeeName: text("employee_name"),
+    first: integer("first", { mode: "boolean" }),
+    teamId: text("team_id"),
+    count: integer("count"),
+    projectId: text("project_id"),
+    projectName: text("project_name"),
+  },
+  (table) => [index("idx_milestones_company").on(table.companyId, table.at)],
 );

@@ -4,6 +4,7 @@ import { toEventId, toRoleId, toTeamId, type CompanyId, type EmployeeId, type Ro
 import * as org from "../domain/organisation";
 
 import type { AppContext, UseCaseResult } from "./context";
+import { recordMilestones } from "./history";
 
 type NameFailure = "nameRequired" | "nameTooLong";
 
@@ -99,6 +100,7 @@ export async function removeTeam(
       events.push(...moved.events);
     }
     await ctx.teams.remove(teamId);
+    await recordMilestones(ctx, companyId, events);
     return { ok: true as const, value: { moved: members.length }, events };
   });
 }
@@ -115,5 +117,6 @@ export async function moveEmployee(
   }
   const moved = moveToTeam(employee, teamId, toEventId(ctx.newId()), ctx.now());
   await ctx.employees.save(moved.employee);
+  await recordMilestones(ctx, employee.companyId, moved.events);
   return { ok: true, value: { employeeId }, events: moved.events };
 }

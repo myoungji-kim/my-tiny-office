@@ -7,19 +7,8 @@ import { finishWork } from "../domain/task";
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { bringBack, hireEmployee, sendOnLeave } from "./employee";
-import {
-  createInMemoryAreaRepository,
-  createInMemoryCompanyRepository,
-  createInMemoryMemoryRepository,
-  createInMemoryEmployeeRepository,
-  createInMemoryProjectRepository,
-  createInMemoryRoleRepository,
-  createInMemoryTaskRepository,
-  createInMemoryTeamRepository,
-  withoutTransaction,
-} from "./in-memory-repositories";
 import { allowCommand, createProject, finishProject, holdProject, startProject } from "./project";
-import { firstRole } from "./test-context";
+import { createTestContext, firstRole } from "./test-context";
 import { applyTask, assignTask, createTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
 
 const minute = 60_000;
@@ -30,21 +19,8 @@ let ctx: AppContext;
 let now: number;
 
 beforeEach(async () => {
-  let counter = 0;
   now = t0;
-  ctx = {
-    companies: createInMemoryCompanyRepository(),
-    employees: createInMemoryEmployeeRepository(),
-    projects: createInMemoryProjectRepository(),
-    tasks: createInMemoryTaskRepository(),
-    areas: createInMemoryAreaRepository(),
-    memories: createInMemoryMemoryRepository(),
-    roles: createInMemoryRoleRepository(),
-    teams: createInMemoryTeamRepository(),
-    now: () => now,
-    newId: () => `id-${(counter += 1)}`,
-    withTransaction: withoutTransaction,
-  };
+  ctx = createTestContext(() => now);
   await createCompany(ctx, { id: companyId, name: "TinySoft" });
 });
 

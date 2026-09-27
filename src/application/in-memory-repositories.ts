@@ -1,6 +1,8 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, RoleId, TaskId, TeamId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, ReviewId, RoleId, TaskId, TeamId } from "../domain/ids";
+import type { RecordedMilestone } from "../domain/milestone";
+import type { Review } from "../domain/review";
 import type { Area, Memory } from "../domain/memory";
 import type { Role, Team } from "../domain/organisation";
 import type { Project } from "../domain/project";
@@ -12,7 +14,9 @@ import type {
   CompanyRepository,
   EmployeeRepository,
   MemoryRepository,
+  MilestoneRepository,
   ProjectRepository,
+  ReviewRepository,
   RoleRepository,
   TaskRepository,
   TeamRepository,
@@ -93,6 +97,9 @@ export function createInMemoryTaskRepository(): TaskRepository {
 function createInMemoryList<TId, TItem extends { readonly id: TId; readonly companyId: CompanyId; readonly createdAt: number }>() {
   const items = new Map<TId, TItem>();
   return {
+    async findById(id: TId) {
+      return items.get(id);
+    },
     async findByCompany(companyId: CompanyId) {
       return [...items.values()].filter((item) => item.companyId === companyId).sort((a, b) => a.createdAt - b.createdAt);
     },
@@ -109,3 +116,16 @@ export const createInMemoryAreaRepository = (): AreaRepository => createInMemory
 export const createInMemoryMemoryRepository = (): MemoryRepository => createInMemoryList<MemoryId, Memory>();
 export const createInMemoryRoleRepository = (): RoleRepository => createInMemoryList<RoleId, Role>();
 export const createInMemoryTeamRepository = (): TeamRepository => createInMemoryList<TeamId, Team>();
+export const createInMemoryReviewRepository = (): ReviewRepository => createInMemoryList<ReviewId, Review>();
+
+export function createInMemoryMilestoneRepository(): MilestoneRepository {
+  const history: RecordedMilestone[] = [];
+  return {
+    async findByCompany(companyId) {
+      return history.filter((m) => m.companyId === companyId).sort((a, b) => a.at - b.at);
+    },
+    async add(milestone) {
+      history.push(milestone);
+    },
+  };
+}

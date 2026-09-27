@@ -1,11 +1,37 @@
 import type { Employee } from "./employee";
-import type { EmployeeId, ProjectId, TaskId } from "./ids";
+import type { EmployeeId, ProjectId, ReviewId, TaskId } from "./ids";
 import { PRIORITY_RANK, type Project } from "./project";
+import type { Review } from "./review";
 import type { Task } from "./task";
 
 export interface PickUp {
   readonly employeeId: EmployeeId;
   readonly taskId: TaskId;
+}
+
+// Someone reviewing is busy, and someone with a review waiting looks at it
+// before they take anything else.
+function occupied(tasks: readonly Task[], reviews: readonly Review[]): Set<EmployeeId | undefined> {
+  return new Set([
+    ...tasks.filter((t) => t.status === "working").map((t) => t.assigneeId),
+    ...reviews.filter((r) => r.state === "reviewing" || r.state === "queued").map((r) => r.reviewerId),
+  ]);
+}
+
+// Queued reviews whose reviewer is now free, the oldest first, one each.
+export function reviewsToStart(tasks: readonly Task[], reviews: readonly Review[], employees: readonly Employee[]): ReviewId[] {
+  const working = new Set(tasks.filter((t) => t.status === "working").map((t) => t.assigneeId));
+  const reviewing = new Set(reviews.filter((r) => r.state === "reviewing").map((r) => r.reviewerId));
+  const started = new Set<EmployeeId>();
+  const result: ReviewId[] = [];
+  for (const review of [...reviews].filter((r) => r.state === "queued").sort((a, b) => a.createdAt - b.createdAt)) {
+    const reviewer = employees.find((e) => e.id === review.reviewerId);
+    if (reviewer === undefined || reviewer.availability !== "available") continue;
+    if (working.has(reviewer.id) || reviewing.has(reviewer.id) || started.has(reviewer.id)) continue;
+    started.add(reviewer.id);
+    result.push(review.id);
+  }
+  return result;
 }
 
 // Who starts what next. One thing at a time per person; only active projects'
@@ -16,9 +42,10 @@ export function pickUps(
   projects: readonly Project[],
   tasks: readonly Task[],
   employees: readonly Employee[],
+  reviews: readonly Review[] = [],
 ): PickUp[] {
   const projectById = new Map<ProjectId, Project>(projects.map((p) => [p.id, p]));
-  const busy = new Set(tasks.filter((t) => t.status === "working").map((t) => t.assigneeId));
+  const busy = occupied(tasks, reviews);
   const waiting = tasks
     .filter((t) => t.status === "backlog" && projectById.get(t.projectId)?.status === "active")
     .sort(

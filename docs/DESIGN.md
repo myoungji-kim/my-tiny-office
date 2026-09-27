@@ -586,13 +586,11 @@ measured flags behind it.
 
 ## Open questions
 
-- **The domain is half way to the board.** Projects, the five task statuses,
-  the blocked mark, time taken, the pick-up order, leave, the company's areas,
-  and memory in its three kinds with the expertise that follows are built
-  (`src/domain`). Still to come: the `reviewing` status with the PullRequest
-  and review, roles and teams, the milestones, and a task's worktree and
-  branch. The screens in `src/components`
-  are the placeholder until they are rebuilt from `docs/ui`.
+- **What the domain does not do yet.** Everything in RULES.md is in
+  `src/domain` except what needs the runtime: when a review is suggested, a
+  project's hold stopping its running tasks, and a task's worktree and branch.
+  The screens in `src/components` are the placeholder until they are rebuilt
+  from `docs/ui`.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

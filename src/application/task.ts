@@ -1,10 +1,12 @@
 import type { DomainEvent } from "../domain/events";
 import { toEventId, toTaskId, type AreaId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
-import { pickUps } from "../domain/pick-up";
+import { pickUps, reviewsToStart } from "../domain/pick-up";
+import { startQueuedReview, type Review } from "../domain/review";
 import type { Priority } from "../domain/project";
 import * as taskDomain from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
+import { recordMilestones } from "./history";
 
 type TaskResult<TFailure extends string> = UseCaseResult<{ readonly task: taskDomain.Task }, TFailure>;
 
@@ -88,8 +90,11 @@ async function changeTask<TFailure extends string>(
 
 const eventId = (ctx: AppContext) => toEventId(ctx.newId());
 
-export const applyTask = (ctx: AppContext, taskId: TaskId) =>
-  changeTask(ctx, taskId, (t) => taskDomain.applyTask(t, eventId(ctx), ctx.now()));
+export async function applyTask(ctx: AppContext, taskId: TaskId) {
+  const result = await changeTask(ctx, taskId, (t) => taskDomain.applyTask(t, eventId(ctx), ctx.now()));
+  if (result.ok) await recordMilestones(ctx, result.value.task.companyId, result.events);
+  return result;
+}
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
   changeTask(ctx, taskId, (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()));
@@ -100,24 +105,40 @@ export const holdTask = (ctx: AppContext, taskId: TaskId, reason: string) =>
 export const resumeTask = (ctx: AppContext, taskId: TaskId) =>
   changeTask(ctx, taskId, (t) => taskDomain.resumeTask(t, eventId(ctx), ctx.now()));
 
-// Everyone who is free takes their next task. Called by the runtime, which is
+// Everyone who is free takes their next thing: a review waiting for them
+// first, otherwise a task. Called by the runtime, which is
 // what actually starts the work: a task never starts without an agent on it.
 export async function pickUpWork(
   ctx: AppContext,
   companyId: CompanyId,
-): Promise<UseCaseResult<{ readonly started: readonly taskDomain.Task[] }, "companyNotFound">> {
+): Promise<UseCaseResult<{ readonly started: readonly taskDomain.Task[]; readonly reviewing: readonly Review[] }, "companyNotFound">> {
   if ((await ctx.companies.findById(companyId)) === undefined) return { ok: false, reason: "companyNotFound" };
 
   return ctx.withTransaction(async () => {
-    const [projects, tasks, employees] = await Promise.all([
+    const [projects, tasks, employees, reviews] = await Promise.all([
       ctx.projects.findByCompany(companyId),
       ctx.tasks.findByCompany(companyId),
       ctx.employees.findByCompany(companyId),
+      ctx.reviews.findByCompany(companyId),
     ]);
     const now = ctx.now();
     const started: taskDomain.Task[] = [];
+    const reviewing: Review[] = [];
     const events: DomainEvent[] = [];
-    for (const { employeeId, taskId } of pickUps(projects, tasks, employees)) {
+
+    let current = [...reviews];
+    for (const reviewId of reviewsToStart(tasks, reviews, employees)) {
+      const review = current.find((r) => r.id === reviewId)!;
+      const reviewer = employees.find((e) => e.id === review.reviewerId)!;
+      const result = startQueuedReview(review, reviewer, eventId(ctx), now);
+      if (!result.ok) continue;
+      await ctx.reviews.save(result.review);
+      current = current.map((r) => (r.id === reviewId ? result.review : r));
+      reviewing.push(result.review);
+      events.push(...result.events);
+    }
+
+    for (const { employeeId, taskId } of pickUps(projects, tasks, employees, current)) {
       const task = tasks.find((t) => t.id === taskId)!;
       const employee = employees.find((e) => e.id === employeeId)!;
       const result = taskDomain.startTask(task, employee, eventId(ctx), now);
@@ -126,6 +147,6 @@ export async function pickUpWork(
       started.push(result.task);
       events.push(...result.events);
     }
-    return { ok: true as const, value: { started }, events };
+    return { ok: true as const, value: { started, reviewing }, events };
   });
 }

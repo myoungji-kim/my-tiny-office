@@ -6,7 +6,9 @@ import type {
   CompanyRepository,
   EmployeeRepository,
   MemoryRepository,
+  MilestoneRepository,
   ProjectRepository,
+  ReviewRepository,
   RoleRepository,
   TaskRepository,
   TeamRepository,
@@ -23,6 +25,8 @@ export interface AppContext {
   readonly memories: MemoryRepository;
   readonly roles: RoleRepository;
   readonly teams: TeamRepository;
+  readonly reviews: ReviewRepository;
+  readonly milestones: MilestoneRepository;
   readonly now: () => Timestamp;
   readonly newId: () => string;
   readonly withTransaction: TransactionRunner;
