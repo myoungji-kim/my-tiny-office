@@ -1,10 +1,12 @@
 import * as companyDomain from "../domain/company";
 import type { CompanyCreated } from "../domain/events";
-import { toCompanyId, toEventId } from "../domain/ids";
+import { toCompanyId, toEventId, type CompanyId } from "../domain/ids";
 
 import type { AppContext } from "./context";
 
 export interface CreateCompanyInput {
+  // Given when the company must match a file already chosen for it.
+  readonly id?: CompanyId;
   readonly name: string;
   readonly description?: string;
 }
@@ -21,7 +23,7 @@ export async function createCompany(
   const now = ctx.now();
 
   const { company, events } = companyDomain.createCompany(
-    { id: toCompanyId(ctx.newId()), name: input.name, description: input.description },
+    { id: input.id ?? toCompanyId(ctx.newId()), name: input.name, description: input.description },
     toEventId(ctx.newId()),
     now,
   );

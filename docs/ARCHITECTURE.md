@@ -634,8 +634,11 @@ default, so that pragma is required rather than optional.
 
 Existing data is never dropped or recreated. A second launch applies nothing.
 
-The connection is a lazy singleton cached on `globalThis` so that development
-hot reloads do not accumulate connections.
+Each company's connection is opened when first needed and cached on
+`globalThis`, so development hot reloads do not accumulate connections. A
+company's file is only ever opened if it already exists; creating a company is
+the one thing that makes one. A company id names its file, so only a UUID is
+accepted as one.
 
 ### Migrations
 

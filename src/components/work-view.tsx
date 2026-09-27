@@ -16,10 +16,12 @@ const columns: readonly TaskStatus[] = ["backlog", "ready", "working", "done"];
 
 function AssignForm({
   t,
+  companyId,
   task,
   employees,
 }: {
   readonly t: Dictionary;
+  readonly companyId: string;
   readonly task: TaskView;
   readonly employees: readonly EmployeeView[];
 }) {
@@ -36,6 +38,7 @@ function AssignForm({
       tone="quiet"
       layout="inline"
     >
+      <input type="hidden" name="companyId" value={companyId} />
       <input type="hidden" name="taskId" value={task.id} />
       <Field label={t.work.assignTo}>
         <Select name="employeeId" defaultValue={task.assigneeId ?? employees[0].id}>
@@ -52,20 +55,22 @@ function AssignForm({
 
 function TaskActions({
   t,
+  companyId,
   task,
   employees,
 }: {
   readonly t: Dictionary;
+  readonly companyId: string;
   readonly task: TaskView;
   readonly employees: readonly EmployeeView[];
 }) {
   switch (task.status) {
     case "backlog":
-      return <AssignForm t={t} task={task} employees={employees} />;
+      return <AssignForm t={t} companyId={companyId} task={task} employees={employees} />;
     case "ready":
       return (
         <div className="flex flex-wrap items-end gap-3">
-          <AssignForm t={t} task={task} employees={employees} />
+          <AssignForm t={t} companyId={companyId} task={task} employees={employees} />
           <ActionForm
             action={startTaskAction}
             errors={t.errors}
@@ -73,6 +78,7 @@ function TaskActions({
             pendingLabel={t.work.starting}
             layout="inline"
           >
+            <input type="hidden" name="companyId" value={companyId} />
             <input type="hidden" name="taskId" value={task.id} />
           </ActionForm>
         </div>
@@ -86,6 +92,7 @@ function TaskActions({
           pendingLabel={t.work.completing}
           layout="inline"
         >
+          <input type="hidden" name="companyId" value={companyId} />
           <input type="hidden" name="taskId" value={task.id} />
         </ActionForm>
       );
@@ -96,10 +103,12 @@ function TaskActions({
 
 function TaskCard({
   t,
+  companyId,
   task,
   employees,
 }: {
   readonly t: Dictionary;
+  readonly companyId: string;
   readonly task: TaskView;
   readonly employees: readonly EmployeeView[];
 }) {
@@ -121,7 +130,7 @@ function TaskCard({
         {task.status === "working" && <ProgressBar value={task.progress} />}
       </div>
 
-      <TaskActions t={t} task={task} employees={employees} />
+      <TaskActions t={t} companyId={companyId} task={task} employees={employees} />
     </li>
   );
 }
@@ -191,7 +200,7 @@ export function WorkView({
                 </h3>
                 <ul className="flex flex-col gap-2">
                   {column.map((task) => (
-                    <TaskCard key={task.id} t={t} task={task} employees={employees} />
+                    <TaskCard key={task.id} t={t} companyId={companyId} task={task} employees={employees} />
                   ))}
                 </ul>
               </section>

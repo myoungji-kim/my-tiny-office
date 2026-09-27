@@ -1,9 +1,11 @@
-import type { AppContext } from "../application/context";
 import { settleDueTasks } from "../application/task";
+import type { Company } from "../domain/company";
 import type { Availability } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import { taskProgress, type TaskPriority, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
+import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
+import { readSettings } from "../infrastructure/persistence/settings";
 
 export interface CompanyOption {
   readonly id: string;
@@ -50,22 +52,37 @@ const empty: OfficeView = {
   tasks: [],
 };
 
+export interface OfficeSource {
+  readonly files?: CompanyFiles;
+  readonly clock?: () => number;
+}
+
+// Every company is a file of its own; a file that holds no company yet is skipped.
+async function listCompanies(files: CompanyFiles): Promise<Company[]> {
+  const companies: Company[] = [];
+  for (const id of files.ids()) {
+    const company = await createAppContext(files.open(id)).companies.findById(id);
+    if (company !== undefined) companies.push(company);
+  }
+  return companies.sort((a, b) => a.foundedAt - b.foundedAt);
+}
+
 export async function loadOffice(
   selectedCompanyId?: string,
-  context?: AppContext,
+  { files = getCompanyFiles(), clock }: OfficeSource = {},
 ): Promise<OfficeView> {
-  const ctx = context ?? createAppContext();
-
-  const companies = await ctx.companies.findAll();
+  const companies = await listCompanies(files);
   if (companies.length === 0) {
     return empty;
   }
 
-  const requested =
-    selectedCompanyId === undefined
-      ? undefined
-      : companies.find((candidate) => candidate.id === toCompanyId(selectedCompanyId));
-  const company = requested ?? companies[0];
+  const byId = (id: string | undefined) =>
+    id === undefined ? undefined : companies.find((candidate) => candidate.id === toCompanyId(id));
+  const company =
+    byId(selectedCompanyId) ?? byId(readSettings(files.directory).lastCompanyId) ?? companies[0];
+
+  const base = createAppContext(files.open(company.id));
+  const ctx = clock === undefined ? base : { ...base, now: clock };
 
   await settleDueTasks(ctx, { companyId: company.id });
 

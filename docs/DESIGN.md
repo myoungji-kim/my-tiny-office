@@ -591,9 +591,6 @@ measured flags behind it.
   than progress derived from `estimatedDuration`. Projects need their status
   and priority and allowed commands, employees the `reviewing` status, and a
   task its worktree, branch and blocked reason.
-- **The code opens one database.** `src/infrastructure/persistence/database.ts`
-  opens a single `my-tiny-office.db`; a file per company, the list of them, and
-  the language and last company in `settings.json` are not built yet.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

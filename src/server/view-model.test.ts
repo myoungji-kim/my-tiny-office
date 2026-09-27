@@ -1,16 +1,22 @@
+import { randomUUID } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
 import { assignTask, completeTask, createTask, startTask } from "../application/task";
-import { toEmployeeId, type CompanyId } from "../domain/ids";
+import { toCompanyId, toEmployeeId, type CompanyId } from "../domain/ids";
 import { createAppContext } from "../infrastructure/app-context";
-import { createSqliteTaskRepository } from "../infrastructure/persistence/task-repository";
 import {
-  createTestDatabase,
-  type TestDatabase,
-} from "../infrastructure/persistence/test-database";
+  createCompanyFiles,
+  type CompanyFiles,
+} from "../infrastructure/persistence/company-files";
+import { writeSettings } from "../infrastructure/persistence/settings";
+import { createSqliteTaskRepository } from "../infrastructure/persistence/task-repository";
 
 import { loadOffice } from "./view-model";
 
@@ -18,22 +24,32 @@ const minute = 60_000;
 const baseTime = 1_700_000_000_000;
 const estimatedDuration = 30 * minute;
 
-let database: TestDatabase;
+let directory: string;
+let files: CompanyFiles;
 let current: number;
+// the context of the company seeded last
 let ctx: AppContext;
+let seeded = 0;
 
 beforeEach(() => {
-  database = createTestDatabase();
+  directory = mkdtempSync(join(tmpdir(), "my-tiny-office-"));
+  files = createCompanyFiles(directory);
   current = baseTime;
-  ctx = { ...createAppContext(database.handle), now: () => current };
 });
 
 afterEach(() => {
-  database.cleanup();
+  files.close();
+  rmSync(directory, { recursive: true, force: true });
 });
 
+const load = (selected?: string) => loadOffice(selected, { files, clock: () => current });
+
 async function seedCompany(name = "TinySoft") {
-  const { company } = await createCompany(ctx, { name, description: "A tiny office" });
+  const id = toCompanyId(randomUUID());
+  ctx = { ...createAppContext(files.create(id)), now: () => current };
+  // each company founded a moment after the last, so "oldest" is well defined
+  const founded = current + seeded++;
+  const { company } = await createCompany({ ...ctx, now: () => founded }, { id, name, description: "A tiny office" });
   return company;
 }
 
@@ -49,7 +65,7 @@ async function seedEmployee(companyId: CompanyId) {
 
 describe("loadOffice", () => {
   it("reports no company on a fresh database", async () => {
-    const office = await loadOffice(undefined, ctx);
+    const office = await load();
 
     expect(office.company).toBeUndefined();
     expect(office.companies).toEqual([]);
@@ -58,7 +74,7 @@ describe("loadOffice", () => {
   it("selects the only company automatically", async () => {
     const company = await seedCompany();
 
-    const office = await loadOffice(undefined, ctx);
+    const office = await load();
 
     expect(office.company).toMatchObject({ id: company.id, name: "TinySoft" });
     expect(office.companies).toHaveLength(1);
@@ -68,7 +84,7 @@ describe("loadOffice", () => {
     await seedCompany("TinySoft");
     const rival = await seedCompany("RivalSoft");
 
-    const office = await loadOffice(rival.id, ctx);
+    const office = await load(rival.id);
 
     expect(office.company?.name).toBe("RivalSoft");
     expect(office.companies).toHaveLength(2);
@@ -78,7 +94,7 @@ describe("loadOffice", () => {
     const company = await seedCompany();
     await seedEmployee(company.id);
 
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.employees).toEqual([
       {
@@ -91,12 +107,49 @@ describe("loadOffice", () => {
     ]);
   });
 
+  it("keeps each company in a file of its own", async () => {
+    const tiny = await seedCompany("TinySoft");
+    const rival = await seedCompany("RivalSoft");
+
+    expect(files.ids()).toHaveLength(2);
+    await expect(createAppContext(files.open(tiny.id)).companies.findAll()).resolves.toEqual([tiny]);
+    await expect(createAppContext(files.open(rival.id)).companies.findAll()).resolves.toEqual([rival]);
+  });
+
+  it("opens the company opened last when none is asked for", async () => {
+    await seedCompany("TinySoft");
+    const rival = await seedCompany("RivalSoft");
+    writeSettings(directory, { lastCompanyId: rival.id });
+
+    const office = await load();
+
+    expect(office.company?.name).toBe("RivalSoft");
+  });
+
+  it("falls back to the oldest company when the one asked for is not here", async () => {
+    await seedCompany("TinySoft");
+    await seedCompany("RivalSoft");
+
+    const office = await load(randomUUID());
+
+    expect(office.company?.name).toBe("TinySoft");
+  });
+
+  it("skips a file that holds no company yet", async () => {
+    files.create(toCompanyId(randomUUID()));
+
+    const office = await load();
+
+    expect(office.company).toBeUndefined();
+  });
+
   it("keeps the company data after the database is reopened", async () => {
     const company = await seedCompany();
     await seedEmployee(company.id);
 
-    const reopened = database.reopen();
-    const office = await loadOffice(company.id, { ...createAppContext(reopened), now: () => current });
+    files.close();
+    files = createCompanyFiles(directory);
+    const office = await load(company.id);
 
     expect(office.company?.name).toBe("TinySoft");
     expect(office.employees).toHaveLength(1);
@@ -123,7 +176,7 @@ describe("task lifecycle through the office view", () => {
   it("shows a new task as unassigned backlog work", async () => {
     const { company } = await seedAssignedTask();
 
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks).toEqual([
       {
@@ -145,7 +198,7 @@ describe("task lifecycle through the office view", () => {
     const assigned = await assignTask(ctx, { taskId: task.id, employeeId: employee.id });
     assert(assigned.ok);
 
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks[0]).toMatchObject({ status: "ready", assigneeName: "Min-su" });
   });
@@ -156,7 +209,7 @@ describe("task lifecycle through the office view", () => {
     await startTask(ctx, { taskId: task.id });
 
     current = baseTime + 15 * minute;
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks[0]).toMatchObject({ status: "working", progress: 0.5 });
     expect(office.employees[0]).toMatchObject({ workingOn: "Implement payment API" });
@@ -171,7 +224,7 @@ describe("task lifecycle through the office view", () => {
     const completed = await completeTask(ctx, { taskId: task.id });
     assert(completed.ok);
 
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks[0]).toMatchObject({ status: "done", progress: 1 });
     expect(office.employees[0]).toMatchObject({ workingOn: undefined });
@@ -183,11 +236,11 @@ describe("task lifecycle through the office view", () => {
     await startTask(ctx, { taskId: task.id });
 
     current = baseTime + 5 * 60 * minute;
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks[0]).toMatchObject({ status: "done" });
     await expect(
-      createSqliteTaskRepository(database.handle.db).findById(task.id),
+      createSqliteTaskRepository(files.open(company.id).db).findById(task.id),
     ).resolves.toMatchObject({ completedAt: baseTime + estimatedDuration });
   });
 
@@ -202,7 +255,7 @@ describe("task lifecycle through the office view", () => {
     });
     assert(rivalTask.ok);
 
-    const office = await loadOffice(company.id, ctx);
+    const office = await load(company.id);
 
     expect(office.tasks.map((task) => task.title)).toEqual(["Implement payment API"]);
   });
@@ -210,8 +263,9 @@ describe("task lifecycle through the office view", () => {
 
 describe("createAppContext", () => {
   it("wires repositories that share the database", async () => {
-    const context = createAppContext(database.handle);
-    const { company } = await createCompany(context, { name: "TinySoft" });
+    const id = toCompanyId(randomUUID());
+    const context = createAppContext(files.create(id));
+    const { company } = await createCompany(context, { id, name: "TinySoft" });
 
     await expect(context.companies.findById(company.id)).resolves.toMatchObject({
       name: "TinySoft",

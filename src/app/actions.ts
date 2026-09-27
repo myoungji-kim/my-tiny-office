@@ -1,14 +1,19 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createCompany } from "../application/company";
+import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
 import { assignTask, completeTask, createTask, startTask } from "../application/task";
 import { toCompanyId, toEmployeeId, toTaskId } from "../domain/ids";
 import type { TaskPriority } from "../domain/task";
-import { createAppContext } from "../infrastructure/app-context";
+import { companyContext, createAppContext } from "../infrastructure/app-context";
+import { getCompanyFiles } from "../infrastructure/persistence/company-files";
+import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 
 const MINUTE = 60_000;
 
@@ -26,6 +31,13 @@ function optionalText(formData: FormData, field: string): string | undefined {
   return value === "" ? undefined : value;
 }
 
+// Every action names its company, and only a company that has a file here is opened.
+function contextOf(formData: FormData): AppContext | undefined {
+  const id = text(formData, "companyId");
+  const files = getCompanyFiles();
+  return files.has(id) ? companyContext(toCompanyId(id), files) : undefined;
+}
+
 function priority(formData: FormData): TaskPriority {
   const value = formData.get("priority");
   return value === "low" || value === "high" ? value : "normal";
@@ -40,10 +52,14 @@ export async function createCompanyAction(
     return { error: "companyNameRequired" };
   }
 
-  const { company } = await createCompany(createAppContext(), {
+  const files = getCompanyFiles();
+  const id = toCompanyId(randomUUID());
+  const { company } = await createCompany(createAppContext(files.create(id)), {
+    id,
     name,
     description: optionalText(formData, "description"),
   });
+  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: company.id });
 
   revalidatePath("/");
   redirect(`/?company=${encodeURIComponent(company.id)}`);
@@ -59,7 +75,12 @@ export async function hireEmployeeAction(
     return { error: "employeeFieldsRequired" };
   }
 
-  const result = await hireEmployee(createAppContext(), {
+  const ctx = contextOf(formData);
+  if (ctx === undefined) {
+    return { error: "companyNotFound" };
+  }
+
+  const result = await hireEmployee(ctx, {
     companyId: toCompanyId(text(formData, "companyId")),
     name,
     role,
@@ -81,7 +102,12 @@ export async function createTaskAction(
     return { error: "taskTitleRequired" };
   }
 
-  const result = await createTask(createAppContext(), {
+  const ctx = contextOf(formData);
+  if (ctx === undefined) {
+    return { error: "companyNotFound" };
+  }
+
+  const result = await createTask(ctx, {
     companyId: toCompanyId(text(formData, "companyId")),
     title,
     description: optionalText(formData, "description"),
@@ -100,7 +126,12 @@ export async function assignTaskAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const result = await assignTask(createAppContext(), {
+  const ctx = contextOf(formData);
+  if (ctx === undefined) {
+    return { error: "companyNotFound" };
+  }
+
+  const result = await assignTask(ctx, {
     taskId: toTaskId(text(formData, "taskId")),
     employeeId: toEmployeeId(text(formData, "employeeId")),
   });
@@ -116,7 +147,12 @@ export async function startTaskAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const result = await startTask(createAppContext(), {
+  const ctx = contextOf(formData);
+  if (ctx === undefined) {
+    return { error: "companyNotFound" };
+  }
+
+  const result = await startTask(ctx, {
     taskId: toTaskId(text(formData, "taskId")),
   });
   if (!result.ok) {
@@ -131,7 +167,12 @@ export async function completeTaskAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const result = await completeTask(createAppContext(), {
+  const ctx = contextOf(formData);
+  if (ctx === undefined) {
+    return { error: "companyNotFound" };
+  }
+
+  const result = await completeTask(ctx, {
     taskId: toTaskId(text(formData, "taskId")),
   });
   if (!result.ok) {
