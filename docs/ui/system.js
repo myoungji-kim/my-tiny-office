@@ -641,7 +641,7 @@ const STAFF = [
     ] },
   { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
     team: "frontend", status: "vacation", joined: "2026. 1. 12.",
-    back: { ko: "3일 후 복귀", en: "Back in 3 days" }, done: 52, reviews: 14,
+    leaveSince: { ko: "9월 23일부터", en: "Since Sep 23" }, done: 52, reviews: 14,
     style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }, { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }],
     memories: [
       { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },

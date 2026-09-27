@@ -207,7 +207,7 @@
       actionOf: (n) => n + " 행동",
       tasks: { paging: "결제 내역 페이지네이션", orderType: "주문 상태 타입 좁히기", webhook: "결제 웹훅 서명 검증" },
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
-      backIn: "3일 후 복귀", backUnknown: "복귀 날짜 미정", justBack: "휴가에서 막 돌아왔어요",
+      sinceToday: "오늘부터", justBack: "휴가에서 막 돌아왔어요",
     },
     en: {
       ...WORDS.en,
@@ -244,7 +244,7 @@
       actionOf: (n) => "Actions for " + n,
       tasks: { paging: "Paginate the payment history", orderType: "Narrow the order status type", webhook: "Verify the payment webhook signature" },
       reviewKey: "Review", reviewingNow: "Reviewing",
-      backIn: "Back in 3 days", backUnknown: "No return date yet", justBack: "Just back from leave",
+      sinceToday: "Since today", justBack: "Just back from leave",
     },
   };
 
@@ -275,7 +275,7 @@
     { id: "p2", col: 8, row: 3, task: { key: "orderType", spent: 8 } },
     { id: "p3", col: 13, row: 3, task: { key: "webhook", spent: 41 } },
     { id: "p4", col: 3, row: 6, review: { key: "webhook", spent: 6 } },
-    { id: "p5", col: 8, row: 6, back: "backIn" },
+    { id: "p5", col: 8, row: 6 },
     { id: null, col: 13, row: 6 },
   ];
   const fromCompany = new Map(STAFF.map((p) => [p.id, p]));
@@ -456,7 +456,7 @@
       p.status === "working" ? `<span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b>`
       : p.status === "reviewing" ? `<span>${t().spent(p.review.spent)}</span><b>${t().status.reviewing}</b>`
       : p.status === "available" ? `<span>${t()[p.last]}</span><b>${t().waiting}</b>`
-      : `<span>${t()[p.back]}</span><b>${t().onLeave}</b>`;
+      : `<span>${p.leaveSince[lang]}</span><b>${t().onLeave}</b>`;
     const line =
       p.status === "working" ? t().tasks[p.task.key]
       : p.status === "reviewing" ? t().tasks[p.review.key]
@@ -657,11 +657,11 @@
     available: [
       { icon: I.plus, label: t().actions.assign, key: true, run: (p) => go("employees.html", p.id + "/assign") },
       TEACH,
-      { icon: I.sun, label: t().actions.leave, run: (p) => change(p, { status: "vacation", back: "backUnknown" }) },
+      { icon: I.sun, label: t().actions.leave, run: (p) => change(p, { status: "vacation", leaveSince: { ko: TEXT.ko.sinceToday, en: TEXT.en.sinceToday } }) },
     ],
     vacation: [
       { icon: I.plus, label: t().actions.assign, key: true, off: t().cannotAssign },
-      { icon: I.undo, label: t().actions.comeBack, run: (p) => change(p, { status: "available", back: null, last: "justBack" }) },
+      { icon: I.undo, label: t().actions.comeBack, run: (p) => change(p, { status: "available", leaveSince: null, last: "justBack" }) },
       TEACH,
     ],
   };
@@ -680,7 +680,7 @@
     if (p.status === "available")
       return `<span class="c-k">${t().lastDone}</span><span class="c-task">${t()[p.last]}</span>
         <span class="p-nums"><span>${t().deskFree}</span><b>${t().waiting}</b></span>`;
-    return `<span class="c-k">${t().vacationLabel}</span><span class="c-task">${t()[p.back]}</span>`;
+    return `<span class="c-k">${t().vacationLabel}</span><span class="c-task">${p.leaveSince[lang]}</span>`;
   }
 
   function open(id, el, viaKey) {

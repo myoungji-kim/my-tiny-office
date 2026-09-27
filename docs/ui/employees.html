@@ -579,8 +579,8 @@
       ? `<span class="k">${t().currentTask}</span><span class="now-task">${tx(p.task)}</span>`
       : p.review
       ? `<span class="k">${t().reviewingNow}</span><span class="now-task">${tx(p.review)}</span>`
-      : p.back
-      ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
+      : p.leaveSince
+      ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.leaveSince)}</span>`
       : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.returned ? t().justBack : p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;
 
     const lost = p.agentLost
@@ -750,11 +750,11 @@
       },
       away
         ? { label: t().comeBack, icon: ICON.undo, run: () => {
-            Object.assign(p, { status: "available", back: null, returned: true });
+            Object.assign(p, { status: "available", leaveSince: null, returned: true });
             rerenderPeople(); renderMembers();
           } }
         : { label: t().sendOnLeave, icon: ICON.sun, confirm: p.task ? t().leaveWhy(tx(p.task)) : null, run: () => {
-            Object.assign(p, { status: "vacation", task: null, returned: false, back: { ko: "복귀 날짜 미정", en: "No return date yet" } });
+            Object.assign(p, { status: "vacation", task: null, returned: false, leaveSince: { ko: "오늘부터", en: "Since today" } });
             rerenderPeople(); renderMembers();
           } },
       {

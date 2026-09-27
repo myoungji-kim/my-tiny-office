@@ -31,7 +31,8 @@ A team is organisation first: its room in the office appears with its first
 person, and no room is built by hand.
 
 **Leave and letting go.** Sending someone on leave returns their task to the
-backlog, and nobody on leave can be given work. Letting someone go returns
+backlog, and nobody on leave can be given work. Leave has no return date: it
+shows since when, and ends when the user brings them back. Letting someone go returns
 their task too and takes what they were taught with them; the company's
 history keeps their hire.
 

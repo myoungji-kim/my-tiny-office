@@ -1196,7 +1196,7 @@
     b.type = "button";
     b.className = "mrow seat";
     const when = away(p) ? t().seatAway : free(p) ? t().seatNow : t().seatLater;
-    const doing = away(p) ? tx(p.back) : free(p) ? t().reviewerFree : t().reviewerBusy(tx(busyWith(p)), p.status === "reviewing");
+    const doing = away(p) ? tx(p.leaveSince) : free(p) ? t().reviewerFree : t().reviewerBusy(tx(busyWith(p)), p.status === "reviewing");
     b.innerHTML = `<span class="w-av"></span><span class="seat-tx"><span class="seat-top"><b>${p.name}</b><span class="seat-when">${when}</span></span><span class="seat-why">${doing}</span></span>`;
     b.title = doing;
     b.querySelector(".w-av").appendChild(spriteCanvas(p.species, 20));
