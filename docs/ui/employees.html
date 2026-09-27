@@ -366,7 +366,7 @@
       referenced: (who, mem) => josa2(who, "이", "가") + " <q>" + mem + "</q>" + (josaNeeds(mem) ? "을" : "를") + " 참고했어요",
       assignTitle: (n) => n + (josaNeeds(n) ? "이" : "가") + " 맡을 업무",
       backlog: "대기 중인 업무", newTask: "새 업무 만들기", minutes: (m) => m + "분",
-      broughtAlong: "이 업무에 들고 갈 기억",
+      broughtAlong: "이 업무에 쓸 만한 기억", broughtWhy: "기억은 전부 들고 가요. 그중 이 업무 분야와 관련된 것만 보여줘요.",
       noAreaMemory: (a) => a + " 기억이 없어요",
       noAreaMemoryWhy: (n) => n + (josaNeeds(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
       tellNow: "지금 알려주기", cancel: "취소", assignThis: "이 업무 맡기기", createAndAssign: "업무 만들고 맡기기",
@@ -406,7 +406,7 @@
       referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
       assignTitle: (n) => "Work for " + n,
       backlog: "Waiting", newTask: "Create a task", minutes: (m) => m + " min",
-      broughtAlong: "What they bring to this",
+      broughtAlong: "What they know that helps here", broughtWhy: "They carry all of it. These are the ones in this task's area.",
       noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
       noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
       tellNow: "Teach them now", cancel: "Cancel", assignThis: "Assign this", createAndAssign: "Create and assign",
@@ -939,6 +939,7 @@
         task
           ? `<div class="m-sec">
                <span class="k">${t().broughtAlong} <span class="kn">${useful.length}</span></span>
+               <p class="hint" style="margin:-2px 0 10px">${t().broughtWhy}</p>
                ${
                  useful.length
                    ? useful.map(memCard).join("")

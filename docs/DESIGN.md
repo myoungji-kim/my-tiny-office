@@ -320,6 +320,11 @@ The assign modal exists to show **what this person brings to this task** before
 the work starts — the memories in the task's area, most-referenced first. It is
 the same loop seen from the other end.
 
+It is a preview, not a choice. Everything live is carried into every task, as
+a person brings everything they know; the modal only points at the part that
+bears on this one. The one way to stop carrying a memory is to archive it, and
+that is a decision about the person, not about a task.
+
 When they have none, the modal says so and offers to teach them right there.
 That is the moment the player actually has the context to teach. Teaching from
 there comes back to the same task, which now lists what was just taught.
