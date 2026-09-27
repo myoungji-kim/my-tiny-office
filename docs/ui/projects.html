@@ -212,8 +212,8 @@
   /* ── the work on the board ───────────────────────────────────── */
 
   const PROJECTS = [
-    { id: "pay", name: { ko: "결제 개편", en: "Payments rework" } },
-    { id: "order", name: { ko: "주문 v2", en: "Orders v2" } },
+    { id: "pay", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft" },
+    { id: "order", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders" },
   ];
 
   // backlog → working → approval → done, and held off to the side.
@@ -518,7 +518,10 @@
     }
 
     const waiting = shown().filter((k) => k.status === "approval").length;
-    document.getElementById("headSub").textContent = t().headSub(shown().length, waiting);
+    const here = PROJECTS.find((p) => p.id === project);
+    document.getElementById("headSub").innerHTML =
+      t().headSub(shown().length, waiting) +
+      (here?.folder ? ` · <span class="mono">${here.folder}</span>` : "");
   }
   /* ── one task, and what the player can do about it ───────────── */
 
@@ -713,7 +716,7 @@
           <div class="field" style="margin-top:0">
             <span class="label">${t().fPriority}</span>
             <span class="select-wrap">
-              <select class="select">
+              <select class="select" id="ntPrio">
                 <option value="low">${t().priority.low}</option>
                 <option value="normal" selected>${t().priority.normal}</option>
                 <option value="high">${t().priority.high}</option>
@@ -756,18 +759,39 @@
 
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
-        <button class="btn btn-primary btn-md">${t().create}</button>
+        <button class="btn btn-primary btn-md" data-create>${t().create}</button>
       </div>`;
+
+    // What the dialog promised is what the board shows: a free person starts
+    // on it, a busy one queues, and nobody named means the backlog.
+    dialog.querySelector("[data-create]").addEventListener("click", () => {
+      const field = dialog.querySelector("#ntTitle");
+      const name = field.value.trim();
+      if (!name) return field.focus();
+      const priority = dialog.querySelector("#ntPrio").value;
+      TASKS.push({
+        id: "nt" + TASKS.length, project: into, area, priority,
+        status: picked && free(picked) ? "working" : "backlog",
+        who: picked ? picked.id : null,
+        spent: picked && free(picked) ? 0 : undefined,
+        title: { ko: name, en: name },
+      });
+      if (project !== "all") project = into;
+      closeModal();
+      render();
+    });
 
     // re-rendering is how the dialog answers what a choice means, so the text
     // already typed has to survive it
     const keep = () => {
       const title = dialog.querySelector("#ntTitle").value;
       const desc = dialog.querySelector(".textarea").value;
+      const prio = dialog.querySelector("#ntPrio").value;
       return (focusId) => {
         renderNewTask();
         dialog.querySelector("#ntTitle").value = title;
         dialog.querySelector(".textarea").value = desc;
+        dialog.querySelector("#ntPrio").value = prio;
         dialog.querySelector(focusId).focus();
       };
     };
