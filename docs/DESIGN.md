@@ -119,10 +119,20 @@ written down, but nobody can start them.
 The same dialogs correct what they made. A task's popover and a project's `⋯`
 open them filled in, and the button says save instead of create.
 
-**A finished task is the record of what happened**, so it is neither edited nor
-deleted; the rest is the player's to change. Where a task sits still follows
-from who is on it: give a queued task to someone free and it starts, take the
-assignee away from one in progress and it goes back to the backlog.
+**Finished work is not rewritten.** A task in the done column is the record of
+what happened, and one waiting for approval is finished too — the answer there
+is to approve it, send it back or hold it. Neither offers an edit.
+
+**A task in progress is redirected, not re-specified.** Someone is working in
+that project's folder right now, so telling them something different is a
+normal thing to do and the dialog says they carry on with it. Moving the task
+to another project is not: that is a different folder, and the field is locked
+with the way around it — hold the task first. Handing it to someone else is
+allowed and says its price, which is that nothing done so far carries across.
+
+Where a task sits keeps following from who is on it: give a queued task to
+someone free and it starts, take the assignee away from one in progress and it
+goes back to the backlog.
 
 **Removing says what is being thrown away, unless nothing has happened yet.** A
 task in the backlog is gone on the spot — nobody has touched it. Past that,

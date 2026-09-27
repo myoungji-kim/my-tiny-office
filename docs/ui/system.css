@@ -281,6 +281,10 @@ body:has(> .app) { padding: 22px 18px 40px; }
 
 .input::placeholder, .textarea::placeholder { color: var(--faint); }
 
+.input:disabled, .select:disabled, .textarea:disabled { background: var(--sunk); color: var(--muted); cursor: default; }
+
+.select-wrap:has(:disabled) svg { color: var(--faint); }
+
 .hint { display: block; font-size: 13px; color: var(--faint); margin-top: 6px; }
 
 .req { color: var(--bad); }

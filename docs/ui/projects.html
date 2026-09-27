@@ -286,6 +286,12 @@
       freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
+      keepsGoing: "지금 하고 있는 일이라, 바꾼 내용으로 이어서 해요.",
+      handOver: (n) => n + subjectParticle(n) + " 이어받고, 지금까지 한 작업은 넘어가지 않아요.",
+      backToBacklog: "대기열로 돌아가고, 지금까지 한 작업은 남지 않아요.",
+      folderLocked: "진행 중에는 폴더를 옮길 수 없어요. 보류한 뒤에 바꿔요.",
+      whenResumed: (n) => "다시 진행하면 " + n + subjectParticle(n) + " 맡아요.",
+      whenResumedAnyone: "다시 진행하면 비는 사람이 가져가요.",
       newProjectTitle: "새 프로젝트", createProject: "프로젝트 만들기",
       fName: "이름", fNamePlaceholder: "결제 개편",
       workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", choose: "고르기", change: "바꾸기",
@@ -341,6 +347,12 @@
       freeNow: (n) => n + " is free and starts on it right away.",
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
+      keepsGoing: "Someone is on it, so they carry on with what you changed.",
+      handOver: (n) => n + " takes it over, and nothing done so far carries across.",
+      backToBacklog: "It goes back to the backlog, and nothing done so far is kept.",
+      folderLocked: "A task in progress cannot move folder. Hold it first.",
+      whenResumed: (n) => n + " picks it up when it resumes.",
+      whenResumedAnyone: "Whoever is free picks it up when it resumes.",
       newProjectTitle: "New project", createProject: "Create project",
       fName: "Name", fNamePlaceholder: "Payments rework",
       workspace: "Workspace", noFolder: "Nothing chosen yet", choose: "Choose", change: "Change",
@@ -643,9 +655,10 @@
     }
 
     // A finished task is the record of what happened, so it is not edited or
-    // thrown away; everything before that is still the player's to change.
+    // thrown away. One waiting for approval is finished too - the answer there
+    // is to approve it, send it back or hold it, not to rewrite what was done.
     if (task.status !== "done") {
-      acts.appendChild(menu(t().actions.edit, null, () => openEditTask(task)));
+      if (task.status !== "approval") acts.appendChild(menu(t().actions.edit, null, () => openEditTask(task)));
       acts.appendChild(menu(t().actions.removeTask, "bad", () => askRemoveTask(task)));
     }
 
@@ -728,6 +741,22 @@
     const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
     const picked = who ? byId.get(who) : null;
     const heading = editing ? t().editTaskTitle : t().newTaskTitle;
+    // An agent is running in this project's folder right now, so the work can
+    // be redirected but not moved somewhere else.
+    const running = editing?.status === "working";
+
+    // What naming this person means, which is a different thing while someone
+    // is already on the work.
+    const whatHappens = () => {
+      if (running) {
+        if (!picked) return t().backToBacklog;
+        return picked.id === editing.who ? t().keepsGoing : t().handOver(picked.name);
+      }
+      // A held task is not waiting its turn; it is waiting for the player.
+      if (editing?.status === "held") return picked ? t().whenResumed(picked.name) : t().whenResumedAnyone;
+      if (!picked) return t().whoTakes;
+      return free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name);
+    };
 
     dialog.setAttribute("aria-label", heading);
     dialog.innerHTML = `
@@ -739,11 +768,12 @@
         <div class="field" style="margin-top:0">
           <span class="label">${t().fProject}</span>
           <span class="select-wrap">
-            <select class="select" id="ntProject">
+            <select class="select" id="ntProject"${running ? " disabled" : ""}>
               ${PROJECTS.map((p) => `<option value="${p.id}"${p.id === into ? " selected" : ""}>${tx(p.name)}</option>`).join("")}
             </select>
             ${chevron}
           </span>
+          ${running ? `<span class="hint">${t().folderLocked}</span>` : ""}
         </div>
 
         <div class="field">
@@ -806,9 +836,7 @@
             </select>
             ${chevron}
           </span>
-          <span class="hint">${
-            !picked ? t().whoTakes : free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name)
-          }</span>
+          <span class="hint">${whatHappens()}</span>
         </div>
       </div>
 
@@ -825,16 +853,19 @@
       if (!name) return field.focus();
       const desc = dialog.querySelector(".textarea").value.trim();
       const task = editing ?? { id: "nt" + TASKS.length, status: "backlog" };
+      const handedOver = running && task.who !== (picked?.id ?? null);
       // The player's own words are not translated, so a new one reads the same
       // in both languages and a correction only touches the one being read.
       const wrote = (had, value) => (editing ? { ...had, [lang]: value } : { ko: value, en: value });
       Object.assign(task, {
         // the only field the dialog does not re-render on, so it is read live
-        project: into, area, priority: dialog.querySelector("#ntPrio").value,
+        project: running ? task.project : into, area, priority: dialog.querySelector("#ntPrio").value,
         who: picked ? picked.id : null,
         title: wrote(task.title, name),
         desc: desc ? wrote(task.desc, desc) : undefined,
       });
+      // Nothing of the old run carries over to whoever takes it next.
+      if (handedOver && task.who) task.spent = 0;
       settle(task);
       if (!editing) TASKS.push(task);
       if (project !== "all") project = into;
