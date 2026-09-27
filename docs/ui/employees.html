@@ -53,7 +53,6 @@
 
   /* ═══ status ═══ */
 
-  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
 
   .chip {
     display: inline-flex; align-items: center; gap: 5px; flex: none;
@@ -338,7 +337,6 @@
     </div>
 
     <div class="rule"></div>
-    <div class="ws-hd"><span>My Tiny Office</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
     <div id="members"></div>
 
     <div class="side-foot">
@@ -607,19 +605,7 @@
   const knowersOf = (area) => people.filter((p) => areasOf(p).includes(area));
 
   /* ── sidebar roster ──────────────────────────────────────────── */
-  const members = document.getElementById("members");
-  for (const p of people) {
-    const b = document.createElement("button");
-    b.className = "row-item";
-    b.type = "button";
-    b.style.cssText = "grid-template-columns:22px 1fr auto;padding:5px 8px;border-bottom:none;border-radius:8px;gap:9px";
-    b.innerHTML = `<span style="width:22px;height:22px;border-radius:6px;overflow:hidden;background:var(--sunk);display:grid;place-items:center"></span>
-      <span style="font-size:13px">${p.name}</span><span class="dot ${p.status}"></span>`;
-    b.firstElementChild.appendChild(avatar(p.species, 22));
-    b.addEventListener("click", () => { show("list"); select(p.id); });
-    members.appendChild(b);
-  }
-
+  mountRoster(document.getElementById("members"), (p) => { show("list"); select(p.id); });
   /* ── header ──────────────────────────────────────────────────── */
   const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0) + companyMemories.length;
   document.getElementById("nList").textContent = people.length;

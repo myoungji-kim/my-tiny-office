@@ -114,6 +114,8 @@
     text-shadow: 0 1px 2px rgb(0 0 0 / .55);
   }
 
+.dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
+
 .dot.working { background: var(--warn); box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--warn); margin: 2px; }
 
 .dot.ready { background: transparent; border: 2px solid var(--info); }
@@ -396,6 +398,19 @@ section > h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
 .nav a[aria-current] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgb(20 20 25 / .06); }
 
 .nav svg { width: 17px; height: 17px; }
+
+.member {
+    display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 9px;
+    height: 32px; padding-inline: 8px; border-radius: 8px; font-size: 13px;
+    width: 100%; background: none; border: none; text-align: left; cursor: pointer;
+    font-family: inherit; color: inherit;
+  }
+
+.member:hover { background: var(--sunk); }
+
+.member[aria-expanded="true"] { background: var(--surface); box-shadow: 0 1px 2px rgb(20 20 25 / .06); font-weight: 600; }
+
+.member .av { width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); display: grid; place-items: center; }
 
 .badge {
     min-width: 19px; height: 19px; padding-inline: 6px; border-radius: 999px;

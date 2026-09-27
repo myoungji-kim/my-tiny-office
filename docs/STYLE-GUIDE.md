@@ -443,7 +443,8 @@ copies equal. They did not stay equal.
 - **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
   the documented set, `:focus-visible` wherever there are controls, no tracked
   Korean, no class without a rule, the same sidebar and header frame on the
-  product screens, every `id` a script reaches for, a title that matches the
+  product screens, every `id` a script reaches for, every class `system.js` writes styled
+  in `system.css` rather than one page, a title that matches the
   name the bar gives the page, and — the point of the two shared files — no page
   redefining a selector, redeclaring a name, or declaring a token of its own
 - **verify-docs** — the token table here must match `system.css`, and the cast

@@ -332,5 +332,30 @@ for (const p of PAGES) {
 }
 console.log("");
 
+/* ── 14. a class the shared code builds is styled in the shared file ── */
+// system.js writes markup; if the class it writes is styled inside one page,
+// every other page gets the markup without the look. That is how the roster
+// arrived on two screens as bare buttons, and the popover as nothing at all.
+console.log("shared markup, shared styling");
+{
+  const SYSTEM_JS = readFileSync("docs/ui/system.js", "utf8");
+  const shared = new Set([...stripMedia(SYSTEM).matchAll(/(^|\n)([.#:a-zA-Z][^{}\n]*?)\s*\{/g)].map((m) => m[2].trim()));
+  const styledSomewhere = (cls) =>
+    [...shared].some((sel) => sel.split(/[\s,>]+/).some((part) => part.split(":")[0] === "." + cls));
+
+  const named = new Set();
+  // className = "x" and className = "x" + … , plus class="x" inside a template
+  for (const m of SYSTEM_JS.matchAll(/className\s*=\s*"([a-z][\w -]*)"/g)) named.add(m[1]);
+  for (const m of SYSTEM_JS.matchAll(/class="([a-z][\w -]*)"/g)) named.add(m[1]);
+
+  for (const value of named) {
+    for (const cls of value.split(/\s+/).filter(Boolean)) {
+      if (!styledSomewhere(cls)) flag(`system.js writes .${cls}, which system.css does not style`);
+    }
+  }
+}
+console.log("");
+
+
 console.log(problems ? `\n${problems} problem(s)` : "\nno inconsistency found");
 process.exit(problems ? 1 : 0);

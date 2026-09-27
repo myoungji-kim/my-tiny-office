@@ -171,7 +171,6 @@
     </div>
 
     <div class="rule"></div>
-    <div class="ws-hd"><span>My Tiny Office</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
     <div id="members"></div>
 
     <div class="side-foot">
@@ -610,16 +609,11 @@
 
   window.addEventListener("resize", () => { if (anchor) place(anchor); });
 
-  /* ── the roster in the sidebar, as on the other screens ──────── */
-  const members = document.getElementById("members");
-  for (const p of STAFF) {
-    const row = document.createElement("div");
-    row.className = "ws-hd";
-    row.style.cssText = "padding:5px 10px";
-    row.innerHTML = `<span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="w-av"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span></span>`;
-    row.querySelector(".w-av").appendChild(avatar(p.species, 20));
-    members.appendChild(row);
-  }
-
+  /* ── sidebar roster ──────────────────────────────────────────── */
+  // The board has no per-person view of its own, so a pick goes to the people
+  // screen, which does.
+  mountRoster(document.getElementById("members"), (p) => {
+    location.href = "employees.html" + (lang === "en" ? "?lang=en" : "");
+  });
   render();
 </script>

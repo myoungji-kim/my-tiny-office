@@ -70,7 +70,8 @@
 
   .chip.bad { background: var(--bad-soft); color: var(--bad-ink); }
 
-  .dot { width: 6px; height: 6px; border-radius: 999px; flex: none; }
+  /* the dot inside a chip, not the standalone status dot system.css sizes */
+  .chip .dot { width: 6px; height: 6px; }
 
   .dot.ok { background: var(--ok); }
 

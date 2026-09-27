@@ -81,6 +81,8 @@ Do not combine unrelated features.
 
 ## Before Opening a PR
 
+Contributions come as pull requests, and every one of these has to pass first:
+
 - typecheck
 - lint
 - tests
@@ -89,6 +91,20 @@ Do not combine unrelated features.
 - verify no secrets were committed
 - verify no unrelated Claude/agent sessions are imported
 - verify Korean/English strings for user-facing changes
+
+## Working as the Maintainer
+
+The maintainer commits to `main` directly and runs the same checks before
+pushing, because a pull request with no second reader buys nothing but delay.
+
+A branch is still worth it when the change is one of these:
+
+- a database migration, or anything else awkward to undo
+- an experiment that might be abandoned
+- something worth reading as one diff later
+
+The checks are not optional either way. A commit message carries what a pull
+request description would have said: what changed, why, and what was measured.
 
 ## AI-Assisted Development
 

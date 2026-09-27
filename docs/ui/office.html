@@ -44,18 +44,6 @@
 
   .logo svg { width: 14px; height: 14px; color: #fff; }
 
-  .member {
-    display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 9px;
-    height: 32px; padding-inline: 8px; border-radius: 8px; font-size: 13px;
-    width: 100%; background: none; border: none; text-align: left; cursor: pointer;
-  }
-
-  .member:hover { background: var(--sunk); }
-
-  .member[aria-expanded="true"] { background: var(--surface); box-shadow: 0 1px 2px rgb(20 20 25 / .06); font-weight: 600; }
-
-  .member .av { width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); display: grid; place-items: center; }
-
   /* ═══ main ═══ */
 
   h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
@@ -74,7 +62,6 @@
 
   .desk[aria-expanded="true"] { border-color: #fff; background: rgb(255 255 255 / .18); }
 
-  .dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
 
   /* ═══ team cards ═══ */
 
@@ -140,7 +127,6 @@
     </div>
 
     <div class="rule"></div>
-    <div class="ws-hd"><span>My Tiny Office</span><button class="ibtn" style="width:22px;height:22px" data-a="hire" aria-label="직원 고용"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>
     <div id="members"></div>
 
     <div class="side-foot">
@@ -342,22 +328,8 @@
     overlay.appendChild(bub);
   }
 
-  /* ── sidebar members ─────────────────────────────────────────── */
-  const members = document.getElementById("members");
-  for (const p of staffed) {
-    const b = document.createElement("button");
-    b.className = "member";
-    b.type = "button";
-    b.dataset.id = p.id;
-    b.innerHTML =
-      '<span class="av"><canvas aria-hidden="true" width="22" height="22"></canvas></span>' +
-      "<span>" + p.name + "</span>" +
-      '<span class="dot ' + p.status + '"></span>';
-    b.addEventListener("click", (e) => open(p.id, b, e.detail === 0));
-    members.appendChild(b);
-    drawAvatar(b.querySelector("canvas"), p.species);
-  }
-
+  /* ── sidebar roster ──────────────────────────────────────────── */
+  mountRoster(document.getElementById("members"), (p, el, viaKey) => open(p.id, el, viaKey));
   /* ── team cards ──────────────────────────────────────────────── */
   function cardInner(p) {
     const v = pct(p);

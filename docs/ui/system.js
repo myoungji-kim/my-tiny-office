@@ -571,6 +571,33 @@ const STAFF = [
     ] },
 ];
 
+/* ═══ the roster in the sidebar ═══ */
+// Presence: whichever screen you are on, you can still see who is in and what
+// they are doing. That is the whole job, so it is one implementation and every
+// screen shows the same five people with the same status.
+
+function mountRoster(el, onPick) {
+  for (const p of STAFF) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "member";
+    b.dataset.id = p.id;
+    b.innerHTML =
+      '<span class="av"><canvas aria-hidden="true" width="22" height="22"></canvas></span>' +
+      "<span>" + p.name + "</span>" +
+      '<span class="dot ' + p.status + '"></span>';
+
+    const c = b.querySelector("canvas");
+    const ctx = c.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(p.species);
+    paint(ctx, sp.sprite, 1, 3, 3, skin(sp));
+
+    if (onPick) b.addEventListener("click", (e) => onPick(p, b, e.detail === 0));
+    el.appendChild(b);
+  }
+}
+
 /* ═══ the sample-page bar ═══ */
 // Not part of the design: it only exists so the samples can be walked through.
 // It builds itself so the seven pages cannot drift apart again, and it carries
