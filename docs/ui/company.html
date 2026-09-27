@@ -10,8 +10,6 @@
 <style>
   /* ═══ main ═══ */
 
-  .view[hidden] { display: none; }
-
   .sec-hd { display: flex; align-items: baseline; gap: 8px; margin: 0 0 10px; }
 
   .sec-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
@@ -185,7 +183,7 @@
     </div>
 
     <div class="body">
-      <div class="view" id="view-overview">
+      <div class="js-view" id="view-overview">
         <div class="flow">
           <div class="panel">
             <div class="panel-bd" id="coCard"></div>
@@ -214,11 +212,11 @@
         </div>
       </div>
 
-      <div class="view" id="view-history" hidden>
+      <div class="js-view" id="view-history" hidden>
         <div class="panel"><div class="panel-bd" id="history"></div></div>
       </div>
 
-      <div class="view" id="view-lists" hidden>
+      <div class="js-view" id="view-lists" hidden>
         <div class="flow">
           <div class="flow" id="ruleNotices"></div>
           <div class="panel">
@@ -238,7 +236,7 @@
         </div>
       </div>
 
-      <div class="view" id="view-memory" hidden>
+      <div class="js-view" id="view-memory" hidden>
         <div class="flow">
           <div class="panel">
             <div class="panel-hd">
@@ -753,7 +751,7 @@
   const VIEWS = ["overview", "history", "lists", "memory"];
   function show(view) {
     for (const tab of document.querySelectorAll(".tab")) tab.setAttribute("aria-selected", String(tab.dataset.view === view));
-    for (const v of document.querySelectorAll(".view")) v.toggleAttribute("hidden", v.id !== "view-" + view);
+    for (const v of document.querySelectorAll(".js-view")) v.toggleAttribute("hidden", v.id !== "view-" + view);
   }
   const fromHash = () => show(VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "overview");
   const go = (view) => { location.hash = view === "overview" ? "" : view; };

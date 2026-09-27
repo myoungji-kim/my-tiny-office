@@ -8,10 +8,6 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  /* ═══ main ═══ */
-
-  .view[hidden] { display: none; }
-
   /* ═══ list ═══ */
 
   .list { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
@@ -59,8 +55,6 @@
   .person-name { display: flex; align-items: center; gap: 10px; }
 
   .d-av { position: relative; width: 56px; height: 56px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
-
-  .ptab[hidden] { display: none; }
 
   .p-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 
@@ -291,28 +285,28 @@
 
     <div class="body">
       <div id="person" hidden>
-        <div class="ptab p-grid" id="pt-overview">
+        <div class="js-ptab p-grid" id="pt-overview">
           <div class="p-col" id="ovLeft"></div>
           <div class="p-col" id="ovRight"></div>
         </div>
-        <div class="ptab mem-layout" id="pt-memory" hidden>
+        <div class="js-ptab mem-layout" id="pt-memory" hidden>
           <nav class="rail" id="rail" aria-label="분야" data-a="areaFilter"></nav>
           <div class="panel" id="memPanel"></div>
         </div>
-        <div class="ptab" id="pt-style" hidden>
+        <div class="js-ptab" id="pt-style" hidden>
           <div class="panel" id="stylePanel"></div>
         </div>
       </div>
 
-      <div class="view" id="view-list">
+      <div class="js-view" id="view-list">
         <div class="list" id="roster"></div>
       </div>
 
-      <div class="view" id="view-org" hidden>
+      <div class="js-view" id="view-org" hidden>
         <div class="org" id="org"></div>
       </div>
 
-      <div class="view" id="view-memory" hidden>
+      <div class="js-view" id="view-memory" hidden>
         <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
         <div class="panel">
           <div class="panel-hd">
@@ -569,7 +563,7 @@
     document.getElementById("pnMem").textContent = p.memories.length;
     document.getElementById("pnStyle").textContent = p.style.length;
     for (const b of document.querySelectorAll("[data-ptab]")) b.setAttribute("aria-selected", String(b.dataset.ptab === tab));
-    for (const el of document.querySelectorAll(".ptab")) el.hidden = el.id !== "pt-" + tab;
+    for (const el of document.querySelectorAll(".js-ptab")) el.hidden = el.id !== "pt-" + tab;
     document.title = "Tiny Office · " + p.name;
   }
 
@@ -1155,7 +1149,7 @@
     for (const t of document.querySelectorAll("#tabs .tab")) {
       t.setAttribute("aria-selected", String(t.dataset.view === view));
     }
-    for (const v of document.querySelectorAll(".view")) {
+    for (const v of document.querySelectorAll(".js-view")) {
       v.toggleAttribute("hidden", shown !== null || v.id !== "view-" + view);
     }
   }
