@@ -103,6 +103,7 @@ export const en = {
     taskNotAssignable: "This task can no longer be reassigned.",
     employeeFromAnotherCompany: "That person works for another company.",
     employeeOnVacation: "This employee is currently on vacation.",
+    areaNotFound: "That area no longer exists.",
     projectNotFound: "That project no longer exists.",
     projectClosed: "Work is written down only in a planned or active project.",
     projectNameRequired: "A project needs a name.",

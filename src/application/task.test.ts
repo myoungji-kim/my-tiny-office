@@ -81,6 +81,14 @@ describe("writing work down", () => {
     });
   });
 
+  it("names an area only the company has", async () => {
+    const pay = await project();
+
+    await expect(createTask(ctx, { companyId, projectId: pay, title: "x", priority: "low", area: "nope" as never })).resolves.toMatchObject({
+      reason: "areaNotFound",
+    });
+  });
+
   it("can name who takes it, and not someone on leave", async () => {
     const pay = await project();
     const mocha = await hire("모카");

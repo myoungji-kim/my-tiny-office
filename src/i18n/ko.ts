@@ -105,6 +105,7 @@ export const ko: Dictionary = {
     taskNotAssignable: "이 업무는 더 이상 담당자를 바꿀 수 없습니다.",
     employeeFromAnotherCompany: "다른 회사 소속 직원입니다.",
     employeeOnVacation: "이 직원은 현재 휴가 중입니다.",
+    areaNotFound: "해당 분야를 찾을 수 없습니다.",
     projectNotFound: "해당 프로젝트를 찾을 수 없습니다.",
     projectClosed: "업무는 시작 전이거나 진행 중인 프로젝트에만 적을 수 있어요.",
     projectNameRequired: "프로젝트 이름을 입력해 주세요.",

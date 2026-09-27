@@ -20,6 +20,7 @@ export interface CreateTaskInput {
 
 export type CreateTaskFailure =
   | "projectNotFound"
+  | "areaNotFound"
   | "projectClosed"
   | "employeeNotFound"
   | taskDomain.CreateTaskFailure
@@ -30,6 +31,9 @@ export async function createTask(ctx: AppContext, input: CreateTaskInput): Promi
   const project = await ctx.projects.findById(input.projectId);
   if (project === undefined || project.companyId !== input.companyId) return { ok: false, reason: "projectNotFound" };
   if (project.status !== "planned" && project.status !== "active") return { ok: false, reason: "projectClosed" };
+  if (input.area !== undefined && !(await ctx.areas.findByCompany(input.companyId)).some((a) => a.id === input.area)) {
+    return { ok: false, reason: "areaNotFound" };
+  }
 
   const now = ctx.now();
   const created = taskDomain.createTask({ ...input, id: toTaskId(ctx.newId()) }, toEventId(ctx.newId()), now);
