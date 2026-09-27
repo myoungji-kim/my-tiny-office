@@ -148,7 +148,7 @@
       ...WORDS.ko,
       title: "설정", headSub: "이 컴퓨터에서 My Tiny Office가 쓰는 것들",
       claudeWhy: "직원은 모두 이걸로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
-      installed: "Claude Code 설치됨", loggedIn: "로그인됨", recheck: "다시 확인", copy: "복사", copied: "복사했어요",
+      installed: "Claude Code 설치됨", loggedIn: "로그인됨", recheck: "다시 확인", checkedNow: "방금 확인했어요", copy: "복사", copied: "복사했어요",
       trustHint: "폴더 신뢰는 프로젝트마다 따로예요. 프로젝트에 폴더를 정할 때 확인해요.",
       toolsLabel: "연결된 외부 도구", toolsHint: "Claude Code에 연결된 그대로 써요. 업무 중에는 읽기만 하고, 바깥에 쓰는 일은 승인할 때 해요.",
       langTitle: "언어", langWhy: "화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.",
@@ -175,7 +175,7 @@
       ...WORDS.en,
       title: "Settings", headSub: "What My Tiny Office uses on this computer",
       claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks.",
-      installed: "Claude Code installed", loggedIn: "Signed in", recheck: "Check again", copy: "Copy", copied: "Copied",
+      installed: "Claude Code installed", loggedIn: "Signed in", recheck: "Check again", checkedNow: "Checked just now", copy: "Copy", copied: "Copied",
       trustHint: "Folder trust is per project, checked where a project's folder is chosen.",
       toolsLabel: "Connected tools", toolsHint: "Used as connected in Claude Code. During work they are only read; anything written outside waits for approval.",
       langTitle: "Language", langWhy: "Changes the words on screen. What you wrote yourself, like names, stays as written.",
@@ -226,7 +226,9 @@
     { icon: "ok", title: t().installed, value: "2.1.283" },
     { icon: "ok", title: t().loggedIn, value: "pro" },
   ].map((c) => checkRow(c, t().copy)).join("");
-  document.getElementById("recheck").innerHTML = REFRESH + t().recheck;
+  const recheck = document.getElementById("recheck");
+  recheck.innerHTML = REFRESH + t().recheck;
+  recheck.addEventListener("click", () => { recheck.innerHTML = REFRESH + t().checkedNow; });
 
   /* ── language ────────────────────────────────────────────────── */
   const langs = document.getElementById("langs");

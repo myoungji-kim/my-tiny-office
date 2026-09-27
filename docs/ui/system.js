@@ -528,7 +528,7 @@ const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
     companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
-    agentLost: "에이전트 연결이 끊겼어요",
+    agentLost: "에이전트 연결이 끊겼어요", copied: "복사했어요",
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
@@ -561,7 +561,7 @@ const WORDS = {
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
     companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
-    agentLost: "The agent disconnected",
+    agentLost: "The agent disconnected", copied: "Copied",
     status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
@@ -1151,6 +1151,17 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
   });
   (to === null && !edit ? $("[data-pick]") : text).focus({ preventScroll: true });
 }
+
+/* ═══ copying a command ═══ */
+// Whichever screen shows a command, its copy button takes the command without
+// the prompt, one line each.
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".cmd .copy");
+  if (!b) return;
+  const text = b.parentElement.querySelector("pre").textContent.split("\n").map((l) => l.replace(/^\$\s*/, "")).join("\n");
+  navigator.clipboard?.writeText(text).catch(() => {});
+  b.textContent = WORDS[uiLang()].copied;
+});
 
 /* ═══ switching company ═══ */
 // Every company on this computer is a file of its own. The names are the

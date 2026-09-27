@@ -932,7 +932,7 @@
 
     const blocked = task.blocked && task.status === "working"
       ? `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${tx(task.blocked)}</b><span>${t().lostWhy}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().reconnect}</button></span></div>`
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect>${t().reconnect}</button></span></div>`
       : "";
 
     const steps = task.steps?.length
@@ -981,6 +981,12 @@
 
     const view = document.getElementById("taskView");
     view.innerHTML = `${blocked}<div class="tk-grid" style="${blocked ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    view.querySelector("[data-reconnect]")?.addEventListener("click", () => {
+      task.blocked = undefined;
+      if (who) who.agentLost = false;
+      render();
+      renderMembers();
+    });
     for (const av of view.querySelectorAll("[data-av]")) av.appendChild(spriteCanvas(byId.get(av.dataset.av).species, 20));
     for (const b of view.querySelectorAll("[data-file]")) {
       b.addEventListener("click", () => {

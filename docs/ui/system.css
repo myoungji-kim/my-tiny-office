@@ -105,7 +105,7 @@ button { font: inherit; color: inherit; }
     display: flex; align-items: center; gap: 10px; width: 100%;
     height: 36px; padding-inline: 10px; border: none; border-radius: 9px;
     background: none; text-align: left; font: inherit; font-size: 15px; color: var(--ink);
-    cursor: pointer;
+    cursor: pointer; text-decoration: none;
   }
 
 .mrow:hover { background: var(--subtle); }

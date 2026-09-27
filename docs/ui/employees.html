@@ -586,7 +586,7 @@
     const lost = p.agentLost
       ? `<div class="notice notice-bad now-lost"><span class="n-ic">${PLUG}</span>
           <span class="n-tx"><b>${WORDS[lang].agentLost}</b><span>${t().lostWhy}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().reconnect}</button></span></div>`
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect>${t().reconnect}</button></span></div>`
       : "";
     document.getElementById("ovLeft").innerHTML = `
       <div class="panel">
@@ -601,6 +601,11 @@
           <div class="kv"><span>${t().timesUsed}</span><b>${t().times(usedOf(p))}</b></div>
         </div>
       </div>`;
+    document.querySelector("#ovLeft [data-reconnect]")?.addEventListener("click", () => {
+      p.agentLost = false;
+      renderPerson(p);
+      renderMembers();
+    });
 
     const seats = areasOf(p);
     const top = [...p.memories].sort(byUse).slice(0, 3);

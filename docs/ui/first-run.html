@@ -189,7 +189,7 @@
     </div>
 
     <div class="acts">
-      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
+      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice" data-to-office>사무실로 가기</button>
     </div>
   </div>
 
@@ -207,7 +207,7 @@
     </div>
 
     <div class="acts">
-      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
+      <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice" data-to-office>사무실로 가기</button>
     </div>
   </div>
 </div>
@@ -387,6 +387,9 @@
   document.getElementById("toCompany").addEventListener("click", () => go(2));
   // The file picker is the system's; the sample goes straight to what it finds.
   document.getElementById("toImport").addEventListener("click", () => go(5));
+  for (const b of document.querySelectorAll("[data-to-office]")) {
+    b.addEventListener("click", () => { location.href = "office.html" + (lang === "en" ? "?lang=en" : ""); });
+  }
 
   // From the sidebar, Claude Code is already checked: a new company starts at
   // its name, an import at what arrived.
