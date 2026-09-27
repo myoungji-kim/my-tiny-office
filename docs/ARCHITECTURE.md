@@ -485,7 +485,7 @@ The simulation owns events such as:
 - TaskCompleted
 - MemoryTaught
 - MemoryUsed
-- MemoryArchived
+- MemoryRemoved
 - PRCreated
 - ReviewStarted
 - ReviewApproved

@@ -102,8 +102,6 @@
 
   .rail-item[aria-current="true"] .n { color: var(--brand-ink); }
 
-  .rail-rule { height: 1px; background: var(--line); margin: 4px 6px; }
-
   .empty-line { margin: 0; font-size: 14px; color: var(--faint); padding: 6px 0; }
 
   .style-form { display: flex; gap: 8px; margin-top: 10px; }
@@ -126,6 +124,16 @@
   .style-line:last-of-type { border-bottom: none; }
 
   .style-line svg { width: 14px; height: 14px; flex: none; margin-top: 5px; color: var(--faint); }
+
+  .style-line span { flex: 1; min-width: 0; }
+
+  .style-line .line-menu { margin: -3px 0 -3px auto; opacity: 0; }
+
+  .style-line .line-menu svg { margin: 0; color: currentColor; }
+
+  .style-line:hover .line-menu, .line-menu:focus-visible, .line-menu[aria-expanded="true"] { opacity: 1; }
+
+  .style-form.in-place { margin: 4px 0; }
 
   /* ═══ org chart ═══ */
 
@@ -197,9 +205,6 @@
 
   .mem.cold-mem { border-color: var(--bad-line); background: var(--bad-wash); }
 
-  .mem.archived-mem { background: var(--subtle); }
-
-  .mem.archived-mem .mem-t { color: var(--muted); }
 
 </style>
 
@@ -342,9 +347,8 @@
       areaFilter: "분야", memActions: "기억", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
       nothingAssigned: "맡은 업무가 없어요",
-      allAreas: "전체", archive: "보관함", archivedNote: "남겨 두지만 업무에 들고 가지 않아요.",
-      archivedEmpty: "보관한 기억이 없어요.", noMemory: "아직 알려준 게 없어요.",
-      edit: "고치기", archiveIt: "보관하기", restore: "다시 꺼내기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
+      allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
+      edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
       styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
       headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
@@ -382,9 +386,8 @@
       areaFilter: "Areas", memActions: "Memory", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
       nothingAssigned: "Nothing assigned",
-      allAreas: "All", archive: "Archived", archivedNote: "Kept, but not carried into work.",
-      archivedEmpty: "Nothing archived.", noMemory: "Nothing taught yet.",
-      edit: "Edit", archiveIt: "Archive", restore: "Bring back", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
+      allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
+      edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
       styleSub: "Carried into every task, whatever the area.", stylePlaceholder: "e.g. Keep commits small",
       headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
@@ -473,7 +476,6 @@
     hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
     more: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg>',
     pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
-    box: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3" width="11.2" height="3.2" rx=".8"/><path d="M3.4 6.2v6.8h9.2V6.2M6.4 8.8h3.2"/></svg>',
     trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 4.4h10.4M6.2 4.4V2.8h3.6v1.6M4.2 4.4l.7 8.8h6.2l.7-8.8"/></svg>',
   };
 
@@ -486,24 +488,21 @@
   };
   const josa = (word, withFinal, withoutFinal) => (hasBatchim(word) ? withFinal : withoutFinal);
 
-  // Archived memory is kept but not carried into the work, so it counts for
-  // neither coverage nor context size.
   // Prose lives beside the data it belongs to, which keeps a memory and its
   // translation from drifting apart.
   const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
 
-  const liveOf = (p) => p.memories.filter((m) => !m.archived);
   // In the company's order, so an area does not jump to the top when first taught.
-  const areasOf = (p) => AREAS.map((a) => a.name).filter((a) => liveOf(p).some((m) => m.area === a));
+  const areasOf = (p) => AREAS.map((a) => a.name).filter((a) => p.memories.some((m) => m.area === a));
   const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
-  const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
-  const charsOf = (p) => liveOf(p).reduce((n, m) => n + tx(m.text).length, 0);
+  const usedOf = (p) => p.memories.reduce((n, m) => n + m.used, 0);
+  const charsOf = (p) => p.memories.reduce((n, m) => n + tx(m.text).length, 0);
 
   /* ── sidebar roster ──────────────────────────────────────────── */
   const members = document.getElementById("members");
   mountRoster(members, (p) => { location.hash = p.id; });
   /* ── header ──────────────────────────────────────────────────── */
-  const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0);
+  const totalMem = people.reduce((n, p) => n + p.memories.length, 0);
   document.getElementById("nList").textContent = people.length;
   document.getElementById("nMem").textContent = totalMem;
   document.getElementById("headSub").textContent =
@@ -521,7 +520,7 @@
       <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
       <span class="r-dept">${t().depts[p.dept]} · ${t().teams[p.team]}</span>
       <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
-      <span class="r-mem">${t().memCountShort(liveOf(p).length)}</span>`;
+      <span class="r-mem">${t().memCountShort(p.memories.length)}</span>`;
     b.querySelector(".r-av").prepend(avatar(p.species, 40));
     roster.appendChild(b);
   }
@@ -535,12 +534,12 @@
   let filter = "all";
 
   // A memory just taught is not cold: nobody has had the chance to use it.
-  const isCold = (m) => m.used === 0 && !m.fresh && !m.archived;
+  const isCold = (m) => m.used === 0 && !m.fresh;
   const usedLabel = (m) => (m.fresh ? t().justTaught : m.used === 0 ? t().neverUsed : t().usedTimes(m.used));
 
   const memCard = (m, withMenu = false) => {
     const cls = m.fresh ? "" : m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
-    const box = ["mem", isCold(m) ? "cold-mem" : "", m.archived ? "archived-mem" : "", m.flash ? "is-new" : ""].filter(Boolean).join(" ");
+    const box = ["mem", isCold(m) ? "cold-mem" : "", m.flash ? "is-new" : ""].filter(Boolean).join(" ");
     const menu = withMenu
       ? `<button class="ibtn ibtn-sm mem-menu" type="button" data-mem="${shown.memories.indexOf(m)}" aria-label="${t().memMenu}" aria-expanded="false">${ICON.more}</button>`
       : "";
@@ -564,7 +563,7 @@
     const chip = document.getElementById("pChip");
     chip.className = "chip " + p.status;
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
-    document.getElementById("pnMem").textContent = liveOf(p).length;
+    document.getElementById("pnMem").textContent = p.memories.length;
     document.getElementById("pnStyle").textContent = p.style.length;
     for (const b of document.querySelectorAll("[data-ptab]")) b.setAttribute("aria-selected", String(b.dataset.ptab === tab));
     for (const el of document.querySelectorAll(".ptab")) el.hidden = el.id !== "pt-" + tab;
@@ -593,7 +592,7 @@
       </div>`;
 
     const seats = reviewAreasOf(p);
-    const top = liveOf(p).sort(byUse).slice(0, 3);
+    const top = [...p.memories].sort(byUse).slice(0, 3);
     document.getElementById("ovRight").innerHTML = `
       <div class="panel">
         <div class="panel-hd with-link"><h2>${t().often}</h2><button class="link" type="button" data-go="memory">${t().allMemory}</button></div>
@@ -605,7 +604,7 @@
           ${
             seats.length
               ? `<span class="areas">${seats
-                  .map((a) => `<span class="area-chip">${t().areas[a]} ${liveOf(p).filter((m) => m.area === a).length}</span>`)
+                  .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
                   .join("")}</span><p class="why">${t().canReviewWhy}</p>`
               : `<p class="why" style="margin:0">${t().noReviewYet}</p>`
           }
@@ -614,25 +613,18 @@
   }
 
   function renderMemory(p) {
-    const live = liveOf(p);
-    const archived = p.memories.filter((m) => m.archived);
+    const live = p.memories;
     const areas = areasOf(p);
-    if (filter !== "all" && filter !== "archived" && !areas.includes(filter)) filter = "all";
+    if (filter !== "all" && !areas.includes(filter)) filter = "all";
 
     const item = (key, label, n) =>
       `<button class="rail-item" type="button" data-filter="${key}" aria-current="${filter === key}"><span>${label}</span><span class="n">${n}</span></button>`;
     document.getElementById("rail").innerHTML =
       item("all", t().allAreas, live.length) +
-      areas.map((a) => item(a, t().areas[a], live.filter((m) => m.area === a).length)).join("") +
-      '<div class="rail-rule"></div>' +
-      item("archived", t().archive, archived.length);
+      areas.map((a) => item(a, t().areas[a], live.filter((m) => m.area === a).length)).join("");
 
     let body;
-    if (filter === "archived") {
-      body = archived.length
-        ? `<p class="why" style="margin:0 0 10px">${t().archivedNote}</p>` + archived.map((m) => memCard(m, true)).join("")
-        : `<p class="empty-line">${t().archivedEmpty}</p>`;
-    } else if (filter === "all") {
+    if (filter === "all") {
       body = live.length
         ? areas
             .map((a) => {
@@ -654,7 +646,7 @@
       body = live.filter((m) => m.area === filter).sort(byUse).map((m) => memCard(m, true)).join("");
     }
 
-    const title = filter === "all" ? t().memory : filter === "archived" ? t().archive : t().areas[filter];
+    const title = filter === "all" ? t().memory : t().areas[filter];
     document.getElementById("memPanel").innerHTML = `
       <div class="panel-hd">
         <h2>${title}</h2>
@@ -662,36 +654,39 @@
       </div>
       <div class="panel-bd">
         ${body}
-        ${filter === "archived" ? "" : `<button class="mem-add" type="button" data-teach>${ICON.plus}${t().tellThem}</button>`}
+        <button class="mem-add" type="button" data-teach>${ICON.plus}${t().tellThem}</button>
       </div>`;
   }
 
-  function renderStyle(p, adding = false) {
+  // editing: null, "new", or the index of the rule being corrected.
+  function renderStyle(p, editing = null) {
     const panel = document.getElementById("stylePanel");
+    const form = (cls) => `<form class="style-form${cls}" data-styleform>
+        <input class="input" maxlength="80" autocomplete="off" placeholder="${t().stylePlaceholder}" aria-label="${t().addStyle}" />
+        <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
+        <button class="btn btn-secondary btn-md" type="button" data-cancelstyle>${t().cancel}</button>
+      </form>`;
+    const line = (x, i) =>
+      editing === i
+        ? form(" in-place")
+        : `<div class="style-line">${ICON.hand}<span>${tx(x)}</span><button class="ibtn ibtn-sm line-menu" type="button" data-style="${i}" aria-label="${t().styleMenu}" aria-expanded="false">${ICON.more}</button></div>`;
     panel.innerHTML = `
       <div class="panel-hd"><h2>${t().howTheyWork}</h2><p>${t().styleSub}</p></div>
       <div class="panel-bd">
-        ${p.style.map((x) => `<div class="style-line">${ICON.hand}<span>${tx(x)}</span></div>`).join("")}
-        ${
-          adding
-            ? `<form class="style-form" data-styleform>
-                 <input class="input" maxlength="80" autocomplete="off" placeholder="${t().stylePlaceholder}" aria-label="${t().addStyle}" />
-                 <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
-                 <button class="btn btn-secondary btn-md" type="button" data-cancelstyle>${t().cancel}</button>
-               </form>`
-            : `<button class="mem-add" type="button" data-addstyle>${ICON.plus}${t().addStyle}</button>`
-        }
+        ${p.style.map(line).join("")}
+        ${editing === "new" ? form("") : `<button class="mem-add" type="button" data-addstyle>${ICON.plus}${t().addStyle}</button>`}
       </div>`;
-    if (!adding) {
-      panel.querySelector("[data-addstyle]").addEventListener("click", () => renderStyle(p, true));
-      return;
-    }
-    const form = panel.querySelector("[data-styleform]");
-    const input = form.querySelector("input");
+    panel.querySelector("[data-addstyle]")?.addEventListener("click", () => renderStyle(p, "new"));
+    const f = panel.querySelector("[data-styleform]");
+    if (!f) return;
+    const input = f.querySelector("input");
+    if (editing !== "new") input.value = tx(p.style[editing]);
     input.focus();
-    form.addEventListener("submit", (e) => {
+    f.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (input.value.trim()) p.style.push(input.value.trim());
+      const value = input.value.trim();
+      if (value && editing === "new") p.style.push(value);
+      else if (value) p.style[editing] = value;
       renderPerson(p);
     });
     panel.querySelector("[data-cancelstyle]").addEventListener("click", () => renderStyle(p));
@@ -708,7 +703,7 @@
   function teach(p, area = null, then = null) {
     openTeach({
       to: p,
-      area: area ?? (filter !== "all" && filter !== "archived" ? filter : null),
+      area: area ?? (filter !== "all" ? filter : null),
       onSave: ({ memory }) => {
         p.memories.unshift({ ...memory, used: 0, fresh: true, flash: true });
         // What was just taught stays in view.
@@ -737,54 +732,36 @@
     if (e.target.closest("[data-teach]")) teach(shown);
     const more = e.target.closest("[data-mem]");
     if (more) openMemMenu(more);
+    const rule = e.target.closest("[data-style]");
+    if (rule) openStyleMenu(rule);
   });
 
-  /* ── one memory, and what the player can do about it ─────────── */
+  /* ── a memory or a rule, and what the player can do about it ── */
   const memPop = document.getElementById("memPop");
   let memAnchor = null;
 
-  function openMemMenu(btn) {
+  const row = (label, icon, kind, then) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mrow" + (kind ? " mrow-" + kind : "");
+    b.innerHTML = icon + label;
+    b.addEventListener("click", then);
+    return b;
+  };
+
+  // Deleting cannot be undone, so the menu asks once more in place.
+  function openMenu(btn, onEdit, onRemove) {
     if (memAnchor === btn) return closeMemMenu();
     closeMemMenu();
-    const p = shown;
-    const m = p.memories[Number(btn.dataset.mem)];
-    const row = (label, icon, kind, then) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "mrow" + (kind ? " mrow-" + kind : "");
-      b.innerHTML = icon + label;
-      b.addEventListener("click", then);
-      return b;
-    };
     const acts = document.createElement("div");
     acts.className = "p-acts";
     acts.style.padding = "0";
     acts.append(
-      row(t().edit, ICON.pen, "", () => {
-        closeMemMenu();
-        openTeach({
-          to: p,
-          edit: m,
-          onSave: ({ memory }) => {
-            Object.assign(m, { area: memory.area, text: memory.text, from: memory.from, flash: true });
-            renderPerson(p);
-          },
-        });
-      }),
-      row(m.archived ? t().restore : t().archiveIt, ICON.box, "", () => {
-        m.archived = !m.archived;
-        closeMemMenu();
-        renderPerson(p);
-      }),
+      row(t().edit, ICON.pen, "", () => { closeMemMenu(); onEdit(); }),
       row(t().remove, ICON.trash, "bad", () => {
-        // Deleting cannot be undone, so it asks once more in place.
         acts.replaceChildren(
           Object.assign(document.createElement("p"), { className: "p-why", textContent: t().removeWhy }),
-          row(t().remove, ICON.trash, "bad", () => {
-            p.memories.splice(p.memories.indexOf(m), 1);
-            closeMemMenu();
-            renderPerson(p);
-          }),
+          row(t().remove, ICON.trash, "bad", () => { closeMemMenu(); onRemove(); }),
           row(t().keep, ICON.x, "", closeMemMenu),
         );
         acts.querySelector(".mrow").focus({ preventScroll: true });
@@ -798,6 +775,39 @@
     const w = memPop.offsetWidth, edge = 12;
     memPop.style.left = Math.round(Math.min(Math.max(edge, r.right - w), innerWidth - w - edge)) + "px";
     memPop.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - memPop.offsetHeight - edge)) + "px";
+  }
+
+  function openMemMenu(btn) {
+    const p = shown;
+    const m = p.memories[Number(btn.dataset.mem)];
+    openMenu(
+      btn,
+      () => openTeach({
+        to: p,
+        edit: m,
+        onSave: ({ memory }) => {
+          Object.assign(m, { area: memory.area, text: memory.text, from: memory.from, flash: true });
+          renderPerson(p);
+        },
+      }),
+      () => {
+        p.memories.splice(p.memories.indexOf(m), 1);
+        renderPerson(p);
+      },
+    );
+  }
+
+  function openStyleMenu(btn) {
+    const p = shown;
+    const i = Number(btn.dataset.style);
+    openMenu(
+      btn,
+      () => renderStyle(p, i),
+      () => {
+        p.style.splice(i, 1);
+        renderPerson(p);
+      },
+    );
   }
 
   function closeMemMenu() {
@@ -841,7 +851,7 @@
         c.className = "tcard";
         c.type = "button";
         c.innerHTML = `<span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(liveOf(p).length)}</span></span>`;
+          <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role} · ${t().memCount(p.memories.length)}</span></span>`;
         c.querySelector(".t-av").prepend(avatar(p.species, 36));
         c.addEventListener("click", () => { location.hash = p.id; });
         grid.appendChild(c);
@@ -904,7 +914,7 @@
     const p = assignee;
     const task = backlog.find((t) => t.id === picked);
     // The point of teaching shows up here: what this person brings to this task.
-    const useful = task ? liveOf(p).filter((m) => m.area === task.area).sort((x, y) => y.used - x.used) : [];
+    const useful = task ? p.memories.filter((m) => m.area === task.area).sort((x, y) => y.used - x.used) : [];
 
     modal.innerHTML = `
       <div class="m-hd">

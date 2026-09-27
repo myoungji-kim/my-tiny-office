@@ -138,9 +138,8 @@ which everyone can hold but no one reviews for.
 A memory is used, not just stored: when an employee references one, the
 activity feed says so. Without that, teaching is only a notes field.
 
-Memory has no cap, but it does have a cost: everything live is carried into
-the work. Memories that stop being referenced can be archived, which keeps
-them readable without keeping them loaded.
+Memory has no cap, but it does have a cost: everything taught is carried into
+the work. A memory that stops being referenced is corrected or deleted.
 
 ## Activity Feed
 

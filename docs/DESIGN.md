@@ -215,8 +215,8 @@ another:
 | Tab | Holds |
 | --- | --- |
 | 개요 | What they are on now, their record, the three memories they use most, the areas they can review. It fits on one screen |
-| 기억 | Their areas down the left, with 전체 and 보관함; the memories of whichever is picked on the right |
-| 일하는 방식 | The rules they carry into every task, whatever the area |
+| 기억 | Their areas down the left, with 전체; the memories of whichever is picked on the right |
+| 일하는 방식 | The rules they carry into every task, whatever the area. Each is corrected or deleted in place |
 
 ## The Office
 
@@ -308,7 +308,6 @@ thing to manage:
 | --- | --- |
 | 분야별로 보기 | The memory tab lists a person's areas in the company's order; one area at a time, or 전체 grouped by area, **most-referenced first** |
 | 크기 | A person's page shows how many characters go with every task |
-| 보관 | Kept, not carried. Excluded from counts, coverage and size |
 | 정리 | A memory referenced zero times is flagged where it sits and on the memory tab. One just taught is not: nobody has had the chance to use it |
 
 Reference count is what makes this safe to automate later: the memory that
@@ -322,7 +321,7 @@ the same loop seen from the other end.
 
 It is a preview, not a choice. Everything live is carried into every task, as
 a person brings everything they know; the modal only points at the part that
-bears on this one. The one way to stop carrying a memory is to archive it, and
+bears on this one. The one way to stop carrying a memory is to delete it, and
 that is a decision about the person, not about a task.
 
 When they have none, the modal says so and offers to teach them right there.
@@ -349,9 +348,9 @@ teaching does: when this is their first memory in a review area, *이제 모카�
 every task (195자 → 215자). The payoff and the cost are both part of the
 decision.
 
-A memory's `⋯` corrects it (고치기, the same dialog), archives it or brings it
-back, or deletes it. Deleting asks once more in place, because it cannot be
-undone.
+A memory's `⋯` corrects it (고치기, the same dialog) or deletes it. There is
+no archive: what is not worth carrying is not worth keeping. Deleting asks
+once more in place, because it cannot be undone.
 
 ## Company
 

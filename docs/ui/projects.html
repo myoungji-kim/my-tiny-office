@@ -404,8 +404,7 @@
   // taught. Teaching someone a database memory is what makes them able to
   // review database work, and the people screen derives it the same way.
   const SEAT_AREAS = ["arch", "types", "db", "security", "l10n", "product", "quality"];
-  const liveOf = (p) => p.memories.filter((m) => !m.archived);
-  const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
+  const areasOf = (p) => [...new Set(p.memories.map((m) => m.area))];
   const seatsOf = (p) => areasOf(p).filter((a) => SEAT_AREAS.includes(a));
   const reviewersFor = (area) => STAFF.filter((p) => seatsOf(p).includes(area));
   const byId = new Map(STAFF.map((p) => [p.id, p]));

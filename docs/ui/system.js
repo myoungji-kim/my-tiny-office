@@ -589,8 +589,7 @@ const STAFF = [
       { area: "db", text: { ko: "결제 테이블은 월 단위로 파티셔닝돼 있어요. 전체 스캔 쿼리는 쓰지 마세요.", en: "The payments table is partitioned by month. Never write a full scan." }, from: null, used: 9 },
       { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요. 현재 시각은 인자로 받아요.", en: "No Date.now() in the domain layer. The current time arrives as an argument." }, from: { ko: "PR #4102", en: "PR #4102" }, used: 22 },
       { area: "types", text: { ko: "any를 쓰지 않아요. 모르면 unknown으로 두고 좁혀 나가요.", en: "No any. Start from unknown and narrow it down." }, from: null, used: 11 },
-      { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 },
-      { area: "process", text: { ko: "예전 결제 모듈은 v1 스키마를 썼어요.", en: "The old payments module used the v1 schema." }, from: { ko: "v1 마이그레이션", en: "the v1 migration" }, used: 2, archived: true },
+      { area: "process", text: { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }, from: null, used: 7 }
     ] },
   { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
     dept: "dev", team: "frontend", status: "working", joined: "2026. 4. 15.",
@@ -724,7 +723,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
   const isCompany = () => state.to === "company";
   const person = () => (state.to && !isCompany() ? state.to : null);
   const liveChars = (p) =>
-    p.memories.filter((m) => !m.archived && m !== edit).reduce((n, m) => n + local(m.text).length, 0);
+    p.memories.filter((m) => m !== edit).reduce((n, m) => n + local(m.text).length, 0);
 
   function paintAvatar() {
     const box = $("[data-av]");
@@ -758,7 +757,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
     if (sec.hidden) return;
     const box = $("[data-picks]");
     box.innerHTML = STAFF.map((p) => {
-      const n = p.memories.filter((m) => !m.archived && m.area === state.area).length;
+      const n = p.memories.filter((m) => m.area === state.area).length;
       return `<button class="pick" type="button" role="radio" data-pick="${p.id}" aria-checked="${state.to === p}">
         <span class="radio"></span><span class="pick-t">${p.name}</span>
         <span class="pick-m">${p.role}</span><span class="pick-m">${w.inArea(n)}</span>
@@ -807,7 +806,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
     const p = person();
     // A first memory in a review area is what gives someone that seat.
     if (p && state.area && !SEATLESS_AREAS.includes(state.area)) {
-      const knows = p.memories.some((m) => !m.archived && m !== edit && m.area === state.area);
+      const knows = p.memories.some((m) => m !== edit && m.area === state.area);
       if (!knows) {
         lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainSeat(p.name, areaName(state.area))}</span>`);
       }
