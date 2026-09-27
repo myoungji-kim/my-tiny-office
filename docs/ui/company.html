@@ -1,0 +1,587 @@
+<meta charset="utf-8" />
+<title>Tiny Office · Company</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+/>
+<link rel="stylesheet" href="system.css" />
+<script src="system.js"></script>
+<style>
+  /* ═══ main ═══ */
+
+  .view[hidden] { display: none; }
+
+  .sec-hd { display: flex; align-items: baseline; gap: 8px; margin: 0 0 10px; }
+
+  .sec-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
+
+  .sec-hd .more { margin-left: auto; font-size: 14px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0; }
+
+  .sec-hd .more:hover { color: var(--ink); }
+
+  /* ═══ overview ═══ */
+
+  .co-name { display: flex; align-items: center; gap: 6px; }
+
+  .co-name b { font-size: 17px; font-weight: 600; }
+
+  .co-name .input { max-width: 320px; }
+
+  .co-since { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+
+  @media (max-width: 1160px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .tile { border: 1px solid var(--line); border-radius: var(--r-card); padding: 13px 15px; }
+
+  .tile .k { margin-bottom: 4px; }
+
+  .tile-n { display: block; font-size: 24px; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+
+  .tile-d { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .tile-d.up { color: var(--ok-ink); }
+
+  .crew { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+
+  .mate {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px 11px;
+    border: 1px solid var(--line); border-radius: var(--r-card); color: inherit; text-decoration: none;
+  }
+
+  .mate:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgb(20 20 25 / .06); }
+
+  .mate-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; }
+
+  .mate-n { font-size: 15px; font-weight: 600; line-height: 1.3; }
+
+  .mate-d { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .proj { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+
+  .proj-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 16px;
+    padding: 11px 15px; border-bottom: 1px solid var(--line);
+  }
+
+  .proj-row:last-child { border-bottom: none; }
+
+  .proj-n { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .proj-m { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .faces { display: flex; }
+
+  .faces span { width: 24px; height: 24px; border-radius: 7px; background: var(--subtle); display: grid; place-items: center; border: 2px solid var(--surface); margin-left: -6px; }
+
+  .faces span:first-child { margin-left: 0; }
+
+  .proj-foot { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  .proj-foot a { color: var(--ink); }
+
+  /* ═══ history ═══ */
+
+  .month { margin-bottom: 18px; }
+
+  .month:last-child { margin-bottom: 0; }
+
+  .month h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+
+  .mile { display: grid; grid-template-columns: 58px 28px minmax(0, 1fr); align-items: center; gap: 10px; padding: 7px 0; }
+
+  .mile-date { font-size: 14px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .mile-ic { width: 28px; height: 28px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; color: var(--muted); }
+
+  .mile-ic svg { width: 14px; height: 14px; }
+
+  .mile-tx { font-size: 15px; line-height: 1.5; }
+
+  .mile-tx span { color: var(--muted); }
+
+  /* ═══ rules ═══ */
+
+  .flow { display: flex; flex-direction: column; gap: 22px; }
+
+  .flow:empty { display: none; }
+
+  .area-row {
+    display: grid; grid-template-columns: minmax(0, 170px) 76px minmax(0, 1fr) auto;
+    align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+
+  .area-row:last-of-type { border-bottom: none; }
+
+  .area-name { font-size: 15px; font-weight: 600; }
+
+  .seat { font-size: 13px; color: var(--muted); }
+
+  .seat.no { color: var(--faint); }
+
+  .knows { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+
+  .knows .who { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--muted); }
+
+  .knows .who span { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; overflow: hidden; }
+
+  .nobody { font-size: 14px; color: var(--bad-ink); font-weight: 600; }
+
+  .area-n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="app">
+  <nav class="side">
+    <a class="side-top" href="#">
+      <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
+      <span class="side-id">
+        <span class="side-name">My Tiny Office</span>
+        <span class="side-ver">v0.1.0</span>
+      </span>
+    </a>
+
+    <div class="nav">
+      <a href="office.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span data-t="nav.office">사무실</span></a>
+      <a href="projects.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span data-t="nav.projects">프로젝트</span></a>
+      <a href="employees.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span data-t="nav.people">직원</span></a>
+      <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 14.5v-3.5M9 14.5v-7M14.5 14.5v-10.5"/></svg><span data-t="nav.company">회사</span></a>
+    </div>
+
+    <div class="rule"></div>
+    <div id="members"></div>
+
+    <div class="side-foot">
+      <div class="rule" style="margin:0 4px 8px"></div>
+      <div class="nav">
+        <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="2.6"/><path d="M9 1.8v2M9 14.2v2M1.8 9h2M14.2 9h2M3.9 3.9l1.4 1.4M12.7 12.7l1.4 1.4M14.1 3.9l-1.4 1.4M5.3 12.7l-1.4 1.4"/></svg><span data-t="nav.settings">설정</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="head">
+      <div class="head-row">
+        <span>
+          <h1 data-t="title">회사</h1>
+          <span class="sub" id="headSub"></span>
+        </span>
+        <div class="head-right"></div>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button class="tab" data-view="overview" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="9" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="2.4" y="9" width="4.6" height="4.6" rx="1"/><rect x="9" y="9" width="4.6" height="4.6" rx="1"/></svg><span data-t="tabs.overview">개요</span></button>
+        <button class="tab" data-view="history"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 4.8V8l2.2 1.4"/></svg><span data-t="tabs.history">연혁</span><span class="n" id="nHistory"></span></button>
+        <button class="tab" data-view="rules"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg><span data-t="tabs.rules">규칙</span></button>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="view" id="view-overview">
+        <div class="flow">
+          <div class="panel">
+            <div class="panel-bd" id="coCard"></div>
+          </div>
+
+          <div class="tiles" id="tiles"></div>
+
+          <div>
+            <div class="sec-hd"><h2 data-t="crewTitle">함께하는 사람들</h2></div>
+            <div class="crew" id="crew"></div>
+          </div>
+
+          <div>
+            <div class="sec-hd"><h2 data-t="projectsTitle">마친 프로젝트</h2></div>
+            <div class="proj" id="finished"></div>
+            <p class="proj-foot" id="ongoing"></p>
+          </div>
+
+          <div>
+            <div class="sec-hd">
+              <h2 data-t="recentTitle">최근 이정표</h2>
+              <button class="more" type="button" data-go="history" data-t="allHistory">연혁 전체 보기</button>
+            </div>
+            <div class="panel"><div class="panel-bd" id="recent"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-history" hidden>
+        <div class="panel"><div class="panel-bd" id="history"></div></div>
+      </div>
+
+      <div class="view" id="view-rules" hidden>
+        <div class="flow">
+          <div class="flow" id="ruleNotices"></div>
+          <div class="panel">
+            <div class="panel-hd">
+              <h2 data-t="areasTitle">분야</h2>
+              <p data-t="areasSub">회사가 정하는 목록이에요.</p>
+            </div>
+            <div class="panel-bd" id="areaTable"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd">
+              <h2 data-t="companyTitle">회사 기억</h2>
+              <p data-t="companySub">모든 직원이 함께 알고 있어요.</p>
+            </div>
+            <div class="panel-bd" id="companyMem"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function avatar(species, px) {
+    const el = document.createElement("canvas");
+    el.width = el.height = px;
+    const g = el.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(species);
+    const scale = Math.max(1, Math.floor(px / 16));
+    const pad = Math.floor((px - 16 * scale) / 2);
+    paint(g, sp.sprite, scale, pad, pad, skin(sp));
+    return el;
+  }
+
+  const hasBatchim = (word) => {
+    const c = word.charCodeAt(word.length - 1);
+    return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  };
+  const josa = (w, withFinal, without) => w + (hasBatchim(w) ? withFinal : without);
+
+  /* ── i18n ────────────────────────────────────────────────────── */
+  // The company's name, nicknames and project names are absent: the player wrote them.
+  const TEXT = {
+    ko: {
+      ...WORDS.ko,
+      title: "회사",
+      headSub: (days, n) => "창업 " + days + "일째 · 직원 " + n + "명",
+      tabs: { overview: "개요", history: "연혁", rules: "규칙" },
+      rename: "이름 바꾸기", save: "저장", cancel: "취소",
+      since: (date, days) => date + " 창업 · " + days + "일째",
+      tiles: {
+        people: "직원", done: "완료한 업무", reviews: "리뷰", memories: "가르친 기억",
+        peopleN: (n) => n + "명", teamsN: (n) => "팀 " + n + "개",
+        count: (n) => n + "건", memN: (n) => n + "개", week: (n) => "이번 주 +" + n,
+      },
+      crewTitle: "함께하는 사람들", daysWith: (n) => n + "일째",
+      projectsTitle: "마친 프로젝트",
+      span: (days) => days + "일", tasksN: (n) => "업무 " + n + "건",
+      ongoing: (n) => "진행 중인 프로젝트 " + n + "개 · ", toBoard: "프로젝트 보드로",
+      recentTitle: "최근 이정표", allHistory: "연혁 전체 보기",
+      miles: {
+        founded: () => "회사를 세웠어요",
+        joined: (m) => m.nth === 1 ? "첫 직원 " + josa(m.who.name, "이", "가") + " 합류했어요" : josa(m.who.name, "이", "가") + " 합류했어요<span> · " + m.nth + "번째 직원</span>",
+        team: (m) => josa(WORDS.ko.teams[m.team], "이", "가") + " 생겼어요",
+        firstTask: (m) => josa(m.who.name, "이", "가") + " 첫 업무를 마쳤어요<span> · " + m.task.ko + "</span>",
+        tasks: (m) => "완료한 업무가 " + m.n + "건을 넘었어요",
+        firstReview: (m) => josa(m.who.name, "이", "가") + " 첫 리뷰를 마쳤어요",
+        memories: (m) => "가르친 기억이 " + m.n + "개가 됐어요",
+        project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
+      },
+      areasTitle: "분야", areasSub: "회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.",
+      reviewArea: "리뷰 분야", noReview: "리뷰 없음", nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
+      memCount: (n) => "기억 " + n,
+      nobodyKnowsArea: (list) => list.join(" · ") + (hasBatchim(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
+      nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
+      pickSomeone: "알려줄 직원 고르기",
+      companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
+      fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌", usedTimes: (n) => n + "회 참조",
+    },
+    en: {
+      ...WORDS.en,
+      title: "Company",
+      headSub: (days, n) => "Day " + days + " · " + n + " people",
+      tabs: { overview: "Overview", history: "History", rules: "Rules" },
+      rename: "Rename", save: "Save", cancel: "Cancel",
+      since: (date, days) => "Founded " + date + " · day " + days,
+      tiles: {
+        people: "People", done: "Tasks done", reviews: "Reviews", memories: "Memories taught",
+        peopleN: (n) => String(n), teamsN: (n) => n + " teams",
+        count: (n) => String(n), memN: (n) => String(n), week: (n) => "+" + n + " this week",
+      },
+      crewTitle: "The people here", daysWith: (n) => "day " + n,
+      projectsTitle: "Finished projects",
+      span: (days) => days + " days", tasksN: (n) => n + " tasks",
+      ongoing: (n) => n + " projects in progress · ", toBoard: "Open the board",
+      recentTitle: "Recent milestones", allHistory: "See all",
+      miles: {
+        founded: () => "The company was founded",
+        joined: (m) => m.nth === 1 ? m.who.name + " joined as the first hire" : m.who.name + " joined<span> · hire no. " + m.nth + "</span>",
+        team: (m) => "The " + WORDS.en.teams[m.team] + " team formed",
+        firstTask: (m) => m.who.name + " finished the first task<span> · " + m.task.en + "</span>",
+        tasks: (m) => "Past " + m.n + " tasks done",
+        firstReview: (m) => m.who.name + " finished the first review",
+        memories: (m) => m.n + " memories taught",
+        project: (m) => "Finished ‘" + m.name + "’<span> · " + m.days + " days</span>",
+      },
+      areasTitle: "Areas", areasSub: "The company owns this list. A PR asks for one of them.",
+      reviewArea: "Review seat", noReview: "No seat", nobodyKnows: "Nobody knows this", addArea: "Add an area",
+      memCount: (n) => n + " memories",
+      nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
+      nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
+      pickSomeone: "Pick someone to teach",
+      companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
+      fromWhere: (x) => "from " + x, toldDirectly: "Told directly", usedTimes: (n) => "used " + n + "×",
+    },
+  };
+
+  const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const t = () => TEXT[lang];
+  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
+  const dig = (o, k) => k.split(".").reduce((a, x) => a?.[x], o);
+  for (const el of document.querySelectorAll("[data-t]")) {
+    const v = dig(t(), el.dataset.t);
+    if (typeof v === "string") el.textContent = v;
+  }
+
+  /* ── data ────────────────────────────────────────────────────── */
+  const TODAY = new Date(2026, 8, 26);
+  const day = (s) => { const [y, m, d] = s.split(".").map((x) => parseInt(x, 10)); return new Date(y, m - 1, d); };
+  const daysSince = (d) => Math.round((TODAY - d) / 86400000) + 1;
+  const fmtDay = new Intl.DateTimeFormat(lang === "en" ? "en-US" : "ko-KR", lang === "en" ? { month: "short", day: "numeric" } : { month: "numeric", day: "numeric" });
+  const fmtFull = new Intl.DateTimeFormat(lang === "en" ? "en-US" : "ko-KR", { year: "numeric", month: lang === "en" ? "short" : "numeric", day: "numeric" });
+  const fmtMonth = new Intl.DateTimeFormat(lang === "en" ? "en-US" : "ko-KR", { year: "numeric", month: "long" });
+
+  const people = STAFF;
+  const who = (id) => people.find((p) => p.id === id);
+  let companyName = "My Tiny Office";
+  const FOUNDED = day("2026. 1. 12.");
+
+  // The company owns this list. A review seat is an area a PR can ask for;
+  // 프로세스 is worth knowing but nobody reviews for it.
+  const AREAS = [
+    { name: "arch", seat: true },
+    { name: "types", seat: true },
+    { name: "db", seat: true },
+    { name: "security", seat: true },
+    { name: "l10n", seat: true },
+    { name: "product", seat: true },
+    { name: "quality", seat: true },
+    { name: "process", seat: false },
+  ];
+
+  const companyMemories = [
+    { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
+    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", en: "Player-facing text goes through i18n. Names the player typed do not." }, from: null, used: 28 },
+    { text: { ko: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", en: "When the docs and the code disagree, fix the docs." }, from: { ko: "스타일 가이드가 낡았던 주", en: "the week the style guide went stale" }, used: 12 },
+  ];
+
+  const finished = [
+    { name: "로그인 개편", from: "2026. 4. 15.", to: "2026. 5. 29.", tasks: 14, crew: ["p2", "p5", "p3"] },
+    { name: "배포 파이프라인", from: "2026. 2. 2.", to: "2026. 3. 20.", tasks: 9, crew: ["p5", "p1"] },
+    { name: "첫 API", from: "2026. 1. 19.", to: "2026. 2. 27.", tasks: 11, crew: ["p5", "p3"] },
+  ];
+  const ONGOING = 2;
+
+  // A milestone keeps its kind and its facts, never a sentence: the words are
+  // the dictionary's, and a player name is whatever it is now.
+  const MILESTONES = [
+    { on: "2026. 1. 12.", kind: "founded" },
+    { on: "2026. 1. 12.", kind: "joined", who: "p5", nth: 1 },
+    { on: "2026. 1. 12.", kind: "team", team: "frontend" },
+    { on: "2026. 1. 23.", kind: "firstTask", who: "p5", task: { ko: "개발 서버 띄우기", en: "Stand up the dev server" } },
+    { on: "2026. 2. 20.", kind: "joined", who: "p3", nth: 2 },
+    { on: "2026. 2. 20.", kind: "team", team: "planning" },
+    { on: "2026. 2. 27.", kind: "project", name: "첫 API", days: 40 },
+    { on: "2026. 3. 2.", kind: "joined", who: "p1", nth: 3 },
+    { on: "2026. 3. 2.", kind: "team", team: "backend" },
+    { on: "2026. 3. 11.", kind: "tasks", n: 10 },
+    { on: "2026. 3. 16.", kind: "firstReview", who: "p3" },
+    { on: "2026. 3. 20.", kind: "project", name: "배포 파이프라인", days: 47 },
+    { on: "2026. 4. 15.", kind: "joined", who: "p2", nth: 4 },
+    { on: "2026. 4. 28.", kind: "memories", n: 10 },
+    { on: "2026. 5. 8.", kind: "joined", who: "p4", nth: 5 },
+    { on: "2026. 5. 29.", kind: "project", name: "로그인 개편", days: 45 },
+    { on: "2026. 6. 12.", kind: "tasks", n: 50 },
+    { on: "2026. 9. 20.", kind: "tasks", n: 100 },
+  ];
+
+  const ICON = {
+    plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
+    alert: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
+    task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
+    hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
+    flag: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 14V2.6h7.6l-1.6 2.7 1.6 2.7H4"/></svg>',
+    person: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="5.4" r="2.5"/><path d="M3.2 13.6c0-2.7 2.2-4.8 4.8-4.8s4.8 2.1 4.8 4.8"/></svg>',
+    team: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="3.6" rx=".8"/><rect x="1.6" y="10.6" width="5" height="3.6" rx=".8"/><rect x="9.4" y="10.6" width="5" height="3.6" rx=".8"/><path d="M8 5.4v2.6M4.1 10.6V8h7.8v2.6"/></svg>',
+    eye: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.8 8S4 3.8 8 3.8 14.2 8 14.2 8 12 12.2 8 12.2 1.8 8 1.8 8z"/><circle cx="8" cy="8" r="1.9"/></svg>',
+    book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg>',
+  };
+  const MILE_ICON = { founded: "flag", joined: "person", team: "team", firstTask: "task", tasks: "task", firstReview: "eye", memories: "book", project: "flag" };
+
+  const liveOf = (p) => p.memories.filter((m) => !m.archived);
+  const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
+  const sum = (f) => people.reduce((n, p) => n + f(p), 0);
+
+  /* ── sidebar ─────────────────────────────────────────────────── */
+  const suffix = lang === "en" ? "?lang=en" : "";
+  mountRoster(document.getElementById("members"), (p) => {
+    location.href = "employees.html" + suffix + "#" + p.id;
+  });
+
+  /* ── header ──────────────────────────────────────────────────── */
+  const age = daysSince(FOUNDED);
+  document.getElementById("headSub").textContent = t().headSub(age, people.length);
+  document.getElementById("nHistory").textContent = MILESTONES.length;
+
+  /* ── overview ────────────────────────────────────────────────── */
+  const coCard = document.getElementById("coCard");
+
+  function renderName(editing) {
+    coCard.innerHTML = editing
+      ? `<form class="co-name" id="nameForm">
+           <input class="input" id="nameInput" maxlength="20" autocomplete="off" />
+           <button class="btn btn-primary btn-sm" type="submit">${t().save}</button>
+           <button class="btn btn-secondary btn-sm" type="button" data-cancel>${t().cancel}</button>
+         </form>`
+      : `<span class="co-name"><b></b><button class="ibtn ibtn-sm" type="button" data-rename aria-label="${t().rename}">${ICON.pen}</button></span>`;
+    coCard.insertAdjacentHTML("beforeend", `<span class="co-since">${t().since(fmtFull.format(FOUNDED), age)}</span>`);
+
+    if (!editing) {
+      coCard.querySelector("b").textContent = companyName;
+      coCard.querySelector("[data-rename]").addEventListener("click", () => renderName(true));
+      return;
+    }
+    const input = coCard.querySelector("#nameInput");
+    input.value = companyName;
+    input.focus();
+    input.select();
+    coCard.querySelector("#nameForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (input.value.trim()) companyName = input.value.trim();
+      document.querySelector(".side-name").textContent = companyName;
+      renderName(false);
+    });
+    coCard.querySelector("[data-cancel]").addEventListener("click", () => renderName(false));
+  }
+  renderName(false);
+
+  const teams = new Set(people.map((p) => p.team)).size;
+  const taught = sum((p) => liveOf(p).length) + companyMemories.length;
+  const STATS = [
+    { k: t().tiles.people, n: t().tiles.peopleN(people.length), d: t().tiles.teamsN(teams) },
+    { k: t().tiles.done, n: t().tiles.count(sum((p) => p.done)), d: t().tiles.week(12), up: true },
+    { k: t().tiles.reviews, n: t().tiles.count(sum((p) => p.reviews)), d: t().tiles.week(7), up: true },
+    { k: t().tiles.memories, n: t().tiles.memN(taught), d: t().tiles.week(3), up: true },
+  ];
+  document.getElementById("tiles").innerHTML = STATS.map(
+    (x) => `<div class="tile"><span class="k">${x.k}</span><span class="tile-n">${x.n}</span><span class="tile-d${x.up ? " up" : ""}">${x.d}</span></div>`,
+  ).join("");
+
+  const crew = document.getElementById("crew");
+  for (const p of [...people].sort((a, b) => day(a.joined) - day(b.joined))) {
+    const a = document.createElement("a");
+    a.className = "mate";
+    a.href = "employees.html" + suffix + "#" + p.id;
+    a.innerHTML = `<span class="mate-av"></span><span class="mate-n"></span><span class="mate-d">${t().daysWith(daysSince(day(p.joined)))}</span>`;
+    a.querySelector(".mate-n").textContent = p.name;
+    a.querySelector(".mate-av").appendChild(avatar(p.species, 44));
+    crew.appendChild(a);
+  }
+
+  const finishedBox = document.getElementById("finished");
+  for (const f of finished) {
+    const row = document.createElement("div");
+    row.className = "proj-row";
+    const from = day(f.from), to = day(f.to);
+    row.innerHTML = `
+      <span class="proj-n"></span>
+      <span class="proj-m">${fmtDay.format(from)} – ${fmtDay.format(to)} · ${t().span(Math.round((to - from) / 86400000) + 1)}</span>
+      <span class="proj-m">${t().tasksN(f.tasks)}</span>
+      <span class="faces"></span>`;
+    row.querySelector(".proj-n").textContent = f.name;
+    const faces = row.querySelector(".faces");
+    for (const id of f.crew) {
+      const s = document.createElement("span");
+      s.appendChild(avatar(who(id).species, 20));
+      faces.appendChild(s);
+    }
+    finishedBox.appendChild(row);
+  }
+  document.getElementById("ongoing").innerHTML = `${t().ongoing(ONGOING)}<a href="projects.html${suffix}">${t().toBoard}</a>`;
+
+  /* ── milestones ──────────────────────────────────────────────── */
+  const mileRow = (m) => {
+    const facts = { ...m, who: m.who ? who(m.who) : null };
+    return `<div class="mile">
+      <span class="mile-date">${fmtDay.format(day(m.on))}</span>
+      <span class="mile-ic">${ICON[MILE_ICON[m.kind]]}</span>
+      <span class="mile-tx">${t().miles[m.kind](facts)}</span>
+    </div>`;
+  };
+  const newest = [...MILESTONES].reverse();
+  document.getElementById("recent").innerHTML = newest.slice(0, 3).map(mileRow).join("");
+
+  const byMonth = new Map();
+  for (const m of newest) {
+    const key = fmtMonth.format(day(m.on));
+    if (!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key).push(m);
+  }
+  document.getElementById("history").innerHTML = [...byMonth]
+    .map(([month, list]) => `<div class="month"><h3>${month}</h3>${list.map(mileRow).join("")}</div>`)
+    .join("");
+
+  /* ── rules ───────────────────────────────────────────────────── */
+  const reviewAreas = AREAS.filter((a) => a.seat).map((a) => a.name);
+  const uncovered = reviewAreas.filter((a) => !people.some((p) => areasOf(p).includes(a)));
+  if (uncovered.length) {
+    document.getElementById("ruleNotices").innerHTML = `
+      <div class="notice notice-warn">
+        <span class="n-ic">${ICON.alert}</span>
+        <span class="n-tx">
+          <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
+          <span>${t().nobodyKnowsWhy}</span>
+        </span>
+        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().pickSomeone}</button></span>
+      </div>`;
+  }
+
+  const areaTable = document.getElementById("areaTable");
+  for (const a of AREAS) {
+    const knowers = people.filter((p) => areasOf(p).includes(a.name));
+    const count = sum((p) => liveOf(p).filter((m) => m.area === a.name).length);
+    const row = document.createElement("div");
+    row.className = "area-row";
+    row.innerHTML = `
+      <span class="area-name">${t().areas[a.name]}</span>
+      <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
+      <span class="knows">${
+        knowers.length
+          ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
+          : '<span class="nobody">' + t().nobodyKnows + "</span>"
+      }</span>
+      <span class="area-n">${t().memCount(count)}</span>`;
+    row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
+    areaTable.appendChild(row);
+  }
+  areaTable.insertAdjacentHTML("beforeend", `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`);
+
+  const memCard = (m) => `<div class="mem">
+      <span class="mem-t">${tx(m.text)}</span>
+      <span class="mem-m">
+        ${m.from ? ICON.task : ICON.hand}
+        <span class="src">${m.from ? t().fromWhere(tx(m.from)) : t().toldDirectly}</span>
+        <span class="used${m.used >= 10 ? " hot" : ""}">${t().usedTimes(m.used)}</span>
+      </span>
+    </div>`;
+  document.getElementById("companyMem").innerHTML =
+    companyMemories.map(memCard).join("") + `<button class="mem-add" type="button">${ICON.plus}${t().tellCompany}</button>`;
+
+  /* ── tabs ────────────────────────────────────────────────────── */
+  function show(view) {
+    for (const tab of document.querySelectorAll(".tab")) tab.setAttribute("aria-selected", String(tab.dataset.view === view));
+    for (const v of document.querySelectorAll(".view")) v.toggleAttribute("hidden", v.id !== "view-" + view);
+  }
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (tab) show(tab.dataset.view);
+  });
+  document.querySelector("[data-go]").addEventListener("click", (e) => show(e.currentTarget.dataset.go));
+</script>

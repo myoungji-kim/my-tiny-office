@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 
-const PAGES = ["index", "first-run", "office", "projects", "employees", "connect", "components", "characters"];
+const PAGES = ["index", "first-run", "office", "projects", "employees", "company", "connect", "components", "characters"];
 const src = Object.fromEntries(PAGES.map((p) => [p, readFileSync(`docs/ui/${p}.html`, "utf8")]));
 
 const stripMedia = (css) => {
@@ -169,7 +169,7 @@ console.log("");
 // rename reached two of the three.
 console.log("app shell");
 {
-  const SCREENS = ["office", "projects", "employees"];
+  const SCREENS = ["office", "projects", "employees", "company"];
 
   const region = (text, open, close) => {
     const i = text.indexOf(open);
@@ -370,7 +370,7 @@ console.log("");
 // "#" is only for the page you are already on, and for a place not built yet.
 console.log("the menu goes somewhere");
 {
-  const SCREENS = ["office", "projects", "employees"];
+  const SCREENS = ["office", "projects", "employees", "company"];
   const TARGET = { office: "office.html", projects: "projects.html", people: "employees.html", company: "company.html", settings: "settings.html" };
 
   for (const p of SCREENS) {

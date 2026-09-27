@@ -2,7 +2,7 @@
 
 ## The standard lives in `docs/ui/`
 
-Seven pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
+Eight pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
 before building or changing a screen.
 
 | Page | Authoritative for |
@@ -10,7 +10,8 @@ before building or changing a screen.
 | `ui/first-run.html` | The three first-run steps, fields, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/projects.html` | The task board, the review queue, and choosing who reviews |
-| `ui/employees.html` | The list, a person's page, org chart, memory, review areas |
+| `ui/employees.html` | The list, a person's page, org chart, memory in use |
+| `ui/company.html` | Overview, finished projects, milestones, areas, company memory |
 | `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -311,6 +312,40 @@ the same loop seen from the other end.
 
 When they have none, the modal says so and offers to teach them right there.
 That is the moment the player actually has the context to teach.
+
+## Company
+
+The office shows what is happening now; the company shows what has happened
+so far. It is opened now and then to look back, so it sits last in the menu,
+and the company's name at the top of the sidebar leads there too.
+
+| Tab | Holds |
+| --- | --- |
+| 개요 | The company's name (editable here), four running totals with this week's gain, the people and how long each has been here, finished projects, the latest milestones |
+| 연혁 | Milestones by month, newest first |
+| 규칙 | The areas list and company memory — the two things the company owns rather than any one person |
+
+**Totals, not a dashboard.** Four numbers and a weekly gain, no charts. A
+finished project is kept as its name, its span, its task count and the
+people who worked on it.
+
+**Milestones are recorded, not reconstructed.** A hire stays in the history
+after the person leaves, so milestones are written when their event happens.
+Each stores its kind and its facts, never a sentence; the words come from the
+dictionary when shown, and a nickname is whatever it is now.
+
+| Milestone | When |
+| --- | --- |
+| 창업 | The company is created |
+| 합류 | Every hire; the first is called out |
+| 팀 생김 | A team gets its first member |
+| 첫 업무 완료 | Once, company-wide |
+| 업무 N건 | 10 · 50 · 100 · 500 |
+| 첫 리뷰 | The first peer review settles |
+| 기억 N개 | 10 · 50 · 100 |
+| 프로젝트 완료 | A project's last task is done |
+
+There are no growth stages yet; the history is what shows the company growing.
 
 ## Status
 

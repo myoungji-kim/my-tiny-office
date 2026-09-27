@@ -80,37 +80,6 @@
 
   .mem-line { flex: 1; height: 1px; background: var(--line); }
 
-  .mem {
-    border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; margin-bottom: 6px;
-    background: var(--surface);
-  }
-
-  .mem:last-child { margin-bottom: 0; }
-
-  .mem-t { display: block; font-size: 14px; line-height: 1.5; }
-
-  .mem-m { display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 13px; color: var(--faint); }
-
-  .mem-m svg { width: 12px; height: 12px; flex: none; }
-
-  .mem-m .src { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .mem-m .used { margin-left: auto; flex: none; font-variant-numeric: tabular-nums; }
-
-  .mem-m .used.hot { color: var(--ok-ink); font-weight: 600; }
-
-  .mem-m .used.cold { color: var(--bad-ink); font-weight: 600; }
-
-  .mem-add {
-    width: 100%; margin-top: 10px; border: 1px dashed var(--line-2); background: var(--subtle);
-    border-radius: 10px; padding: 9px; font-size: 14px; color: var(--muted); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-  }
-
-  .mem-add:hover { border-color: var(--muted); color: var(--ink); background: var(--surface); }
-
-  .mem-add svg { width: 14px; height: 14px; }
-
   .style-line {
     display: flex; align-items: flex-start; gap: 8px; font-size: 14px;
     padding: 6px 0; border-bottom: 1px solid var(--line);
@@ -168,22 +137,6 @@
 
   /* ═══ memory tab ═══ */
 
-  .mem-cols { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
-
-  @media (max-width: 1160px) { .mem-cols { grid-template-columns: 1fr; } }
-
-  .panel { border: 1px solid var(--line); border-radius: var(--r-card); }
-
-  .panel-hd { padding: 12px 15px; border-bottom: 1px solid var(--line); }
-
-  .panel-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
-
-  .panel-hd h2 .kn { margin-left: 4px; color: var(--faint); font-weight: 500; font-variant-numeric: tabular-nums; }
-
-  .panel-hd p { margin: 1px 0 0; font-size: 14px; color: var(--muted); }
-
-  .panel-bd { padding: 13px 15px; }
-
   .feed-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 
   .feed-row:last-child { border-bottom: none; }
@@ -201,31 +154,6 @@
   .f-time { font-size: 13px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
 
   .stack { display: flex; flex-direction: column; gap: 10px; }
-
-  /* ═══ area coverage ═══ */
-
-  .area-row {
-    display: grid; grid-template-columns: minmax(0, 170px) 76px minmax(0, 1fr) auto;
-    align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
-  }
-
-  .area-row:last-of-type { border-bottom: none; }
-
-  .area-name { font-size: 15px; font-weight: 600; }
-
-  .seat { font-size: 13px; color: var(--muted); }
-
-  .seat.no { color: var(--faint); }
-
-  .knows { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-
-  .knows .who { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--muted); }
-
-  .knows .who span { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; overflow: hidden; }
-
-  .nobody { font-size: 14px; color: var(--bad-ink); font-weight: 600; }
-
-  .area-n { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
   /* ═══ memory scaling ═══ */
 
@@ -258,19 +186,19 @@
 
 <div class="app">
   <nav class="side">
-    <div class="side-top">
+    <a class="side-top" href="company.html">
       <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
       <span class="side-id">
-        <span class="side-name">MY TINY OFFICE</span>
+        <span class="side-name">My Tiny Office</span>
         <span class="side-ver">v0.1.0</span>
       </span>
-    </div>
+    </a>
 
     <div class="nav">
       <a href="office.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="11.5" rx="1.5"/><path d="M6 7.5h1.8M10.2 7.5H12M6 11h1.8M10.2 11H12"/></svg><span data-t="nav.office">사무실</span></a>
       <a href="projects.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 5.5h4.5L8.5 8h7v6.5h-13z"/></svg><span data-t="nav.projects">프로젝트</span></a>
       <a href="#" aria-current="page"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="2.8"/><path d="M3.5 15c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/></svg><span data-t="nav.people">직원</span></a>
-      <a href="#"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 14.5v-3.5M9 14.5v-7M14.5 14.5v-10.5"/></svg><span data-t="nav.company">회사</span></a>
+      <a href="company.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 14.5v-3.5M9 14.5v-7M14.5 14.5v-10.5"/></svg><span data-t="nav.company">회사</span></a>
     </div>
 
     <div class="rule"></div>
@@ -333,29 +261,12 @@
 
       <div class="view" id="view-memory" hidden>
         <div class="stack" id="memNotices" style="margin-bottom:16px"></div>
-        <div class="panel" style="margin-bottom:16px">
+        <div class="panel">
           <div class="panel-hd">
-            <h2 data-t="areasTitle">분야</h2>
-            <p data-t="areasSub">회사가 정하는 목록이에요.</p>
+            <h2 data-t="feedTitle">최근에 쓰인 기억</h2>
+            <p data-t="feedSub">알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
           </div>
-          <div class="panel-bd" id="areaTable"></div>
-        </div>
-
-        <div class="mem-cols">
-          <div class="panel">
-            <div class="panel-hd">
-              <h2 data-t="feedTitle">최근에 쓰인 기억</h2>
-              <p data-t="feedSub">알려준 것이 실제 업무에서 쓰인 기록이에요.</p>
-            </div>
-            <div class="panel-bd" id="feed"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-hd">
-              <h2 data-t="companyTitle">회사 기억</h2>
-              <p data-t="companySub">모든 직원이 함께 알고 있어요.</p>
-            </div>
-            <div class="panel-bd" id="companyMem"></div>
-          </div>
+          <div class="panel-bd" id="feed"></div>
         </div>
       </div>
     </div>
@@ -407,10 +318,7 @@
       neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
       howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
       giveWork: "업무 맡기기", nobodyYet: "아직 아무도 없어요",
-      areasTitle: "분야", areasSub: "회사가 정하는 목록이에요. PR은 이 중 하나로 리뷰어를 찾아요.",
-      reviewArea: "리뷰 분야", noReview: "리뷰 없음", nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
       feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
-      companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
       referenced: (who, mem) => josa2(who, "이", "가") + " <q>" + mem + "</q>" + (josaNeeds(mem) ? "을" : "를") + " 참고했어요",
       assignTitle: (n) => n + (josaNeeds(n) ? "이" : "가") + " 맡을 업무",
       backlog: "대기 중인 업무", newTask: "새 업무 만들기", minutes: (m) => m + "분",
@@ -418,9 +326,6 @@
       noAreaMemory: (a) => a + " 기억이 없어요",
       noAreaMemoryWhy: (n) => n + (josaNeeds(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
       tellNow: "지금 알려주기", cancel: "취소", assignThis: "이 업무 맡기기", createAndAssign: "업무 만들고 맡기기",
-      nobodyKnowsArea: (list) => list.join(" · ") + (josaNeeds(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
-      nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
-      pickSomeone: "알려줄 직원 고르기",
       coldTitle: (n) => "한 번도 쓰이지 않은 기억이 " + n + "개 있어요",
       coldExample: (who, mem) => who + "의 “" + mem + "”",
       coldWhy: " — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.",
@@ -446,10 +351,7 @@
       neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
       howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
       giveWork: "Give them work", nobodyYet: "Nobody here yet",
-      areasTitle: "Areas", areasSub: "The company owns this list. A PR asks for one of them.",
-      reviewArea: "Review seat", noReview: "No seat", nobodyKnows: "Nobody knows this", addArea: "Add an area",
       feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
-      companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
       referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
       assignTitle: (n) => "Work for " + n,
       backlog: "Waiting", newTask: "Create a task", minutes: (m) => m + " min",
@@ -457,9 +359,6 @@
       noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
       noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
       tellNow: "Teach them now", cancel: "Cancel", assignThis: "Assign this", createAndAssign: "Create and assign",
-      nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
-      nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
-      pickSomeone: "Pick someone to teach",
       coldTitle: (n) => n + " memory has never been used",
       coldExample: (who, mem) => who + "'s “" + mem + "”",
       coldWhy: " — either no task has needed it yet, or it went to the wrong person.",
@@ -507,12 +406,6 @@
 
   const people = STAFF;
 
-  const companyMemories = [
-    { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
-    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", en: "Player-facing text goes through i18n. Names the player typed do not." }, from: null, used: 28 },
-    { text: { ko: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", en: "When the docs and the code disagree, fix the docs." }, from: { ko: "스타일 가이드가 낡았던 주", en: "the week the style guide went stale" }, used: 12 },
-  ];
-
   const feed = [
     { who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" }, on: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, when: { ko: "12분 전", en: "12 min ago" } },
     { who: "p2", mem: { ko: "한글에는 letter-spacing을 걸지 않아요", en: "Never track Hangul" }, on: { ko: "로그인 폼 구현", en: "Build the login form" }, when: { ko: "34분 전", en: "34 min ago" } },
@@ -549,13 +442,12 @@
   const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
   const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
   const charsOf = (p) => liveOf(p).reduce((n, m) => n + tx(m.text).length, 0);
-  const knowersOf = (area) => people.filter((p) => areasOf(p).includes(area));
 
   /* ── sidebar roster ──────────────────────────────────────────── */
   const members = document.getElementById("members");
   mountRoster(members, (p) => { location.hash = p.id; });
   /* ── header ──────────────────────────────────────────────────── */
-  const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0) + companyMemories.length;
+  const totalMem = people.reduce((n, p) => n + liveOf(p).length, 0);
   document.getElementById("nList").textContent = people.length;
   document.getElementById("nMem").textContent = totalMem;
   document.getElementById("headSub").textContent =
@@ -749,22 +641,8 @@
   /* ── memory tab ──────────────────────────────────────────────── */
   const notices = document.getElementById("memNotices");
 
-  // A review seat nobody can take, and memory nobody ever used, are the two
-  // things this screen knows that the player cannot see anywhere else.
-  const uncovered = REVIEW_AREAS.filter((a) => !people.some((p) => areasOf(p).includes(a)));
-  if (uncovered.length) {
-    const n = document.createElement("div");
-    n.className = "notice notice-warn";
-    n.innerHTML = `
-      <span class="n-ic">${ICON.alert}</span>
-      <span class="n-tx">
-        <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
-        <span>${t().nobodyKnowsWhy}</span>
-      </span>
-      <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().pickSomeone}</button></span>`;
-    notices.appendChild(n);
-  }
-
+  // Memory nobody ever used is something this screen knows that the player
+  // cannot see anywhere else.
   const cold = people.flatMap((p) => p.memories.filter((m) => m.used === 0).map((m) => ({ p, m })));
   if (cold.length) {
     const n = document.createElement("div");
@@ -779,29 +657,6 @@
     notices.appendChild(n);
   }
 
-  const areaTable = document.getElementById("areaTable");
-  for (const a of AREAS) {
-    const knowers = knowersOf(a.name);
-    const count = people.reduce((n, p) => n + liveOf(p).filter((m) => m.area === a.name).length, 0);
-    const row = document.createElement("div");
-    row.className = "area-row";
-    row.innerHTML = `
-      <span class="area-name">${t().areas[a.name]}</span>
-      <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
-      <span class="knows">${
-        knowers.length
-          ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
-          : '<span class="nobody">' + t().nobodyKnows + '</span>'
-      }</span>
-      <span class="area-n">${t().memCount(count)}</span>`;
-    row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
-    areaTable.appendChild(row);
-  }
-  areaTable.insertAdjacentHTML(
-    "beforeend",
-    `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`,
-  );
-
   const feedBox = document.getElementById("feed");
   for (const f of feed) {
     const p = people.find((x) => x.id === f.who);
@@ -814,10 +669,6 @@
     el.querySelector(".f-av").appendChild(avatar(p.species, 28));
     feedBox.appendChild(el);
   }
-
-  document.getElementById("companyMem").innerHTML =
-    companyMemories.map(memCard).join("") +
-    `<button class="mem-add" type="button">${ICON.plus}${t().tellCompany}</button>`;
 
   /* ── assign ──────────────────────────────────────────────────── */
   const scrim = document.getElementById("scrim");
