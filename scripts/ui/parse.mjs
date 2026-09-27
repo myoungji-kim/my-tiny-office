@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { Script } from "node:vm";
 
 // A page's script only has to parse here; nothing is run.
-const PAGES = ["index", "first-run", "office", "projects", "employees", "connect", "components", "characters"];
+const PAGES = ["index", "first-run", "office", "projects", "employees", "settings", "connect", "components", "characters"];
 let bad = 0;
 const fail = (m) => { console.log("  ✗ " + m); bad++; };
 

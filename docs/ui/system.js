@@ -1142,7 +1142,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
 
 /* ═══ the sample-page bar ═══ */
 // Not part of the design: it only exists so the samples can be walked through.
-// It builds itself so the seven pages cannot drift apart again, and it carries
+// It builds itself so the pages cannot drift apart again, and it carries
 // ?lang= from page to page, or choosing English would undo itself on the next
 // click.
 (() => {
@@ -1151,7 +1151,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
     '<path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>';
 
   const GROUPS = [
-    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["projects", "프로젝트", "Projects"], ["employees", "직원", "People"], ["company", "회사", "Company"]]],
+    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["projects", "프로젝트", "Projects"], ["employees", "직원", "People"], ["company", "회사", "Company"], ["settings", "설정", "Settings"]]],
     ["문서", "Reference", [["connect", "연결", "Connect"], ["components", "컴포넌트", "Components"], ["characters", "캐릭터", "Cast"]]],
   ];
 

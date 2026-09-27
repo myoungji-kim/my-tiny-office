@@ -12,7 +12,7 @@ holds, and how the user moves between them. The rest lives elsewhere:
 
 ## The standard lives in `docs/ui/`
 
-Eight pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
+Nine pages define the current UI. Open [`docs/ui/index.html`](ui/index.html)
 before building or changing a screen.
 
 | Page | Authoritative for |
@@ -22,6 +22,7 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
+| `ui/settings.html` | The company's Claude Code, language, where the data lives |
 | `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -412,6 +413,23 @@ The areas table answers "who knows this one", and the tab leads with a notice
 for any area nobody knows. The roles table shows who holds each title; the last
 role cannot be deleted. A default area speaks both languages; a role, or
 anything the user named, is shown as written.
+
+## Settings
+
+Settings holds what belongs to this computer rather than to the company: the
+Claude Code everyone works through, the language, and the file the company is
+stored in. It is one column of panels, no tabs — there is too little for tabs
+to earn their place.
+
+| Panel | Holds |
+| --- | --- |
+| Claude Code | The same check as first run — installed, logged in — with 다시 확인. Folder trust is not here: it is per project |
+| 언어 | 한국어 · English. What the user wrote is shown as written in both |
+| 데이터 | The database file's path, with 복사 |
+| 버전 | The app's version |
+
+What the company decides — its name, areas, roles, memory — is on the company
+screen, not here.
 
 ## First run
 
