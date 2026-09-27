@@ -229,7 +229,7 @@ archive.
 
 The user writes the nicknames, so the feed uses whatever they chose.
 
-Examples:
+It covers today, newest first. Examples:
 - "모카 picked up Paginate the payment history."
 - "삐약 is looking at the security side of the webhook change."
 - "삐약 asked for the retryable failures to be split out."

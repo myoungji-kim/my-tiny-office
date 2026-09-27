@@ -117,6 +117,16 @@ groups cards by team, with anyone without a team first under 팀 없음. A team'
 cards end in 빈 책상에 직원 채우기, which hires into the free desk and reads
 빈 책상이 없어요 when none is left.
 
+### Today
+
+Under the floor, above the cards, **오늘** lists what happened in the office,
+newest first: who started what, a colleague starting a review, a memory drawn
+on, work finished and waiting on the user, work applied, someone going on
+leave. Each row is a domain event worded by the dictionary, with its time. The
+feed follows the room — a team's room and the lounge show the people in them —
+and shows six before 더 보기. Only what waits on the user carries an action, the way to it
+(승인하러 가기); the rest is there to be read.
+
 ### Status
 
 Status mirrors the domain rather than inventing its own vocabulary:

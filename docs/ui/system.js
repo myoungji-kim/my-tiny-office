@@ -600,7 +600,7 @@ const WORDS = {
 const STAFF = [
   { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
     team: "backend", status: "working", joined: "2026. 3. 2.",
-    task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, done: 41, reviews: 18,
+    task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, done: 41, reviews: 18,
     style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }, { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }],
     memories: [
       { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
@@ -610,7 +610,7 @@ const STAFF = [
     ] },
   { id: "p2", name: "두부", species: "bunny", role: "Frontend Engineer",
     team: "frontend", status: "working", joined: "2026. 4. 15.",
-    task: { ko: "로그인 폼 구현", en: "Build the login form" }, done: 33, reviews: 9,
+    task: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" }, done: 33, reviews: 9,
     style: [{ ko: "완성 전에 스크린샷을 남겨", en: "Leave a screenshot before you call it done" }, { ko: "버튼은 항상 pill이에요. 8px 모서리를 쓰지 않아요.", en: "Buttons are always pills. Never an 8px corner." }],
     memories: [
       { area: "l10n", text: { ko: "한글에는 letter-spacing을 걸지 않아요. 자소가 벌어져 보여요.", en: "Never track Hangul. It pulls the jamo of a syllable apart." }, from: { ko: "사이드바 자간이 깨진 이슈", en: "the broken sidebar tracking" }, used: 18 },
@@ -618,7 +618,7 @@ const STAFF = [
     ] },
   { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
     team: "planning", status: "working", joined: "2026. 2. 20.",
-    task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
+    task: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, done: 27, reviews: 22,
     style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }, { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }],
     memories: [
       { area: "product", text: { ko: "업무는 30분 이내로 쪼개요. 넘으면 사실 두 개예요.", en: "Keep a task under 30 minutes. Longer means it is really two." }, from: null, used: 15 },

@@ -49,6 +49,26 @@
 
   .p-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  /* ═══ today ═══ */
+
+  .today-row { display: grid; grid-template-columns: 44px 16px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+
+  .today-row:last-child { border-bottom: none; }
+
+  .today-at { font-family: var(--mono); font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .today-ic { display: grid; place-items: center; color: var(--muted); }
+
+  .today-ic svg { width: 15px; height: 15px; }
+
+  .today-row.you .today-ic { color: var(--brand); }
+
+  .today-tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+
+  .today-tx b { color: var(--ink); font-weight: 600; }
+
+  .today-more { margin-top: 8px; }
+
   /* Menu rows replace buttons inside the popover: a card never carries a
      near-black primary. The first row is the one the user came for. */
 
@@ -113,6 +133,10 @@
           <div class="overlay" id="overlay"></div>
         </div>
       </div>
+      <div class="panel">
+        <div class="panel-hd"><h2 data-t="feedTitle">오늘</h2><p data-t="feedSub">사무실에서 일어난 일, 최신순이에요.</p></div>
+        <div class="panel-bd" id="feed"></div>
+      </div>
       <div id="teams"></div>
     </div>
   </div>
@@ -150,6 +174,16 @@
       hireDesk: "빈 책상에 직원 채우기", noTeam: "팀 없음", noDesk: "빈 책상이 없어요", justHired: "방금 입사",
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
+      feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
+      feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기",
+      feed: {
+        started: (e) => subj(e.name) + " " + objB(e.task) + " 시작했어요",
+        reviewStarted: (e) => subj(e.name) + " " + objB(e.task) + " " + e.area + " 관점에서 보기 시작했어요",
+        memoryUsed: (e) => subj(e.name) + " ‘" + e.mem + "’" + (hasBatchim(e.mem) ? "을" : "를") + " 참고했어요",
+        waiting: (e) => subj(e.name) + " " + objB(e.task) + " 마쳤어요 · " + e.took + "분 · 승인을 기다려요",
+        applied: (e) => objB(e.task) + " 반영했어요",
+        leave: (e) => subj(e.name) + " 휴가를 떠났어요",
+      },
       tabs: { all: "전체", lounge: "휴게실" },
       deskSub: (used, seats) => "책상 " + seats + "석 중 " + used + "석 사용",
       loungeSub: "일이 없는 사람은 여기 있어요.",
@@ -173,7 +207,7 @@
       },
       cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
       actionOf: (n) => n + " 행동",
-      tasks: { pay: "결제 API 에러 응답 구조 변경", login: "로그인 폼 구현", docs: "API 문서 작성", webhook: "결제 웹훅 서명 검증" },
+      tasks: { paging: "결제 내역 페이지네이션", orderType: "주문 상태 타입 좁히기", webhook: "결제 웹훅 서명 검증" },
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
       backIn: "3일 후 복귀",
     },
@@ -182,6 +216,16 @@
       hireDesk: "Fill this desk", noTeam: "No team", noDesk: "No free desk", justHired: "Just joined",
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
+      feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
+      feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it",
+      feed: {
+        started: (e) => e.name + " started <b>" + e.task + "</b>",
+        reviewStarted: (e) => e.name + " started looking at the " + e.area + " side of <b>" + e.task + "</b>",
+        memoryUsed: (e) => e.name + " drew on “" + e.mem + "”",
+        waiting: (e) => e.name + " finished <b>" + e.task + "</b> in " + e.took + " min · waiting on you",
+        applied: (e) => "<b>" + e.task + "</b> was applied",
+        leave: (e) => e.name + " went on leave",
+      },
       tabs: { all: "All", lounge: "Lounge" },
       deskSub: (used, seats) => used + " of " + seats + " desks in use",
       loungeSub: "Whoever has no work to do is here.",
@@ -205,7 +249,7 @@
       },
       cannotAssign: "They cannot take work while on leave.",
       actionOf: (n) => "Actions for " + n,
-      tasks: { pay: "Change the payment API error shape", login: "Build the login form", docs: "Write the API docs", webhook: "Verify the payment webhook signature" },
+      tasks: { paging: "Paginate the payment history", orderType: "Narrow the order status type", webhook: "Verify the payment webhook signature" },
       reviewKey: "Review", reviewingNow: "Reviewing",
       backIn: "Back in 3 days",
     },
@@ -234,9 +278,9 @@
   // Who these people are is the company's answer, not this screen's. The floor
   // adds only where each of them sits and what is on their desk today.
   const DESKS = [
-    { id: "p1", col: 3, row: 3, task: { key: "pay", spent: 22 } },
-    { id: "p2", col: 8, row: 3, task: { key: "login", spent: 12 } },
-    { id: "p3", col: 13, row: 3, task: { key: "docs", spent: 4 } },
+    { id: "p1", col: 3, row: 3, task: { key: "paging", spent: 23 } },
+    { id: "p2", col: 8, row: 3, task: { key: "orderType", spent: 8 } },
+    { id: "p3", col: 13, row: 3, task: { key: "webhook", spent: 41 } },
     { id: "p4", col: 3, row: 6, review: { key: "webhook", spent: 6 } },
     { id: "p5", col: 8, row: 6, back: "backIn" },
     { id: null, col: 13, row: 6 },
@@ -437,11 +481,68 @@
       <span class="c-nums">${nums}</span>`;
   }
 
+  /* ── today ───────────────────────────────────────────────────── */
+  // Each row is a domain event worded by the dictionary. What waits on the
+  // user carries the way to it; nothing else asks for anything.
+  const subj = (n) => (lang === "en" ? n : withParticle(n, "이", "가"));
+  const objB = (w) => "<b>" + w + "</b>" + (lang === "en" ? "" : hasBatchim(w) ? "을" : "를");
+  const EVENTS = [
+    { at: "10:16", kind: "started", who: "p2", task: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" } },
+    { at: "10:12", kind: "reviewStarted", who: "p4", area: "security", task: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" } },
+    { at: "10:09", kind: "memoryUsed", who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" } },
+    { at: "10:01", kind: "started", who: "p1", task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" } },
+    { at: "10:00", kind: "waiting", who: "p1", took: 52, project: "pay", task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" } },
+    { at: "09:43", kind: "started", who: "p3", task: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" } },
+    { at: "09:40", kind: "applied", task: { ko: "환불 정책 문서화", en: "Write down the refund policy" } },
+    { at: "09:12", kind: "waiting", who: "p4", took: 19, project: "order", task: { ko: "주문 테이블 인덱스 정리", en: "Tidy the order table indexes" } },
+    { at: "09:00", kind: "leave", who: "p5" },
+  ];
+  const FEED_ICON = {
+    started: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.4l7.6 4.6L5 12.6z"/></svg>',
+    reviewStarted: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
+    memoryUsed: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.8 3.2h3.6A1.8 1.8 0 0 1 8 5v8a1.6 1.6 0 0 0-1.6-1.4H2.8zM13.2 3.2H9.6A1.8 1.8 0 0 0 8 5v8a1.6 1.6 0 0 1 1.6-1.4h3.6z"/></svg>',
+    waiting: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 9.4h3.2l1 1.8h2.8l1-1.8h3.2"/><path d="M3.6 3.4h8.8l1.2 6v3.2H2.4V9.4z"/></svg>',
+    applied: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
+    leave: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.6"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1"/></svg>',
+  };
+  const FEED_SHOWN = 6;
+  let feedOpen = false;
+
+  // The feed follows the room: a team's room and the lounge show the people in them.
+  function renderFeed(here) {
+    const box = document.getElementById("feed");
+    const inRoom = (p) => (here.kind === "team" ? p.team === room : here.kind === "lounge" ? inLounge(byId.get(p.id)) : true);
+    const mine = (e) => (here.kind !== "team" && here.kind !== "lounge") || (e.who && inRoom(fromCompany.get(e.who)));
+    const list = EVENTS.filter(mine);
+    const rows = feedOpen ? list : list.slice(0, FEED_SHOWN);
+    const suffix = lang === "en" ? "?lang=en" : "";
+    box.innerHTML = list.length ? "" : `<p class="col-empty" style="margin:0">${t().feedNothing}</p>`;
+    for (const e of rows) {
+      const words = { name: e.who ? fromCompany.get(e.who).name : "", task: e.task?.[lang], mem: e.mem?.[lang], area: t().areas[e.area], took: e.took };
+      const row = document.createElement("div");
+      row.className = "today-row" + (e.kind === "waiting" ? " you" : "");
+      row.innerHTML = `<span class="today-at">${e.at}</span><span class="today-ic">${FEED_ICON[e.kind]}</span>
+        <span class="today-tx">${t().feed[e.kind](words)}</span>
+        ${e.kind === "waiting" ? `<a class="btn btn-secondary btn-sm" href="projects.html${suffix}#${e.project}">${t().feedApprove}</a>` : "<span></span>"}`;
+      row.querySelector(".today-tx").title = row.querySelector(".today-tx").textContent;
+      box.appendChild(row);
+    }
+    if (list.length > FEED_SHOWN) {
+      const more = document.createElement("button");
+      more.className = "btn btn-ghost btn-sm today-more";
+      more.type = "button";
+      more.textContent = feedOpen ? t().feedLess : t().feedMore(list.length - FEED_SHOWN);
+      more.addEventListener("click", () => { feedOpen = !feedOpen; renderFeed(here); });
+      box.appendChild(more);
+    }
+  }
+
   const teams = document.getElementById("teams");
 
   function drawCards() {
     teams.innerHTML = "";
     const here = roomOf(room);
+    renderFeed(here);
     const groups =
       here.kind === "all" ? [["noTeam", staffed.filter((p) => !p.team)], ...TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])].filter(([k, g]) => k !== "noTeam" || g.length)
       : here.kind === "team" ? [[room, staffed.filter((p) => p.team === room)]]
