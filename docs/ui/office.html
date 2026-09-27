@@ -144,7 +144,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      hireDesk: "빈 책상에 직원 채우기", noDesk: "빈 책상이 없어요", justHired: "방금 입사",
+      hireDesk: "빈 책상에 직원 채우기", noTeam: "팀 없음", noDesk: "빈 책상이 없어요", justHired: "방금 입사",
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
       tabs: { all: "전체", lounge: "휴게실" },
@@ -176,7 +176,7 @@
     },
     en: {
       ...WORDS.en,
-      hireDesk: "Fill this desk", noDesk: "No free desk", justHired: "Just joined",
+      hireDesk: "Fill this desk", noTeam: "No team", noDesk: "No free desk", justHired: "Just joined",
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
       tabs: { all: "All", lounge: "Lounge" },
@@ -255,7 +255,7 @@
   ctx.imageSmoothingEnabled = false;
 
   const tabs = document.getElementById("tabs");
-  const TEAMS = [...new Set(staffed.map((p) => p.team))];
+  const TEAMS = [...new Set(staffed.map((p) => p.team))].filter(Boolean);
   const inLounge = (p) => p.status === "available";
   const atDesk = (p) => p.status === "working" || p.status === "ready";
 
@@ -447,14 +447,14 @@
     teams.innerHTML = "";
     const here = roomOf(room);
     const groups =
-      here.kind === "all" ? TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])
+      here.kind === "all" ? [["noTeam", staffed.filter((p) => !p.team)], ...TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])].filter(([k, g]) => k !== "noTeam" || g.length)
       : here.kind === "team" ? [[room, staffed.filter((p) => p.team === room)]]
       : [[here.kind, here.kind === "lounge" ? staffed.filter(inLounge) : []]];
 
     for (const [key, group] of groups) {
       const wrap = document.createElement("div");
       wrap.style.marginBottom = "18px";
-      const heading = t().teams[key] ?? t().rooms[key];
+      const heading = key === "noTeam" ? t().noTeam : t().teams[key] ?? t().rooms[key];
       wrap.innerHTML = `<div class="grp"><h2>${heading}</h2><span class="cnt">${group.length}</span></div>`;
       const grid = document.createElement("div");
       grid.className = "cards";

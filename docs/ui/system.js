@@ -533,7 +533,7 @@ const WORDS = {
     hire: {
       title: "직원 고용", sub: "새 동료가 빈 책상에 앉아요.",
       species: "어떤 친구인가요", name: "이름", nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
-      role: "역할", team: "팀", cancel: "취소",
+      role: "역할", team: "팀", noTeam: "팀 없음", cancel: "취소",
       simulated: "시뮬레이션 직원으로 시작해요. 실제로 일하게 하려면 고용한 뒤 Claude Code를 연결해요.",
       hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
     },
@@ -564,7 +564,7 @@ const WORDS = {
     hire: {
       title: "Hire", sub: "Someone new takes a free desk.",
       species: "Who are they?", name: "Name", nameHint: "Shorter is better. You can change it later.",
-      role: "Role", team: "Team", cancel: "Cancel",
+      role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       simulated: "They start simulated. Connect Claude Code after hiring to put them to real work.",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
     },
@@ -807,6 +807,8 @@ function openHire({ team = null, teams = null, onSave }) {
   const returnTo = document.activeElement;
 
   for (const r of ROLES) $("#hireRole").append(new Option(r, r));
+  // A team is optional: a tiny office may not have one yet.
+  $("#hireTeam").append(new Option(w.noTeam, ""));
   for (const x of teams ?? Object.entries(WORDS[lang].teams).map(([key, label]) => ({ key, label }))) $("#hireTeam").append(new Option(x.label, x.key));
   if (team) $("#hireTeam").value = team;
 
@@ -852,7 +854,7 @@ function openHire({ team = null, teams = null, onSave }) {
   for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
   $("[data-ok]").addEventListener("click", () => {
-    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value };
+    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value || null };
     close();
     onSave(hired);
   });

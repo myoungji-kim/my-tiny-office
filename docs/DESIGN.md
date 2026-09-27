@@ -388,6 +388,11 @@ A company is organised in teams and nothing above them. There are no
 departments: a tiny office does not need a second level, and a person's line
 reads *Backend Engineer · 백엔드팀*.
 
+A team is optional. A company of one has no reason to have one, so first-run
+never asks, and the first hire starts with 팀 없음. Teams appear when the
+company grows enough to split its work — which is also when 연혁 records
+팀 생김. Someone without a team reads as just their role.
+
 Teams are managed on the org chart, where they are shown. 팀 추가 at the foot
 names a new one; a team's `⋯` renames it or deletes it; a person's `⋯` moves
 them to another team.
@@ -395,8 +400,11 @@ them to another team.
 - A default team speaks both languages. One the player names or renames is
   shown as written, like a nickname.
 - A team with people in it is not deleted outright: a dialog asks which team
-  they move to. An empty one asks once more in place. The last team cannot be
-  deleted, because everyone belongs somewhere.
+  they move to, 팀 없음 included. An empty one asks once more in place.
+- People without a team are listed first on the org chart and on the office's
+  whole floor, under 팀 없음; that group cannot be renamed or deleted. A
+  person's `⋯` can also take them off their team.
+- The hire dialog offers 팀 없음 first, unless it was opened from a team.
 - A team is organisation, a room is space. Making a team does not build its
   room; the office's 방 추가 offers the teams that do not have one yet.
 

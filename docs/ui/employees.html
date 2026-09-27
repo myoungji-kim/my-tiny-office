@@ -145,6 +145,8 @@
 
   .team-box-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
 
+  .team-box-hd h2.muted { color: var(--muted); }
+
   .team-box-hd .ibtn { margin-left: auto; }
 
   .team-bd { padding: 14px 15px; }
@@ -157,7 +159,7 @@
 
   .cnt { font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
 
-  .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr)); }
+  .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); }
 
   .tcard {
     display: flex; align-items: center; gap: 10px; text-align: left;
@@ -344,7 +346,7 @@
       styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
       headSub: (n, teams) => n + "명 · 팀 " + teams + "개",
       tabs: { list: "목록", org: "조직도", memory: "기억" },
-      teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
+      noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
       teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
       moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
       removeTeamTitle: (team) => "‘" + team + "’ 지우기", removeTeamSub: (n) => "팀원이 " + n + "명 있어요. 지우기 전에 옮길 팀을 골라요.",
@@ -386,7 +388,7 @@
       styleSub: "Carried into every task, whatever the area.", stylePlaceholder: "e.g. Keep commits small",
       headSub: (n, teams) => n + " people · " + teams + " teams",
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
-      teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
+      noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
       teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
       moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
       removeTeamTitle: (team) => "Delete ‘" + team + "’", removeTeamSub: (n) => n + (n === 1 ? " person is" : " people are") + " in this team. Choose where they go first.",
@@ -439,7 +441,8 @@
   const TEAMS = Object.keys(WORDS.ko.teams).map((key) => ({ key }));
   const teamOf = (key) => TEAMS.find((x) => x.key === key);
   const teamLabel = (x) => x.label ?? t().teams[x.key];
-  const teamName = (key) => teamLabel(teamOf(key));
+  const teamName = (key) => (teamOf(key) ? teamLabel(teamOf(key)) : "");
+  const roleLine = (p) => p.role + (teamName(p.team) ? " · " + teamName(p.team) : "");
 
   const backlog = [
     { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
@@ -507,7 +510,7 @@
       b.innerHTML = `
         <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
         <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
-        <span class="r-team">${teamName(p.team)}</span>
+        <span class="r-team">${teamName(p.team) || t().noTeam}</span>
         <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
         <span class="r-mem">${t().memCountShort(p.memories.length)}</span>`;
       b.querySelector(".r-av").prepend(spriteCanvas(p.species, 40));
@@ -549,7 +552,7 @@
   function renderHead(p) {
     document.getElementById("pAv").replaceChildren(spriteCanvas(p.species, 56));
     document.getElementById("pName").textContent = p.name;
-    document.getElementById("pRole").textContent = p.role + " · " + teamName(p.team);
+    document.getElementById("pRole").textContent = roleLine(p);
     const chip = document.getElementById("pChip");
     chip.className = "chip " + p.status;
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
@@ -777,8 +780,28 @@
       <p class="hint" data-taken hidden>${t().nameTaken}</p>
     </form>`;
 
+  const personCard = (p) => {
+    const wrap = document.createElement("div");
+    wrap.className = "tcard-wrap";
+    wrap.innerHTML = `<button class="tcard" type="button" data-open="${p.id}">
+        <span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+        <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role}</span></span>
+      </button>
+      <button class="ibtn ibtn-sm" type="button" data-move="${p.id}" aria-label="${t().personMenu}" aria-expanded="false">${ICON.more}</button>`;
+    wrap.querySelector(".t-av").prepend(spriteCanvas(p.species, 36));
+    return wrap;
+  };
+
   function renderOrg() {
     org.replaceChildren();
+    const loose = people.filter((p) => !teamOf(p.team));
+    if (loose.length) {
+      const box = document.createElement("div");
+      box.className = "team-box";
+      box.innerHTML = `<div class="team-box-hd"><h2 class="muted">${t().noTeam}</h2><span class="cnt">${loose.length}</span></div><div class="team-bd"><div class="tgrid"></div></div>`;
+      for (const p of loose) box.querySelector(".tgrid").append(personCard(p));
+      org.append(box);
+    }
     for (const team of TEAMS) {
       const inTeam = people.filter((p) => p.team === team.key);
       const box = document.createElement("div");
@@ -791,17 +814,7 @@
       box.querySelector("h2")?.append(teamLabel(team));
       const grid = document.createElement("div");
       grid.className = "tgrid";
-      for (const p of inTeam) {
-        const wrap = document.createElement("div");
-        wrap.className = "tcard-wrap";
-        wrap.innerHTML = `<button class="tcard" type="button" data-open="${p.id}">
-            <span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
-            <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role}</span></span>
-          </button>
-          <button class="ibtn ibtn-sm" type="button" data-move="${p.id}" aria-label="${t().personMenu}" aria-expanded="false">${ICON.more}</button>`;
-        wrap.querySelector(".t-av").prepend(spriteCanvas(p.species, 36));
-        grid.append(wrap);
-      }
+      for (const p of inTeam) grid.append(personCard(p));
       if (!inTeam.length) {
         const v = document.createElement("button");
         v.className = "vacant";
@@ -850,7 +863,7 @@
   }
 
   function removeTeam(team, into) {
-    for (const p of people) if (p.team === team.key) p.team = into;
+    for (const p of people) if (p.team === team.key) p.team = into || null;
     TEAMS.splice(TEAMS.indexOf(team), 1);
     rerenderPeople();
   }
@@ -859,38 +872,37 @@
     const team = teamOf(btn.dataset.teammenu);
     const members = people.filter((p) => p.team === team.key).length;
     const others = TEAMS.filter((x) => x !== team);
-    const items = [{ label: t().renameTeam, icon: ICON.pen, run: () => { editingTeam = team.key; renderOrg(); } }];
-    // The last team stays: everyone has to belong somewhere.
-    if (others.length) {
-      items.push(
-        members
-          ? {
-              label: t().remove, icon: ICON.trash, bad: true,
-              run: () => openMoveDialog({
-                title: t().removeTeamTitle(teamLabel(team)),
-                sub: t().removeTeamSub(members),
-                label: t().moveToTeam,
-                options: others.map((x) => ({ value: x.key, label: teamLabel(x) })),
-                cancel: t().cancel,
-                confirm: t().moveAndRemove,
-                onConfirm: (into) => removeTeam(team, into),
-              }),
-            }
-          : { label: t().remove, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => removeTeam(team, null) },
-      );
-    }
-    openRowMenu(btn, items, { keep: t().keep });
+    openRowMenu(btn, [
+      { label: t().renameTeam, icon: ICON.pen, run: () => { editingTeam = team.key; renderOrg(); } },
+      members
+        ? {
+            label: t().remove, icon: ICON.trash, bad: true,
+            run: () => openMoveDialog({
+              title: t().removeTeamTitle(teamLabel(team)),
+              sub: t().removeTeamSub(members),
+              label: t().moveToTeam,
+              options: [{ value: "", label: t().noTeam }, ...others.map((x) => ({ value: x.key, label: teamLabel(x) }))],
+              cancel: t().cancel,
+              confirm: t().moveAndRemove,
+              onConfirm: (into) => removeTeam(team, into),
+            }),
+          }
+        : { label: t().remove, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: () => removeTeam(team, null) },
+    ], { keep: t().keep });
   }
 
   function moveMenu(btn) {
     const p = people.find((x) => x.id === btn.dataset.move);
     openRowMenu(
       btn,
-      TEAMS.filter((x) => x.key !== p.team).map((x) => ({
-        label: t().moveInto(teamLabel(x)),
-        icon: ICON.swap,
-        run: () => { p.team = x.key; rerenderPeople(); },
-      })),
+      [
+        ...TEAMS.filter((x) => x.key !== p.team).map((x) => ({
+          label: t().moveInto(teamLabel(x)),
+          icon: ICON.swap,
+          run: () => { p.team = x.key; rerenderPeople(); },
+        })),
+        ...(teamOf(p.team) ? [{ label: t().leaveTeam, icon: ICON.x, run: () => { p.team = null; rerenderPeople(); } }] : []),
+      ],
     );
   }
 
@@ -998,7 +1010,7 @@
         <span class="m-av"></span>
         <span style="flex:1;min-width:0">
           <span class="m-t">${t().assignTitle(p.name)}</span>
-          <span class="m-s">${p.role} · ${teamName(p.team)}</span>
+          <span class="m-s">${roleLine(p)}</span>
         </span>
       </div>
 
