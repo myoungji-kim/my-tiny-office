@@ -160,9 +160,23 @@
 
   .p-said b { display: block; font-weight: 600; color: var(--ink); font-size: 13px; margin-bottom: 3px; }
 
-  .seat-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  /* A reviewer row carries what they are doing, which can be long, so it
+     grows to two lines instead of squeezing the name. */
+  .mrow.seat { height: auto; min-height: 36px; padding-block: 7px; gap: 9px; align-items: flex-start; }
 
-  .seat-why { font-size: 12px; color: var(--faint); }
+  .mrow.seat .w-av { margin-top: 1px; }
+
+  .seat-tx { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+
+  .seat-top { display: flex; align-items: baseline; gap: 8px; }
+
+  .seat-top b { font-weight: 500; white-space: nowrap; }
+
+  .seat-when { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--info-ink); white-space: nowrap; }
+
+  .seat-why { font-size: 13px; line-height: 1.4; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .mrow.seat:disabled .seat-when, .mrow.seat:disabled .seat-why { color: var(--faint); }
 
   @media (max-width: 900px) {
     .board { grid-auto-columns: 84vw; }
@@ -372,7 +386,8 @@
         startProject: "시작하기", holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
       },
       pickWho: (a) => a + " 검토를 누구에게 받을까요?",
-      reviewerFree: "지금 비어 있어요 · 바로 봐요", reviewerBusy: (w, reviewing) => w + (reviewing ? " 검토하는 중" : " 하는 중") + " · 끝나고 봐요", reviewerAway: "휴가 중",
+      seatNow: "바로 봐요", seatLater: "끝나고 봐요", seatAway: "휴가 중",
+      reviewerFree: "지금 비어 있어요", reviewerBusy: (w, reviewing) => w + (reviewing ? " 검토하는 중" : " 하는 중"),
       peerQueued: (n) => n + subjectParticle(n) + " 검토할 차례를 기다려요",
       changesAsked: (s) => "보완 요청 · " + s,
       reworkTitle: "무엇을 보완할까요?", reworkLabel: "보완할 내용", reworkPlaceholder: "재시도할 수 있는 실패는 따로 나눠 주세요",
@@ -466,7 +481,8 @@
         startProject: "Start", holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
       },
       pickWho: (a) => "Who should look at the " + a + " side?",
-      reviewerFree: "Free now · looks right away", reviewerBusy: (w, reviewing) => (reviewing ? "Reviewing " : "On ") + w + " · looks after", reviewerAway: "On leave",
+      seatNow: "Looks now", seatLater: "Looks after", seatAway: "On leave",
+      reviewerFree: "Free right now", reviewerBusy: (w, reviewing) => (reviewing ? "Reviewing " : "On ") + w,
       peerQueued: (n) => n + " looks once they are free",
       changesAsked: (s) => "Sent back · " + s,
       reworkTitle: "What should change?", reworkLabel: "What to change", reworkPlaceholder: "Split out the retryable failures",
@@ -816,9 +832,11 @@
   function reviewerRow(task, p) {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "mrow";
-    const state = away(p) ? t().reviewerAway : free(p) ? t().reviewerFree : t().reviewerBusy(tx(busyWith(p)), p.status === "reviewing");
-    b.innerHTML = `<span class="seat-row"><span class="w-av"></span><span>${p.name}</span><span class="seat-why">${state}</span></span>`;
+    b.className = "mrow seat";
+    const when = away(p) ? t().seatAway : free(p) ? t().seatNow : t().seatLater;
+    const doing = away(p) ? tx(p.back) : free(p) ? t().reviewerFree : t().reviewerBusy(tx(busyWith(p)), p.status === "reviewing");
+    b.innerHTML = `<span class="w-av"></span><span class="seat-tx"><span class="seat-top"><b>${p.name}</b><span class="seat-when">${when}</span></span><span class="seat-why">${doing}</span></span>`;
+    b.title = doing;
     b.querySelector(".w-av").appendChild(spriteCanvas(p.species, 20));
     b.disabled = away(p);
     b.addEventListener("click", () => {
