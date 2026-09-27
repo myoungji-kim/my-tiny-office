@@ -583,7 +583,7 @@ Possible direction:
 MY TINY OFFICE
 Everyone's working. Probably.
 
-Acme Tiny Software                     ● System OK
+My Tiny Office                         ● System OK
 ```
 
 If showing counts, make them understandable:
