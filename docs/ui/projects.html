@@ -12,14 +12,14 @@
     margin: 0; padding: 26px 22px 70px;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     background: var(--page); color: var(--ink);
-    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
   }
 
   .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
 
   .logo svg { width: 14px; height: 14px; color: #fff; }
 
-  .sub { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+  .sub { display: block; font-size: 14px; color: var(--muted); margin-top: 1px; }
 
   .tab:focus-visible, .btn:focus-visible, .col-add:focus-visible,
   .work:focus-visible, .mrow:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
@@ -43,9 +43,9 @@
 
   .col-dot { width: 7px; height: 7px; border-radius: 999px; flex: none; }
 
-  .col-hd h2 { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; }
+  .col-hd h2 { margin: 0; font-size: 13.5px; font-weight: 600; letter-spacing: -.01em; }
 
-  .col-n { font-size: 11px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .col-n { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 
   .col-line { flex: 1; }
   .work {
@@ -63,7 +63,7 @@
   /* a stretch item in a flex column, so it has to be told to hug its text */
   .work .area-chip { align-self: flex-start; }
 
-  .w-title { font-size: 13.5px; font-weight: 500; line-height: 1.45; }
+  .w-title { font-size: 14.5px; font-weight: 500; line-height: 1.45; }
 
   /* finished work is struck through rather than merely greyed */
   .work.is-done .w-title { text-decoration: line-through; color: var(--muted); }
@@ -77,7 +77,7 @@
   /* the numbers a card carries, set off from the body by a rule */
   .w-foot {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums;
+    font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums;
     border-top: 1px solid var(--line); padding-top: 8px;
   }
 
@@ -96,12 +96,12 @@
   .r-line.peer { color: var(--info-ink, var(--muted)); }
   .r-line.settled { color: var(--ok-ink); }
 
-  .prio { font-size: 11px; font-weight: 600; flex: none; white-space: nowrap; color: var(--muted); }
+  .prio { font-size: 12px; font-weight: 600; flex: none; white-space: nowrap; color: var(--muted); }
   .prio.high { color: var(--bad-ink); }
   .prio svg { width: 11px; height: 11px; }
   .col-add {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    width: 100%; font: inherit; font-size: 12.5px; color: var(--faint);
+    width: 100%; font: inherit; font-size: 13.5px; color: var(--faint);
     background: none; border: 1px dashed var(--line-2); border-radius: var(--r-ctl);
     padding: 9px; cursor: pointer;
   }
@@ -110,11 +110,11 @@
 
   .col-add svg { width: 13px; height: 13px; }
 
-  .col-empty { font-size: 12px; color: var(--line-2); padding: 7px 2px; }
+  .col-empty { font-size: 13px; color: var(--line-2); padding: 7px 2px; }
 
   /* ═══ what a review is waiting on ═══ */
 
-  .r-line { display: flex; align-items: center; gap: 6px; font-size: 11.5px; }
+  .r-line { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
 
   .r-line.pending { color: var(--warn-ink); }
   .r-line.changes { color: var(--bad-ink); }
@@ -126,21 +126,21 @@
      it is a mark on the card rather than a place of its own. */
   .work.is-blocked { border-color: var(--bad-line); }
 
-  .w-block { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--bad-ink); background: var(--bad-soft); border-radius: 999px; padding: 2px 8px; align-self: flex-start; }
+  .w-block { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--bad-ink); background: var(--bad-soft); border-radius: 999px; padding: 2px 8px; align-self: flex-start; }
 
   .w-block svg { width: 11px; height: 11px; }
   /* ═══ what a review said, and who may give one ═══ */
 
   .p-said {
-    display: block; font-size: 12.5px; line-height: 1.5; color: var(--muted);
+    display: block; font-size: 13.5px; line-height: 1.5; color: var(--muted);
     background: var(--sunk); border-radius: 9px; padding: 9px 10px; margin-top: 8px;
   }
 
-  .p-said b { display: block; font-weight: 600; color: var(--ink); font-size: 11.5px; margin-bottom: 3px; }
+  .p-said b { display: block; font-weight: 600; color: var(--ink); font-size: 12.5px; margin-bottom: 3px; }
 
   .seat-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
-  .seat-why { font-size: 11px; color: var(--faint); }
+  .seat-why { font-size: 12px; color: var(--faint); }
 
   @media (max-width: 900px) {
     .board { grid-auto-columns: 84vw; }

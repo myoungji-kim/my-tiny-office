@@ -200,12 +200,14 @@ Noto Sans KR, weights 400 / 500 / 600 / 700. **All four must load** — a missin
 
 | Role | Size | Weight |
 | --- | --- | --- |
-| Screen title | 23px | 600 |
-| Section heading | 15–16px | 600 |
-| Card name | 16px | 600 |
-| Body | 14px | 400 |
-| Card / popover detail | 13–13.5px | 400–500 |
-| Label, metadata | 11–12px | 600 |
+| Screen title | 24px | 600 |
+| Section heading | 16–17px | 600 |
+| Card name | 17px | 600 |
+| Body | 15px | 400 |
+| Card / popover detail | 14–14.5px | 400–500 |
+| Label, metadata | 12–13px | 600 |
+
+Nothing is smaller than 12px: below that, a Korean syllable stops being legible.
 
 Numbers that change in place use `font-variant-numeric: tabular-nums` so the
 layout does not twitch.

@@ -12,20 +12,20 @@
     margin: 0; padding: 26px 20px 70px;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     background: var(--page); color: var(--ink);
-    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
   }
 
   .wrap { max-width: 1060px; margin: 0 auto; }
 
   header.top { margin-bottom: 26px; }
 
-  header.top h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+  header.top h1 { margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -.01em; }
 
   header.top p { margin: 4px 0 0; color: var(--muted); max-width: 64ch; }
 
-  section > .note { margin: 0 0 18px; color: var(--muted); font-size: 13px; max-width: 70ch; }
+  section > .note { margin: 0 0 18px; color: var(--muted); font-size: 14px; max-width: 70ch; }
 
-  h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 22px 0 10px; }
+  h3 { font-size: 14px; font-weight: 600; color: var(--muted); margin: 22px 0 10px; }
 
   h3:first-of-type { margin-top: 0; }
 
@@ -43,7 +43,7 @@
   .chip {
     display: inline-flex; align-items: center; gap: 5px; flex: none;
     border-radius: 999px; padding: 2px 9px;
-    font-size: 11.5px; font-weight: 600;
+    font-size: 12.5px; font-weight: 600;
   }
 
   .chip.ok { background: var(--ok-soft); color: var(--ok-ink); }
@@ -67,9 +67,9 @@
 
   /* ═══ menu rows ═══ */
 
-  .p-k { display: block; font-size: 11px; font-weight: 600; color: var(--faint); }
+  .p-k { display: block; font-size: 12px; font-weight: 600; color: var(--faint); }
 
-  .p-task { display: block; font-size: 13.5px; font-weight: 500; margin-top: 2px; }
+  .p-task { display: block; font-size: 14.5px; font-weight: 500; margin-top: 2px; }
 
   .track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 9px; }
 
@@ -88,7 +88,7 @@
     display: flex; align-items: center; gap: 9px;
     background: var(--subtle); border: 1px dashed var(--line-2);
     border-radius: var(--r-card); padding: 11px 13px;
-    font-size: 12.5px; color: var(--muted);
+    font-size: 13.5px; color: var(--muted);
   }
 
   .locked svg { width: 14px; height: 14px; flex: none; }
@@ -106,9 +106,9 @@
 
   .e-ic svg { width: 17px; height: 17px; }
 
-  .empty b { font-size: 14px; font-weight: 600; }
+  .empty b { font-size: 15px; font-weight: 600; }
 
-  .empty p { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 42ch; }
+  .empty p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 42ch; }
 
   .e-acts { display: flex; gap: 7px; margin-top: 11px; }
 
@@ -130,9 +130,9 @@
 
   .d-body { min-width: 0; flex: 1; }
 
-  .d-t { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.45; }
+  .d-t { margin: 0; font-size: 16.5px; font-weight: 600; line-height: 1.45; }
 
-  .d-d { margin: 5px 0 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .d-d { margin: 5px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
 
   .dlg-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
@@ -520,8 +520,8 @@
     <div class="grid2">
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
-        <div style="font-size:15px;font-weight:600">모카를 내보낼까요?</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px">진행 중이던 업무는 대기 상태로 돌아가요.</div>
+        <div style="font-size:16px;font-weight:600">모카를 내보낼까요?</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">진행 중이던 업무는 대기 상태로 돌아가요.</div>
         <div class="row" style="margin-top:10px">
           <button class="btn btn-secondary btn-sm" type="button">계속 두기</button>
           <button class="btn btn-danger btn-sm" type="button">내보내기</button>
@@ -530,8 +530,8 @@
       </div>
       <div class="bad-ex">
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
-        <div style="font-size:15px;font-weight:600">정말 삭제하시겠습니까?</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px">이 작업은 되돌릴 수 없습니다.</div>
+        <div style="font-size:16px;font-weight:600">정말 삭제하시겠습니까?</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">이 작업은 되돌릴 수 없습니다.</div>
         <div class="row" style="margin-top:10px">
           <button class="btn btn-secondary btn-sm" type="button">취소</button>
           <button class="btn btn-danger btn-sm" type="button">확인</button>
