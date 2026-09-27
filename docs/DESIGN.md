@@ -35,8 +35,7 @@ Every page loads two shared files and keeps only what is its own:
 
 A page opens by double-clicking it; nothing here needs a server. A pattern that
 is in neither `ui/` nor the style guide is not a pattern yet: add it to `ui/`
-first. Superseded directions sit in [`archive/`](archive/README.md) for
-comparison only.
+first.
 
 ## Visual direction
 

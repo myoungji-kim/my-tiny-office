@@ -71,8 +71,7 @@ my-tiny-office/
 │   ├── RULES.md
 │   ├── ARCHITECTURE.md
 │   ├── STYLE-GUIDE.md
-│   ├── ui/                  the UI standard: open index.html
-│   └── archive/             superseded directions, kept for comparison
+│   └── ui/                  the UI standard: open index.html
 ├── .github/
 │   ├── pull_request_template.md
 │   ├── ISSUE_TEMPLATE/
