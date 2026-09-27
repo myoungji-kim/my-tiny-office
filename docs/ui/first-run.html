@@ -117,7 +117,7 @@
     </div>
 
     <div class="acts">
-      <button class="btn btn-secondary btn-lg" id="toImport" disabled data-t="startImport">내보낸 파일로 시작</button>
+      <button class="btn btn-secondary btn-lg" id="toImport" disabled data-t="startImport">기존 회사 가져오기</button>
       <button class="btn btn-primary btn-lg" style="flex:1" id="toCompany" disabled data-t="startNew">새 회사 만들기</button>
     </div>
   </div>
@@ -219,7 +219,7 @@
     <li><strong>Claude Code 확인이 먼저입니다.</strong> 직원은 에이전트로 일하고, 에이전트 없이 할 수 있는 일은 없습니다. 준비될 때까지 다음으로 넘어가지 않습니다.</li>
     <li><strong>로그인은 대신 해주지 않습니다.</strong> 확인하고, 터미널에서 할 일을 보여주고, 기다립니다. 토큰 입력칸은 없습니다.</li>
     <li>확인은 <strong>회사 전체에 한 번</strong>입니다. 이후에 뽑는 직원은 따로 연결하지 않습니다.</li>
-    <li><strong>내보낸 파일로 시작할 수 있습니다.</strong> 다른 컴퓨터에서 옮겨 올 때입니다. Claude Code 확인은 그래도 먼저이고, 회사와 직원 단계는 건너뜁니다. 파일에 없는 것 — 이 컴퓨터의 폴더, 예전 세션 — 은 도착 화면에서 말합니다.</li>
+    <li><strong>기존 회사를 가져와서 시작할 수 있습니다.</strong> 다른 컴퓨터에서 옮겨 올 때입니다. Claude Code 확인은 그래도 먼저이고, 회사와 직원 단계는 건너뜁니다. 파일에 없는 것 — 이 컴퓨터의 폴더, 예전 세션 — 은 도착 화면에서 말합니다.</li>
     <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다. 팀은 묻지 않습니다.</li>
     <li>이름은 사용자가 짓습니다 — <strong>i18n을 거치지 않는 텍스트</strong>입니다.</li>
     <li>종족은 외형일 뿐이라 <strong>능력치에 영향이 없습니다.</strong> 그래서 고민 없이 고를 수 있습니다.</li>
@@ -283,7 +283,7 @@
       checkLabel: "먼저 Claude Code를 확인해요",
       checkHint: "직원들은 Claude Code로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
       installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요",
-      loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", startNew: "새 회사 만들기", startImport: "내보낸 파일로 시작",
+      loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", startNew: "새 회사 만들기", startImport: "기존 회사 가져오기",
       importedTitle: "TinySoft를 가져왔어요", importedSub: "my-tiny-office-2026-09-26.db · 직원 5명 · 프로젝트 7개",
       againTitle: "이 컴퓨터에서 다시 할 것",
       againBody: "프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 신뢰를 확인해요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.",
@@ -314,7 +314,7 @@
       checkLabel: "First, Claude Code",
       checkHint: "Your employees work through Claude Code. You sign in to Claude Code itself; this app only checks.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed",
-      loggedOutWhy: "Sign in once from a terminal. A browser will open.", startNew: "Start a new company", startImport: "Start from a file",
+      loggedOutWhy: "Sign in once from a terminal. A browser will open.", startNew: "Start a new company", startImport: "Import an existing company",
       importedTitle: "Imported TinySoft", importedSub: "my-tiny-office-2026-09-26.db · 5 people · 7 projects",
       againTitle: "To do again on this computer",
       againBody: "2 projects' folders are not here. Choosing a folder again checks its trust. 3 tasks in progress had their sessions on the old computer, so they start again.",

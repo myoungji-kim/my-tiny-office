@@ -443,7 +443,7 @@ nothing is deleted. connect.html shows both.
 
 ```text
 앱 실행 → Claude Code 확인 (설치 · 로그인) → 회사 만들기 → 첫 직원 고용 → 사무실 도착 → 업무 맡기기
-                                      └→ 내보낸 파일로 시작 → 사무실 도착 (다시 할 것)
+                                      └→ 기존 회사 가져오기 → 사무실 도착 (다시 할 것)
 ```
 
 **Claude Code comes first.** Nothing in the office works without an agent to
@@ -454,8 +454,8 @@ hired afterwards works through it; there is no per-employee login.
 
 It does not ask for a team.
 
-**A company can arrive in a file.** After the Claude Code check, 내보낸 파일로
-시작 imports one instead and skips the company and the first hire; arrival
+**A company can arrive in a file.** After the Claude Code check, 기존 회사
+가져오기 imports one instead and skips the company and the first hire; arrival
 then lists what this computer still has to do — folders to choose again,
 tasks whose sessions stayed on the old one.
 
