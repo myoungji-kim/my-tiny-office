@@ -517,8 +517,8 @@
       board.appendChild(col);
     }
 
-    const waiting = TASKS.filter((k) => k.status === "approval").length;
-    document.getElementById("headSub").textContent = t().headSub(TASKS.length, waiting);
+    const waiting = shown().filter((k) => k.status === "approval").length;
+    document.getElementById("headSub").textContent = t().headSub(shown().length, waiting);
   }
   /* ── one task, and what the player can do about it ───────────── */
 
@@ -819,8 +819,20 @@
 
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
-        <button class="btn btn-primary btn-md">${t().createProject}</button>
+        <button class="btn btn-primary btn-md" data-create>${t().createProject}</button>
       </div>`;
+
+    // The sample keeps what it is given for as long as the page is open, so
+    // the new project can be opened and filled. A reload is the reset.
+    dialog.querySelector("[data-create]").addEventListener("click", () => {
+      const field = dialog.querySelector("#npName");
+      const name = field.value.trim();
+      if (!name) return field.focus();
+      PROJECTS.push({ id: "np" + PROJECTS.length, name: { ko: name, en: name }, folder: dir || null });
+      project = PROJECTS.at(-1).id;
+      closeModal();
+      render();
+    });
 
     dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
       const name = dialog.querySelector("#npName").value;
