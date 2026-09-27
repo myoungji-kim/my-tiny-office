@@ -205,7 +205,7 @@
 <div class="pop" id="pop" role="dialog" aria-label="업무"></div>
 
 <div class="scrim" id="scrim" hidden>
-  <div class="modal" id="newTask" role="dialog" aria-modal="true" aria-label="새 업무"></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 </div>
 
 <script>
@@ -307,6 +307,11 @@
       freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
+      newProjectTitle: "새 프로젝트", createProject: "프로젝트 만들기",
+      fName: "이름", fNamePlaceholder: "결제 개편",
+      workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", choose: "고르기", change: "바꾸기",
+      folderHint: "이 프로젝트의 업무는 이 폴더에서 이뤄져요.",
+      noFolderHint: "나중에 정해도 돼요. 폴더가 없으면 업무를 만들어 둘 수는 있어도 아무도 시작할 수 없어요.",
     },
     en: {
       nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
@@ -345,6 +350,11 @@
       freeNow: (n) => n + " is free and starts on it right away.",
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
+      newProjectTitle: "New project", createProject: "Create project",
+      fName: "Name", fNamePlaceholder: "Payments rework",
+      workspace: "Workspace", noFolder: "Nothing chosen yet", choose: "Choose", change: "Change",
+      folderHint: "Work on this project happens in this folder.",
+      noFolderHint: "You can set it later. Without a folder a task can be created, but nobody can start it.",
     },
   };
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
@@ -485,6 +495,7 @@
     add.style.color = "var(--faint)";
     add.setAttribute("aria-label", t().addProject);
     add.textContent = "+";
+    add.addEventListener("click", openNewProject);
     tabs.appendChild(add);
 
     board.innerHTML = "";
@@ -652,7 +663,7 @@
   // made, rather than leaving it to be discovered in the review column.
 
   const scrim = document.getElementById("scrim");
-  const dialog = document.getElementById("newTask");
+  const dialog = document.getElementById("modal");
 
   function renderNewTask() {
     const area = dialog.dataset.area || SEAT_AREAS[0];
@@ -664,6 +675,7 @@
     const away = (p) => p.status === "vacation";
     const free = (p) => p.status === "available";
 
+    dialog.setAttribute("aria-label", t().newTaskTitle);
     dialog.innerHTML = `
       <div class="m-hd">
         <span style="flex:1;min-width:0"><span class="m-t">${t().newTaskTitle}</span></span>
@@ -770,24 +782,79 @@
         again(id);
       });
     }
-    dialog.querySelector("[data-close]").addEventListener("click", closeNewTask);
+    dialog.querySelector("[data-close]").addEventListener("click", closeModal);
   }
   function openNewTask() {
-    close();
-    delete dialog.dataset.area;
-    delete dialog.dataset.who;
-    dialog.dataset.project = project === "all" ? PROJECTS[0].id : project;
-    scrim.hidden = false;
-    renderNewTask();
+    openModal(renderNewTask, { project: project === "all" ? PROJECTS[0].id : project });
     dialog.querySelector("#ntTitle").focus({ preventScroll: true });
   }
 
-  function closeNewTask() {
+  /* ── making a project ────────────────────────────────────────── */
+  // A project is a folder as much as it is a name: the office works in it, so
+  // the dialog asks for it here rather than leaving it to be discovered when
+  // the first task cannot start.
+
+  const SAMPLE_FOLDERS = ["~/Projects/tinysoft", "~/Projects/orders"];
+
+  function renderNewProject() {
+    const dir = dialog.dataset.folder || "";
+    dialog.setAttribute("aria-label", t().newProjectTitle);
+    dialog.innerHTML = `
+      <div class="m-hd">
+        <span style="flex:1;min-width:0"><span class="m-t">${t().newProjectTitle}</span></span>
+      </div>
+
+      <div class="m-sec">
+        <div class="field" style="margin-top:0">
+          <span class="label">${t().fName} <span class="req">*</span></span>
+          <input class="input" id="npName" placeholder="${t().fNamePlaceholder}" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <span class="label">${t().workspace}</span>
+          <div class="folder">
+            ${icon.folder}
+            <span class="path${dir ? "" : " empty"}">${dir || t().noFolder}</span>
+            <button class="btn btn-secondary btn-sm" type="button" data-pick-folder>${dir ? t().change : t().choose}</button>
+          </div>
+          <span class="hint">${dir ? t().folderHint : t().noFolderHint}</span>
+        </div>
+      </div>
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
+        <button class="btn btn-primary btn-md">${t().createProject}</button>
+      </div>`;
+
+    dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
+      const name = dialog.querySelector("#npName").value;
+      dialog.dataset.folder = SAMPLE_FOLDERS[(SAMPLE_FOLDERS.indexOf(dir) + 1) % SAMPLE_FOLDERS.length];
+      renderNewProject();
+      dialog.querySelector("#npName").value = name;
+      dialog.querySelector("[data-pick-folder]").focus();
+    });
+    dialog.querySelector("[data-close]").addEventListener("click", closeModal);
+  }
+
+  function openNewProject() {
+    openModal(renderNewProject);
+    dialog.querySelector("#npName").focus({ preventScroll: true });
+  }
+
+  function openModal(render, state = {}) {
+    close();
+    for (const k of Object.keys(dialog.dataset)) delete dialog.dataset[k];
+    Object.assign(dialog.dataset, state);
+    scrim.hidden = false;
+    render();
+  }
+
+  function closeModal() {
     scrim.hidden = true;
   }
 
-  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeNewTask(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeNewTask(); });
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeModal(); });
   // the column button is built by render(), so this listens rather than binds
   document.addEventListener("click", (e) => { if (e.target.closest("[data-new-task]")) openNewTask(); });
 
