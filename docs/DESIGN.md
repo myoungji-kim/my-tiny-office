@@ -298,6 +298,22 @@ can take that seat. Two things are worth saying out loud:
 - a memory that has **never been referenced**, which is either wrong or was
   given to the wrong person — the people screen's memory tab leads with it
 
+The list is changed where it is shown. 분야 추가하기 opens a row at the foot of
+the table for a name and whether it is a review seat; each row's `⋯` renames
+it, turns its seat on or off, or deletes it.
+
+- The eight default areas speak both languages. One the player adds or renames
+  is their text, shown as written in either, like a nickname.
+- Turning a seat off says first who loses it.
+- An area with memory in it is not deleted outright: a dialog asks where that
+  memory goes, and names who loses the seat. An empty one asks once more in
+  place.
+- Memory and tasks point at an area by id, so a rename changes nothing else.
+
+Areas are made only here. The teaching dialog offers the list as it stands and
+a line pointing back — 찾는 분야가 없나요? 회사 › 규칙에서 추가하기 — rather than a
+second place to create them.
+
 ### When memory gets long
 
 Memory is carried into the work, so a long list is not only hard to read — it

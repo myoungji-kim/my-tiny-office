@@ -541,6 +541,7 @@ const WORDS = {
       who: "받는 사람", area: "분야", text: "내용", from: "어디서 알게 됐나요",
       placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
       hint: "한두 문장이 좋아요.",
+      areaHint: "찾는 분야가 없나요?", areaHintLink: "회사 › 규칙에서 추가하기",
       told: "직접 알려줌", nowTask: (x) => "지금 하는 업무 · " + x,
       inArea: (n) => "이 분야 기억 " + n,
       gainSeat: (name, area) => "이제 " + withParticle(name, "이", "가") + " " + area + " 리뷰를 맡을 수 있어요",
@@ -564,6 +565,7 @@ const WORDS = {
       who: "Who", area: "Area", text: "What to remember", from: "Where it came from",
       placeholder: "e.g. The payments table is partitioned by month.",
       hint: "A sentence or two is best.",
+      areaHint: "Not the right area?", areaHintLink: "Add one in Company › Rules",
       told: "Told directly", nowTask: (x) => "Current task · " + x,
       inArea: (n) => n + " here",
       gainSeat: (name, area) => name + " can now review " + area,
@@ -659,11 +661,85 @@ function mountRoster(el, onPick) {
   }
 }
 
+/* ═══ a row's ⋯ menu ═══ */
+// One small menu for anything listed in rows: a memory, a rule, an area.
+// An item with `confirm` asks once more in place before it runs, for what
+// cannot be undone.
+
+let menuPop = null;
+let menuAnchor = null;
+
+function closeRowMenu() {
+  if (!menuPop) return;
+  menuPop.removeAttribute("data-open");
+  menuAnchor?.setAttribute("aria-expanded", "false");
+  menuAnchor = null;
+}
+
+const KEEP_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
+
+function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
+  if (menuAnchor === anchor) return closeRowMenu();
+  closeRowMenu();
+  if (!menuPop) {
+    menuPop = document.createElement("div");
+    menuPop.className = "pop";
+    menuPop.setAttribute("role", "menu");
+    menuPop.style.width = "232px";
+    document.body.append(menuPop);
+    document.addEventListener("pointerdown", (e) => {
+      if (menuAnchor && !menuPop.contains(e.target) && !menuAnchor.contains(e.target)) closeRowMenu();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !menuAnchor) return;
+      const back = menuAnchor;
+      closeRowMenu();
+      back.focus({ preventScroll: true });
+    });
+    window.addEventListener("scroll", closeRowMenu, { passive: true });
+  }
+
+  const row = (item, run) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mrow" + (item.bad ? " mrow-bad" : "");
+    b.innerHTML = (item.icon ?? "") + item.label;
+    b.addEventListener("click", run);
+    return b;
+  };
+  const acts = document.createElement("div");
+  acts.className = "p-acts";
+  acts.style.padding = "0";
+  for (const item of items) {
+    acts.append(row(item, () => {
+      if (!item.confirm) {
+        closeRowMenu();
+        item.run();
+        return;
+      }
+      const why = document.createElement("p");
+      why.className = "p-why";
+      why.textContent = item.confirm;
+      acts.replaceChildren(why, row(item, () => { closeRowMenu(); item.run(); }), row({ label: keep, icon: KEEP_ICON }, closeRowMenu));
+      acts.querySelector(".mrow").focus({ preventScroll: true });
+    }));
+  }
+  menuPop.replaceChildren(acts);
+  menuAnchor = anchor;
+  anchor.setAttribute("aria-expanded", "true");
+  menuPop.setAttribute("data-open", "");
+  const r = anchor.getBoundingClientRect();
+  const w = menuPop.offsetWidth, edge = 12;
+  menuPop.style.left = Math.round(Math.min(Math.max(edge, r.right - w), innerWidth - w - edge)) + "px";
+  menuPop.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - menuPop.offsetHeight - edge)) + "px";
+}
+
 /* ═══ teaching ═══ */
 // Every place that says "teach" opens this one dialog; where it was opened
 // from decides only what is already filled in. `to` is someone from STAFF,
-// "company", or null to let the player choose. The dialog stores nothing
-// itself: it hands the memory to onSave.
+// "company", or null to let the player choose. `areas` is the company's list
+// as [{ key, label, seat }] when the caller holds it. The dialog stores
+// nothing itself: it hands the memory to onSave.
 
 function uiLang() {
   return new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
@@ -678,10 +754,11 @@ function withParticle(word, afterFinal, afterVowel) {
 // 프로세스 is worth knowing, but no PR asks for it.
 const SEATLESS_AREAS = ["process"];
 
-function openTeach({ to = null, area = null, edit = null, carried = null, onSave }) {
+function openTeach({ to = null, area = null, edit = null, carried = null, areas = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].teach;
-  const areaName = (a) => WORDS[lang].areas[a];
+  const list = areas ?? Object.entries(WORDS[lang].areas).map(([key, label]) => ({ key, label, seat: !SEATLESS_AREAS.includes(key) }));
+  const areaName = (a) => list.find((x) => x.key === a)?.label ?? "";
   const local = (v) => (v && typeof v === "object" ? v[lang] : v ?? "");
   const MAX = 200;
 
@@ -696,7 +773,10 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
     </div>
     <div class="m-sec" data-who hidden><span class="k">${w.who}</span><div data-picks></div></div>
     <div class="m-sec">
-      <div data-areafield><span class="k">${w.area}</span><div class="opts" role="radiogroup" aria-label="${w.area}" data-areas></div></div>
+      <div data-areafield>
+        <span class="k">${w.area}</span><div class="opts" role="radiogroup" aria-label="${w.area}" data-areas></div>
+        ${areas ? "" : `<p class="hint">${w.areaHint} <a href="company.html${lang === "en" ? "?lang=en" : ""}#rules">${w.areaHintLink}</a></p>`}
+      </div>
       <div class="field">
         <label class="label" for="teachText">${w.text}</label>
         <textarea class="textarea" id="teachText" rows="3" maxlength="${MAX}" placeholder="${w.placeholder}"></textarea>
@@ -777,9 +857,11 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
   function paintAreas() {
     $("[data-areafield]").hidden = isCompany();
     const box = $("[data-areas]");
-    box.innerHTML = Object.keys(WORDS[lang].areas)
-      .map((a) => `<button class="opt" type="button" role="radio" data-area="${a}" aria-checked="${state.area === a}">${areaName(a)}</button>`)
+    box.innerHTML = list
+      .map((a) => `<button class="opt" type="button" role="radio" data-area="${a.key}" aria-checked="${state.area === a.key}"></button>`)
       .join("");
+    // A label the player wrote is text, never markup.
+    box.querySelectorAll("[data-area]").forEach((b, i) => { b.textContent = list[i].label; });
     for (const b of box.querySelectorAll("[data-area]")) {
       b.addEventListener("click", () => {
         state.area = b.dataset.area;
@@ -805,7 +887,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, onSave
     const lines = [];
     const p = person();
     // A first memory in a review area is what gives someone that seat.
-    if (p && state.area && !SEATLESS_AREAS.includes(state.area)) {
+    if (p && state.area && list.find((x) => x.key === state.area)?.seat) {
       const knows = p.memories.some((m) => m !== edit && m.area === state.area);
       if (!knows) {
         lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainSeat(p.name, areaName(state.area))}</span>`);

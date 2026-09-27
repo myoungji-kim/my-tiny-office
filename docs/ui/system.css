@@ -696,3 +696,7 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .gain + .hint { margin-top: 6px; }
 
 [data-effect] .hint:first-child { margin-top: 0; }
+
+.hint a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+.hint a:hover { color: var(--brand-ink); }

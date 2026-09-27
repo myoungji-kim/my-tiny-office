@@ -313,8 +313,6 @@
   </div>
 </div>
 
-<div class="pop" id="memPop" role="menu" data-a="memActions" aria-label="기억" style="width:220px"></div>
-
 <div class="scrim" id="scrim" hidden>
   <div class="modal" role="dialog" aria-modal="true" data-a="giveWork" aria-label="업무 맡기기" id="modal"></div>
 </div>
@@ -344,7 +342,7 @@
       ...WORDS.ko,
       title: "직원", hire: "직원 고용", backToList: "직원 목록", teach: "기억 가르치기",
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
-      areaFilter: "분야", memActions: "기억", memMenu: "기억 메뉴",
+      areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
       nothingAssigned: "맡은 업무가 없어요",
       allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
@@ -383,7 +381,7 @@
       ...WORDS.en,
       title: "People", hire: "Hire", backToList: "All people", teach: "Teach",
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
-      areaFilter: "Areas", memActions: "Memory", memMenu: "Memory actions",
+      areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
       nothingAssigned: "Nothing assigned",
       allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
@@ -737,50 +735,16 @@
   });
 
   /* ── a memory or a rule, and what the player can do about it ── */
-  const memPop = document.getElementById("memPop");
-  let memAnchor = null;
-
-  const row = (label, icon, kind, then) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "mrow" + (kind ? " mrow-" + kind : "");
-    b.innerHTML = icon + label;
-    b.addEventListener("click", then);
-    return b;
-  };
-
-  // Deleting cannot be undone, so the menu asks once more in place.
-  function openMenu(btn, onEdit, onRemove) {
-    if (memAnchor === btn) return closeMemMenu();
-    closeMemMenu();
-    const acts = document.createElement("div");
-    acts.className = "p-acts";
-    acts.style.padding = "0";
-    acts.append(
-      row(t().edit, ICON.pen, "", () => { closeMemMenu(); onEdit(); }),
-      row(t().remove, ICON.trash, "bad", () => {
-        acts.replaceChildren(
-          Object.assign(document.createElement("p"), { className: "p-why", textContent: t().removeWhy }),
-          row(t().remove, ICON.trash, "bad", () => { closeMemMenu(); onRemove(); }),
-          row(t().keep, ICON.x, "", closeMemMenu),
-        );
-        acts.querySelector(".mrow").focus({ preventScroll: true });
-      }),
-    );
-    memPop.replaceChildren(acts);
-    memAnchor = btn;
-    btn.setAttribute("aria-expanded", "true");
-    memPop.setAttribute("data-open", "");
-    const r = btn.getBoundingClientRect();
-    const w = memPop.offsetWidth, edge = 12;
-    memPop.style.left = Math.round(Math.min(Math.max(edge, r.right - w), innerWidth - w - edge)) + "px";
-    memPop.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - memPop.offsetHeight - edge)) + "px";
-  }
+  const editOrRemove = (btn, onEdit, onRemove) =>
+    openRowMenu(btn, [
+      { label: t().edit, icon: ICON.pen, run: onEdit },
+      { label: t().remove, icon: ICON.trash, bad: true, confirm: t().removeWhy, run: onRemove },
+    ], { keep: t().keep });
 
   function openMemMenu(btn) {
     const p = shown;
     const m = p.memories[Number(btn.dataset.mem)];
-    openMenu(
+    editOrRemove(
       btn,
       () => openTeach({
         to: p,
@@ -800,7 +764,7 @@
   function openStyleMenu(btn) {
     const p = shown;
     const i = Number(btn.dataset.style);
-    openMenu(
+    editOrRemove(
       btn,
       () => renderStyle(p, i),
       () => {
@@ -809,23 +773,6 @@
       },
     );
   }
-
-  function closeMemMenu() {
-    memPop.removeAttribute("data-open");
-    memAnchor?.setAttribute("aria-expanded", "false");
-    memAnchor = null;
-  }
-
-  document.addEventListener("pointerdown", (e) => {
-    if (memAnchor && !memPop.contains(e.target) && !memAnchor.contains(e.target)) closeMemMenu();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape" || !memAnchor) return;
-    const back = memAnchor;
-    closeMemMenu();
-    back.focus({ preventScroll: true });
-  });
-  window.addEventListener("scroll", closeMemMenu, { passive: true });
 
   /* ── org chart ───────────────────────────────────────────────── */
   const org = document.getElementById("org");
@@ -1031,7 +978,7 @@
     if (next !== shown) filter = "all";
     shown = next;
     tab = ["memory", "style"].includes(sub) ? sub : "overview";
-    closeMemMenu();
+    closeRowMenu();
     personHead.hidden = person.hidden = !shown;
     peopleHead.hidden = !!shown;
     members.querySelectorAll(".member").forEach((m) => {
