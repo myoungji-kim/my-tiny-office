@@ -14,6 +14,14 @@
      floating in the page, and it is wide enough that a title stays on one
      line — the board scrolls sideways instead of squeezing five in. */
 
+  .here { display: flex; align-items: flex-start; gap: 12px; }
+
+  .here h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+
+  .here p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
+
+  .here-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
+
   .board { display: grid; grid-auto-flow: column; grid-auto-columns: 268px; gap: 10px; align-items: start; overflow-x: auto; padding-bottom: 6px; }
 
   /* a section of its own, not the reference pages' card */
@@ -164,8 +172,7 @@
           <span class="sub" id="headSub"></span>
         </span>
         <div class="head-right">
-          <button class="ibtn" id="projectMenu" data-id="project" aria-expanded="false" hidden><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12" cy="8" r="1.4"/></svg></button>
-          <button class="btn btn-primary btn-lg" data-new-task><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="newTask">새 업무</span></button>
+          <button class="btn btn-secondary btn-md" data-new-project><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="newProjectTitle">새 프로젝트</span></button>
         </div>
       </div>
 
@@ -173,6 +180,7 @@
     </div>
 
     <div class="body">
+      <div class="here" id="here"></div>
       <div class="board" id="board"></div>
     </div>
   </div>
@@ -188,8 +196,10 @@
   /* ── the work on the board ───────────────────────────────────── */
 
   const PROJECTS = [
-    { id: "pay", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft" },
-    { id: "order", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders" },
+    { id: "pay", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft",
+      desc: { ko: "결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요.", en: "Tidy the payment flow and make the webhooks trustworthy." } },
+    { id: "order", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders",
+      desc: { ko: "주문 상태를 하나의 흐름으로 다시 세워요.", en: "Rebuild the order states as one flow." } },
   ];
 
   // backlog → working → approval → done, and held off to the side.
@@ -249,7 +259,7 @@
     ko: {
       ...WORDS.ko,
       title: "프로젝트", newTask: "새 업무",
-      all: "전체", addProject: "프로젝트 추가",
+      all: "전체",
       headSub: (t, a) => "업무 " + t + "개 · 내 승인 대기 " + a + "건",
       columns: { backlog: "대기열", working: "진행 중", approval: "승인 대기", done: "완료", held: "보류" },
       priority: { low: "낮음", normal: "보통", high: "높음" },
@@ -292,6 +302,9 @@
       whenResumedAnyone: "다시 진행하면 비는 사람이 가져가요.",
       newProjectTitle: "새 프로젝트", createProject: "프로젝트 만들기",
       fName: "이름", fNamePlaceholder: "결제 개편",
+      fAbout: "한 줄 설명", fAboutPlaceholder: "이 프로젝트가 무엇을 바꾸는지",
+      allAbout: "모든 프로젝트의 업무를 모아 봐요.",
+      noFolderYet: "작업 폴더가 없어서 아직 아무도 시작할 수 없어요.",
       workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", choose: "고르기", change: "바꾸기",
       editTaskTitle: "업무 수정", editProjectTitle: "프로젝트 수정", save: "저장",
       projectActions: "이 프로젝트",
@@ -311,7 +324,7 @@
     en: {
       ...WORDS.en,
       title: "Projects", newTask: "New task",
-      all: "All", addProject: "Add a project",
+      all: "All",
       headSub: (t, a) => t + " tasks · " + a + " waiting on you",
       columns: { backlog: "Backlog", working: "In progress", approval: "Waiting on you", done: "Done", held: "Held" },
       priority: { low: "Low", normal: "Normal", high: "High" },
@@ -354,6 +367,9 @@
       whenResumedAnyone: "Whoever is free picks it up when it resumes.",
       newProjectTitle: "New project", createProject: "Create project",
       fName: "Name", fNamePlaceholder: "Payments rework",
+      fAbout: "One line about it", fAboutPlaceholder: "What this project changes",
+      allAbout: "Every project on one board.",
+      noFolderYet: "No workspace yet, so nobody can start on it.",
       workspace: "Workspace", noFolder: "Nothing chosen yet", choose: "Choose", change: "Change",
       editTaskTitle: "Edit task", editProjectTitle: "Edit project", save: "Save",
       projectActions: "This project",
@@ -505,14 +521,6 @@
       b.addEventListener("click", () => { project = p.id; close(); render(); });
       tabs.appendChild(b);
     }
-    const add = document.createElement("button");
-    add.className = "tab";
-    add.style.color = "var(--faint)";
-    add.setAttribute("aria-label", t().addProject);
-    add.textContent = "+";
-    add.addEventListener("click", openNewProject);
-    tabs.appendChild(add);
-
     board.innerHTML = "";
     for (const { status, color } of COLUMNS) {
       const list = shown().filter((k) => k.status === status);
@@ -537,15 +545,30 @@
     }
 
     const waiting = shown().filter((k) => k.status === "approval").length;
-    const here = PROJECTS.find((p) => p.id === project);
-    document.getElementById("headSub").innerHTML =
-      t().headSub(shown().length, waiting) +
-      (here?.folder ? ` · <span class="mono">${here.folder}</span>` : "");
+    document.getElementById("headSub").textContent = t().headSub(shown().length, waiting);
 
+    const here = PROJECTS.find((p) => p.id === project);
+    // A project with no folder cannot be worked in, so the bar says so.
+    const about = here
+      ? [here.desc ? tx(here.desc) : "", here.folder ? `<span class="mono">${here.folder}</span>` : t().noFolderYet].filter(Boolean).join(" · ")
+      : t().allAbout;
     // There is nothing to rename or remove while every project is on screen.
-    const more = document.getElementById("projectMenu");
-    more.hidden = !here;
-    more.setAttribute("aria-label", t().projectActions);
+    document.getElementById("here").innerHTML = `
+      <span style="min-width:0">
+        <h2>${here ? tx(here.name) : t().all}</h2>
+        ${about ? `<p>${about}</p>` : ""}
+      </span>
+      <span class="here-right">
+        ${here ? `<button class="ibtn" id="projectMenu" data-id="project" aria-expanded="false" aria-label="${t().projectActions}"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12" cy="8" r="1.4"/></svg></button>` : ""}
+        <button class="btn btn-primary btn-md" data-new-task><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span>${t().newTask}</span></button>
+      </span>`;
+
+    document.getElementById("projectMenu")?.addEventListener("click", (e) => {
+      openMenu(e.currentTarget, [
+        menu(t().actions.editProject, null, () => openEditProject(here)),
+        menu(t().actions.removeProject, "bad", () => askRemoveProject(here)),
+      ]);
+    });
   }
   /* ── one task, and what the player can do about it ───────────── */
 
@@ -921,6 +944,11 @@
         </div>
 
         <div class="field">
+          <span class="label">${t().fAbout}</span>
+          <input class="input" id="npDesc" placeholder="${t().fAboutPlaceholder}" autocomplete="off" />
+        </div>
+
+        <div class="field">
           <span class="label">${t().workspace}</span>
           <div class="folder">
             ${icon.folder}
@@ -942,11 +970,18 @@
       const field = dialog.querySelector("#npName");
       const name = field.value.trim();
       if (!name) return field.focus();
+      const about = dialog.querySelector("#npDesc").value.trim();
       if (editing) {
         editing.name = { ...editing.name, [lang]: name };
+        editing.desc = about ? { ...editing.desc, [lang]: about } : undefined;
         editing.folder = dir || null;
       } else {
-        PROJECTS.push({ id: "np" + PROJECTS.length, name: { ko: name, en: name }, folder: dir || null });
+        PROJECTS.push({
+          id: "np" + PROJECTS.length,
+          name: { ko: name, en: name },
+          desc: about ? { ko: about, en: about } : undefined,
+          folder: dir || null,
+        });
         project = PROJECTS.at(-1).id;
       }
       closeModal();
@@ -955,9 +990,11 @@
 
     dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
       const name = dialog.querySelector("#npName").value;
+      const about = dialog.querySelector("#npDesc").value;
       dialog.dataset.folder = SAMPLE_FOLDERS[(SAMPLE_FOLDERS.indexOf(dir) + 1) % SAMPLE_FOLDERS.length];
       renderNewProject();
       dialog.querySelector("#npName").value = name;
+      dialog.querySelector("#npDesc").value = about;
       dialog.querySelector("[data-pick-folder]").focus();
     });
     dialog.querySelector("[data-close]").addEventListener("click", closeModal);
@@ -972,6 +1009,7 @@
     openModal(renderNewProject, { edit: p.id, folder: p.folder ?? "" });
     const field = dialog.querySelector("#npName");
     field.value = tx(p.name);
+    if (p.desc) dialog.querySelector("#npDesc").value = tx(p.desc);
     field.focus({ preventScroll: true });
   }
 
@@ -1037,15 +1075,9 @@
   scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeModal(); });
   // the column button is built by render(), so this listens rather than binds
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-new-task]")) openNewTask(); });
-
-  document.getElementById("projectMenu").addEventListener("click", (e) => {
-    const here = PROJECTS.find((p) => p.id === project);
-    if (!here) return;
-    openMenu(e.currentTarget, [
-      menu(t().actions.editProject, null, () => openEditProject(here)),
-      menu(t().actions.removeProject, "bad", () => askRemoveProject(here)),
-    ]);
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-new-task]")) openNewTask();
+    if (e.target.closest("[data-new-project]")) openNewProject();
   });
 
   render();

@@ -110,10 +110,37 @@ naming a person says what it costs: someone free starts right away, someone
 busy queues behind their current work, and someone on leave cannot be chosen at
 all.
 
-New project asks for a name and the folder the office works in. A project
-without a folder is allowed, because naming the work usually comes before
-deciding where it lives, and the dialog says what that costs: the tasks can be
-written down, but nobody can start them.
+New project asks for a name, a line about what it changes, and the folder the
+office works in. A project without a folder is allowed, because naming the work
+usually comes before deciding where it lives, and the dialog says what that
+costs: the tasks can be written down, but nobody can start them.
+
+### An action sits with what it acts on
+
+A task belongs to a project, so the buttons have to say so:
+
+```text
+프로젝트                                   [+ 새 프로젝트]   ← the page, and its action
+[전체][결제 개편][주문 v2]                                  ← which project
+───────────────────────────────────────────────────────
+결제 개편                              [⋯] [+ 새 업무]      ← this project, and its actions
+결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요. · ~/Projects/tinysoft
+───────────────────────────────────────────────────────
+[the board]
+```
+
+The board once put **new task** in the page's top-right corner, where it read
+as the page's own action, while the project it would belong to was a small `+`
+in the tab row and a `⋯` beside it. The child had the loudest button and the
+parent had none.
+
+The project now has a line of its own between the tabs and the board, carrying
+its name, what it is for, and where it lives — and the two actions that are
+really its own. **The rarer action can still be the page's, and the frequent
+one still gets the only solid button**, because primary is about what this
+screen is for, not about which row it sits in.
+
+A project with no folder says so there rather than waiting to be found out.
 
 ### Correcting and removing
 
