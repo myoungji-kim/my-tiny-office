@@ -150,15 +150,15 @@ The projects screen is a list, like people: 대기 · 진행 중 · 보류 · �
 every row opens that project's board at its own address (`#pay`). Each status
 has one mark, by shape as well as colour, used on its tab and beside the
 project's name: 대기 a hollow ring, 진행 중 the working dot, 보류 a pause, 완료 a
-check. An active or
-held row carries its folder, how many tasks sit in each column, with 승인 대기
-lifted when it is not zero, and when it started; a done one carries its record
-— tasks done and days taken — and when it finished. There is no board across
+check.
+
+A row carries its folder, how many tasks sit in each column, with 승인 대기
+lifted when it is not zero, and when it started — 시작 전 until it has; a done
+one carries its record, tasks done and days taken, and when it finished. Every
+tab is ranked: rows sort by the project's priority and lead with the task
+cards' flag, and the project's header carries it too. There is no board across
 all projects: the office shows who is on what, and the list shows where work
-waits on the user. A planned row reads 시작 전 where the start date would be.
-Every tab is ranked: rows sort by the project's priority and lead with the
-task cards' flag, and the project's header carries it too. A held project
-keeps its place for when it resumes.
+waits on the user.
 
 A project's page is its board under a header with its name, its status, where
 it lives, a `⋯` and 새 업무. The `⋯` follows the project's status:
@@ -174,10 +174,10 @@ A planned, held or done project says so above its board, with what it is
 waiting for, the reason or the date, and the one action that moves it on. A
 planned project takes 새 업무 — writing work down ahead is what it is for —
 and the new-task dialog says the assignee takes it when the project starts;
-held and done ones do not. Holding asks for the
-reason in the dialog and says how many tasks in progress go with it; finishing
-says how many unstarted ones close. A done project's cards open with nothing
-to do: it is a record. The rules are in RULES.md.
+held and done ones do not. Holding asks for the reason in the dialog and says
+how many tasks in progress go with it; finishing says how many unstarted ones
+close. A done project's cards open with nothing to do: it is a record. The
+rules are in RULES.md.
 
 ## The board
 
@@ -201,6 +201,9 @@ start button: the user says what the work is and who should do it.
   how long it has been running; finished, how long it took.
 - **Blocked rides on the card** as a mark and a reason, never as a column.
 - **A colleague's review shows on the card** while the task is in progress.
+  Asking for one lists the people taught the task's area, never its assignee,
+  each with when they would look — now, after what they are on, or not while
+  on leave — and the one they are on underneath.
 
 ### The two dialogs
 
@@ -478,7 +481,8 @@ the measured runtime surface.
 
 - **The domain predates the board.** `src/domain/task.ts` needs backlog,
   working, approval, done and held, plus the blocked mark, and time taken rather
-  than progress derived from `estimatedDuration`.
+  than progress derived from `estimatedDuration`. Projects need their status
+  and priority, and employees the `reviewing` status.
 - **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
   are the likeliest lever: hiring already needs a free one.
 - **A 내 차례 / Needs you inbox**, holding reviews waiting on the user, blocked

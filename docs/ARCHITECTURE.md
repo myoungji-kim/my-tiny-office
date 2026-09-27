@@ -183,6 +183,18 @@ Agent
 ├── registration
 └── session?
 
+Project
+├── id
+├── companyId
+├── name
+├── description?
+├── workspace?
+├── status          planned | active | held | done
+├── priority        high | normal | low
+├── heldReason?
+├── startedAt?
+└── finishedAt?
+
 AgentSession
 ├── id
 ├── agentId
@@ -454,6 +466,10 @@ Company → Employee → Agent → Session
 The domain owns events such as:
 
 - EmployeeHired
+- ProjectStarted
+- ProjectHeld
+- ProjectResumed
+- ProjectFinished
 - TaskAssigned
 - TaskStarted
 - TaskCompleted

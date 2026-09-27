@@ -10,7 +10,7 @@ Each employee has:
 - memories, and the expertise that follows from them
 - a way of working (일하는 방식)
 - a status: working, reviewing, available or on leave
-- a current task
+- what they are on: a task, or a colleague's review
 - an Agent — Claude Code — that does the work; without a working one they cannot take a task
 
 ## People and teams
@@ -106,7 +106,8 @@ Tasks have:
 - blocker
 
 Statuses:
-- backlog — nobody has picked it up; whoever is free takes it
+- backlog — not started: whoever is free takes it, or it is queued behind its
+  assignee's current work
 - working — an employee is on it, and a colleague may be reviewing alongside
 - approval — finished on their machine, waiting for the user to apply it
 - done — applied
@@ -138,10 +139,10 @@ If nobody has been taught the area, there is nobody to suggest, and the user
 sees that.
 
 What the user decides is the last step, not the verdict: whether the finished
-work may be applied. Sending it back takes a reason, which the card carries, and returns it to
-whoever did it: `working` if they are free, queued behind their current task
-if not. Holding it parks it with the reason attached; resuming follows the
-same rule.
+work may be applied. Sending it back takes a reason, which the card carries,
+and returns it to whoever did it: `working` if they are free, queued behind
+their current task if not. Holding it parks it with the reason attached;
+resuming follows the same rule.
 
 ## PR Collaboration
 
@@ -158,8 +159,7 @@ Example:
 
 PR #4821 — Payment API error response change
 
-The office suggests a reviewer by the task's area, from the people who have
-been taught it. Where a review stands:
+Where a review stands:
 - suggested — the area asks for a second pair of eyes, nobody picked yet
 - queued — a colleague is picked and looks once free
 - reviewing — a colleague is looking
