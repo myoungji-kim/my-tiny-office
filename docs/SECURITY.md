@@ -37,7 +37,7 @@ claude -p
   --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands>"
   --append-system-prompt-file <memory file>
-  --max-budget-usd <cap>
+  --max-budget-usd 2
   [--resume <session-id>]
 cwd = <folder>/.worktrees/<task>
 stdin = the task prompt
@@ -55,7 +55,7 @@ Each flag earns its place:
 | `Read(./**)` and friends | File tools confined to the worktree. The `Read` rule also governs Grep and Glob | ✓ outside read, write, grep and glob denied |
 | `<project commands>` | Each allowed command as `Bash(<cmd>)` **and** `PowerShell(<cmd>)`: on Windows the agent runs commands through PowerShell | ✓ |
 | stdin for the prompt | `--allowedTools` and `--tools` are variadic and swallow a trailing prompt argument; stdin also keeps task text out of the process list and past Windows' command-line limit | ✓ |
-| `--max-budget-usd` | A runaway stop, not a budget: it is checked after a turn, so a run can overshoot (a $0.10 cap stopped at $0.20) | ✓ `error_max_budget_usd` |
+| `--max-budget-usd 2` | A runaway stop, not a budget: $2 per run, fixed and not a setting. It is checked after a turn, so a run can overshoot (a $0.10 cap stopped at $0.20) | ✓ `error_max_budget_usd` |
 
 **Never** pass `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions`,
 `--permission-mode bypassPermissions`, an unscoped `Read`, `Edit`, `Write`,
@@ -115,14 +115,20 @@ The app is a local web server holding every company's data and able to start
 agents, so it is a target in its own right.
 
 - **Binding.** It listens on `127.0.0.1` only.
-- **DNS rebinding.** Every request's `Host` must be `127.0.0.1:<port>` or
-  `localhost:<port>`; anything else is refused before routing.
-- **Cross-site requests.** Server actions reject a request whose `Origin`
-  does not match the host. No state changes on `GET`.
+- **DNS rebinding.** Every request's `Host`, and `X-Forwarded-Host` when
+  present, must name this machine (`127.0.0.1`, `localhost`, `[::1]`); anything
+  else is refused with 421 before routing, static files included
+  (`src/proxy.ts`).
+- **Cross-site requests.** Anything but `GET`, `HEAD` and `OPTIONS` needs an
+  `Origin` equal to the host, and a `Sec-Fetch-Site` that is not `cross-site`;
+  otherwise 403. Next.js checks the origin of a server action too, but lets one
+  without an `Origin` through, which this does not. No state changes on `GET`.
 - **Processes.** `claude` and `git` are started with `spawn(file, args)` and
-  `shell: false`. A `claude` installed as a `.cmd` shim (the npm install on
+  `shell: false` (`src/infrastructure/process/run.ts`), found on `PATH` by the
+  app rather than by a shell. A `claude` installed as a `.cmd` shim (the npm install on
   Windows) cannot be run that way; the app says so and asks for the native
-  install rather than falling back to a shell.
+  install rather than falling back to a shell. A native program anywhere on
+  `PATH` is preferred over a shim that comes earlier.
 - **Output.** Agent output, file names, diffs and anything else from a run is
   rendered as text. Never through `dangerouslySetInnerHTML`.
 - **Claude Code's sign-in.** Read from `claude auth status --json`, and only
