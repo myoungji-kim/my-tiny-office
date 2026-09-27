@@ -453,6 +453,9 @@ Letting someone go returns their task to the backlog and takes what they were
 taught with them; the company's history keeps their hire. After leave, 지금 says
 휴가에서 막 돌아왔어요 rather than calling the return a finished task.
 
+While someone is on leave, 업무 맡기기 stays in the header, disabled, with the
+reason beside it — the same rule as the office popover.
+
 ## Company
 
 The office shows what is happening now; the company shows what has happened

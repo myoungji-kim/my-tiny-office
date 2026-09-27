@@ -13,7 +13,7 @@
   .list { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
 
   .row-item {
-    display: grid; grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, auto) auto;
+    display: grid; grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.6fr) 84px;
     align-items: center; gap: 12px; width: 100%;
     padding: 11px 14px; border-bottom: 1px solid var(--line);
     color: inherit; text-decoration: none;
@@ -33,7 +33,7 @@
 
   .r-team { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .r-mem { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .r-mem { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
 
   .r-mem b { color: var(--ink); font-weight: 600; }
 
@@ -271,7 +271,8 @@
         </span>
         <div class="head-right">
           <button class="btn btn-secondary btn-lg" id="pTeach"><span data-t="teach">기억 가르치기</span></button>
-          <button class="btn btn-primary btn-lg" id="pAssign"><span data-t="giveWork">업무 맡기기</span></button>
+          <span class="ghost-note" id="pAssignWhy" hidden></span>
+          <button class="btn btn-primary btn-lg" id="pAssign" aria-describedby="pAssignWhy"><span data-t="giveWork">업무 맡기기</span></button>
           <button class="ibtn" id="pMore" type="button" data-a="personMenu" aria-label="직원 메뉴" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg></button>
         </div>
       </div>
@@ -360,7 +361,7 @@
       fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
       neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
       howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
-      giveWork: "업무 맡기기", nobodyYet: "아직 아무도 없어요",
+      giveWork: "업무 맡기기", cannotAssign: "휴가 중에는 업무를 맡길 수 없어요", nobodyYet: "아직 아무도 없어요",
       feedTitle: "최근에 쓰인 기억", feedSub: "알려준 것이 실제 업무에서 쓰인 기록이에요.",
       referenced: (who, mem) => withParticle(who, "이", "가") + " <q>" + mem + "</q>" + (hasBatchim(mem) ? "을" : "를") + " 참고했어요",
       assignTitle: (n) => n + (hasBatchim(n) ? "이" : "가") + " 맡을 업무",
@@ -406,7 +407,7 @@
       fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
       neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
       howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
-      giveWork: "Give them work", nobodyYet: "Nobody here yet",
+      giveWork: "Give them work", cannotAssign: "They cannot take work while on leave", nobodyYet: "Nobody here yet",
       feedTitle: "Memory in use", feedSub: "Where what you taught actually showed up.",
       referenced: (who, mem) => who + " used " + "<q>" + mem + "</q>",
       assignTitle: (n) => "Work for " + n,
@@ -563,6 +564,11 @@
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
     document.getElementById("pnMem").textContent = p.memories.length;
     document.getElementById("pnStyle").textContent = p.style.length;
+    // Leave forbids new work; the button stays, disabled, with the reason beside it.
+    const away = p.status === "vacation";
+    document.getElementById("pAssign").disabled = away;
+    document.getElementById("pAssignWhy").hidden = !away;
+    document.getElementById("pAssignWhy").textContent = away ? t().cannotAssign : "";
     for (const b of document.querySelectorAll("[data-ptab]")) b.setAttribute("aria-selected", String(b.dataset.ptab === tab));
     for (const el of document.querySelectorAll(".js-ptab")) el.hidden = el.id !== "pt-" + tab;
     document.title = "Tiny Office · " + p.name;
