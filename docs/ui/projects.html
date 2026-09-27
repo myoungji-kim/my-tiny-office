@@ -18,6 +18,9 @@
 
   #projList .row-item { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.7fr) 110px; }
 
+  /* Planned and active projects are ranked, so their rows lead with it. */
+  #projList.ranked .row-item { grid-template-columns: 58px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.7fr) 110px; }
+
   .pr-name { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .pr-desc { display: block; font-size: 14px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -262,13 +265,13 @@
   // finish a project, because more can always be added.
   const TODAY = "2026. 9. 26.";
   const PROJECTS = [
-    { id: "pay", status: "active", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft",
+    { id: "pay", status: "active", priority: "high", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft",
       desc: { ko: "결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요.", en: "Tidy the payment flow and make the webhooks trustworthy." } },
-    { id: "order", status: "active", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders",
+    { id: "order", status: "active", priority: "normal", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders",
       desc: { ko: "주문 상태를 하나의 흐름으로 다시 세워요.", en: "Rebuild the order states as one flow." } },
-    { id: "settle", status: "planned", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle",
+    { id: "settle", status: "planned", priority: "normal", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle",
       desc: { ko: "가맹점이 월별 정산 내역을 내려받아요.", en: "Merchants download their monthly settlements." } },
-    { id: "admin", status: "held", since: "2026. 8. 18.", name: { ko: "관리자 대시보드", en: "Admin dashboard" }, folder: "~/Projects/admin",
+    { id: "admin", status: "held", priority: "low", since: "2026. 8. 18.", name: { ko: "관리자 대시보드", en: "Admin dashboard" }, folder: "~/Projects/admin",
       desc: { ko: "운영팀이 주문과 환불을 한 화면에서 봐요.", en: "One screen for support to see orders and refunds." },
       reason: { ko: "결제 개편을 먼저 끝내기로", en: "Payments rework comes first" } },
     // A finished project is kept as its record: its span and how much was done.
@@ -419,6 +422,7 @@
       whenResumedAnyone: "다시 진행하면 비는 사람이 가져가요.",
       newProjectTitle: "새 프로젝트", createProject: "프로젝트 만들기",
       fName: "이름", fNamePlaceholder: "결제 개편",
+      projectPrioHint: "비는 사람은 우선순위가 높은 프로젝트의 업무부터 가져가요.",
       fAbout: "한 줄 설명", fAboutPlaceholder: "이 프로젝트가 무엇을 바꾸는지",
       noFolderYet: "작업 폴더가 없어서 아직 아무도 시작할 수 없어요.",
       workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", choose: "고르기", change: "바꾸기",
@@ -514,6 +518,7 @@
       whenResumedAnyone: "Whoever is free picks it up when it resumes.",
       newProjectTitle: "New project", createProject: "Create project",
       fName: "Name", fNamePlaceholder: "Payments rework",
+      projectPrioHint: "Whoever is free takes work from the highest-ranked project first.",
       fAbout: "One line about it", fAboutPlaceholder: "What this project changes",
       noFolderYet: "No workspace yet, so nobody can start on it.",
       workspace: "Workspace", noFolder: "Nothing chosen yet", choose: "Choose", change: "Change",
@@ -569,6 +574,8 @@
 
 
   /* ── the board ───────────────────────────────────────────────── */
+
+  const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
 
   let project = null;
   let filter = "active";
@@ -697,14 +704,19 @@
     document.getElementById("headSub").textContent = t().headSub(active.length, waiting);
 
     const list = document.getElementById("projList");
+    // Whoever is free takes from the highest-ranked project first, so the
+    // list is in that order wherever it still decides something.
+    const ranked = filter === "planned" || filter === "active";
     const rows = PROJECTS.filter((p) => p.status === filter);
+    if (ranked) rows.sort((a, b) => RANK[a.priority] - RANK[b.priority]);
+    list.classList.toggle("ranked", ranked);
     list.innerHTML = rows.length ? "" : `<p class="list-empty">${t().listEmpty[filter]}</p>`;
     for (const p of rows) {
       const a = document.createElement("a");
       a.className = "row-item";
       a.href = "#" + p.id;
       const done = p.status === "done";
-      a.innerHTML = `
+      a.innerHTML = `${ranked ? prioMark(p.priority) : ""}
         <span><span class="pr-name">${tx(p.name)}</span>${p.desc ? `<span class="pr-desc">${tx(p.desc)}</span>` : ""}</span>
         <span class="pr-folder mono">${p.folder ?? t().noFolder}</span>
         <span class="pr-counts">${done ? t().record(p.tasks, daysBetween(p.since, p.doneOn)) : t().counts(countOf(p))}</span>
@@ -712,6 +724,9 @@
       list.appendChild(a);
     }
   }
+
+  const RANK = { high: 0, normal: 1, low: 2 };
+  const prioMark = (k) => `<span class="prio ${k}">${icon.flag}${t().priority[k]}</span>`;
 
   const STATUS_CHIP = { planned: "planned", active: "working", held: "vacation", done: "available" };
   const projectMark = (status) =>
@@ -726,7 +741,7 @@
     chip.className = "chip " + STATUS_CHIP[p.status];
     chip.innerHTML = projectMark(p.status) + t().filters[p.status];
     // A project with no folder cannot be worked in; a planned one says so in its notice instead.
-    document.getElementById("pjSub").innerHTML = [p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
+    document.getElementById("pjSub").innerHTML = [writable(p) ? prioMark(p.priority) : "", p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
       .filter(Boolean).join(" · ");
     document.getElementById("pjNewTask").hidden = !writable(p);
 
@@ -1025,7 +1040,6 @@
     const who = dialog.dataset.who || "";
     const prio = dialog.dataset.prio || "normal";
     const knowers = reviewersFor(area).map((p) => p.name);
-    const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
     const picked = who ? byId.get(who) : null;
     const heading = editing ? t().editTaskTitle : t().newTaskTitle;
     // An agent is running in this project's folder right now, so the work can
@@ -1212,6 +1226,7 @@
   function renderNewProject() {
     const editing = PROJECTS.find((p) => p.id === dialog.dataset.edit) ?? null;
     const dir = dialog.dataset.folder || "";
+    const prio = dialog.dataset.prio || editing?.priority || "normal";
     const heading = editing ? t().editProjectTitle : t().newProjectTitle;
     dialog.setAttribute("aria-label", heading);
     dialog.innerHTML = `
@@ -1228,6 +1243,17 @@
         <div class="field">
           <span class="label">${t().fAbout}</span>
           <input class="input" id="npDesc" placeholder="${t().fAboutPlaceholder}" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <span class="label">${t().fPriority}</span>
+          <span class="select-wrap">
+            <select class="select" id="npPrio">
+              ${["low", "normal", "high"].map((k) => `<option value="${k}"${k === prio ? " selected" : ""}>${t().priority[k]}</option>`).join("")}
+            </select>
+            ${chevron}
+          </span>
+          <span class="hint">${t().projectPrioHint}</span>
         </div>
 
         <div class="field">
@@ -1257,6 +1283,7 @@
         editing.name = { ...editing.name, [lang]: name };
         editing.desc = about ? { ...editing.desc, [lang]: about } : undefined;
         editing.folder = dir || null;
+        editing.priority = prio;
       } else {
         PROJECTS.push({
           id: "np" + PROJECTS.length,
@@ -1264,12 +1291,15 @@
           desc: about ? { ko: about, en: about } : undefined,
           folder: dir || null,
           status: "planned",
+          priority: prio,
         });
       }
       closeModal();
       if (!editing) location.hash = PROJECTS.at(-1).id;
       else render();
     });
+
+    dialog.querySelector("#npPrio").addEventListener("change", (e) => { dialog.dataset.prio = e.target.value; });
 
     dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
       const name = dialog.querySelector("#npName").value;

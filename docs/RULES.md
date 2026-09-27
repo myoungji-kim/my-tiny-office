@@ -76,6 +76,9 @@ planned → active → done
             held
 ```
 
+- **A project has a priority** — high, normal or low, the words a task uses.
+  Whoever is free takes from the backlog in that order: the project's priority
+  first, then the task's, then the oldest.
 - **A new project is planned.** Its tasks can be written down, even given to
   someone, but nothing is picked up. **Start** needs a folder; it is when the
   backlog starts being picked up, and when the project's span begins.
