@@ -290,7 +290,7 @@
       nobodyKnowsWhy: "이 분야 PR이 올라오면 리뷰어를 지정할 수 없어요. 누구에게든 한 줄 알려주면 그 사람이 맡을 수 있어요.",
       pickSomeone: "알려줄 직원 고르기",
       companyTitle: "회사 기억", companySub: "모든 직원이 함께 알고 있어요.", tellCompany: "회사 전체에 알려주기",
-      fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌", usedTimes: (n) => n + "회 참조",
+      fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌", usedTimes: (n) => n + "회 참조", justTaught: "방금 알려줌",
     },
     en: {
       ...WORDS.en,
@@ -326,7 +326,7 @@
       nobodyKnowsWhy: "A PR in this area cannot be given a reviewer. Teach anyone one line and they can take it.",
       pickSomeone: "Pick someone to teach",
       companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
-      fromWhere: (x) => "from " + x, toldDirectly: "Told directly", usedTimes: (n) => "used " + n + "×",
+      fromWhere: (x) => "from " + x, toldDirectly: "Told directly", usedTimes: (n) => "used " + n + "×", justTaught: "Just taught",
     },
   };
 
@@ -530,49 +530,84 @@
 
   /* ── rules ───────────────────────────────────────────────────── */
   const reviewAreas = AREAS.filter((a) => a.seat).map((a) => a.name);
-  const uncovered = reviewAreas.filter((a) => !people.some((p) => areasOf(p).includes(a)));
-  if (uncovered.length) {
-    document.getElementById("ruleNotices").innerHTML = `
-      <div class="notice notice-warn">
-        <span class="n-ic">${ICON.alert}</span>
-        <span class="n-tx">
-          <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
-          <span>${t().nobodyKnowsWhy}</span>
-        </span>
-        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().pickSomeone}</button></span>
-      </div>`;
+
+  function renderAreas() {
+    const uncovered = reviewAreas.filter((a) => !people.some((p) => areasOf(p).includes(a)));
+    document.getElementById("ruleNotices").innerHTML = uncovered.length
+      ? `<div class="notice notice-warn">
+          <span class="n-ic">${ICON.alert}</span>
+          <span class="n-tx">
+            <b>${t().nobodyKnowsArea(uncovered.map((a) => t().areas[a]))}</b>
+            <span>${t().nobodyKnowsWhy}</span>
+          </span>
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-pick="${uncovered[0]}">${t().pickSomeone}</button></span>
+        </div>`
+      : "";
+
+    const areaTable = document.getElementById("areaTable");
+    areaTable.replaceChildren();
+    for (const a of AREAS) {
+      const knowers = people.filter((p) => areasOf(p).includes(a.name));
+      const count = sum((p) => liveOf(p).filter((m) => m.area === a.name).length);
+      const row = document.createElement("div");
+      row.className = "area-row";
+      row.innerHTML = `
+        <span class="area-name">${t().areas[a.name]}</span>
+        <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
+        <span class="knows">${
+          knowers.length
+            ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
+            : '<span class="nobody">' + t().nobodyKnows + "</span>"
+        }</span>
+        <span class="area-n">${t().memCount(count)}</span>`;
+      row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
+      areaTable.appendChild(row);
+    }
+    areaTable.insertAdjacentHTML("beforeend", `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`);
   }
 
-  const areaTable = document.getElementById("areaTable");
-  for (const a of AREAS) {
-    const knowers = people.filter((p) => areasOf(p).includes(a.name));
-    const count = sum((p) => liveOf(p).filter((m) => m.area === a.name).length);
-    const row = document.createElement("div");
-    row.className = "area-row";
-    row.innerHTML = `
-      <span class="area-name">${t().areas[a.name]}</span>
-      <span class="seat${a.seat ? "" : " no"}">${a.seat ? t().reviewArea : t().noReview}</span>
-      <span class="knows">${
-        knowers.length
-          ? knowers.map((p) => `<span class="who"><span></span>${p.name}</span>`).join("")
-          : '<span class="nobody">' + t().nobodyKnows + "</span>"
-      }</span>
-      <span class="area-n">${t().memCount(count)}</span>`;
-    row.querySelectorAll(".who > span").forEach((box, i) => box.appendChild(avatar(knowers[i].species, 20)));
-    areaTable.appendChild(row);
-  }
-  areaTable.insertAdjacentHTML("beforeend", `<button class="mem-add" type="button">${ICON.plus}${t().addArea}</button>`);
-
-  const memCard = (m) => `<div class="mem">
+  const memCard = (m) => `<div class="mem${m.flash ? " is-new" : ""}">
       <span class="mem-t">${tx(m.text)}</span>
       <span class="mem-m">
         ${m.from ? ICON.task : ICON.hand}
         <span class="src">${m.from ? t().fromWhere(tx(m.from)) : t().toldDirectly}</span>
-        <span class="used${m.used >= 10 ? " hot" : ""}">${t().usedTimes(m.used)}</span>
+        <span class="used${m.used >= 10 ? " hot" : ""}">${m.fresh ? t().justTaught : t().usedTimes(m.used)}</span>
       </span>
     </div>`;
-  document.getElementById("companyMem").innerHTML =
-    companyMemories.map(memCard).join("") + `<button class="mem-add" type="button">${ICON.plus}${t().tellCompany}</button>`;
+
+  function renderCompanyMem() {
+    document.getElementById("companyMem").innerHTML =
+      companyMemories.map(memCard).join("") + `<button class="mem-add" type="button" data-tellall>${ICON.plus}${t().tellCompany}</button>`;
+    for (const m of companyMemories) m.flash = false;
+  }
+
+  renderAreas();
+  renderCompanyMem();
+
+  const fresh = (memory) => ({ ...memory, used: 0, fresh: true, flash: true });
+  document.getElementById("view-rules").addEventListener("click", (e) => {
+    const pick = e.target.closest("[data-pick]");
+    if (pick) {
+      openTeach({
+        to: null,
+        area: pick.dataset.pick,
+        onSave: ({ to, memory }) => {
+          to.memories.unshift(fresh(memory));
+          renderAreas();
+        },
+      });
+    }
+    if (e.target.closest("[data-tellall]")) {
+      openTeach({
+        to: "company",
+        carried: companyMemories.reduce((n, m) => n + tx(m.text).length, 0),
+        onSave: ({ memory }) => {
+          companyMemories.unshift(fresh(memory));
+          renderCompanyMem();
+        },
+      });
+    }
+  });
 
   /* ── tabs ────────────────────────────────────────────────────── */
   function show(view) {

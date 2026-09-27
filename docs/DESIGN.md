@@ -204,9 +204,19 @@ selection stays in sync across all three. The popover covers the neighbouring
 card while open; that is accepted.
 
 Reading an employee in full is a page, not a panel. The people list is only a
-list, and each row opens that person's page: summary on the left, memory on
-the right, growing downward with the page. The popover is for acting on
+list, and each row opens that person's page. The popover is for acting on
 someone; the page is for knowing them.
+
+A person's page keeps its header — who they are, their status, 기억 가르치기
+and 업무 맡기기 — and splits the rest into tabs, each with its own address
+(`#p1`, `#p1/memory`, `#p1/style`), so no tab grows long enough to bury
+another:
+
+| Tab | Holds |
+| --- | --- |
+| 개요 | What they are on now, their record, the three memories they use most, the areas they can review. It fits on one screen |
+| 기억 | Their areas down the left, with 전체 and 보관함; the memories of whichever is picked on the right |
+| 일하는 방식 | The rules they carry into every task, whatever the area |
 
 ## The Office
 
@@ -275,18 +285,18 @@ An area is the vocabulary that memory, tasks and PR review all share. **The
 company owns the list**, not the engine — a studio that cares about 게임 서버
 should be able to say so.
 
-The list lives on the memory tab as a coverage table rather than in settings,
-because the useful question is never "what areas exist" but "who knows this
-one". An area that is a *review seat* can be asked for by a PR; 프로세스 is
-worth knowing and nobody reviews for it.
+The list lives on the company's 규칙 tab as a coverage table rather than in
+settings, because the useful question is never "what areas exist" but "who
+knows this one". An area that is a *review seat* can be asked for by a PR;
+프로세스 is worth knowing and nobody reviews for it.
 
 Review eligibility falls out of memory: an employee who holds memory in an area
-can take that seat. Two things are worth saying out loud, and the memory tab
-leads with both:
+can take that seat. Two things are worth saying out loud:
 
-- an area **no employee knows**, so that PR cannot be reviewed
+- an area **no employee knows**, so that PR cannot be reviewed — the 규칙 tab
+  leads with it, and its button opens teaching with the area already chosen
 - a memory that has **never been referenced**, which is either wrong or was
-  given to the wrong person
+  given to the wrong person — the people screen's memory tab leads with it
 
 ### When memory gets long
 
@@ -296,10 +306,10 @@ thing to manage:
 
 | | |
 | --- | --- |
-| 분야별 묶기 | Three per area, **most-referenced first**, the rest behind 더 보기 |
+| 분야별로 보기 | The memory tab lists a person's areas in the company's order; one area at a time, or 전체 grouped by area, **most-referenced first** |
 | 크기 | A person's page shows how many characters go with every task |
 | 보관 | Kept, not carried. Excluded from counts, coverage and size |
-| 정리 | A memory referenced zero times is flagged where it sits and on the memory tab |
+| 정리 | A memory referenced zero times is flagged where it sits and on the memory tab. One just taught is not: nobody has had the chance to use it |
 
 Reference count is what makes this safe to automate later: the memory that
 earns its place is the one that keeps getting used.
@@ -311,7 +321,32 @@ the work starts — the memories in the task's area, most-referenced first. It i
 the same loop seen from the other end.
 
 When they have none, the modal says so and offers to teach them right there.
-That is the moment the player actually has the context to teach.
+That is the moment the player actually has the context to teach. Teaching from
+there comes back to the same task, which now lists what was just taught.
+
+### Teaching
+
+Every "teach" in the game opens one dialog. Where it was opened from decides
+only what is already filled in:
+
+| Opened from | Already filled in |
+| --- | --- |
+| A person's page, or the office popover | Who |
+| 지금 알려주기 in the assign modal | Who, and the task's area |
+| 알려줄 직원 고르기 on the 규칙 tab | The area; the player picks who |
+| 회사 전체에 알려주기 | The whole company; company memory has no area |
+
+The dialog asks for an **area**, because review seats come from areas; the
+**text**, a sentence or two; and optionally **where it came from** — told
+directly, or the task they are on. Before anything is saved it says what the
+teaching does: when this is their first memory in a review area, *이제 모카가
+품질 리뷰를 맡을 수 있어요*, and always how much more they will carry into
+every task (195자 → 215자). The payoff and the cost are both part of the
+decision.
+
+A memory's `⋯` corrects it (고치기, the same dialog), archives it or brings it
+back, or deletes it. Deleting asks once more in place, because it cannot be
+undone.
 
 ## Company
 
@@ -372,13 +407,16 @@ presents them; it does not re-implement them.
 
 | State | Actions |
 | --- | --- |
-| `working` | 완료 처리 · 업무 상세 · 담당 변경 |
-| `ready` | 업무 시작 · 다른 업무로 교체 · 할당 취소 |
-| `available` | 업무 할당 · 교육 보내기 · 휴가 보내기 |
-| `vacation` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 |
+| `working` | 완료 처리 · 업무 상세 · 담당 변경 · 기억 가르치기 |
+| `ready` | 업무 시작 · 다른 업무로 교체 · 기억 가르치기 · 할당 취소 |
+| `available` | 업무 할당 · 기억 가르치기 · 휴가 보내기 |
+| `vacation` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 · 기억 가르치기 |
 
 An action the domain forbids is shown **disabled with a one-line reason**, not
 hidden. The rule is the thing worth teaching.
+
+기억 가르치기 is offered in every state because it is not a transition: it
+changes what someone knows, not what they are doing.
 
 ## Information Density
 

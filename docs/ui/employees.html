@@ -54,21 +54,59 @@
 
   .crumb svg { width: 14px; height: 14px; }
 
-  .person-hd { align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .person-hd { align-items: center; }
 
   .person-name { display: flex; align-items: center; gap: 10px; }
 
   .d-av { position: relative; width: 56px; height: 56px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .person { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .ptab[hidden] { display: none; }
 
-  .person[hidden] { display: none; }
+  .p-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 
-  @media (max-width: 1160px) { .person { grid-template-columns: 1fr; } }
+  @media (max-width: 1160px) { .p-grid { grid-template-columns: 1fr; } }
 
-  .d-sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .p-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
-  .d-sec:last-child { border-bottom: none; }
+  .now-task { display: block; font-size: 17px; font-weight: 600; line-height: 1.4; margin-top: 8px; }
+
+  .now-note { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+
+  .panel-hd.with-link { display: flex; align-items: baseline; gap: 10px; }
+
+  .panel-hd .link { margin-left: auto; font-size: 14px; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; }
+
+  .panel-hd .link:hover { color: var(--ink); }
+
+  .why { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+
+  /* ═══ a person's memory ═══ */
+
+  .mem-layout { display: grid; grid-template-columns: 212px minmax(0, 1fr); gap: 16px; align-items: start; }
+
+  @media (max-width: 900px) { .mem-layout { grid-template-columns: 1fr; } }
+
+  .rail { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 6px; }
+
+  .rail-item {
+    display: flex; align-items: center; gap: 8px; height: 34px; padding-inline: 10px;
+    border: none; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--muted);
+    text-align: left; cursor: pointer;
+  }
+
+  .rail-item:hover { background: var(--subtle); color: var(--ink); }
+
+  .rail-item[aria-current="true"] { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
+
+  .rail-item .n { margin-left: auto; font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .rail-item[aria-current="true"] .n { color: var(--brand-ink); }
+
+  .rail-rule { height: 1px; background: var(--line); margin: 4px 6px; }
+
+  .empty-line { margin: 0; font-size: 14px; color: var(--faint); padding: 6px 0; }
+
+  .style-form { display: flex; gap: 8px; margin-top: 10px; }
 
   /* ═══ memory ═══ */
 
@@ -159,28 +197,9 @@
 
   .mem.cold-mem { border-color: var(--bad-line); background: var(--bad-wash); }
 
-  .mem-more {
-    width: 100%; border: none; background: none; cursor: pointer;
-    font-size: 13px; color: var(--muted); padding: 5px 0 1px; text-align: left;
-  }
+  .mem.archived-mem { background: var(--subtle); }
 
-  .mem-more:hover { color: var(--ink); }
-
-  .budget { display: flex; justify-content: space-between; font-size: 13px; color: var(--faint); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
-
-  .archived { margin-top: 12px; border-top: 1px dashed var(--line-2); padding-top: 11px; }
-
-  .archived summary { font-size: 14px; color: var(--muted); cursor: pointer; list-style: none; }
-
-  .archived summary::-webkit-details-marker { display: none; }
-
-  .archived summary::before { content: "▸ "; color: var(--faint); }
-
-  .archived[open] summary::before { content: "▾ "; }
-
-  .archived .mem { opacity: .62; margin-top: 7px; }
-
-  /* ═══ modal ═══ */
+  .mem.archived-mem .mem-t { color: var(--muted); }
 
 </style>
 
@@ -240,15 +259,31 @@
           <span class="sub" id="pRole"></span>
         </span>
         <div class="head-right">
+          <button class="btn btn-secondary btn-lg" id="pTeach"><span data-t="teach">기억 가르치기</span></button>
           <button class="btn btn-primary btn-lg" id="pAssign"><span data-t="giveWork">업무 맡기기</span></button>
         </div>
+      </div>
+
+      <div class="tabs" id="pTabs">
+        <button class="tab" data-ptab="overview"><span data-t="ptabs.overview">개요</span></button>
+        <button class="tab" data-ptab="memory"><span data-t="ptabs.memory">기억</span><span class="n" id="pnMem"></span></button>
+        <button class="tab" data-ptab="style"><span data-t="ptabs.style">일하는 방식</span><span class="n" id="pnStyle"></span></button>
       </div>
     </div>
 
     <div class="body">
-      <div class="person" id="person" hidden>
-        <div class="panel" id="pSide"></div>
-        <div class="panel" id="pMem"></div>
+      <div id="person" hidden>
+        <div class="ptab p-grid" id="pt-overview">
+          <div class="p-col" id="ovLeft"></div>
+          <div class="p-col" id="ovRight"></div>
+        </div>
+        <div class="ptab mem-layout" id="pt-memory" hidden>
+          <nav class="rail" id="rail" aria-label="분야" data-a="areaFilter"></nav>
+          <div class="panel" id="memPanel"></div>
+        </div>
+        <div class="ptab" id="pt-style" hidden>
+          <div class="panel" id="stylePanel"></div>
+        </div>
       </div>
 
       <div class="view" id="view-list">
@@ -272,6 +307,8 @@
     </div>
   </div>
 </div>
+
+<div class="pop" id="memPop" role="menu" data-a="memActions" aria-label="기억" style="width:220px"></div>
 
 <div class="scrim" id="scrim" hidden>
   <div class="modal" role="dialog" aria-modal="true" data-a="giveWork" aria-label="업무 맡기기" id="modal"></div>
@@ -300,7 +337,16 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      title: "직원", hire: "직원 고용", backToList: "직원 목록",
+      title: "직원", hire: "직원 고용", backToList: "직원 목록", teach: "기억 가르치기",
+      ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
+      areaFilter: "분야", memActions: "기억", memMenu: "기억 메뉴",
+      now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
+      nothingAssigned: "맡은 업무가 없어요",
+      allAreas: "전체", archive: "보관함", archivedNote: "남겨 두지만 업무에 들고 가지 않아요.",
+      archivedEmpty: "보관한 기억이 없어요.", noMemory: "아직 알려준 게 없어요.",
+      edit: "고치기", archiveIt: "보관하기", restore: "다시 꺼내기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
+      justTaught: "방금 알려줌", save: "저장",
+      styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
       headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
       tabs: { list: "목록", org: "조직도", memory: "기억" },
       depts: { dev: "개발본부", product: "프로덕트" },
@@ -312,8 +358,6 @@
       canReviewWhy: "이 분야 기억이 있어서 PR 리뷰어로 지정할 수 있어요.",
       noReviewYet: "아직 리뷰 분야가 없어요. 무엇이든 알려주면 그 분야를 맡을 수 있어요.",
       carried: "업무마다 함께 들고 가요", chars: (n) => n + "자",
-      archivedLine: (n) => "보관함 " + n + "개 — 남겨 두지만 업무에 들고 가지 않아요",
-      showMore: (n) => n + "개 더 보기", fold: "접기",
       fromWhere: (x) => x + "에서", toldDirectly: "직접 알려줌",
       neverUsed: "아직 안 쓰임", usedTimes: (n) => n + "회 참조",
       howTheyWork: "일하는 방식", tellThem: "이 직원에게 알려주기", addStyle: "방식 하나 더 정하기",
@@ -333,7 +377,16 @@
     },
     en: {
       ...WORDS.en,
-      title: "People", hire: "Hire", backToList: "All people",
+      title: "People", hire: "Hire", backToList: "All people", teach: "Teach",
+      ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
+      areaFilter: "Areas", memActions: "Memory", memMenu: "Memory actions",
+      now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
+      nothingAssigned: "Nothing assigned",
+      allAreas: "All", archive: "Archived", archivedNote: "Kept, but not carried into work.",
+      archivedEmpty: "Nothing archived.", noMemory: "Nothing taught yet.",
+      edit: "Edit", archiveIt: "Archive", restore: "Bring back", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
+      justTaught: "Just taught", save: "Save",
+      styleSub: "Carried into every task, whatever the area.", stylePlaceholder: "e.g. Keep commits small",
       headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
       depts: { dev: "Engineering", product: "Product" },
@@ -345,8 +398,6 @@
       canReviewWhy: "They hold memory here, so they can be named a reviewer.",
       noReviewYet: "No review areas yet. Teach them anything and they can take that seat.",
       carried: "Carried into every task", chars: (n) => n + " chars",
-      archivedLine: (n) => "Archived " + n + " — kept, but not carried into work",
-      showMore: (n) => n + " more", fold: "Fold",
       fromWhere: (x) => "from " + x, toldDirectly: "Told directly",
       neverUsed: "Never used", usedTimes: (n) => "used " + n + "×",
       howTheyWork: "How they work", tellThem: "Teach them something", addStyle: "Add another rule",
@@ -420,6 +471,10 @@
     x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
     task: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.6" y="2.6" width="10.8" height="10.8" rx="1.6"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
     hand: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h5"/></svg>',
+    more: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.6" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.4" cy="8" r="1.3"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
+    box: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="3" width="11.2" height="3.2" rx=".8"/><path d="M3.4 6.2v6.8h9.2V6.2M6.4 8.8h3.2"/></svg>',
+    trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 4.4h10.4M6.2 4.4V2.8h3.6v1.6M4.2 4.4l.7 8.8h6.2l.7-8.8"/></svg>',
   };
 
   const josaNeeds = (w) => hasBatchim(w);
@@ -438,7 +493,8 @@
   const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
 
   const liveOf = (p) => p.memories.filter((m) => !m.archived);
-  const areasOf = (p) => [...new Set(liveOf(p).map((m) => m.area))];
+  // In the company's order, so an area does not jump to the top when first taught.
+  const areasOf = (p) => AREAS.map((a) => a.name).filter((a) => liveOf(p).some((m) => m.area === a));
   const reviewAreasOf = (p) => areasOf(p).filter((a) => REVIEW_AREAS.includes(a));
   const usedOf = (p) => liveOf(p).reduce((n, m) => n + m.used, 0);
   const charsOf = (p) => liveOf(p).reduce((n, m) => n + tx(m.text).length, 0);
@@ -474,126 +530,292 @@
   const personHead = document.getElementById("personHead");
   const peopleHead = document.querySelector(".head");
   const person = document.getElementById("person");
-  const pSide = document.getElementById("pSide");
-  const pMem = document.getElementById("pMem");
   let shown = null;
+  let tab = "overview";
+  let filter = "all";
 
-  const memCard = (m) => {
-    const cls = m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
-    return `<div class="mem${m.used === 0 && !m.archived ? " cold-mem" : ""}">
+  // A memory just taught is not cold: nobody has had the chance to use it.
+  const isCold = (m) => m.used === 0 && !m.fresh && !m.archived;
+  const usedLabel = (m) => (m.fresh ? t().justTaught : m.used === 0 ? t().neverUsed : t().usedTimes(m.used));
+
+  const memCard = (m, withMenu = false) => {
+    const cls = m.fresh ? "" : m.used === 0 ? "cold" : m.used >= 10 ? "hot" : "";
+    const box = ["mem", isCold(m) ? "cold-mem" : "", m.archived ? "archived-mem" : "", m.flash ? "is-new" : ""].filter(Boolean).join(" ");
+    const menu = withMenu
+      ? `<button class="ibtn ibtn-sm mem-menu" type="button" data-mem="${shown.memories.indexOf(m)}" aria-label="${t().memMenu}" aria-expanded="false">${ICON.more}</button>`
+      : "";
+    return `<div class="${box}">
+      ${menu}
       <span class="mem-t">${tx(m.text)}</span>
       <span class="mem-m">
         ${m.from ? ICON.task : ICON.hand}
         <span class="src">${m.from ? t().fromWhere(tx(m.from)) : t().toldDirectly}</span>
-        <span class="used ${cls}">${m.used === 0 ? t().neverUsed : t().usedTimes(m.used)}</span>
+        <span class="used ${cls}">${usedLabel(m)}</span>
       </span>
     </div>`;
   };
 
-  function renderPerson(p) {
-    // Three per area keeps every area on screen at once. The most-referenced
-    // ones are the ones worth seeing first.
-    const FOLD = 3;
-    const grouped = areasOf(p)
-      .map((a) => {
-        const list = liveOf(p)
-          .filter((m) => m.area === a)
-          .sort((x, y) => y.used - x.used);
-        const seat = REVIEW_AREAS.includes(a);
-        const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
-        const head = list.slice(0, FOLD);
-        const rest = list.slice(FOLD);
-        return `<div class="mem-group">
-          <div class="mem-hd">
-            <span class="area-chip"${style}>${t().areas[a]}</span>
-            <span class="mem-line"></span>
-            <span style="font-size:13px;color:var(--faint)">${list.length}</span>
-          </div>
-          ${head.map(memCard).join("")}
-          ${
-            rest.length
-              ? `<div class="js-mem-rest" hidden>${rest.map(memCard).join("")}</div>
-                 <button class="mem-more" type="button" data-rest>${t().showMore(rest.length)}</button>`
-              : ""
-          }
-        </div>`;
-      })
-      .join("");
+  const byUse = (a, b) => (b.fresh ? 1 : 0) - (a.fresh ? 1 : 0) || b.used - a.used;
 
-    const archived = p.memories.filter((m) => m.archived);
-
-    const now = p.task
-      ? `<div class="kv"><span>${t().currentTask}</span><b>${tx(p.task)}</b></div>`
-      : p.back
-      ? `<div class="kv"><span>${t().onLeave}</span><b>${tx(p.back)}</b></div>`
-      : `<div class="kv"><span>${t().lastFinished}</span><b>${tx(p.last)}</b></div>`;
-
-    const seats = reviewAreasOf(p);
-
-    const av = document.getElementById("pAv");
-    av.replaceChildren(avatar(p.species, 56));
+  function renderHead(p) {
+    document.getElementById("pAv").replaceChildren(avatar(p.species, 56));
     document.getElementById("pName").textContent = p.name;
     document.getElementById("pRole").textContent = p.role + " · " + t().depts[p.dept] + " · " + t().teams[p.team];
     const chip = document.getElementById("pChip");
     chip.className = "chip " + p.status;
     chip.innerHTML = `<span class="dot ${p.status}"></span>${t().status[p.status]}`;
+    document.getElementById("pnMem").textContent = liveOf(p).length;
+    document.getElementById("pnStyle").textContent = p.style.length;
+    for (const b of document.querySelectorAll("[data-ptab]")) b.setAttribute("aria-selected", String(b.dataset.ptab === tab));
+    for (const el of document.querySelectorAll(".ptab")) el.hidden = el.id !== "pt-" + tab;
     document.title = "Tiny Office · " + p.name;
+  }
 
-    pSide.innerHTML = `
-      <div class="d-sec">
-        ${now}
-        <div class="kv"><span>${t().joined}</span><b>${p.joined}</b></div>
-        <div class="kv"><span>${t().doneAndReviews}</span><b>${t().counts(p.done, p.reviews)}</b></div>
-        <div class="kv"><span>${t().timesUsed}</span><b>${t().times(usedOf(p))}</b></div>
+  function renderOverview(p) {
+    const now = p.task
+      ? `<span class="k">${t().currentTask}</span><span class="now-task">${tx(p.task)}</span>`
+      : p.back
+      ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
+      : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${t().lastFinished} · ${tx(p.last)}</span>`;
+
+    document.getElementById("ovLeft").innerHTML = `
+      <div class="panel">
+        <div class="panel-hd"><h2>${t().now}</h2></div>
+        <div class="panel-bd">${now}</div>
       </div>
-
-      <div class="d-sec">
-        <span class="k">${t().canReview}</span>
-        ${
-          seats.length
-            ? `<span class="areas">${seats
-                .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
-                .join("")}</span>
-               <p style="margin:8px 0 0;font-size:13px;color:var(--muted)">${t().canReviewWhy}</p>`
-            : `<p style="margin:0;font-size:14px;color:var(--muted)">${t().noReviewYet}</p>`
-        }
-      </div>
-
-      <div class="d-sec">
-        <span class="k">${t().howTheyWork}</span>
-        ${p.style.map((x) => `<div class="style-line">${ICON.hand}<span>${tx(x)}</span></div>`).join("")}
-        <button class="mem-add" type="button">${ICON.plus}${t().addStyle}</button>
+      <div class="panel">
+        <div class="panel-hd"><h2>${t().record}</h2></div>
+        <div class="panel-bd">
+          <div class="kv"><span>${t().joined}</span><b>${p.joined}</b></div>
+          <div class="kv"><span>${t().doneAndReviews}</span><b>${t().counts(p.done, p.reviews)}</b></div>
+          <div class="kv"><span>${t().timesUsed}</span><b>${t().times(usedOf(p))}</b></div>
+        </div>
       </div>`;
 
-    pMem.innerHTML = `
+    const seats = reviewAreasOf(p);
+    const top = liveOf(p).sort(byUse).slice(0, 3);
+    document.getElementById("ovRight").innerHTML = `
+      <div class="panel">
+        <div class="panel-hd with-link"><h2>${t().often}</h2><button class="link" type="button" data-go="memory">${t().allMemory}</button></div>
+        <div class="panel-bd">${top.length ? top.map((m) => memCard(m)).join("") : `<p class="empty-line">${t().noMemory}</p>`}</div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><h2>${t().canReview}</h2></div>
+        <div class="panel-bd">
+          ${
+            seats.length
+              ? `<span class="areas">${seats
+                  .map((a) => `<span class="area-chip">${t().areas[a]} ${liveOf(p).filter((m) => m.area === a).length}</span>`)
+                  .join("")}</span><p class="why">${t().canReviewWhy}</p>`
+              : `<p class="why" style="margin:0">${t().noReviewYet}</p>`
+          }
+        </div>
+      </div>`;
+  }
+
+  function renderMemory(p) {
+    const live = liveOf(p);
+    const archived = p.memories.filter((m) => m.archived);
+    const areas = areasOf(p);
+    if (filter !== "all" && filter !== "archived" && !areas.includes(filter)) filter = "all";
+
+    const item = (key, label, n) =>
+      `<button class="rail-item" type="button" data-filter="${key}" aria-current="${filter === key}"><span>${label}</span><span class="n">${n}</span></button>`;
+    document.getElementById("rail").innerHTML =
+      item("all", t().allAreas, live.length) +
+      areas.map((a) => item(a, t().areas[a], live.filter((m) => m.area === a).length)).join("") +
+      '<div class="rail-rule"></div>' +
+      item("archived", t().archive, archived.length);
+
+    let body;
+    if (filter === "archived") {
+      body = archived.length
+        ? `<p class="why" style="margin:0 0 10px">${t().archivedNote}</p>` + archived.map((m) => memCard(m, true)).join("")
+        : `<p class="empty-line">${t().archivedEmpty}</p>`;
+    } else if (filter === "all") {
+      body = live.length
+        ? areas
+            .map((a) => {
+              const list = live.filter((m) => m.area === a).sort(byUse);
+              const seat = REVIEW_AREAS.includes(a);
+              const style = seat ? "" : ' style="background:var(--subtle);color:var(--muted)"';
+              return `<div class="mem-group">
+                <div class="mem-hd">
+                  <span class="area-chip"${style}>${t().areas[a]}</span>
+                  <span class="mem-line"></span>
+                  <span class="count">${list.length}</span>
+                </div>
+                ${list.map((m) => memCard(m, true)).join("")}
+              </div>`;
+            })
+            .join("")
+        : `<p class="empty-line">${t().noMemory}</p>`;
+    } else {
+      body = live.filter((m) => m.area === filter).sort(byUse).map((m) => memCard(m, true)).join("");
+    }
+
+    const title = filter === "all" ? t().memory : filter === "archived" ? t().archive : t().areas[filter];
+    document.getElementById("memPanel").innerHTML = `
       <div class="panel-hd">
-        <h2>${t().memory} <span class="kn">${liveOf(p).length}</span></h2>
+        <h2>${title}</h2>
         <p>${t().carried} · ${t().chars(charsOf(p))}</p>
       </div>
       <div class="panel-bd">
-        ${grouped}
-        ${
-          archived.length
-            ? `<details class="archived">
-                 <summary>${t().archivedLine(archived.length)}</summary>
-                 ${archived.map(memCard).join("")}
-               </details>`
-            : ""
-        }
-        <button class="mem-add" type="button">${ICON.plus}${t().tellThem}</button>
+        ${body}
+        ${filter === "archived" ? "" : `<button class="mem-add" type="button" data-teach>${ICON.plus}${t().tellThem}</button>`}
       </div>`;
+  }
 
-    pMem.querySelectorAll("[data-rest]").forEach((b) => {
-      b.addEventListener("click", () => {
-        const rest = b.previousElementSibling;
-        const open = !rest.hasAttribute("hidden");
-        rest.toggleAttribute("hidden", open);
-        b.textContent = open ? t().showMore(rest.children.length) : t().fold;
-      });
+  function renderStyle(p, adding = false) {
+    const panel = document.getElementById("stylePanel");
+    panel.innerHTML = `
+      <div class="panel-hd"><h2>${t().howTheyWork}</h2><p>${t().styleSub}</p></div>
+      <div class="panel-bd">
+        ${p.style.map((x) => `<div class="style-line">${ICON.hand}<span>${tx(x)}</span></div>`).join("")}
+        ${
+          adding
+            ? `<form class="style-form" data-styleform>
+                 <input class="input" maxlength="80" autocomplete="off" placeholder="${t().stylePlaceholder}" aria-label="${t().addStyle}" />
+                 <button class="btn btn-primary btn-md" type="submit">${t().save}</button>
+                 <button class="btn btn-secondary btn-md" type="button" data-cancelstyle>${t().cancel}</button>
+               </form>`
+            : `<button class="mem-add" type="button" data-addstyle>${ICON.plus}${t().addStyle}</button>`
+        }
+      </div>`;
+    if (!adding) {
+      panel.querySelector("[data-addstyle]").addEventListener("click", () => renderStyle(p, true));
+      return;
+    }
+    const form = panel.querySelector("[data-styleform]");
+    const input = form.querySelector("input");
+    input.focus();
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (input.value.trim()) p.style.push(input.value.trim());
+      renderPerson(p);
+    });
+    panel.querySelector("[data-cancelstyle]").addEventListener("click", () => renderStyle(p));
+  }
+
+  function renderPerson(p) {
+    renderHead(p);
+    renderOverview(p);
+    renderMemory(p);
+    renderStyle(p);
+    for (const m of p.memories) m.flash = false;
+  }
+
+  function teach(p, area = null, then = null) {
+    openTeach({
+      to: p,
+      area: area ?? (filter !== "all" && filter !== "archived" ? filter : null),
+      onSave: ({ memory }) => {
+        p.memories.unshift({ ...memory, used: 0, fresh: true, flash: true });
+        // What was just taught stays in view.
+        if (filter !== "all") filter = memory.area;
+        if (tab !== "memory" && !then) location.hash = p.id + "/memory";
+        else renderPerson(p);
+        then?.();
+      },
     });
   }
 
+  document.getElementById("pTeach").addEventListener("click", () => teach(shown));
   document.getElementById("pAssign").addEventListener("click", () => openAssign(shown));
+  document.getElementById("pTabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ptab]");
+    if (b) location.hash = shown.id + (b.dataset.ptab === "overview" ? "" : "/" + b.dataset.ptab);
+  });
+  person.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-go]");
+    if (go) location.hash = shown.id + "/" + go.dataset.go;
+    const f = e.target.closest("[data-filter]");
+    if (f) {
+      filter = f.dataset.filter;
+      renderMemory(shown);
+    }
+    if (e.target.closest("[data-teach]")) teach(shown);
+    const more = e.target.closest("[data-mem]");
+    if (more) openMemMenu(more);
+  });
+
+  /* ── one memory, and what the player can do about it ─────────── */
+  const memPop = document.getElementById("memPop");
+  let memAnchor = null;
+
+  function openMemMenu(btn) {
+    if (memAnchor === btn) return closeMemMenu();
+    closeMemMenu();
+    const p = shown;
+    const m = p.memories[Number(btn.dataset.mem)];
+    const row = (label, icon, kind, then) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "mrow" + (kind ? " mrow-" + kind : "");
+      b.innerHTML = icon + label;
+      b.addEventListener("click", then);
+      return b;
+    };
+    const acts = document.createElement("div");
+    acts.className = "p-acts";
+    acts.style.padding = "0";
+    acts.append(
+      row(t().edit, ICON.pen, "", () => {
+        closeMemMenu();
+        openTeach({
+          to: p,
+          edit: m,
+          onSave: ({ memory }) => {
+            Object.assign(m, { area: memory.area, text: memory.text, from: memory.from, flash: true });
+            renderPerson(p);
+          },
+        });
+      }),
+      row(m.archived ? t().restore : t().archiveIt, ICON.box, "", () => {
+        m.archived = !m.archived;
+        closeMemMenu();
+        renderPerson(p);
+      }),
+      row(t().remove, ICON.trash, "bad", () => {
+        // Deleting cannot be undone, so it asks once more in place.
+        acts.replaceChildren(
+          Object.assign(document.createElement("p"), { className: "p-why", textContent: t().removeWhy }),
+          row(t().remove, ICON.trash, "bad", () => {
+            p.memories.splice(p.memories.indexOf(m), 1);
+            closeMemMenu();
+            renderPerson(p);
+          }),
+          row(t().keep, ICON.x, "", closeMemMenu),
+        );
+        acts.querySelector(".mrow").focus({ preventScroll: true });
+      }),
+    );
+    memPop.replaceChildren(acts);
+    memAnchor = btn;
+    btn.setAttribute("aria-expanded", "true");
+    memPop.setAttribute("data-open", "");
+    const r = btn.getBoundingClientRect();
+    const w = memPop.offsetWidth, edge = 12;
+    memPop.style.left = Math.round(Math.min(Math.max(edge, r.right - w), innerWidth - w - edge)) + "px";
+    memPop.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - memPop.offsetHeight - edge)) + "px";
+  }
+
+  function closeMemMenu() {
+    memPop.removeAttribute("data-open");
+    memAnchor?.setAttribute("aria-expanded", "false");
+    memAnchor = null;
+  }
+
+  document.addEventListener("pointerdown", (e) => {
+    if (memAnchor && !memPop.contains(e.target) && !memAnchor.contains(e.target)) closeMemMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !memAnchor) return;
+    const back = memAnchor;
+    closeMemMenu();
+    back.focus({ preventScroll: true });
+  });
+  window.addEventListener("scroll", closeMemMenu, { passive: true });
 
   /* ── org chart ───────────────────────────────────────────────── */
   const org = document.getElementById("org");
@@ -643,7 +865,7 @@
 
   // Memory nobody ever used is something this screen knows that the player
   // cannot see anywhere else.
-  const cold = people.flatMap((p) => p.memories.filter((m) => m.used === 0).map((m) => ({ p, m })));
+  const cold = people.flatMap((p) => p.memories.filter(isCold).map((m) => ({ p, m })));
   if (cold.length) {
     const n = document.createElement("div");
     n.className = "notice notice-bad";
@@ -726,7 +948,7 @@
                           <b>${t().noAreaMemory(t().areas[task.area])}</b>
                           <span>${t().noAreaMemoryWhy(p.name)}</span>
                         </span>
-                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().tellNow}</button></span>
+                        <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tellnow>${t().tellNow}</button></span>
                       </div>`
                }
              </div>`
@@ -746,6 +968,12 @@
       }),
     );
     modal.querySelector("[data-close]").addEventListener("click", closeAssign);
+    // Teaching here returns to the same task, which now shows what was taught.
+    modal.querySelector("[data-tellnow]")?.addEventListener("click", () => {
+      const keep = picked;
+      closeAssign();
+      teach(p, task.area, () => openAssign(p, keep));
+    });
     // Re-rendering must not pull focus out of the list: only the first paint
     // sends it to Cancel, afterwards it returns to the row just picked.
     const back = modal.querySelector(`[data-task="${picked}"]`);
@@ -753,9 +981,9 @@
     firstPaint = false;
   }
 
-  function openAssign(p) {
+  function openAssign(p, keep = null) {
     assignee = p;
-    picked = backlog[0].id;
+    picked = keep ?? backlog[0].id;
     firstPaint = true;
     scrim.hidden = false;
     renderAssign();
@@ -771,7 +999,7 @@
   let view = "list";
   function show(next) {
     view = next;
-    for (const t of document.querySelectorAll(".tab")) {
+    for (const t of document.querySelectorAll("#tabs .tab")) {
       t.setAttribute("aria-selected", String(t.dataset.view === view));
     }
     for (const v of document.querySelectorAll(".view")) {
@@ -785,9 +1013,14 @@
 
   /* ── route ───────────────────────────────────────────────────── */
   // The list and a person are separate pages that share one file: the hash
-  // names the person, and no hash is the list.
+  // names the person and, after a slash, their tab. No hash is the list.
   function route() {
-    shown = people.find((x) => x.id === location.hash.slice(1)) ?? null;
+    const [id, sub] = location.hash.slice(1).split("/");
+    const next = people.find((x) => x.id === id) ?? null;
+    if (next !== shown) filter = "all";
+    shown = next;
+    tab = ["memory", "style"].includes(sub) ? sub : "overview";
+    closeMemMenu();
     personHead.hidden = person.hidden = !shown;
     peopleHead.hidden = !!shown;
     members.querySelectorAll(".member").forEach((m) => {

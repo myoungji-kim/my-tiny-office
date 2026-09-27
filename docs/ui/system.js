@@ -530,12 +530,46 @@ const WORDS = {
     status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
+    teach: {
+      titleTo: (name) => name + "에게 알려주기",
+      titleCompany: "회사 전체에 알려주기",
+      titlePick: (area) => withParticle(area, "을", "를") + " 누구에게 알려줄까요",
+      titleEdit: "기억 고치기",
+      subTo: "업무마다 이 기억을 함께 들고 가요.",
+      subCompany: "모든 직원이 함께 알게 돼요.",
+      subPick: "알려준 사람이 이 분야 리뷰를 맡을 수 있어요.",
+      who: "받는 사람", area: "분야", text: "내용", from: "어디서 알게 됐나요",
+      placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
+      hint: "한두 문장이 좋아요.",
+      told: "직접 알려줌", nowTask: (x) => "지금 하는 업무 · " + x,
+      inArea: (n) => "이 분야 기억 " + n,
+      gainSeat: (name, area) => "이제 " + withParticle(name, "이", "가") + " " + area + " 리뷰를 맡을 수 있어요",
+      carried: (a, b) => "업무마다 들고 가는 기억 " + a + "자 → " + b + "자",
+      cancel: "취소", teach: "알려주기", save: "저장",
+    },
   },
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
     status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
+    teach: {
+      titleTo: (name) => "Teach " + name,
+      titleCompany: "Tell the whole company",
+      titlePick: (area) => "Who should learn " + area + "?",
+      titleEdit: "Edit this memory",
+      subTo: "They carry this into every task.",
+      subCompany: "Everyone will know it.",
+      subPick: "Whoever you teach can review this area.",
+      who: "Who", area: "Area", text: "What to remember", from: "Where it came from",
+      placeholder: "e.g. The payments table is partitioned by month.",
+      hint: "A sentence or two is best.",
+      told: "Told directly", nowTask: (x) => "Current task · " + x,
+      inArea: (n) => n + " here",
+      gainSeat: (name, area) => name + " can now review " + area,
+      carried: (a, b) => "Carried into every task " + a + " → " + b + " chars",
+      cancel: "Cancel", teach: "Teach", save: "Save",
+    },
   },
 };
 
@@ -624,6 +658,195 @@ function mountRoster(el, onPick) {
     if (onPick) b.addEventListener("click", (e) => onPick(p, b, e.detail === 0));
     el.appendChild(b);
   }
+}
+
+/* ═══ teaching ═══ */
+// Every place that says "teach" opens this one dialog; where it was opened
+// from decides only what is already filled in. `to` is someone from STAFF,
+// "company", or null to let the player choose. The dialog stores nothing
+// itself: it hands the memory to onSave.
+
+function uiLang() {
+  return new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+}
+
+function withParticle(word, afterFinal, afterVowel) {
+  const c = word.charCodeAt(word.length - 1);
+  const final = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return word + (final ? afterFinal : afterVowel);
+}
+
+// 프로세스 is worth knowing, but no PR asks for it.
+const SEATLESS_AREAS = ["process"];
+
+function openTeach({ to = null, area = null, edit = null, carried = null, onSave }) {
+  const lang = uiLang();
+  const w = WORDS[lang].teach;
+  const areaName = (a) => WORDS[lang].areas[a];
+  const local = (v) => (v && typeof v === "object" ? v[lang] : v ?? "");
+  const MAX = 200;
+
+  const state = { to, area: edit ? edit.area : area };
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true">
+    <div class="m-hd">
+      <span class="m-av" data-av></span>
+      <span style="flex:1;min-width:0"><span class="m-t" data-title></span><span class="m-s" data-sub></span></span>
+      <button class="ibtn" type="button" data-close aria-label="${w.cancel}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
+    </div>
+    <div class="m-sec" data-who hidden><span class="k">${w.who}</span><div data-picks></div></div>
+    <div class="m-sec">
+      <div data-areafield><span class="k">${w.area}</span><div class="opts" role="radiogroup" aria-label="${w.area}" data-areas></div></div>
+      <div class="field">
+        <label class="label" for="teachText">${w.text}</label>
+        <textarea class="textarea" id="teachText" rows="3" maxlength="${MAX}" placeholder="${w.placeholder}"></textarea>
+        <span class="field-foot"><span class="hint">${w.hint}</span><span class="count" data-count></span></span>
+      </div>
+      <div class="field" data-fromfield>
+        <label class="label" for="teachFrom">${w.from}</label>
+        <span class="select-wrap"><select class="select" id="teachFrom"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
+      </div>
+    </div>
+    <div class="m-sec" data-effect></div>
+    <div class="m-foot">
+      <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
+      <button class="btn btn-primary btn-md" type="button" data-ok>${edit ? w.save : w.teach}</button>
+    </div>
+  </div>`;
+  document.body.append(scrim);
+  const $ = (sel) => scrim.querySelector(sel);
+  const text = $("#teachText");
+  const fromSel = $("#teachFrom");
+  const returnTo = document.activeElement;
+  text.value = edit ? local(edit.text) : "";
+
+  const isCompany = () => state.to === "company";
+  const person = () => (state.to && !isCompany() ? state.to : null);
+  const liveChars = (p) =>
+    p.memories.filter((m) => !m.archived && m !== edit).reduce((n, m) => n + local(m.text).length, 0);
+
+  function paintAvatar() {
+    const box = $("[data-av]");
+    box.replaceChildren();
+    const p = person();
+    if (!p) {
+      box.innerHTML = '<svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>';
+      return;
+    }
+    const c = document.createElement("canvas");
+    c.width = c.height = 32;
+    const g = c.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    const sp = SPECIES.get(p.species);
+    paint(g, sp.sprite, 2, 0, 0, skin(sp));
+    box.append(c);
+  }
+
+  function paintHead() {
+    const p = person();
+    $("[data-title]").textContent = edit
+      ? w.titleEdit
+      : isCompany() ? w.titleCompany : to === null ? w.titlePick(areaName(state.area)) : w.titleTo(p.name);
+    $("[data-sub]").textContent = isCompany() ? w.subCompany : to === null && !edit ? w.subPick : w.subTo;
+    paintAvatar();
+  }
+
+  function paintPicks() {
+    const sec = $("[data-who]");
+    sec.hidden = to !== null || !!edit;
+    if (sec.hidden) return;
+    const box = $("[data-picks]");
+    box.innerHTML = STAFF.map((p) => {
+      const n = p.memories.filter((m) => !m.archived && m.area === state.area).length;
+      return `<button class="pick" type="button" role="radio" data-pick="${p.id}" aria-checked="${state.to === p}">
+        <span class="radio"></span><span class="pick-t">${p.name}</span>
+        <span class="pick-m">${p.role}</span><span class="pick-m">${w.inArea(n)}</span>
+      </button>`;
+    }).join("");
+    for (const b of box.querySelectorAll("[data-pick]")) {
+      b.addEventListener("click", () => {
+        state.to = STAFF.find((p) => p.id === b.dataset.pick);
+        for (const x of box.querySelectorAll("[data-pick]")) x.setAttribute("aria-checked", String(x === b));
+        paintHead();
+        paintFrom();
+        paintEffect();
+      });
+    }
+  }
+
+  function paintAreas() {
+    $("[data-areafield]").hidden = isCompany();
+    const box = $("[data-areas]");
+    box.innerHTML = Object.keys(WORDS[lang].areas)
+      .map((a) => `<button class="opt" type="button" role="radio" data-area="${a}" aria-checked="${state.area === a}">${areaName(a)}</button>`)
+      .join("");
+    for (const b of box.querySelectorAll("[data-area]")) {
+      b.addEventListener("click", () => {
+        state.area = b.dataset.area;
+        for (const x of box.querySelectorAll("[data-area]")) x.setAttribute("aria-checked", String(x === b));
+        paintEffect();
+      });
+    }
+  }
+
+  function paintFrom() {
+    const options = [{ value: "", label: w.told }];
+    const task = person()?.task;
+    if (task) options.push({ value: "task", label: w.nowTask(local(task)) });
+    if (edit?.from) options.push({ value: "kept", label: local(edit.from) });
+    fromSel.innerHTML = options.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
+    fromSel.value = edit?.from ? "kept" : "";
+    $("[data-fromfield]").hidden = options.length === 1;
+  }
+
+  function paintEffect() {
+    const len = text.value.trim().length;
+    $("[data-count]").textContent = text.value.length + "/" + MAX;
+    const lines = [];
+    const p = person();
+    // A first memory in a review area is what gives someone that seat.
+    if (p && state.area && !SEATLESS_AREAS.includes(state.area)) {
+      const knows = p.memories.some((m) => !m.archived && m !== edit && m.area === state.area);
+      if (!knows) {
+        lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainSeat(p.name, areaName(state.area))}</span>`);
+      }
+    }
+    const before = p ? liveChars(p) : isCompany() ? carried : null;
+    if (before !== null) lines.push(`<span class="hint">${w.carried(before, before + len)}</span>`);
+    const box = $("[data-effect]");
+    box.innerHTML = lines.join("");
+    box.hidden = !lines.length;
+    $("[data-ok]").disabled = !len || !state.to || (!isCompany() && !state.area);
+  }
+
+  function close() {
+    scrim.remove();
+    document.removeEventListener("keydown", onKey);
+    returnTo?.focus?.({ preventScroll: true });
+  }
+  function onKey(e) {
+    if (e.key === "Escape") close();
+  }
+
+  paintHead();
+  paintPicks();
+  paintAreas();
+  paintFrom();
+  paintEffect();
+
+  text.addEventListener("input", paintEffect);
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
+  for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  $("[data-ok]").addEventListener("click", () => {
+    const from = fromSel.value === "task" ? person().task : fromSel.value === "kept" ? edit.from : null;
+    const memory = { area: isCompany() ? null : state.area, text: text.value.trim(), from };
+    const target = state.to;
+    close();
+    onSave({ to: target, memory });
+  });
+  (to === null && !edit ? $("[data-pick]") : text).focus({ preventScroll: true });
 }
 
 /* ═══ the sample-page bar ═══ */

@@ -657,3 +657,42 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .panel-bd { padding: 13px 15px; }
 
+
+.mem { position: relative; }
+
+.mem .mem-menu { position: absolute; top: 5px; right: 5px; opacity: 0; }
+
+.mem:hover .mem-menu, .mem-menu:focus-visible, .mem-menu[aria-expanded="true"] { opacity: 1; }
+
+.mem:has(.mem-menu) .mem-t { padding-right: 26px; }
+
+.mem.is-new { animation: mem-new 1.6s ease-out; }
+
+@keyframes mem-new { from { border-color: var(--brand); background: var(--brand-soft); } }
+
+/* ═══ teaching ═══ */
+
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.opt {
+    height: 30px; padding-inline: 12px; border-radius: 999px; border: 1px solid var(--line-2);
+    background: var(--surface); font: inherit; font-size: 14px; color: var(--ink); cursor: pointer;
+  }
+
+.opt:hover { background: var(--subtle); }
+
+.opt[aria-checked="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
+
+.field-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; }
+
+.field-foot .hint { margin-top: 0; }
+
+.count { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; flex: none; }
+
+.gain { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--ok-ink); }
+
+.gain svg { width: 15px; height: 15px; flex: none; }
+
+.gain + .hint { margin-top: 6px; }
+
+[data-effect] .hint:first-child { margin-top: 0; }

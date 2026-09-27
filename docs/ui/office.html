@@ -167,7 +167,7 @@
       actions: {
         complete: "완료 처리", detail: "업무 상세", reassign: "담당 변경",
         start: "업무 시작", swap: "다른 업무로 교체", unassign: "할당 취소",
-        assign: "업무 할당", train: "교육 보내기", leave: "휴가 보내기", comeBack: "복귀 처리",
+        assign: "업무 할당", teach: "기억 가르치기", leave: "휴가 보내기", comeBack: "복귀 처리",
       },
       cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
       actionOf: (n) => n + " 행동",
@@ -199,7 +199,7 @@
       actions: {
         complete: "Mark done", detail: "Task details", reassign: "Reassign",
         start: "Start work", swap: "Swap the task", unassign: "Unassign",
-        assign: "Assign work", train: "Send to training", leave: "Send on leave", comeBack: "Bring back",
+        assign: "Assign work", teach: "Teach", leave: "Send on leave", comeBack: "Bring back",
       },
       cannotAssign: "They cannot take work while on leave.",
       actionOf: (n) => "Actions for " + n,
@@ -494,26 +494,31 @@
   };
 
   // Only transitions the domain allows from this state. The first row is the
-  // one the player came here for.
+  // one the player came here for. Teaching is not a transition, so it is
+  // offered in every state.
+  const TEACH = { icon: I.book, label: t().actions.teach, teach: true };
   const ACTIONS = {
     working: [
       { icon: I.check, label: t().actions.complete, key: true },
       { icon: I.info, label: t().actions.detail },
       { icon: I.swap, label: t().actions.reassign },
+      TEACH,
     ],
     ready: [
       { icon: I.play, label: t().actions.start, key: true },
       { icon: I.swap, label: t().actions.swap },
+      TEACH,
       { icon: I.undo, label: t().actions.unassign, bad: true },
     ],
     available: [
       { icon: I.plus, label: t().actions.assign, key: true },
-      { icon: I.book, label: t().actions.train },
+      TEACH,
       { icon: I.sun, label: t().actions.leave },
     ],
     vacation: [
       { icon: I.plus, label: t().actions.assign, key: true, off: t().cannotAssign },
       { icon: I.undo, label: t().actions.comeBack },
+      TEACH,
     ],
   };
 
@@ -547,7 +552,7 @@
     const rows = ACTIONS[p.status]
       .map((a) => {
         const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");
-        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}>${a.icon}${a.label}</button>`;
+        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}${a.teach ? " data-teach" : ""}>${a.icon}${a.label}</button>`;
         return a.off ? row + `<p class="p-why">${a.off}</p>` : row;
       })
       .join("");
@@ -569,6 +574,10 @@
       <div class="p-rule"></div>
       <div class="p-acts">${rows}</div>`;
     drawAvatar(pop.querySelector("canvas"), p.species);
+    pop.querySelector("[data-teach]").addEventListener("click", () => {
+      close();
+      openTeach({ to: fromCompany.get(p.id), onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }) });
+    });
 
     anchor = el;
     pop.setAttribute("data-open", "");

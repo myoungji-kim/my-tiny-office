@@ -544,7 +544,7 @@
 
     <h3>규칙</h3>
     <div class="spec"><code>언제</code><span>고를 것이 둘 이상이고, 고르기 전에는 다음으로 못 갈 때만.</span></div>
-    <div class="spec"><code>포커스</code><span>열리면 <strong>취소</strong>에 먼저 갑니다. 닫히면 열었던 버튼으로 돌아갑니다.</span></div>
+    <div class="spec"><code>포커스</code><span>열리면 <strong>취소</strong>에 먼저 갑니다. 닫히면 열었던 버튼으로 돌아갑니다. 적는 것이 본론인 창(기억 가르치기)만 첫 입력칸으로 갑니다.</span></div>
     <div class="spec"><code>닫기</code><span><code>Escape</code>와 바깥 클릭 둘 다 닫습니다. 닫기는 아무것도 저장하지 않습니다.</span></div>
     <div class="spec"><code>확인 버튼</code><span>고른 것을 말합니다 — <code>이 업무 맡기기</code>. <code>확인</code>이 아닙니다.</span></div>
     <div class="spec"><code>결과 미리보기</code><span>맡기기 전에 <strong>무엇이 달라지는지</strong> 같은 창에서 보여줍니다.</span></div>
@@ -581,6 +581,17 @@
         <div class="field">
           <span class="label">설명</span>
           <textarea class="textarea" placeholder="무엇을 바꾸는지 한두 줄"></textarea>
+          <span class="field-foot"><span class="hint">한두 문장이 좋아요.</span><span class="count">0/200</span></span>
+        </div>
+
+        <div class="field">
+          <span class="label">분야</span>
+          <div class="opts" role="radiogroup" aria-label="분야">
+            <button class="opt" type="button" role="radio" aria-checked="false">아키텍처</button>
+            <button class="opt" type="button" role="radio" aria-checked="true">데이터베이스</button>
+            <button class="opt" type="button" role="radio" aria-checked="false">보안</button>
+            <button class="opt" type="button" role="radio" aria-checked="false">프로세스</button>
+          </div>
         </div>
       </div>
 
@@ -607,6 +618,9 @@
       <li>높이는 38px 하나, 큰 변형이 필요하면 <code>-lg</code>로 이름을 줍니다.</li>
       <li>select은 <code>appearance: none</code>으로 네이티브 화살표를 걷어내고,
           셰브론을 인라인 <code>svg</code>로 그립니다 — 다른 아이콘처럼 색이 토큰에서 옵니다.</li>
+      <li>고를 것이 여덟 개 안팎이고 <strong>한눈에 비교해야</strong> 하면 select 대신
+          <code>.opt</code> 칩 묶음을 씁니다. 분야처럼 고르는 순간 결과가 달라지는 선택이 여기 해당합니다.</li>
+      <li>글자 수 제한이 있는 칸은 <code>.field-foot</code>에 hint와 <code>.count</code>를 나란히 둡니다.</li>
     </ul>
   </section>
 
