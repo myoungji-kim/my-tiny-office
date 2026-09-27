@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { toCompanyId } from "../../domain/ids";
 
+import { createSqliteAreaRepository } from "./memory-repository";
 import { createSqliteProjectRepository } from "./project-repository";
 import * as schema from "./schema";
 import { createSqliteTaskRepository } from "./task-repository";
@@ -62,6 +63,9 @@ describe("moving to projects", () => {
       ["done", "done", "mocha", projects[0].id],
     ]);
     expect(tasks[3]).toMatchObject({ description: "kept", workedFor: 60, finishedAt: t0 + 65, appliedAt: t0 + 65 });
+
+    const areas = await createSqliteAreaRepository(db).findByCompany(toCompanyId("c"));
+    expect(areas.map((a) => a.starting)).toEqual(["architecture", "typeSafety", "database", "security", "localization", "product", "quality"]);
     connection.close();
   });
 

@@ -1,11 +1,19 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { CompanyId, EmployeeId, ProjectId, TaskId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, TaskId } from "../domain/ids";
+import type { Area, Memory } from "../domain/memory";
 import type { Project } from "../domain/project";
 import type { Task } from "../domain/task";
 
 import type { TransactionRunner } from "./context";
-import type { CompanyRepository, EmployeeRepository, ProjectRepository, TaskRepository } from "./repositories";
+import type {
+  AreaRepository,
+  CompanyRepository,
+  EmployeeRepository,
+  MemoryRepository,
+  ProjectRepository,
+  TaskRepository,
+} from "./repositories";
 
 export const withoutTransaction: TransactionRunner = (work) => work();
 
@@ -78,3 +86,21 @@ export function createInMemoryTaskRepository(): TaskRepository {
     },
   };
 }
+
+function createInMemoryList<TId, TItem extends { readonly id: TId; readonly companyId: CompanyId; readonly createdAt: number }>() {
+  const items = new Map<TId, TItem>();
+  return {
+    async findByCompany(companyId: CompanyId) {
+      return [...items.values()].filter((item) => item.companyId === companyId).sort((a, b) => a.createdAt - b.createdAt);
+    },
+    async save(item: TItem) {
+      items.set(item.id, item);
+    },
+    async remove(id: TId) {
+      items.delete(id);
+    },
+  };
+}
+
+export const createInMemoryAreaRepository = (): AreaRepository => createInMemoryList<AreaId, Area>();
+export const createInMemoryMemoryRepository = (): MemoryRepository => createInMemoryList<MemoryId, Memory>();

@@ -1,4 +1,5 @@
-import type { CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
+import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, TaskId } from "./ids";
+import type { MemoryKind } from "./memory";
 import type { Priority } from "./project";
 import type { Blocker } from "./task";
 import type { Duration, Timestamp } from "./time";
@@ -112,7 +113,40 @@ export interface TaskReturned extends TaskEvent {
   readonly type: "TaskReturned";
 }
 
+export interface AreaAdded extends DomainEventBase {
+  readonly type: "AreaAdded";
+  readonly areaId: AreaId;
+  readonly areaName: string;
+}
+export interface AreaRenamed extends DomainEventBase {
+  readonly type: "AreaRenamed";
+  readonly areaId: AreaId;
+  readonly areaName: string;
+}
+export interface AreaRemoved extends DomainEventBase {
+  readonly type: "AreaRemoved";
+  readonly areaId: AreaId;
+}
+
+export interface MemoryTaught extends DomainEventBase {
+  readonly type: "MemoryTaught";
+  readonly memoryId: MemoryId;
+  readonly kind: MemoryKind;
+  readonly employeeId: EmployeeId | undefined;
+  readonly areaId: AreaId | undefined;
+}
+export interface MemoryRemoved extends DomainEventBase {
+  readonly type: "MemoryRemoved";
+  readonly memoryId: MemoryId;
+  readonly employeeId: EmployeeId | undefined;
+}
+
 export type DomainEvent =
+  | AreaAdded
+  | AreaRenamed
+  | AreaRemoved
+  | MemoryTaught
+  | MemoryRemoved
   | CompanyCreated
   | EmployeeHired
   | EmployeeWentOnVacation

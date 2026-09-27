@@ -1,5 +1,5 @@
 import type { DomainEvent } from "../domain/events";
-import { toEventId, toTaskId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
+import { toEventId, toTaskId, type AreaId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
 import { pickUps } from "../domain/pick-up";
 import type { Priority } from "../domain/project";
 import * as taskDomain from "../domain/task";
@@ -13,7 +13,7 @@ export interface CreateTaskInput {
   readonly projectId: ProjectId;
   readonly title: string;
   readonly description?: string;
-  readonly area?: string;
+  readonly area?: AreaId;
   readonly priority: Priority;
   readonly assigneeId?: EmployeeId;
 }

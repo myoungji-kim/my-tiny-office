@@ -7,6 +7,7 @@ import { createSqliteCompanyRepository } from "./persistence/company-repository"
 import { getCompanyFiles, type CompanyFiles } from "./persistence/company-files";
 import type { DatabaseHandle } from "./persistence/database";
 import { createSqliteEmployeeRepository } from "./persistence/employee-repository";
+import { createSqliteAreaRepository, createSqliteMemoryRepository } from "./persistence/memory-repository";
 import { createSqliteProjectRepository } from "./persistence/project-repository";
 import { createSqliteTaskRepository } from "./persistence/task-repository";
 
@@ -16,6 +17,8 @@ export function createAppContext(handle: DatabaseHandle): AppContext {
     employees: createSqliteEmployeeRepository(handle.db),
     projects: createSqliteProjectRepository(handle.db),
     tasks: createSqliteTaskRepository(handle.db),
+    areas: createSqliteAreaRepository(handle.db),
+    memories: createSqliteMemoryRepository(handle.db),
     now: () => Date.now(),
     newId: () => randomUUID(),
     withTransaction: handle.withTransaction,

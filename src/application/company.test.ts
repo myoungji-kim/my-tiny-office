@@ -5,7 +5,9 @@ import { toCompanyId } from "../domain/ids";
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import {
+  createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
+  createInMemoryMemoryRepository,
   createInMemoryEmployeeRepository,
   createInMemoryProjectRepository,
   createInMemoryTaskRepository,
@@ -22,6 +24,8 @@ function createContext(): AppContext {
     employees: createInMemoryEmployeeRepository(),
     projects: createInMemoryProjectRepository(),
     tasks: createInMemoryTaskRepository(),
+    areas: createInMemoryAreaRepository(),
+    memories: createInMemoryMemoryRepository(),
     now: () => foundedAt,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,

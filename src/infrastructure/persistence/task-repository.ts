@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 
 import type { TaskRepository } from "../../application/repositories";
-import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
+import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
 import type { Blocker, Task } from "../../domain/task";
 
 import type { AppDatabase } from "./database";
@@ -32,7 +32,7 @@ function toTask(row: TaskRow): Task {
     projectId: toProjectId(row.projectId),
     title: row.title,
     description: row.description ?? undefined,
-    area: row.area ?? undefined,
+    area: row.area === null ? undefined : toAreaId(row.area),
     priority: row.priority,
     assigneeId: row.assigneeId === null ? undefined : toEmployeeId(row.assigneeId),
     status: row.status,

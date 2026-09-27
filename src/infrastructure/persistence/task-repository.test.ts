@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { Company } from "../../domain/company";
 import type { Employee } from "../../domain/employee";
-import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
+import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
 import type { Project } from "../../domain/project";
 import type { Task } from "../../domain/task";
 
@@ -44,7 +44,7 @@ const backlog: Task = {
   projectId: pay.id,
   title: "Paginate",
   description: undefined,
-  area: "db",
+  area: toAreaId("db"),
   priority: "normal",
   assigneeId: undefined,
   status: "backlog",

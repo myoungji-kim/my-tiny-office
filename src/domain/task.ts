@@ -12,7 +12,7 @@ import type {
   TaskStarted,
   TaskUnblocked,
 } from "./events";
-import type { CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
+import type { AreaId, CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
 import type { Priority } from "./project";
 import type { Duration, Timestamp } from "./time";
 
@@ -33,7 +33,7 @@ export interface Task {
   readonly projectId: ProjectId;
   readonly title: string;
   readonly description: string | undefined;
-  readonly area: string | undefined;
+  readonly area: AreaId | undefined;
   readonly priority: Priority;
   readonly assigneeId: EmployeeId | undefined;
   readonly status: TaskStatus;
@@ -86,7 +86,7 @@ export interface CreateTaskInput {
   readonly projectId: ProjectId;
   readonly title: string;
   readonly description?: string;
-  readonly area?: string;
+  readonly area?: AreaId;
   readonly priority: Priority;
 }
 

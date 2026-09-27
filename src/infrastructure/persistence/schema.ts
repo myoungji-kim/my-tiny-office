@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import type { Availability } from "../../domain/employee";
+import { STARTING_AREAS, type MemoryKind } from "../../domain/memory";
 import type { Priority, ProjectStatus } from "../../domain/project";
 import type { TaskStatus } from "../../domain/task";
 
@@ -107,5 +108,47 @@ export const tasks = sqliteTable(
     check("tasks_held", sql`${table.status} <> 'held' or (${table.heldReason} is not null and ${table.heldFrom} is not null)`),
     check("tasks_finished", sql`${table.status} not in ('approval', 'done') or ${table.finishedAt} is not null`),
     check("tasks_applied", sql`${table.status} <> 'done' or ${table.appliedAt} is not null`),
+  ],
+);
+
+const startingAreas = STARTING_AREAS;
+const memoryKinds = ["expertise", "style", "company"] as const satisfies readonly MemoryKind[];
+
+export const areas = sqliteTable(
+  "areas",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    starting: text("starting", { enum: startingAreas }),
+    name: text("name"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_areas_company").on(table.companyId),
+    check("areas_named", sql`${table.starting} is not null or ${table.name} is not null`),
+  ],
+);
+
+export const memories = sqliteTable(
+  "memories",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    kind: text("kind", { enum: memoryKinds }).notNull(),
+    employeeId: text("employee_id").references(() => employees.id),
+    areaId: text("area_id").references(() => areas.id),
+    text: text("text").notNull(),
+    sourceTaskId: text("source_task_id"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_memories_company").on(table.companyId),
+    check("memories_kind", sql`${table.kind} in ('expertise', 'style', 'company')`),
+    check("memories_area", sql`(${table.kind} = 'expertise') = (${table.areaId} is not null)`),
+    check("memories_owner", sql`(${table.kind} = 'company') = (${table.employeeId} is null)`),
   ],
 );

@@ -29,6 +29,13 @@
       "when": 1790536751865,
       "tag": "0003_drop_simulated_time",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790537335744,
+      "tag": "0004_areas_and_memory",
+      "breakpoints": true
     }
   ]
 }

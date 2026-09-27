@@ -6,7 +6,9 @@ import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { hireEmployee } from "./employee";
 import {
+  createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
+  createInMemoryMemoryRepository,
   createInMemoryEmployeeRepository,
   createInMemoryProjectRepository,
   createInMemoryTaskRepository,
@@ -23,6 +25,8 @@ function createContext(): AppContext {
     employees: createInMemoryEmployeeRepository(),
     projects: createInMemoryProjectRepository(),
     tasks: createInMemoryTaskRepository(),
+    areas: createInMemoryAreaRepository(),
+    memories: createInMemoryMemoryRepository(),
     now: () => now,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,
@@ -42,7 +46,7 @@ describe("hireEmployee", () => {
 
     assert(result.ok);
     expect(result.value.employee).toEqual({
-      id: toEmployeeId("id-3"),
+      id: toEmployeeId("id-10"),
       companyId: company.id,
       name: "Min-su",
       role: "Backend Engineer",
@@ -80,11 +84,11 @@ describe("hireEmployee", () => {
     assert(result.ok);
     expect(result.events).toEqual([
       {
-        eventId: "id-4",
+        eventId: "id-11",
         type: "EmployeeHired",
         occurredAt: now,
         companyId: company.id,
-        employeeId: toEmployeeId("id-3"),
+        employeeId: toEmployeeId("id-10"),
         employeeName: "Min-su",
         role: "Backend Engineer",
       },

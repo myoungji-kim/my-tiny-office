@@ -1,6 +1,7 @@
 import * as companyDomain from "../domain/company";
 import type { CompanyCreated } from "../domain/events";
-import { toCompanyId, toEventId, type CompanyId } from "../domain/ids";
+import { toAreaId, toCompanyId, toEventId, type CompanyId } from "../domain/ids";
+import { startingAreas, STARTING_AREAS } from "../domain/memory";
 
 import type { AppContext } from "./context";
 
@@ -29,6 +30,9 @@ export async function createCompany(
   );
 
   await ctx.companies.save(company);
+  for (const area of startingAreas(company.id, STARTING_AREAS.map(() => toAreaId(ctx.newId())), now)) {
+    await ctx.areas.save(area);
+  }
 
   return { company, events };
 }

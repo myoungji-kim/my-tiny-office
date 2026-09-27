@@ -1,6 +1,7 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { CompanyId, EmployeeId, ProjectId, TaskId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, TaskId } from "../domain/ids";
+import type { Area, Memory } from "../domain/memory";
 import type { Project } from "../domain/project";
 import type { Task } from "../domain/task";
 
@@ -26,4 +27,16 @@ export interface TaskRepository {
   findById(id: TaskId): Promise<Task | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Task[]>;
   save(task: Task): Promise<void>;
+}
+
+export interface AreaRepository {
+  findByCompany(companyId: CompanyId): Promise<readonly Area[]>;
+  save(area: Area): Promise<void>;
+  remove(id: AreaId): Promise<void>;
+}
+
+export interface MemoryRepository {
+  findByCompany(companyId: CompanyId): Promise<readonly Memory[]>;
+  save(memory: Memory): Promise<void>;
+  remove(id: MemoryId): Promise<void>;
 }

@@ -8,7 +8,9 @@ import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { bringBack, hireEmployee, sendOnVacation } from "./employee";
 import {
+  createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
+  createInMemoryMemoryRepository,
   createInMemoryEmployeeRepository,
   createInMemoryProjectRepository,
   createInMemoryTaskRepository,
@@ -32,6 +34,8 @@ beforeEach(async () => {
     employees: createInMemoryEmployeeRepository(),
     projects: createInMemoryProjectRepository(),
     tasks: createInMemoryTaskRepository(),
+    areas: createInMemoryAreaRepository(),
+    memories: createInMemoryMemoryRepository(),
     now: () => now,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,
