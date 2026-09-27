@@ -29,6 +29,10 @@
   .danger-row { display: flex; align-items: center; gap: 14px; }
 
   .danger-row p { margin: 0; flex: 1; font-size: 14px; color: var(--muted); }
+
+  .scope-acts { display: flex; justify-content: flex-end; margin-top: 12px; }
+
+  .guide .scope { margin-top: 0; border: 0; padding: 0; }
 </style>
 
 <div class="app">
@@ -73,8 +77,19 @@
       </div>
     </div>
 
+    <div class="head" id="guideHead" hidden>
+      <a class="crumb" href="#"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg><span data-t="title">설정</span></a>
+      <div class="head-row">
+        <span>
+          <h1 data-t="guideTitle">안전 범위</h1>
+          <span class="sub" data-t="guideSub">직원이 이 컴퓨터에서 하는 일과 하지 않는 일</span>
+        </span>
+        <div class="head-right"></div>
+      </div>
+    </div>
+
     <div class="body">
-      <div class="set-list">
+      <div class="set-list" id="setList">
         <div class="panel">
           <div class="panel-hd">
             <h2>Claude Code</h2>
@@ -83,9 +98,17 @@
           <div class="panel-bd">
             <div id="checks"></div>
             <div class="recheck"><button class="btn btn-secondary btn-sm" type="button" id="recheck"></button></div>
-            <span class="hint" data-t="trustHint">폴더 신뢰는 프로젝트마다 따로예요. 프로젝트에 폴더를 정할 때 확인해요.</span>
-            <div class="kv" style="margin-top:12px"><span data-t="toolsLabel">연결된 외부 도구</span><b>Atlassian (Jira · Confluence)</b></div>
-            <span class="hint" data-t="toolsHint">Claude Code에 연결된 그대로 써요. 업무 중에는 읽기만 하고, 바깥에 쓰는 일은 승인할 때 해요.</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
+            <h2 data-t="scopeTitle">직원이 할 수 있는 일</h2>
+            <p data-t="scopeWhy">모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.</p>
+          </div>
+          <div class="panel-bd">
+            <div class="scope" id="scopeBrief"></div>
+            <div class="scope-acts"><a class="btn btn-secondary btn-sm" href="#safety" data-t="guideOpen">안내 보기</a></div>
           </div>
         </div>
 
@@ -115,7 +138,7 @@
               <button class="btn btn-secondary btn-sm" type="button" id="exportDb" data-t="exportDb">내보내기</button>
               <button class="btn btn-secondary btn-sm" type="button" id="importDb" data-t="importDb">가져오기</button>
             </div>
-            <span class="hint" data-t="moveHint">내보내기는 이 회사를 파일로 저장하고, 가져오기는 파일의 회사를 하나 더 추가해요. Claude Code 로그인과 폴더 신뢰는 파일에 담기지 않아요.</span>
+            <span class="hint" data-t="moveHint">내보내기는 이 회사를 파일로 저장하고, 가져오기는 파일의 회사를 하나 더 추가해요. Claude Code 로그인과 프로젝트 폴더는 파일에 담기지 않아요.</span>
             <div id="moved"></div>
           </div>
         </div>
@@ -136,6 +159,8 @@
           </div>
         </div>
       </div>
+
+      <div class="set-list guide" id="guide" hidden></div>
     </div>
   </div>
 </div>
@@ -152,8 +177,37 @@
       title: "설정", headSub: "이 컴퓨터에서 My Tiny Office가 쓰는 것들",
       claudeWhy: "직원은 모두 이걸로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
       installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요", loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", recheck: "다시 확인", checkedNow: "방금 확인했어요", copy: "복사", copied: "복사했어요",
-      trustHint: "폴더 신뢰는 프로젝트마다 따로예요. 프로젝트에 폴더를 정할 때 확인해요.",
-      toolsLabel: "연결된 외부 도구", toolsHint: "Claude Code에 연결된 그대로 써요. 업무 중에는 읽기만 하고, 바깥에 쓰는 일은 승인할 때 해요.",
+      scopeTitle: "직원이 할 수 있는 일", scopeWhy: "모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.",
+      guideOpen: "안내 보기", guideTitle: "안전 범위", guideSub: "직원이 이 컴퓨터에서 하는 일과 하지 않는 일",
+      brief: {
+        yes: ["프로젝트 폴더 안, 업무마다 따로 만든 작업 폴더에서 파일을 읽고 고쳐요", "프로젝트에서 허용한 명령만 실행해요"],
+        no: ["폴더 밖의 파일, 인터넷, push는 건드리지 않아요"],
+      },
+      guide: [
+        { title: "하는 일", kind: "yes", rows: [
+          "프로젝트 폴더 안에서, 업무마다 따로 만든 작업 폴더(<code>.worktrees/업무</code>)에서 파일을 읽고 고쳐요. 두 사람이 같은 파일을 덮어쓰지 않아요.",
+          "프로젝트에서 허용한 명령만 실행해요. 기본은 <code>package.json</code>의 test · lint · build 같은 스크립트예요.",
+          "끝나면 바뀐 것을 보여 주고 기다려요. 승인하면 그 업무의 브랜치(<code>mto/업무</code>)에 커밋해요.",
+        ] },
+        { title: "하지 않는 일", kind: "no", rows: [
+          "프로젝트 폴더 밖의 파일은 읽지도 쓰지도 않아요.",
+          "인터넷에 접속하지 않아요.",
+          "push, merge, 배포는 하지 않아요. 그건 직접 해요.",
+          "Jira나 Slack처럼 Claude Code에 연결해 둔 외부 도구는 쓰지 않아요.",
+          "Claude Code에 설정해 둔 개인 훅, 플러그인, 기억은 가져오지 않아요.",
+          "Claude Code의 로그인 정보는 읽지 않아요. 로그인은 Claude Code가 해요.",
+        ] },
+        { title: "멈추고 묻는 때", kind: "ask", rows: [
+          "허용하지 않은 명령이 필요하면 그 자리에서 멈추고, 업무 화면에서 허용할지 물어요.",
+          "업무 한 건이 쓸 수 있는 비용에는 상한이 있어요. 닿으면 멈춰요.",
+          "연결이 끊기면 하던 일과 기억은 그대로 두고 멈춰요. 다시 연결하면 이어서 해요.",
+        ] },
+        { title: "알아 두면 좋은 것", kind: "ask", rows: [
+          "허용한 명령은 그 명령이 하는 일을 모두 해요. <code>npm test</code>가 부르는 스크립트도 프로젝트의 코드라서, 믿는 저장소에만 폴더를 정해 주세요.",
+          "직원은 읽은 코드나 문서에 적힌 말에 흔들릴 수 있어요. 승인하기 전에 바뀐 것을 꼭 봐 주세요.",
+          "내보낸 회사 파일에는 업무 기록이 들어 있어요. 코드 조각도 담길 수 있으니 믿는 곳으로만 옮겨 주세요.",
+        ] },
+      ],
       langTitle: "언어", langWhy: "화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.",
       dataTitle: "이 회사의 데이터", dataWhy: "직원, 기억, 프로젝트, 업무가 모두 이 파일 하나에 있어요. 회사마다 파일이 따로라 서로 섞이지 않아요.",
       dataHint: "코드 폴더와 따로 있어서 브랜치를 바꾸거나 저장소를 지워도 회사는 남아요.",
@@ -166,7 +220,7 @@
       deleteKeep: "지우기 전에 내보내 두면 나중에 다시 가져올 수 있어요.",
       deleteType: "확인하려면 회사 이름을 그대로 입력해요",
       deleted: (n, next) => withParticle(n, "을", "를") + " 삭제했어요. " + withParticle(next, "을", "를") + " 열었어요.",
-      moveHint: "내보내기는 이 회사를 파일로 저장하고, 가져오기는 파일의 회사를 하나 더 추가해요. Claude Code 로그인과 폴더 신뢰는 파일에 담기지 않아요.",
+      moveHint: "내보내기는 이 회사를 파일로 저장하고, 가져오기는 파일의 회사를 하나 더 추가해요. Claude Code 로그인과 프로젝트 폴더는 파일에 담기지 않아요.",
       exported: "내려받기 폴더에 저장했어요 · my-tiny-office-2026-09-26.db",
       importedTitle: "TinySoft를 가져왔어요",
       importedBody: "회사 목록에 추가했어요. 열면 프로젝트 2개의 폴더를 이 컴퓨터에서 다시 골라야 해요.",
@@ -179,8 +233,37 @@
       title: "Settings", headSub: "What My Tiny Office uses on this computer",
       claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed", loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", checkedNow: "Checked just now", copy: "Copy", copied: "Copied",
-      trustHint: "Folder trust is per project, checked where a project's folder is chosen.",
-      toolsLabel: "Connected tools", toolsHint: "Used as connected in Claude Code. During work they are only read; anything written outside waits for approval.",
+      scopeTitle: "What employees may do", scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
+      guideOpen: "Read the guide", guideTitle: "What is safe", guideSub: "What employees do on this computer, and what they never do",
+      brief: {
+        yes: ["Read and edit files in a folder of each task's own, inside the project's folder", "Run only the commands the project allows"],
+        no: ["Nothing outside the folder, no internet, no push"],
+      },
+      guide: [
+        { title: "What they do", kind: "yes", rows: [
+          "Read and edit files inside the project's folder, each task in a folder of its own (<code>.worktrees/task</code>), so two people never write over each other.",
+          "Run only the commands the project allows. By default those are the test, lint and build scripts in <code>package.json</code>.",
+          "Show what changed and wait. Approving commits it to the task's branch (<code>mto/task</code>).",
+        ] },
+        { title: "What they never do", kind: "no", rows: [
+          "Read or write anything outside the project's folder.",
+          "Reach the internet.",
+          "Push, merge or deploy. That stays yours.",
+          "Use the outside tools connected to Claude Code, such as Jira or Slack.",
+          "Bring in your personal Claude Code hooks, plugins or memory.",
+          "Read Claude Code's sign-in. Claude Code signs in on its own.",
+        ] },
+        { title: "When they stop and ask", kind: "ask", rows: [
+          "A task that needs a command the project does not allow stops there, and its page asks whether to allow it.",
+          "Each task has a spending cap. Reaching it stops the task.",
+          "A dropped connection stops the task and keeps its work and memory. Reconnecting carries on.",
+        ] },
+        { title: "Worth knowing", kind: "ask", rows: [
+          "An allowed command does everything that command does. The scripts <code>npm test</code> runs are the project's own code, so choose folders from repositories you trust.",
+          "Employees can be swayed by what is written in the code or documents they read. Look at what changed before you approve it.",
+          "An exported company file holds the history of its work, possibly with pieces of code. Move it only somewhere you trust.",
+        ] },
+      ],
       langTitle: "Language", langWhy: "Changes the words on screen. What you wrote yourself, like names, stays as written.",
       dataTitle: "This company's data", dataWhy: "Its people, memory, projects and work all live in this one file. Each company has its own, so nothing mixes.",
       dataHint: "It lives apart from the code, so switching branches or deleting the checkout leaves the company alone.",
@@ -193,7 +276,7 @@
       deleteKeep: "Export it first and it can be imported again later.",
       deleteType: "Type the company's name to confirm",
       deleted: (n, next) => "Deleted " + n + ". " + next + " is open now.",
-      moveHint: "Export saves this company as a file; import adds the file's company as one more. The Claude Code sign-in and folder trust are not in the file.",
+      moveHint: "Export saves this company as a file; import adds the file's company as one more. The Claude Code sign-in and the project folders are not in the file.",
       exported: "Saved to Downloads · my-tiny-office-2026-09-26.db",
       importedTitle: "Imported TinySoft",
       importedBody: "Added to your companies. Once open, 2 projects need their folder chosen on this computer.",
@@ -241,6 +324,26 @@
     if (RUNTIME.off) runtimeBack();
     recheck.innerHTML = REFRESH + t().checkedNow;
   });
+
+  /* ── what is safe ─────────────────────────────────────────────── */
+  // The brief is the panel; the guide is the same promise in full, as its own view.
+  document.getElementById("scopeBrief").innerHTML =
+    t().brief.yes.map((r) => scopeRow("yes", r)).join("") + t().brief.no.map((r) => scopeRow("no", r)).join("");
+  document.getElementById("guide").innerHTML = t().guide.map((g) => `
+    <div class="panel">
+      <div class="panel-hd"><h2>${g.title}</h2></div>
+      <div class="panel-bd"><div class="scope">${g.rows.map((r) => scopeRow(g.kind, r)).join("")}</div></div>
+    </div>`).join("");
+  const showView = () => {
+    const guide = location.hash === "#safety";
+    document.querySelector(".head").hidden = guide;
+    document.getElementById("setList").hidden = guide;
+    document.getElementById("guideHead").hidden = !guide;
+    document.getElementById("guide").hidden = !guide;
+    scrollTo(0, 0);
+  };
+  addEventListener("hashchange", showView);
+  showView();
 
   /* ── language ────────────────────────────────────────────────── */
   const langs = document.getElementById("langs");

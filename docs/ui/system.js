@@ -712,6 +712,14 @@ function closeRowMenu() {
 
 const KEEP_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
 
+// One line of what an employee may ("yes"), may not ("no") or stops to ask ("ask").
+const SCOPE_ICON = {
+  yes: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
+  no: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="5.6"/><path d="M4 12L12 4"/></svg>',
+  ask: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v8M10 4v8"/></svg>',
+};
+const scopeRow = (kind, html) => `<div class="scope-row ${kind}">${SCOPE_ICON[kind]}<span>${html}</span></div>`;
+
 function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
   if (menuAnchor === anchor) return closeRowMenu();
   closeRowMenu();

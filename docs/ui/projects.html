@@ -90,17 +90,21 @@
 
   .tk-mem.used svg { color: var(--ok); }
 
-  .ob-hd { display: block; font-size: 12px; font-weight: 600; color: var(--faint); margin: 14px 0 4px; }
+  .runs { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  .ob { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .run { display: inline-flex; align-items: center; gap: 2px; height: 30px; padding: 0 4px 0 11px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--surface); font-family: var(--mono); font-size: 13px; }
 
-  .ob:last-of-type { border-bottom: none; }
+  .run button { width: 22px; height: 22px; display: grid; place-items: center; border: 0; border-radius: 999px; background: none; color: var(--faint); cursor: pointer; }
 
-  .ob-where { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--sunk); border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+  .run button:hover { background: var(--subtle); color: var(--ink); }
 
-  .ob-tx b { display: block; font-weight: 600; }
+  .run button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
-  .ob-tx span { color: var(--muted); }
+  .run button svg { width: 11px; height: 11px; }
+
+  .run-add { display: flex; gap: 6px; margin-top: 8px; }
+
+  .run-add .input { flex: 1; font-family: var(--mono); font-size: 14px; }
 
   .tk-apply { display: block; font-size: 13px; color: var(--muted); margin-top: 10px; }
 
@@ -213,6 +217,8 @@
 
   .r-line.changes { color: var(--bad-ink); }
   .r-line.blocked { color: var(--bad-ink); }
+
+  .r-line code { font-family: var(--mono); font-size: .92em; white-space: nowrap; }
 
   .r-line svg { width: 13px; height: 13px; flex: none; }
 
@@ -349,13 +355,13 @@
   // finish a project, because more can always be added.
   const TODAY = "2026. 9. 26.";
   const PROJECTS = [
-    { id: "pay", status: "active", priority: "high", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft",
+    { id: "pay", status: "active", priority: "high", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft", runs: ["npm test", "npm run lint", "npm run build"],
       desc: { ko: "결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요.", en: "Tidy the payment flow and make the webhooks trustworthy." } },
-    { id: "order", status: "active", priority: "normal", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders",
+    { id: "order", status: "active", priority: "normal", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders", runs: ["npm test", "npm run lint"],
       desc: { ko: "주문 상태를 하나의 흐름으로 다시 세워요.", en: "Rebuild the order states as one flow." } },
-    { id: "settle", status: "planned", priority: "normal", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle",
+    { id: "settle", status: "planned", priority: "normal", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle", runs: ["npm test"],
       desc: { ko: "가맹점이 월별 정산 내역을 내려받아요.", en: "Merchants download their monthly settlements." } },
-    { id: "admin", status: "held", priority: "low", since: "2026. 8. 18.", name: { ko: "관리자 대시보드", en: "Admin dashboard" }, folder: "~/Projects/admin",
+    { id: "admin", status: "held", priority: "low", since: "2026. 8. 18.", name: { ko: "관리자 대시보드", en: "Admin dashboard" }, folder: "~/Projects/admin", runs: ["npm test", "npm run lint"],
       desc: { ko: "운영팀이 주문과 환불을 한 화면에서 봐요.", en: "One screen for support to see orders and refunds." },
       reason: { ko: "결제 개편을 먼저 끝내기로", en: "Payments rework comes first" } },
     // A finished project is kept as its record: its span and how much was done.
@@ -371,19 +377,15 @@
     // an agent that stopped: blocked is a mark, not a place
     { id: "t1", project: "pay", area: "db", priority: "high", status: "working", who: "p1", spent: 23,
       title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" },
-      blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" },
+      blocked: { kind: "lost" },
       desc: { ko: "결제 내역을 한 번에 다 불러오지 않게 페이지로 나눠요.", en: "Stop loading the whole payment history at once; page it." },
-      session: "434e0703", usedMem: [0, 2],
+      session: "434e0703-5b1c-4f7e-9a2d-8c61f0e2b9a4", usedMem: [0, 2],
       steps: [
         { at: "10:17", kind: "read", what: "src/payments/history.ts" },
         { at: "10:15", kind: "run", what: "npm test -- history", note: { ko: "2개 실패", en: "2 failing" } },
         { at: "10:12", kind: "edit", what: "src/payments/history.test.ts" },
         { at: "10:08", kind: "edit", what: "src/payments/history.ts" },
         { at: "10:03", kind: "read", what: "src/db/schema.ts" },
-        { at: "10:02", kind: "fetch", what: "Jira · PAY-212" },
-      ],
-      outbound: [
-        { where: "Jira", target: "PAY-212", what: { ko: "댓글 · 커서 기반으로 바꿨어요. 페이지당 50건이에요.", en: "Comment · Switched to a cursor. 50 per page." } },
       ],
       said: { ko: "offset은 페이지가 깊어질수록 느려서 커서 기반으로 바꾸는 중이에요.", en: "Offsets slow down the deeper the page, so I am switching to a cursor." },
       files: [
@@ -407,7 +409,7 @@
     { id: "t2", project: "pay", area: "security", priority: "high", status: "working", who: "p3", spent: 41,
       title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" },
       peer: { by: "p4", state: "reviewing" },
-      session: "9c1f27b2",
+      session: "9c1f27b2-0d4e-4a61-b8f3-2e7c5a90d1c6",
       steps: [
         { at: "10:22", kind: "edit", what: "src/webhooks/verify.ts" },
         { at: "10:19", kind: "run", what: "npm test -- webhooks", note: { ko: "통과", en: "passing" } },
@@ -425,13 +427,24 @@
 
     { id: "t3", project: "order", area: "types", priority: "normal", status: "working", who: "p2", spent: 8,
       title: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" },
-      peer: { by: null, state: "suggested" } },
+      blocked: { kind: "command", run: "npm run typecheck" },
+      peer: { by: null, state: "suggested" },
+      session: "e71b3c58-9a02-4d6f-b1e4-7c38f5a2d0b9",
+      steps: [
+        { at: "10:24", kind: "run", what: "npm run typecheck", note: { ko: "허용되지 않음", en: "not allowed" } },
+        { at: "10:21", kind: "edit", what: "src/orders/status.ts" },
+      ],
+      files: [{ file: "src/orders/status.ts", add: 12, del: 9 }],
+      log: [
+        { at: "10:16", kind: "started", who: "p2" },
+        { at: "10:24", kind: "stoppedAtRun" },
+      ] },
 
     { id: "t4", project: "pay", area: "arch", priority: "normal", status: "approval", who: "p1", spent: 52,
       title: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" },
       peer: { by: "p4", state: "done" },
       desc: { ko: "에러 응답을 { code, message, retryable } 하나로 맞춰요.", en: "Give every error response one shape: { code, message, retryable }." },
-      session: "5d02aa91", usedMem: [2],
+      session: "5d02aa91-3f7c-4e28-a6b0-91d4c2e8f735", usedMem: [2],
       files: [
         { file: "src/api/errors.ts", add: 42, del: 17, diff: [
           "-export function toResponse(err) { return { error: err.message }; }",
@@ -441,10 +454,6 @@
         ] },
         { file: "src/api/payments.ts", add: 9, del: 12 },
         { file: "docs/api/errors.md", add: 21, del: 4 },
-      ],
-      outbound: [
-        { where: "Confluence", target: { ko: "결제 API · 에러 응답", en: "Payments API · Errors" }, what: { ko: "새 응답 구조와 재시도 규칙으로 고친 본문", en: "Body rewritten for the new shape and the retry rule" } },
-        { where: "Jira", target: "PAY-198", what: { ko: "상태 · 진행 중 → 검토 완료", en: "Status · In progress → Reviewed" } },
       ],
       thread: [
         { by: "p4", text: { ko: "재시도할 수 있는 실패는 따로 나눠 주세요.", en: "Split out the failures that can be retried." } },
@@ -577,19 +586,22 @@
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
       lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.", reconnect: "다시 연결", copy: "복사",
+      runBlocked: (c) => "허용되지 않은 명령 · <code>" + c + "</code>",
+      runStopped: (c) => c + " 실행 전에 멈췄어요",
+      runWhy: (n) => "이 프로젝트에서 허용한 명령이 아니에요. 허용하면 이 프로젝트의 업무는 앞으로 이 명령을 쓸 수 있고, " + n + subjectParticle(n) + " 이어서 해요.",
+      allowRun: "허용하고 이어서",
       tk: {
         now: "지금 하는 일", did: "한 일", changed: "바뀐 것", review: "검토", desc: "업무 설명",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
-        attach: "터미널에서 직접 보기", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
+        resumeHint: "멈춘 뒤에는 터미널에서 이 세션을 이어 볼 수 있어요.", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
         said: (n) => n + "의 말", notStarted: "아직 아무도 시작하지 않았어요.",
-        applyWhat: (b, n) => "승인하면 <code>" + b + "</code> 브랜치에 커밋" + (n ? "하고, 바깥에 쓸 " + n + "건을 반영해요" : "해요") + ". push는 하지 않아요.",
+        applyWhat: (b) => "승인하면 <code>" + b + "</code> 브랜치에 커밋해요. push는 하지 않아요.",
         applied: (b, c) => "<code>" + b + "</code> 브랜치에 커밋했어요 · <code>" + c + "</code>",
-        steps: { read: "읽는 중", edit: "수정", run: "실행", fetch: "가져옴" },
-        outbound: "승인하면 바깥에 쓸 것", outboundDone: "바깥에 쓴 것",
+        steps: { read: "읽는 중", edit: "수정", run: "실행" },
         took: (m) => m + "분 걸림",
         logs: {
-          created: () => "만듦", lost: () => "에이전트 연결이 끊김", applied: () => "승인해서 반영함",
+          created: () => "만듦", lost: () => "에이전트 연결이 끊김", applied: () => "승인해서 반영함", stoppedAtRun: () => "허용되지 않은 명령에서 멈춤",
           started: (e) => e.name + subjectParticle(e.name) + " 시작",
           reviewStarted: (e) => e.name + subjectParticle(e.name) + " 검토를 시작",
           reviewDone: (e) => e.name + subjectParticle(e.name) + " 검토를 마침",
@@ -622,7 +634,13 @@
       removeProjectWhy: (n) => "업무 " + n + "개도 같이 사라져요. 완료한 기록도요.",
       removeProjectEmpty: "업무가 없어서 프로젝트만 사라져요.",
       removeProjectDone: "마친 기록이 회사 개요에서 사라져요. 연혁에 남은 한 줄은 그대로예요.",
-      folderHint: "이 프로젝트의 업무는 이 폴더에서 이뤄져요.",
+      folderHint: "만들거나 저장하면 직원이 이 폴더에서 이 범위로 일하는 걸 허용해요.",
+      scopeFiles: "업무마다 따로 떼어 낸 작업 폴더에서 파일을 읽고 고쳐요",
+      scopeRuns: "아래 명령만 실행해요",
+      scopeNot: "이 폴더 밖의 파일, 인터넷, push는 건드리지 않아요",
+      scopeMore: "안전 범위 자세히",
+      fRuns: "실행할 수 있는 명령", runsHint: "package.json에서 찾은 스크립트예요. 목록에 없는 명령이 필요하면 업무가 멈추고 물어봐요.",
+      runsNone: "없어요. 파일만 읽고 고쳐요.", addRun: "추가", runPlaceholder: "npm run e2e", removeRun: (c) => c + " 빼기",
       noFolderHint: "나중에 정해도 돼요. 업무는 적어 둘 수 있고, 폴더를 정해야 프로젝트를 시작할 수 있어요.",
     },
     en: {
@@ -693,19 +711,22 @@
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
       lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.", reconnect: "Reconnect", copy: "Copy",
+      runBlocked: (c) => "Command not allowed · <code>" + c + "</code>",
+      runStopped: (c) => "Stopped before running " + c,
+      runWhy: (n) => "This project does not allow it. Allowing it lets every task here run it, and " + n + " carries on.",
+      allowRun: "Allow and carry on",
       tk: {
         now: "Doing now", did: "What was done", changed: "What changed", review: "Review", desc: "About this task",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
-        attach: "Watch it in a terminal", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
+        resumeHint: "Once it stops, you can open this session in a terminal.", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
         said: (n) => n + " says", notStarted: "Nobody has started it yet.",
-        applyWhat: (b, n) => "Approving commits to the <code>" + b + "</code> branch" + (n ? " and makes the " + n + " writes outside" : "") + ". Nothing is pushed.",
+        applyWhat: (b) => "Approving commits to the <code>" + b + "</code> branch. Nothing is pushed.",
         applied: (b, c) => "Committed to <code>" + b + "</code> · <code>" + c + "</code>",
-        steps: { read: "Reading", edit: "Edited", run: "Ran", fetch: "Fetched" },
-        outbound: "Written outside on approval", outboundDone: "Written outside",
+        steps: { read: "Reading", edit: "Edited", run: "Ran" },
         took: (m) => "took " + m + " min",
         logs: {
-          created: () => "Created", lost: () => "The agent disconnected", applied: () => "Approved and applied",
+          created: () => "Created", lost: () => "The agent disconnected", applied: () => "Approved and applied", stoppedAtRun: () => "Stopped at a command it may not run",
           started: (e) => e.name + " started",
           reviewStarted: (e) => e.name + " started reviewing",
           reviewDone: (e) => e.name + " finished reviewing",
@@ -739,7 +760,13 @@
         n === 1 ? "Its one task goes with it, finished or not." : "All " + n + " of its tasks go with it, finished or not.",
       removeProjectEmpty: "It has no tasks, so only the project goes.",
       removeProjectDone: "Its record leaves the company overview. The line in the history stays.",
-      folderHint: "Work on this project happens in this folder.",
+      folderHint: "Creating or saving the project lets its employees work in this folder, within exactly this.",
+      scopeFiles: "Read and edit files in a folder of each task's own",
+      scopeRuns: "Run only the commands below",
+      scopeNot: "Nothing outside this folder, no internet, no push",
+      scopeMore: "More on what is safe",
+      fRuns: "Commands they may run", runsHint: "Found in package.json. A task that needs one not listed here stops and asks.",
+      runsNone: "None. They only read and edit files.", addRun: "Add", runPlaceholder: "npm run e2e", removeRun: (c) => "Remove " + c,
       noFolderHint: "You can set it later. Tasks can be written down, but the project cannot start without one.",
     },
   };
@@ -814,8 +841,10 @@
 
   // What the card says under the title, if anything: an agent that stopped,
   // a colleague looking at it, or a suggestion that one should.
+  const blockedText = (task) => (task.blocked.kind === "command" ? t().runBlocked(task.blocked.run) : t().agentLost);
+
   function noteFor(task) {
-    if (task.blocked) return { cls: "blocked", svg: icon.none, text: tx(task.blocked) };
+    if (task.blocked) return { cls: "blocked", svg: icon.none, text: blockedText(task) };
     if (task.changes) return { cls: "changes", svg: icon.back, text: t().changesAsked(tx(task.changes)) };
     if (!task.peer) return null;
     if (task.peer.state === "queued") {
@@ -908,7 +937,6 @@
     read: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
     edit: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10.6 2.8l2.6 2.6L6 12.6H3.4V10z"/></svg>',
     run: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5"/></svg>',
-    fetch: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 9.4l2.8-2.8M7 4.6l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L10.7 8.3M9 11.4l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2"/></svg>',
     used: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
     unused: '<svg viewBox="0 0 16 16"></svg>',
   };
@@ -932,10 +960,13 @@
     ].filter(Boolean).join(" · ");
     renderTaskActions(p, task);
 
-    const blocked = task.blocked && task.status === "working"
-      ? `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${tx(task.blocked)}</b><span>${t().lostWhy}</span></span>
-          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect>${t().reconnect}</button></span></div>`
-      : "";
+    const off = RUNTIME.off ? " disabled" : "";
+    const blocked = !task.blocked || task.status !== "working" ? ""
+      : task.blocked.kind === "command"
+        ? `<div class="notice notice-bad"><span class="n-ic">${TASK_ICON.run}</span><span class="n-tx"><b>${t().runStopped("<code>" + task.blocked.run + "</code>")}</b><span>${t().runWhy(who.name)}</span></span>
+            <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-allow-run${off}>${t().allowRun}</button></span></div>`
+        : `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
+            <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect${off}>${t().reconnect}</button></span></div>`;
 
     const steps = task.steps?.length
       ? panel(task.status === "working" ? k.now : k.did, task.steps.map((s, i) => `
@@ -945,14 +976,10 @@
       : "";
 
     const changes = task.status === "backlog" ? "" : panel(k.changed,
-      (task.files?.length || task.outbound?.length
-        ? (task.files ?? []).map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
-          + (task.outbound?.length
-            ? `<span class="ob-hd">${task.status === "done" ? k.outboundDone : k.outbound}</span>`
-              + task.outbound.map((o) => `<div class="ob"><span class="ob-where">${o.where}</span><span class="ob-tx"><b>${tx(o.target)}</b><span>${tx(o.what)}</span></span></div>`).join("")
-            : "")
+      (task.files?.length
+        ? task.files.map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
         : `<p class="col-empty" style="margin:0">${k.noChanges}</p>`)
-      + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task), task.outbound?.length ?? 0)}</span>` : "")
+      + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task))}</span>` : "")
       + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : ""));
 
     const note = noteFor(task);
@@ -977,12 +1004,17 @@
       task.session ? panel(k.session, `
         <div class="kv"><span>${k.folder}</span><b class="mono">${p.folder}/.worktrees/${task.id}</b></div>
         <div class="kv"><span>branch</span><b class="mono">${branchOf(task)}</b></div>
-        <span class="hint">${k.attach}</span>
-        <div class="cmd"><pre><span class="p">$</span> claude attach ${task.session}</pre><button class="copy" type="button">${t().copy}</button></div>`) : "",
+        <span class="hint">${k.resumeHint}</span>
+        <div class="cmd"><pre><span class="p">$</span> claude --resume ${task.session}</pre><button class="copy" type="button">${t().copy}</button></div>`) : "",
     ];
 
     const view = document.getElementById("taskView");
     view.innerHTML = `${blocked}<div class="tk-grid" style="${blocked ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    view.querySelector("[data-allow-run]")?.addEventListener("click", () => {
+      p.runs = [...(p.runs ?? []), task.blocked.run];
+      task.blocked = undefined;
+      render();
+    });
     view.querySelector("[data-reconnect]")?.addEventListener("click", () => {
       task.blocked = undefined;
       if (who) who.agentLost = false;
@@ -1028,7 +1060,7 @@
     if (task.status === "approval" && p.status !== "done") {
       button(t().actions.hold, "secondary", () => askHoldTask(task));
       button(t().actions.rework, "secondary", () => askRework(task), true);
-      button(t().actions.approve, "primary", () => approveTask(task), !!task.outbound?.length);
+      button(t().actions.approve, "primary", () => approveTask(task));
     }
     if (task.status === "held" && live) button(t().actions.resume, "primary", () => resumeTask(task), true);
     if (box.querySelector(":disabled")) {
@@ -1303,8 +1335,8 @@
     // This is the line the work does not cross on its own.
     if (task.status === "approval" && kept) {
       say("p-said", `<b>${t().approveTitle}</b>${t().approveWhy}`);
-      // a commit needs no agent, but writing outside resumes the session
-      acts.appendChild(task.outbound?.length ? gated(t().actions.approve, "key", () => approveTask(task)) : menu(t().actions.approve, "key", () => approveTask(task)));
+      // a commit needs no agent
+      acts.appendChild(menu(t().actions.approve, "key", () => approveTask(task)));
       acts.appendChild(gated(t().actions.rework, null, () => askRework(task)));
       acts.appendChild(menu(t().actions.hold, null, () => askHoldTask(task)));
     }
@@ -1594,11 +1626,15 @@
   // the first task cannot start.
 
   const SAMPLE_FOLDERS = ["~/Projects/tinysoft", "~/Projects/orders"];
+  // what a folder's package.json offers, as the app would read it
+  const SAMPLE_RUNS = { "~/Projects/tinysoft": ["npm test", "npm run lint", "npm run build"], "~/Projects/orders": ["npm test", "npm run lint"] };
+  const X_SM = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
 
   function renderNewProject() {
     const editing = PROJECTS.find((p) => p.id === dialog.dataset.edit) ?? null;
     const dir = dialog.dataset.folder || "";
     const prio = dialog.dataset.prio || editing?.priority || "normal";
+    const runs = dialog.dataset.runs !== undefined ? JSON.parse(dialog.dataset.runs) : editing?.runs ?? [];
     const heading = editing ? t().editProjectTitle : t().newProjectTitle;
     dialog.setAttribute("aria-label", heading);
     dialog.innerHTML = `
@@ -1635,8 +1671,20 @@
             <span class="path${dir ? "" : " empty"}">${dir || t().noFolder}</span>
             <button class="btn btn-secondary btn-sm" type="button" data-pick-folder>${dir ? t().change : t().choose}</button>
           </div>
-          <span class="hint">${dir ? t().folderHint : t().noFolderHint}</span>
+          ${dir ? `<div class="scope">
+            ${scopeRow("yes", t().scopeFiles)}${scopeRow("yes", t().scopeRuns)}${scopeRow("no", t().scopeNot)}
+          </div>` : ""}
+          <span class="hint">${dir ? t().folderHint : t().noFolderHint} ${dir ? `<a href="settings.html${lang === "en" ? "?lang=en" : ""}#safety">${t().scopeMore}</a>` : ""}</span>
         </div>
+
+        ${dir ? `<div class="field">
+          <span class="label">${t().fRuns}</span>
+          ${runs.length
+            ? `<div class="runs">${runs.map((r, i) => `<span class="run">${r}<button type="button" data-drop-run="${i}" aria-label="${t().removeRun(r)}">${X_SM}</button></span>`).join("")}</div>`
+            : `<span class="hint" style="margin-top:0">${t().runsNone}</span>`}
+          <div class="run-add"><input class="input" id="npRun" placeholder="${t().runPlaceholder}" autocomplete="off" spellcheck="false" /><button class="btn btn-secondary btn-sm" type="button" data-add-run>${t().addRun}</button></div>
+          <span class="hint">${t().runsHint}</span>
+        </div>` : ""}
       </div>
 
       <div class="m-foot">
@@ -1656,12 +1704,14 @@
         editing.desc = about ? { ...editing.desc, [lang]: about } : undefined;
         editing.folder = dir || null;
         editing.priority = prio;
+        editing.runs = dir ? runs : [];
       } else {
         PROJECTS.push({
           id: "np" + PROJECTS.length,
           name: { ko: name, en: name },
           desc: about ? { ko: about, en: about } : undefined,
           folder: dir || null,
+          runs: dir ? runs : [],
           status: "planned",
           priority: prio,
         });
@@ -1673,15 +1723,34 @@
 
     dialog.querySelector("#npPrio").addEventListener("change", (e) => { dialog.dataset.prio = e.target.value; });
 
-    dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
+    // Re-rendering keeps what was typed; focus returns to what was pressed.
+    const again = (focusSel) => {
       const name = dialog.querySelector("#npName").value;
       const about = dialog.querySelector("#npDesc").value;
-      dialog.dataset.folder = SAMPLE_FOLDERS[(SAMPLE_FOLDERS.indexOf(dir) + 1) % SAMPLE_FOLDERS.length];
       renderNewProject();
       dialog.querySelector("#npName").value = name;
       dialog.querySelector("#npDesc").value = about;
-      dialog.querySelector("[data-pick-folder]").focus();
+      dialog.querySelector(focusSel)?.focus();
+    };
+    dialog.querySelector("[data-pick-folder]").addEventListener("click", () => {
+      dialog.dataset.folder = SAMPLE_FOLDERS[(SAMPLE_FOLDERS.indexOf(dir) + 1) % SAMPLE_FOLDERS.length];
+      dialog.dataset.runs = JSON.stringify(SAMPLE_RUNS[dialog.dataset.folder] ?? []);
+      again("[data-pick-folder]");
     });
+    const addRun = () => {
+      const v = dialog.querySelector("#npRun").value.trim();
+      if (!v || runs.includes(v)) return;
+      dialog.dataset.runs = JSON.stringify([...runs, v]);
+      again("#npRun");
+    };
+    dialog.querySelector("[data-add-run]")?.addEventListener("click", addRun);
+    dialog.querySelector("#npRun")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addRun(); } });
+    for (const b of dialog.querySelectorAll("[data-drop-run]")) {
+      b.addEventListener("click", () => {
+        dialog.dataset.runs = JSON.stringify(runs.filter((_, i) => i !== Number(b.dataset.dropRun)));
+        again("#npRun");
+      });
+    }
     dialog.querySelector("[data-close]").addEventListener("click", closeModal);
   }
 
@@ -1691,7 +1760,7 @@
   }
 
   function openEditProject(p) {
-    openModal(renderNewProject, { edit: p.id, folder: p.folder ?? "" });
+    openModal(renderNewProject, { edit: p.id, folder: p.folder ?? "", runs: JSON.stringify(p.runs ?? []) });
     const field = dialog.querySelector("#npName");
     field.value = tx(p.name);
     if (p.desc) dialog.querySelector("#npDesc").value = tx(p.desc);

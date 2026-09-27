@@ -182,7 +182,7 @@
       <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
       <span class="n-tx">
         <b data-t="noticeTitle">업무를 맡기면 바로 일을 시작해요</b>
-        <span data-t="noticeBody">Claude Code로 일해요. 처음 쓰는 폴더는 한 번 신뢰해 줘야 해요.</span>
+        <span data-t="noticeBody">Claude Code로 일해요. 직원은 프로젝트 폴더 안에서, 허용한 명령만 실행해요.</span>
       </span>
     </div>
 
@@ -200,7 +200,7 @@
       <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
       <span class="n-tx">
         <b data-t="againTitle">이 컴퓨터에서 다시 할 것</b>
-        <span data-t="againBody">프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 신뢰를 확인해요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.</span>
+        <span data-t="againBody">프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 그 폴더에서 일해도 되는지 다시 물어요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.</span>
       </span>
     </div>
 
@@ -288,7 +288,7 @@
       loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", startNew: "새 회사 만들기", startImport: "기존 회사 가져오기",
       importedTitle: "TinySoft를 가져왔어요", importedSub: "my-tiny-office-2026-09-26.db · 직원 5명 · 프로젝트 7개",
       againTitle: "이 컴퓨터에서 다시 할 것",
-      againBody: "프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 신뢰를 확인해요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.",
+      againBody: "프로젝트 2개의 폴더를 찾을 수 없어요. 폴더를 다시 고르면 그 폴더에서 일해도 되는지 다시 물어요. 진행 중이던 업무 3건은 세션이 예전 컴퓨터에 있어서 다시 시작해야 해요.",
       recheck: "다시 확인", copy: "복사",
       companyTitle: "회사 이름을 정해요", companySub: "사이드바 맨 위에 보이는 이름이에요.",
       companyLabel: "회사 이름",
@@ -305,7 +305,7 @@
       opened: "사무실이 열렸어요",
       headcount: (n) => `직원 ${n}명`,
       noticeTitle: "업무를 맡기면 바로 일을 시작해요",
-      noticeBody: "Claude Code로 일해요. 처음 쓰는 폴더는 한 번 신뢰해 줘야 해요.",
+      noticeBody: "Claude Code로 일해요. 직원은 프로젝트 폴더 안에서, 허용한 명령만 실행해요.",
       toOffice: "사무실로 가기",
       companyFallback: "내 회사",
     },
@@ -319,7 +319,7 @@
       loggedOutWhy: "Sign in once from a terminal. A browser will open.", startNew: "Start a new company", startImport: "Import an existing company",
       importedTitle: "Imported TinySoft", importedSub: "my-tiny-office-2026-09-26.db · 5 people · 7 projects",
       againTitle: "To do again on this computer",
-      againBody: "2 projects' folders are not here. Choosing a folder again checks its trust. 3 tasks in progress had their sessions on the old computer, so they start again.",
+      againBody: "2 projects' folders are not here. Choosing a folder again asks whether they may work there. 3 tasks in progress had their sessions on the old computer, so they start again.",
       recheck: "Check again", copy: "Copy",
       companyTitle: "Name your company", companySub: "It is the name at the top of the sidebar.",
       companyLabel: "Company name",
@@ -336,7 +336,7 @@
       opened: "Your office is open",
       headcount: (n) => `${n} employee${n === 1 ? "" : "s"}`,
       noticeTitle: "Give them work and they start",
-      noticeBody: "They work through Claude Code. A folder used for the first time has to be trusted once.",
+      noticeBody: "They work through Claude Code, inside the project's folder, running only the commands it allows.",
       toOffice: "Go to the office",
       companyFallback: "My company",
     },

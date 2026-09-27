@@ -187,6 +187,7 @@
         applied: (e) => objB(e.task) + " 반영했어요",
         leave: (e) => subj(e.name) + " 휴가를 떠났어요",
         lost: (e) => e.name + "의 에이전트 연결이 끊겼어요 · <b>" + e.task + "</b>",
+        stopped: (e) => subj(e.name) + " 허용되지 않은 명령 앞에서 멈췄어요 · <b>" + e.task + "</b>",
       },
       tabs: { all: "전체", lounge: "휴게실" },
       peopleSub: (n) => "직원 " + n + "명",
@@ -224,6 +225,7 @@
         applied: (e) => "<b>" + e.task + "</b> was applied",
         leave: (e) => e.name + " went on leave",
         lost: (e) => e.name + "'s agent disconnected · <b>" + e.task + "</b>",
+        stopped: (e) => e.name + " stopped at a command the project does not allow · <b>" + e.task + "</b>",
       },
       tabs: { all: "All", lounge: "Lounge" },
       peopleSub: (n) => n + (n === 1 ? " person" : " people"),
@@ -483,6 +485,7 @@
   const subj = (n) => (lang === "en" ? n : withParticle(n, "이", "가"));
   const objB = (w) => "<b>" + w + "</b>" + (lang === "en" ? "" : hasBatchim(w) ? "을" : "를");
   const EVENTS = [
+    { at: "10:24", kind: "stopped", who: "p2", project: "order/t3", task: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" } },
     { at: "10:18", kind: "lost", who: "p1", project: "pay", task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" } },
     { at: "10:16", kind: "started", who: "p2", task: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" } },
     { at: "10:12", kind: "reviewStarted", who: "p4", area: "security", task: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" } },
@@ -501,6 +504,7 @@
     waiting: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 9.4h3.2l1 1.8h2.8l1-1.8h3.2"/><path d="M3.6 3.4h8.8l1.2 6v3.2H2.4V9.4z"/></svg>',
     applied: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
     lost: PLUG,
+    stopped: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5"/></svg>',
     leave: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.6"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1"/></svg>',
   };
   const FEED_SHOWN = 6;
@@ -518,10 +522,11 @@
     for (const e of rows) {
       const words = { name: e.who ? fromCompany.get(e.who).name : "", task: e.task?.[lang], mem: e.mem?.[lang], area: t().areas[e.area], took: e.took };
       const row = document.createElement("div");
-      row.className = "today-row" + (e.kind === "waiting" ? " you" : e.kind === "lost" ? " bad" : "");
+      const stop = e.kind === "lost" || e.kind === "stopped";
+      row.className = "today-row" + (e.kind === "waiting" ? " you" : stop ? " bad" : "");
       row.innerHTML = `<span class="today-at">${e.at}</span><span class="today-ic">${FEED_ICON[e.kind]}</span>
         <span class="today-tx">${t().feed[e.kind](words)}</span>
-        ${e.project ? `<a class="btn btn-secondary btn-sm" href="projects.html${suffix}#${e.project}">${e.kind === "lost" ? t().feedLook : t().feedApprove}</a>` : "<span></span>"}`;
+        ${e.project ? `<a class="btn btn-secondary btn-sm" href="projects.html${suffix}#${e.project}">${stop ? t().feedLook : t().feedApprove}</a>` : "<span></span>"}`;
       row.querySelector(".today-tx").title = row.querySelector(".today-tx").textContent;
       box.appendChild(row);
     }
