@@ -302,7 +302,11 @@
       canReview: (names) => names.join(" · ") + subjectParticle(names[names.length - 1]) + " 검토할 수 있어요",
       canReviewNobody: (a) => a + " 아는 사람이 아직 없어요. 만들 수는 있지만 검토를 받을 수 없어요.",
       cancel: "취소", create: "업무 만들기", fAssignee: "담당자",
-      whoTakes: "비는 사람이 가져가요",
+      anyoneFree: "비는 사람이 가져가요",
+      busyNow: (n) => n + subjectParticle(n) + " 지금 다른 일을 하고 있어서 줄을 서요.",
+      freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
+      onLeaveOption: (n) => n + " (휴가 중)",
+      whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
     },
     en: {
       nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
@@ -336,7 +340,11 @@
       canReview: (names) => names.join(" · ") + " can review it",
       canReviewNobody: (a) => "Nobody knows " + a + " yet. You can still make it, but it cannot be reviewed.",
       cancel: "Cancel", create: "Create task", fAssignee: "Assignee",
-      whoTakes: "Whoever is free picks it up",
+      anyoneFree: "Whoever is free picks it up",
+      busyNow: (n) => n + " is on something else, so it queues behind it.",
+      freeNow: (n) => n + " is free and starts on it right away.",
+      onLeaveOption: (n) => n + " (on leave)",
+      whoTakes: "It waits in the backlog until someone is free.",
     },
   };
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
@@ -648,19 +656,31 @@
 
   function renderNewTask() {
     const area = dialog.dataset.area || SEAT_AREAS[0];
-    const into = project === "all" ? PROJECTS[0] : PROJECTS.find((p) => p.id === project);
+    const into = dialog.dataset.project || (project === "all" ? PROJECTS[0].id : project);
+    const who = dialog.dataset.who || "";
     const knowers = reviewersFor(area).map((p) => p.name);
+    const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
+    const picked = who ? byId.get(who) : null;
+    const away = (p) => p.status === "vacation";
+    const free = (p) => p.status === "available";
 
     dialog.innerHTML = `
       <div class="m-hd">
-        <span style="flex:1;min-width:0">
-          <span class="m-t">${t().newTaskTitle}</span>
-          <span class="m-s">${t().newTaskWhere(tx(into.name))}</span>
-        </span>
+        <span style="flex:1;min-width:0"><span class="m-t">${t().newTaskTitle}</span></span>
       </div>
 
       <div class="m-sec">
         <div class="field" style="margin-top:0">
+          <span class="label">${t().fProject}</span>
+          <span class="select-wrap">
+            <select class="select" id="ntProject">
+              ${PROJECTS.map((p) => `<option value="${p.id}"${p.id === into ? " selected" : ""}>${tx(p.name)}</option>`).join("")}
+            </select>
+            ${chevron}
+          </span>
+        </div>
+
+        <div class="field">
           <span class="label">${t().fTitle} <span class="req">*</span></span>
           <input class="input" id="ntTitle" placeholder="${t().fTitlePlaceholder}" autocomplete="off" />
         </div>
@@ -679,7 +699,7 @@
               <select class="select" id="ntArea">
                 ${SEAT_AREAS.map((a) => `<option value="${a}"${a === area ? " selected" : ""}>${t().areas[a]}</option>`).join("")}
               </select>
-              <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
+              ${chevron}
             </span>
           </div>
           <div class="field" style="margin-top:0">
@@ -690,7 +710,7 @@
                 <option value="normal" selected>${t().priority.normal}</option>
                 <option value="high">${t().priority.high}</option>
               </select>
-              <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
+              ${chevron}
             </span>
           </div>
         </div>
@@ -706,8 +726,24 @@
       </div>
 
       <div class="m-sec">
-        <span class="k">${t().fAssignee}</span>
-        <p class="hint" style="margin-top:4px">${t().whoTakes}</p>
+        <div class="field" style="margin-top:0">
+          <span class="label">${t().fAssignee}</span>
+          <span class="select-wrap">
+            <select class="select" id="ntWho">
+              <option value=""${who ? "" : " selected"}>${t().anyoneFree}</option>
+              ${STAFF.map(
+                (p) =>
+                  `<option value="${p.id}"${p.id === who ? " selected" : ""}${away(p) ? " disabled" : ""}>${
+                    away(p) ? t().onLeaveOption(p.name) : p.name
+                  }</option>`,
+              ).join("")}
+            </select>
+            ${chevron}
+          </span>
+          <span class="hint">${
+            !picked ? t().whoTakes : free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name)
+          }</span>
+        </div>
       </div>
 
       <div class="m-foot">
@@ -715,18 +751,32 @@
         <button class="btn btn-primary btn-md">${t().create}</button>
       </div>`;
 
-    dialog.querySelector("#ntArea").addEventListener("change", (e) => {
-      dialog.dataset.area = e.target.value;
-      const keep = dialog.querySelector("#ntTitle").value;
-      renderNewTask();
-      dialog.querySelector("#ntTitle").value = keep;
-      dialog.querySelector("#ntArea").focus();
-    });
+    // re-rendering is how the dialog answers what a choice means, so the text
+    // already typed has to survive it
+    const keep = () => {
+      const title = dialog.querySelector("#ntTitle").value;
+      const desc = dialog.querySelector(".textarea").value;
+      return (focusId) => {
+        renderNewTask();
+        dialog.querySelector("#ntTitle").value = title;
+        dialog.querySelector(".textarea").value = desc;
+        dialog.querySelector(focusId).focus();
+      };
+    };
+    for (const [id, key] of [["#ntArea", "area"], ["#ntProject", "project"], ["#ntWho", "who"]]) {
+      dialog.querySelector(id).addEventListener("change", (e) => {
+        const again = keep();
+        dialog.dataset[key] = e.target.value;
+        again(id);
+      });
+    }
     dialog.querySelector("[data-close]").addEventListener("click", closeNewTask);
   }
-
   function openNewTask() {
     close();
+    delete dialog.dataset.area;
+    delete dialog.dataset.who;
+    dialog.dataset.project = project === "all" ? PROJECTS[0].id : project;
     scrim.hidden = false;
     renderNewTask();
     dialog.querySelector("#ntTitle").focus({ preventScroll: true });
