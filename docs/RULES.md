@@ -9,7 +9,7 @@ Each employee has:
 - a team, or none
 - memories, and the expertise that follows from them
 - a way of working (일하는 방식)
-- a status: working, ready, available or on leave
+- a status: working, available or on leave
 - a current task
 - an Agent — Claude Code — that does the work; without a working one they cannot take a task
 

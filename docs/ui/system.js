@@ -513,7 +513,6 @@ const SPECIES = new Map(CAST.map((c) => [c.key, c]));
 
 const STATUS = {
   working:   { color: "var(--warn)" },
-  ready:     { color: "var(--info)" },
   available: { color: "var(--ok)" },
   vacation:  { color: "var(--faint)" },
 };
@@ -527,7 +526,7 @@ const STATUS = {
 const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
-    status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+    status: { working: "업무 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     hire: {
@@ -558,7 +557,7 @@ const WORDS = {
   },
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
-    status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+    status: { working: "Working", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
     hire: {
@@ -615,7 +614,7 @@ const STAFF = [
       { area: "l10n", text: { ko: "같은 문장도 영문이 한글보다 길어요. 고정 너비를 쓰지 않아요.", en: "The same sentence runs longer in English. Avoid fixed widths." }, from: { ko: "PR #4180", en: "PR #4180" }, used: 6 },
     ] },
   { id: "p3", name: "단풍", species: "deer", role: "Product Manager",
-    team: "planning", status: "ready", joined: "2026. 2. 20.",
+    team: "planning", status: "working", joined: "2026. 2. 20.",
     task: { ko: "API 문서 작성", en: "Write the API docs" }, done: 27, reviews: 22,
     style: [{ ko: "막히면 30분 안에 물어봐", en: "Ask within 30 minutes of getting stuck" }, { ko: "금요일 오후에는 배포하지 않아요.", en: "No deploys on a Friday afternoon." }],
     memories: [

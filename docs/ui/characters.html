@@ -170,15 +170,15 @@
     ko: {
       ...WORDS.ko,
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
-      spent: (m) => m + "분째", estimate: (m) => "예상 " + m + "분",
-      notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
+      spent: (m) => m + "분째",
+      waiting: "대기", onLeave: "휴가",
       goodName: "모카", badName: "모카냥이 🐱", badRole: "백엔드 개발 담당 고양이",
     },
     en: {
       ...WORDS.en,
       work: "WORK", noTask: "Nothing assigned", away: "Away",
-      spent: (m) => m + " min so far", estimate: (m) => "~" + m + " min",
-      notStarted: "Not started", waiting: "Free", onLeave: "Leave",
+      spent: (m) => m + " min so far",
+      waiting: "Free", onLeave: "Leave",
       goodName: "Mocha", badName: "Mocha the Cat 🐱", badRole: "Cat in charge of backend work",
     },
   };
@@ -272,12 +272,12 @@
 
   /* ── the room ────────────────────────────────────────────────── */
   const seats = [
-    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, spent: 22, total: 30 },
-    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: { ko: "로그인 폼 구현", en: "Build the login form" },              spent: 12, total: 25 },
-    { c: pick("deer"),    col: 13, row: 3, status: "ready",     task: { ko: "API 문서 작성", en: "Write the API docs" },               spent: 0,  total: 20 },
+    { c: pick("cat"),     col: 3,  row: 3, status: "working",   task: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" }, spent: 22 },
+    { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: { ko: "로그인 폼 구현", en: "Build the login form" },              spent: 12 },
+    { c: pick("deer"),    col: 13, row: 3, status: "working",   task: { ko: "API 문서 작성", en: "Write the API docs" },               spent: 4 },
     { c: pick("chick"),   col: 3,  row: 6, status: "available", last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" } },
     { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  back: { ko: "3일 후 복귀", en: "Back in 3 days" } },
-    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: { ko: "회귀 테스트 작성", en: "Write the regression tests" },            spent: 7,  total: 18 },
+    { c: pick("penguin"), col: 13, row: 6, status: "working",   task: { ko: "회귀 테스트 작성", en: "Write the regression tests" },            spent: 7 },
   ];
 
   const S = 3, T = 48;
@@ -319,11 +319,10 @@
   seats.forEach((s, i) => {
     const nums =
       s.status === "working" ? `<span>${t().spent(s.spent)}</span><b>${t().status.working}</b>`
-      : s.status === "ready" ? `<span>${t().estimate(s.total)}</span><b>${t().notStarted}</b>`
       : s.status === "available" ? `<span>${tx(s.last)}</span><b>${t().waiting}</b>`
       : `<span>${tx(s.back)}</span><b>${t().onLeave}</b>`;
     const line =
-      s.status === "working" || s.status === "ready" ? tx(s.task)
+      s.status === "working" ? tx(s.task)
       : s.status === "available" ? t().noTask : t().away;
 
     const el = document.createElement("div");

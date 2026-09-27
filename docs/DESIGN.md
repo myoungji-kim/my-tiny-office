@@ -120,7 +120,6 @@ Status mirrors the domain rather than inventing its own vocabulary:
 | Status | Meaning | Shown as |
 | --- | --- | --- |
 | `working` | A task is in progress | Amber dot with ring, time taken |
-| `ready` | A task is assigned, not started | Hollow blue dot |
 | `available` | No task assigned | Solid green dot |
 | `vacation` | Employee is away | Grey dash |
 
@@ -135,8 +134,7 @@ it does not re-implement them.
 
 | State | Actions |
 | --- | --- |
-| `working` | 완료 처리 · 업무 상세 · 담당 변경 · 기억 가르치기 |
-| `ready` | 업무 시작 · 다른 업무로 교체 · 기억 가르치기 · 할당 취소 |
+| `working` | 업무 상세 · 담당 변경 · 기억 가르치기 |
 | `available` | 업무 할당 · 기억 가르치기 · 휴가 보내기 |
 | `vacation` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 · 기억 가르치기 |
 
