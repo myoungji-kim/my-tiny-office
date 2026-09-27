@@ -23,3 +23,6 @@ coverage/
 
 *.tsbuildinfo
 next-env.d.ts
+
+# local-only reference images
+docs/design-references/

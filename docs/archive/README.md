@@ -12,7 +12,4 @@ The standard lives in [`docs/ui/`](../ui/index.html).
 | `styleguide-warm.html` | Design system page for the warm direction | Replaced by `ui/components.html` |
 | `UX-UI-BRIEF.md` | The brief that started the design phase | That phase produced `ui/`; the brief still describes a PR menu and training |
 
-The reference images the direction was argued from are in
-[`../design-references/`](../design-references).
-
 Delete these once nobody refers back to them.
