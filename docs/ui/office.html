@@ -196,13 +196,11 @@
   // never go through a dictionary.
   const TEXT = {
     ko: {
-      nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+      ...WORDS.ko,
       hire: "직원 고용", hireDesk: "빈 책상에 직원 채우기",
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
       title: "사무실", sub: "백엔드팀 · 책상 6석 중 5석 사용", date: "2026. 9. 26. (토) 10:24",
       tabs: { all: "전체", backend: "백엔드팀", frontend: "프론트엔드팀", lounge: "휴게실" },
-      teams: { backend: "백엔드팀", frontend: "프론트엔드팀" },
-      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
       minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
       notStarted: "시작 전", waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
@@ -218,13 +216,11 @@
       lastIndex: "인덱스 튜닝 완료", backIn: "3일 후 복귀",
     },
     en: {
-      nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+      ...WORDS.en,
       hire: "Hire", hireDesk: "Fill this desk",
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
       title: "Office", sub: "Backend · 5 of 6 desks in use", date: "Sat, Sep 26, 2026 · 10:24",
       tabs: { all: "All", backend: "Backend", frontend: "Frontend", lounge: "Lounge" },
-      teams: { backend: "Backend", frontend: "Frontend" },
-      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
       work: "WORK", noTask: "Nothing assigned", away: "Away",
       minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
       notStarted: "Not started", waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",

@@ -430,14 +430,11 @@
   // Employee nicknames are absent: the player wrote them.
   const TEXT = {
     ko: {
-      nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+      ...WORDS.ko,
       title: "직원", hire: "직원 고용",
       headSub: (n, d, p) => n + "명 · 개발본부 " + d + " · 프로덕트 " + p,
       tabs: { list: "목록", org: "조직도", memory: "기억" },
-      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
-      areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
       depts: { dev: "개발본부", product: "프로덕트" },
-      teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
       memory: "기억", memCount: (n) => "기억 " + n, memCountShort: (n) => "<b>" + n + "</b>개 기억",
       currentTask: "현재 업무", onLeave: "휴가", lastFinished: "최근 완료", joined: "입사",
       doneAndReviews: "완료한 업무 · 리뷰", counts: (a, b) => a + "건 · " + b + "건",
@@ -472,14 +469,11 @@
       review: "확인하기",
     },
     en: {
-      nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+      ...WORDS.en,
       title: "People", hire: "Hire",
       headSub: (n, d, p) => n + " people · Engineering " + d + " · Product " + p,
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
-      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
-      areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
       depts: { dev: "Engineering", product: "Product" },
-      teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
       memory: "Memory", memCount: (n) => n + " memories", memCountShort: (n) => "<b>" + n + "</b> memories",
       currentTask: "Current task", onLeave: "On leave", lastFinished: "Last finished", joined: "Joined",
       doneAndReviews: "Tasks · reviews", counts: (a, b) => a + " · " + b,

@@ -512,6 +512,27 @@ const STATUS = {
 };
 
 
+/* ═══ the words more than one screen says ═══ */
+// The menu, the statuses, the areas and the team names are the same words
+// wherever they appear. Each page spreads these into its own dictionary and
+// adds only what is its own.
+
+const WORDS = {
+  ko: {
+    nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+    status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+    areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질", process: "프로세스" },
+    teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
+  },
+  en: {
+    nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+    status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+    areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality", process: "Process" },
+    teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
+  },
+};
+
+
 /* ═══ the sample company ═══ */
 // One company across the samples: the people screen and the project board
 // describe the same five, and review seats are derived from what each of them

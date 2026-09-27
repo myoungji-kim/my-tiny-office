@@ -279,6 +279,7 @@
   // is building it, so it stays as written.
   const TEXT = {
     ko: {
+      ...WORDS.ko,
       modalTitle: (n) => n + "를 실제로 일하게 하기", team: "백엔드팀",
       runtime: "런타임", available: "사용 가능", needsCheck: "확인 필요", notYet: "아직 없어요",
       workspace: "작업 폴더", noFolder: "아직 고르지 않았어요", change: "바꾸기", choose: "고르기",
@@ -302,9 +303,9 @@
       noteCost: "비용을 숨기지 않습니다. 업무 하나에 고정 오버헤드가 붙는 구조라 플레이어가 알아야 합니다.",
       noteSafe: "런타임 실패가 회사 데이터를 건드리지 않는다는 걸 문장으로 말합니다.",
       reallyWorking: "실제로 일하는 중", simulated: "시뮬레이션", greenMeansWhat: "초록이면 연결됨?",
-      status: { working: "업무 중" },
     },
     en: {
+      ...WORDS.en,
       modalTitle: (n) => "Put " + n + " to real work", team: "Backend",
       runtime: "Runtime", available: "Available", needsCheck: "Needs a check", notYet: "Not yet",
       workspace: "Workspace", noFolder: "Nothing chosen yet", change: "Change", choose: "Choose",
@@ -328,7 +329,6 @@
       noteCost: "Cost is not hidden. A fixed overhead rides on every task, so the player has to see it.",
       noteSafe: "Say in a sentence that a runtime failure does not touch company data.",
       reallyWorking: "Working for real", simulated: "Simulated", greenMeansWhat: "Green means connected?",
-      status: { working: "Working" },
     },
   };
 

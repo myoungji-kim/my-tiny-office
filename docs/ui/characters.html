@@ -194,14 +194,14 @@
   // is building it.
   const TEXT = {
     ko: {
-      status: { working: "업무 중", ready: "준비됨", available: "대기 중", vacation: "휴가 중" },
+      ...WORDS.ko,
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
       minutes: (a, b) => a + "/" + b + "분", estimate: (m) => "예상 " + m + "분",
       notStarted: "시작 전", waiting: "대기", onLeave: "휴가",
       goodName: "모카", badName: "모카냥이 🐱", badRole: "백엔드 개발 담당 고양이",
     },
     en: {
-      status: { working: "Working", ready: "Ready", available: "Free", vacation: "On leave" },
+      ...WORDS.en,
       work: "WORK", noTask: "Nothing assigned", away: "Away",
       minutes: (a, b) => a + "/" + b + " min", estimate: (m) => "~" + m + " min",
       notStarted: "Not started", waiting: "Free", onLeave: "Leave",

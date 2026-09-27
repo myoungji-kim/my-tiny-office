@@ -234,6 +234,9 @@ console.log("one copy only");
   const SYSTEM_JS = readFileSync("docs/ui/system.js", "utf8");
   const sharedSels = new Set([...stripMedia(SYSTEM).matchAll(/(^|\n)([.#:a-zA-Z][^{}\n]*?)\s*\{/g)].map((m) => m[2].trim()));
   const sharedNames = new Set([...SYSTEM_JS.matchAll(/^(?:const|let|function) ([A-Za-z_$][\w$]*)/gm)].map((m) => m[1]));
+  const sharedWords = new Set(
+    [...(SYSTEM_JS.match(/const WORDS = \{\n  ko: \{([\s\S]*?)\n  \},/) ?? [, ""])[1].matchAll(/^    ([a-zA-Z]+): \{/gm)].map((m) => m[1]),
+  );
 
   for (const p of PAGES) {
     const text = src[p];
@@ -253,6 +256,11 @@ console.log("one copy only");
 
     for (const m of text.matchAll(/^  (?:const|let|function) ([A-Za-z_$][\w$]*)/gm)) {
       if (sharedNames.has(m[1])) flag(`${p} redeclares ${m[1]}, which system.js already declares`);
+    }
+    // The menu, the statuses, the areas and the teams are the same words on
+    // every screen that shows them, so a page may not spell them again.
+    for (const m of text.matchAll(/^      ([a-zA-Z]+): \{/gm)) {
+      if (sharedWords.has(m[1])) flag(`${p} spells ${m[1]} itself, which WORDS already spells`);
     }
     if (text.includes('<nav class="devbar"')) flag(`${p} still carries the sample bar in its markup`);
   }
