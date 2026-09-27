@@ -1295,6 +1295,10 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
     if (here === "index") home.setAttribute("aria-current", "page");
     nav.append(home, sep());
 
+    // The screens that show the company's Claude Code state. The switch sits
+    // with them, and only where it changes something; reference pages have none.
+    const STATEFUL = ["office", "projects", "employees", "company", "settings"];
+
     for (const [ko, en, items] of GROUPS) {
       const label = document.createElement("span");
       label.className = "grouplabel";
@@ -1307,18 +1311,15 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
         if (here === key) a.setAttribute("aria-current", "page");
         nav.append(a);
       }
+      if (items.some(([key]) => key === "office") && STATEFUL.includes(here)) nav.append(runtimeSwitch());
       nav.append(sep());
     }
 
-    // A state the sample can be put in. It is on every page so the bar never
-    // moves; the screens show it, and it carries across all of them.
-    {
-      const label = document.createElement("span");
-      label.className = "grouplabel";
-      label.textContent = lang === "en" ? "State" : "상태";
+    function runtimeSwitch() {
       const b = document.createElement("button");
       b.type = "button";
       b.dataset.state = "claude";
+      b.className = "toggle";
       b.textContent = lang === "en" ? "Claude Code signed out" : "Claude Code 로그아웃";
       b.setAttribute("aria-pressed", String(RUNTIME.off));
       b.addEventListener("click", () => {
@@ -1327,7 +1328,7 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
         u.searchParams.delete("claude");
         location.href = u.toString();
       });
-      nav.append(label, b, sep());
+      return b;
     }
 
     const box = document.createElement("span");

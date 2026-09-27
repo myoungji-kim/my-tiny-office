@@ -347,6 +347,16 @@ body:has(> .app) { padding: 22px 18px 40px; }
 
 .devbar [aria-current], .devbar [aria-pressed="true"] { background: var(--ink); color: #fff; }
 
+/* a switch, not a place: it reads as one before it is pressed */
+.devbar .toggle { display: inline-flex; align-items: center; gap: 7px; }
+
+.devbar .toggle::before {
+  content: ""; width: 22px; height: 12px; border-radius: 999px; flex: none;
+  background: radial-gradient(circle at 6px 50%, #fff 3.5px, transparent 4px) var(--line-2);
+}
+
+.devbar .toggle[aria-pressed="true"]::before { background: radial-gradient(circle at 16px 50%, #fff 3.5px, transparent 4px) var(--bad); }
+
 .devbar .sep { width: 1px; height: 18px; background: var(--line-2); flex: none; margin-inline: 4px; }
 
 .devbar .home { padding-inline: 9px; }
