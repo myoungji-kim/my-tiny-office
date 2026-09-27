@@ -18,7 +18,7 @@ before building or changing a screen.
 | Page | Authoritative for |
 | --- | --- |
 | `ui/first-run.html` | First run: the Claude Code check, the company, the first hire, species picker |
-| `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
+| `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover, the rooms, today's feed |
 | `ui/projects.html` | The project list, a project's board, a task's page, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
