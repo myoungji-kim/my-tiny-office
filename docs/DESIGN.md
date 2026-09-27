@@ -144,25 +144,29 @@ they are doing.
 
 ## Projects
 
-The projects screen is a list, like people: 진행 중 · 보류 · 완료 tabs, and
+The projects screen is a list, like people: 대기 · 진행 중 · 보류 · 완료 tabs, and
 every row opens that project's board at its own address (`#pay`). An active or
 held row carries its folder, how many tasks sit in each column, with 승인 대기
 lifted when it is not zero, and when it started; a done one carries its record
 — tasks done and days taken — and when it finished. There is no board across
 all projects: the office shows who is on what, and the list shows where work
-waits on the user.
+waits on the user. A planned row reads 시작 전 where the start date would be.
 
 A project's page is its board under a header with its name, its status, where
 it lives, a `⋯` and 새 업무. The `⋯` follows the project's status:
 
 | Status | Actions |
 | --- | --- |
+| 대기 | 시작하기 *(disabled without a folder, with the reason)* · 프로젝트 수정 · 프로젝트 삭제 |
 | 진행 중 | 프로젝트 수정 · 보류 · 완료 처리 *(disabled while work is in progress or waiting, with the count)* · 프로젝트 삭제 |
 | 보류 | 다시 진행 · 프로젝트 수정 · 프로젝트 삭제 |
 | 완료 | 다시 열기 · 프로젝트 삭제 |
 
-A held or done project says so above its board, with the reason or the date
-and the one action that undoes it. Neither offers 새 업무. Holding asks for the
+A planned, held or done project says so above its board, with what it is
+waiting for, the reason or the date, and the one action that moves it on. A
+planned project takes 새 업무 — writing work down ahead is what it is for —
+and the new-task dialog says the assignee takes it when the project starts;
+held and done ones do not. Holding asks for the
 reason in the dialog and says how many tasks in progress go with it; finishing
 says how many unstarted ones close. A done project's cards open with nothing
 to do: it is a record. The rules are in RULES.md.
@@ -202,15 +206,16 @@ someone free starts right away, someone busy queues behind their current work,
 and someone on leave cannot be chosen at all.
 
 New project asks for a name, a line about what it changes, and the folder the
-office works in. A project without a folder is allowed, because naming the work
-usually comes before deciding where it lives, and the dialog says what that
-costs: the tasks can be written down, but nobody can start them.
+office works in. It starts planned. A project without a folder is allowed,
+because naming the work usually comes before deciding where it lives, and the
+dialog says what that costs: the tasks can be written down, but the project
+cannot start.
 
 ### An action sits with what it acts on
 
 ```text
 프로젝트                                   [+ 새 프로젝트]   ← the list, and its action
-[진행 중][보류][완료]
+[대기][진행 중][보류][완료]
 ───────────────────────────────────────────────────────
 ‹ 프로젝트 목록
 결제 개편 진행 중                          [⋯] [+ 새 업무]   ← this project, and its actions

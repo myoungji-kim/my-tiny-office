@@ -65,10 +65,19 @@ This prevents unrelated local AI sessions from appearing in the office.
 
 ## Projects
 
-A project is a piece of work with a folder. It is **active**, **held** or
-**done**, and only the user moves it: tasks running out does not finish a
-project, because more can always be added.
+A project is a piece of work with a folder. It is **planned**, **active**,
+**held** or **done**, and only the user moves it: tasks running out does not
+finish a project, because more can always be added.
 
+```text
+planned → active → done
+             ↕
+            held
+```
+
+- **A new project is planned.** Its tasks can be written down, even given to
+  someone, but nothing is picked up. **Start** needs a folder; it is when the
+  backlog starts being picked up, and when the project's span begins.
 - **Hold** takes a reason. Its tasks in progress are held with it, and nobody
   starts anything new; finished work waiting for approval can still be applied.
 - **Resume** gives held work back to whoever had it, or queues it behind what

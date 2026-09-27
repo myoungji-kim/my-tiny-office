@@ -36,6 +36,8 @@
 
   .proj-title { display: flex; align-items: center; gap: 10px; }
 
+  .chip.planned { background: none; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
+
   @media (max-width: 860px) {
     #projList .row-item { grid-template-columns: minmax(0, 1fr) auto; }
     .pr-folder, .pr-counts { display: none; }
@@ -229,14 +231,17 @@
 <script>
   /* ── the work on the board ───────────────────────────────────── */
 
-  // A project is active, held or done, and only the user moves it: work
-  // running out does not finish a project, because more can always be added.
+  // A project is planned, active, held or done, and only the user moves it:
+  // nothing in a planned one is picked up, and work running out does not
+  // finish a project, because more can always be added.
   const TODAY = "2026. 9. 26.";
   const PROJECTS = [
     { id: "pay", status: "active", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft",
       desc: { ko: "결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요.", en: "Tidy the payment flow and make the webhooks trustworthy." } },
     { id: "order", status: "active", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders",
       desc: { ko: "주문 상태를 하나의 흐름으로 다시 세워요.", en: "Rebuild the order states as one flow." } },
+    { id: "settle", status: "planned", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle",
+      desc: { ko: "가맹점이 월별 정산 내역을 내려받아요.", en: "Merchants download their monthly settlements." } },
     { id: "admin", status: "held", since: "2026. 8. 18.", name: { ko: "관리자 대시보드", en: "Admin dashboard" }, folder: "~/Projects/admin",
       desc: { ko: "운영팀이 주문과 환불을 한 화면에서 봐요.", en: "One screen for support to see orders and refunds." },
       reason: { ko: "결제 개편을 먼저 끝내기로", en: "Payments rework comes first" } },
@@ -293,6 +298,13 @@
 
     { id: "t12", project: "admin", area: "arch", priority: "low", status: "backlog", who: null,
       title: { ko: "권한별 메뉴 나누기", en: "Split the menu by permission" } },
+
+    // written down ahead, and nobody picks them up until the project starts
+    { id: "t13", project: "settle", area: "db", priority: "normal", status: "backlog", who: "p4",
+      title: { ko: "정산 집계 쿼리 설계", en: "Design the settlement rollup query" } },
+
+    { id: "t14", project: "settle", area: "product", priority: "low", status: "backlog", who: null,
+      title: { ko: "리포트 항목 정하기", en: "Decide what the report shows" } },
   ];
 
   // A column is a status a task rests in. Approval is the user's: work is
@@ -311,14 +323,19 @@
     ko: {
       ...WORDS.ko,
       title: "프로젝트", newTask: "새 업무", backToList: "프로젝트 목록",
-      filters: { active: "진행 중", held: "보류", done: "완료" },
+      filters: { planned: "대기", active: "진행 중", held: "보류", done: "완료" },
       headSub: (n, a) => "진행 중 " + n + "개 · 내 승인 대기 " + a + "건",
       counts: (c) => [["대기", c.backlog], ["진행", c.working], ["승인 대기", c.approval, "wait"], ["완료", c.done]]
         .map(([k, n, cls]) => `<span${cls && n ? ` class="${cls}"` : ""}>${k} <b>${n}</b></span>`).join(" · "),
       record: (n, d) => "업무 " + n + "건 · " + d + "일",
       date: (y, m, d) => m + "월 " + d + "일",
-      since: (d) => d + "부터", doneOn: (d) => d + " 마침",
-      listEmpty: { active: "진행 중인 프로젝트가 없어요.", held: "보류한 프로젝트가 없어요.", done: "아직 마친 프로젝트가 없어요." },
+      since: (d) => d + "부터", doneOn: (d) => d + " 마침", notStarted: "시작 전",
+      listEmpty: { planned: "기다리는 프로젝트가 없어요.", active: "진행 중인 프로젝트가 없어요.", held: "보류한 프로젝트가 없어요.", done: "아직 마친 프로젝트가 없어요." },
+      plannedNotice: "아직 시작하지 않은 프로젝트예요", plannedNoticeWhy: "업무를 적어 둘 수 있어요. 시작하면 그때부터 대기열의 업무를 가져가요.",
+      needsFolder: "작업 폴더를 정해야 시작할 수 있어요.",
+      whenStarted: (n) => "프로젝트를 시작하면 " + n + subjectParticle(n) + " 맡아요.",
+      whenStartedAnyone: "프로젝트를 시작하면 비는 사람이 가져가요.",
+      removePlanned: (n) => n ? "아직 시작하지 않았어요. 적어 둔 업무 " + n + "건이 같이 사라져요." : "아직 시작하지 않았고 업무도 없어요.",
       heldNotice: "보류한 프로젝트예요", heldNoticeHint: "다시 진행할 때까지 아무도 새로 시작하지 않아요.",
       doneNotice: (d) => d + "에 마친 프로젝트예요", doneNoticeWhy: "기록으로 남아 있어요. 다시 열면 업무를 더할 수 있어요.",
       holdTitle: "이 프로젝트를 보류할까요?", holdReason: "보류하는 이유", holdPlaceholder: "결제 개편을 먼저 끝내기로",
@@ -343,7 +360,7 @@
         resume: "다시 진행", teach: "이걸 기억시키기", open: "직원 화면에서 보기",
         edit: "업무 수정", removeTask: "업무 삭제",
         editProject: "프로젝트 수정", removeProject: "프로젝트 삭제",
-        holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
+        startProject: "시작하기", holdProject: "보류", resumeProject: "다시 진행", finishProject: "완료 처리", reopenProject: "다시 열기",
       },
       whySeat: (a) => a + " 기억이 있어요",
       noSeat: "이 분야를 아는 사람을 먼저 만들어야 해요",
@@ -387,19 +404,24 @@
       removeProjectEmpty: "업무가 없어서 프로젝트만 사라져요.",
       removeProjectDone: "마친 기록이 회사 개요에서 사라져요. 연혁에 남은 한 줄은 그대로예요.",
       folderHint: "이 프로젝트의 업무는 이 폴더에서 이뤄져요.",
-      noFolderHint: "나중에 정해도 돼요. 폴더가 없으면 업무를 만들어 둘 수는 있어도 아무도 시작할 수 없어요.",
+      noFolderHint: "나중에 정해도 돼요. 업무는 적어 둘 수 있고, 폴더를 정해야 프로젝트를 시작할 수 있어요.",
     },
     en: {
       ...WORDS.en,
       title: "Projects", newTask: "New task", backToList: "All projects",
-      filters: { active: "Active", held: "Held", done: "Done" },
+      filters: { planned: "Planned", active: "Active", held: "Held", done: "Done" },
       headSub: (n, a) => n + " active · " + a + " waiting on you",
       counts: (c) => [[c.backlog, "queued"], [c.working, "in progress"], [c.approval, "waiting on you", "wait"], [c.done, "done"]]
         .map(([n, k, cls]) => `<span${cls && n ? ` class="${cls}"` : ""}><b>${n}</b> ${k}</span>`).join(" · "),
       record: (n, d) => n + " tasks · " + d + " days",
       date: (y, m, d) => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1] + " " + d,
-      since: (d) => "Since " + d, doneOn: (d) => "Finished " + d,
-      listEmpty: { active: "No active projects.", held: "Nothing is held.", done: "No finished projects yet." },
+      since: (d) => "Since " + d, doneOn: (d) => "Finished " + d, notStarted: "Not started",
+      listEmpty: { planned: "Nothing is planned.", active: "No active projects.", held: "Nothing is held.", done: "No finished projects yet." },
+      plannedNotice: "This project has not started", plannedNoticeWhy: "Write its tasks down now. Once it starts, the backlog gets picked up.",
+      needsFolder: "Choose a workspace to start it.",
+      whenStarted: (n) => n + " takes it when the project starts.",
+      whenStartedAnyone: "Whoever is free picks it up when the project starts.",
+      removePlanned: (n) => n ? "It never started. The " + n + " task" + (n === 1 ? "" : "s") + " written down go with it." : "It never started and has no tasks.",
       heldNotice: "This project is held", heldNoticeHint: "Nobody starts anything new until it resumes.",
       doneNotice: (d) => "Finished on " + d, doneNoticeWhy: "It stays as a record. Reopen it to add more work.",
       holdTitle: "Hold this project?", holdReason: "Why it is held", holdPlaceholder: "Payments rework comes first",
@@ -424,7 +446,7 @@
         resume: "Resume", teach: "Teach them this", open: "Open in People",
         edit: "Edit task", removeTask: "Delete task",
         editProject: "Edit project", removeProject: "Delete project",
-        holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
+        startProject: "Start", holdProject: "Hold", resumeProject: "Resume", finishProject: "Finish", reopenProject: "Reopen",
       },
       whySeat: (a) => "has " + a + " memories",
       noSeat: "Someone has to learn this area first",
@@ -469,7 +491,7 @@
       removeProjectEmpty: "It has no tasks, so only the project goes.",
       removeProjectDone: "Its record leaves the company overview. The line in the history stays.",
       folderHint: "Work on this project happens in this folder.",
-      noFolderHint: "You can set it later. Without a folder a task can be created, but nobody can start it.",
+      noFolderHint: "You can set it later. Tasks can be written down, but the project cannot start without one.",
     },
   };
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
@@ -517,6 +539,8 @@
   const shown = () => TASKS.filter((k) => k.project === project);
   const here = () => PROJECTS.find((p) => p.id === project);
   const tasksOf = (p) => TASKS.filter((k) => k.project === p.id);
+  // Work is written down in a planned or active project, never in a held or done one.
+  const writable = (p) => p.status === "planned" || p.status === "active";
   const countOf = (p) => Object.fromEntries(COLUMNS.map(({ status }) => [status, tasksOf(p).filter((k) => k.status === status).length]));
 
   const dayOf = (s) => { const [y, m, d] = s.split(".").map(Number); return new Date(y, m - 1, d); };
@@ -566,6 +590,7 @@
   // who is free starts right away. Work already past the office does not move.
   function settle(task) {
     if (task.status !== "backlog" && task.status !== "working") return;
+    if (PROJECTS.find((p) => p.id === task.project)?.status === "planned") return;
     if (!task.who) {
       task.status = "backlog";
       task.spent = undefined;
@@ -616,7 +641,7 @@
 
   function renderList() {
     tabs.innerHTML = "";
-    for (const f of ["active", "held", "done"]) {
+    for (const f of ["planned", "active", "held", "done"]) {
       const b = document.createElement("button");
       b.className = "tab";
       b.setAttribute("aria-selected", String(f === filter));
@@ -640,26 +665,29 @@
         <span><span class="pr-name">${tx(p.name)}</span>${p.desc ? `<span class="pr-desc">${tx(p.desc)}</span>` : ""}</span>
         <span class="pr-folder mono">${p.folder ?? t().noFolder}</span>
         <span class="pr-counts">${done ? t().record(p.tasks, daysBetween(p.since, p.doneOn)) : t().counts(countOf(p))}</span>
-        <span class="pr-since">${done ? t().doneOn(shortDate(p.doneOn)) : t().since(shortDate(p.since))}</span>`;
+        <span class="pr-since">${done ? t().doneOn(shortDate(p.doneOn)) : p.since ? t().since(shortDate(p.since)) : t().notStarted}</span>`;
       list.appendChild(a);
     }
   }
 
-  const STATUS_CHIP = { active: "working", held: "vacation", done: "available" };
+  const STATUS_CHIP = { planned: "planned", active: "working", held: "vacation", done: "available" };
 
   function renderProject(p) {
     document.getElementById("pjName").textContent = tx(p.name);
     const chip = document.getElementById("pjChip");
     chip.className = "chip " + STATUS_CHIP[p.status];
     chip.textContent = t().filters[p.status];
-    // A project with no folder cannot be worked in, so the header says so.
-    document.getElementById("pjSub").innerHTML = [p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : t().noFolderYet]
+    // A project with no folder cannot be worked in; a planned one says so in its notice instead.
+    document.getElementById("pjSub").innerHTML = [p.desc ? tx(p.desc) : "", p.folder ? `<span class="mono">${p.folder}</span>` : p.status === "planned" ? "" : t().noFolderYet]
       .filter(Boolean).join(" · ");
-    document.getElementById("pjNewTask").hidden = p.status !== "active";
+    document.getElementById("pjNewTask").hidden = !writable(p);
 
     const notice = document.getElementById("pjNotice");
     notice.innerHTML =
-      p.status === "held" ? `<div class="notice notice-warn"><span class="n-ic">${icon.pause}</span>
+      p.status === "planned" ? `<div class="notice"><span class="n-ic">${icon.flag}</span>
+          <span class="n-tx"><b>${t().plannedNotice}</b><span>${p.folder ? t().plannedNoticeWhy : t().needsFolder}</span></span>
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-start${p.folder ? "" : " disabled"}>${t().actions.startProject}</button></span></div>`
+      : p.status === "held" ? `<div class="notice notice-warn"><span class="n-ic">${icon.pause}</span>
           <span class="n-tx"><b>${t().heldNotice}</b><span>${tx(p.reason)} · ${t().heldNoticeHint}</span></span>
           <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-resume>${t().actions.resumeProject}</button></span></div>`
       : p.status === "done" ? `<div class="notice"><span class="n-ic">${icon.check}</span>
@@ -668,6 +696,7 @@
       : "";
     notice.hidden = !notice.innerHTML;
     notice.querySelector("[data-resume]")?.addEventListener("click", () => resumeProject(p));
+    notice.querySelector("[data-start]")?.addEventListener("click", () => startProject(p));
 
     board.innerHTML = "";
     for (const { status, color } of COLUMNS) {
@@ -682,7 +711,7 @@
         e.textContent = t().empty;
         col.appendChild(e);
       }
-      if (status === "backlog" && p.status === "active") {
+      if (status === "backlog" && writable(p)) {
         const a = document.createElement("button");
         a.className = "col-add";
         a.dataset.newTask = "";
@@ -699,7 +728,12 @@
     const p = here();
     const unsettled = tasksOf(p).filter((k) => k.status === "working" || k.status === "approval").length;
     const rows =
-      p.status === "active" ? [
+      p.status === "planned" ? [
+        p.folder ? menu(t().actions.startProject, "key", () => startProject(p)) : offRow(t().actions.startProject),
+        ...(p.folder ? [] : [why(t().needsFolder)]),
+        menu(t().actions.editProject, null, () => openEditProject(p)),
+      ]
+      : p.status === "active" ? [
         menu(t().actions.editProject, null, () => openEditProject(p)),
         menu(t().actions.holdProject, null, () => askHoldProject(p)),
         ...(unsettled ? [offRow(t().actions.finishProject), why(t().cannotFinish(unsettled))] : [menu(t().actions.finishProject, null, () => askFinishProject(p))]),
@@ -785,6 +819,7 @@
     // applied; a done one is only a record.
     const live = here().status === "active";
     const kept = here().status !== "done";
+    const draft = writable(here());
 
     if (task.status === "backlog" && live) {
       acts.appendChild(menu(t().actions.assign));
@@ -825,7 +860,7 @@
     // A finished task is the record of what happened, so it is not edited or
     // thrown away. One waiting for approval is finished too - the answer there
     // is to approve it, send it back or hold it, not to rewrite what was done.
-    if (task.status !== "done" && live) {
+    if (task.status !== "done" && draft) {
       if (task.status !== "approval") acts.appendChild(menu(t().actions.edit, null, () => openEditTask(task)));
       acts.appendChild(menu(t().actions.removeTask, "bad", () => askRemoveTask(task)));
     }
@@ -922,6 +957,7 @@
       }
       // A held task is not waiting its turn; it is waiting for the user.
       if (editing?.status === "held") return picked ? t().whenResumed(picked.name) : t().whenResumedAnyone;
+      if (PROJECTS.find((p) => p.id === into)?.status === "planned") return picked ? t().whenStarted(picked.name) : t().whenStartedAnyone;
       if (!picked) return t().whoTakes;
       return free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name);
     };
@@ -937,7 +973,7 @@
           <span class="label">${t().fProject}</span>
           <span class="select-wrap">
             <select class="select" id="ntProject"${running ? " disabled" : ""}>
-              ${PROJECTS.filter((p) => p.status === "active").map((p) => `<option value="${p.id}"${p.id === into ? " selected" : ""}>${tx(p.name)}</option>`).join("")}
+              ${PROJECTS.filter(writable).map((p) => `<option value="${p.id}"${p.id === into ? " selected" : ""}>${tx(p.name)}</option>`).join("")}
             </select>
             ${chevron}
           </span>
@@ -1143,8 +1179,7 @@
           name: { ko: name, en: name },
           desc: about ? { ko: about, en: about } : undefined,
           folder: dir || null,
-          status: "active",
-          since: TODAY,
+          status: "planned",
         });
       }
       closeModal();
@@ -1215,6 +1250,14 @@
     (dialog.querySelector("#stepText") ?? dialog.querySelector("[data-yes]")).focus({ preventScroll: true });
   }
 
+  // Starting is what lets the backlog be picked up, and when the project's span begins.
+  function startProject(p) {
+    Object.assign(p, { status: "active", since: TODAY });
+    for (const k of tasksOf(p)) settle(k);
+    close();
+    render();
+  }
+
   function askHoldProject(p) {
     const running = tasksOf(p).filter((k) => k.status === "working");
     confirmStep({
@@ -1260,7 +1303,7 @@
 
   function askRemoveProject(p) {
     const mine = tasksOf(p);
-    const why = p.status === "done" ? t().removeProjectDone : mine.length ? t().removeProjectWhy(mine.length) : t().removeProjectEmpty;
+    const why = p.status === "done" ? t().removeProjectDone : p.status === "planned" ? t().removePlanned(mine.length) : mine.length ? t().removeProjectWhy(mine.length) : t().removeProjectEmpty;
     confirmRemoval(t().removeProjectTitle, why, () => {
       for (const k of mine) drop(k);
       PROJECTS.splice(PROJECTS.indexOf(p), 1);
