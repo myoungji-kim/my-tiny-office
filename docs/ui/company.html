@@ -477,8 +477,8 @@
   }
   renderName(false);
 
-  // the company's teams, including one nobody has joined yet
-  const teams = Object.keys(WORDS.ko.teams).length;
+  // a team counts once someone is in it, as its office room does
+  const teams = new Set(people.map((p) => p.team).filter(Boolean)).size;
   const taught = sum((p) => p.memories.length) + companyMemories.length;
   const STATS = [
     { k: t().tiles.people, n: t().tiles.peopleN(people.length), d: t().tiles.teamsN(teams) },
