@@ -56,30 +56,45 @@ of PRs.
 
 ## The board
 
-A column is a status a task rests in, ordered the way work moves. The columns
-are therefore the domain's own statuses, not a set the screen invented, and
-moving between them is a transition — assign, start, approve — rather than
-another status.
+```text
+대기열  →  진행 중  →  승인 대기  →  완료
+                          ↓ 보완 요청 (사유를 남기고)
+                        진행 중
+                          ↓ 보류
+                        보류
+```
 
-**In progress and Review differ by who the task waits on.** In progress means
-the employee is doing it: the meter fills from the clock and the player waits.
-Review means their work is finished and a decision is missing, and three of
-the four shapes a review takes need the player — pick a reviewer, approve, or
-answer a change request. Only "someone is reviewing" is another employee
-working, and even then the task is past its assignee.
+A column is a status a task rests in. Whoever is free picks work out of the
+backlog themselves, so the board carries no start button: the player says what
+the work is and who should do it, and the office does the rest.
 
-That is the axis the board is built on: left to right is a handoff, not just
-time. Review is the column that stops if the player ignores it.
+**Approval is the player's, and it is the only gate.** An employee's work
+finishes on their own machine and touches nothing else. Applying it — pushing,
+writing, deploying — is a step the office never takes by itself. The approval
+column is that line, and the popover says so in as many words: nothing has been
+applied anywhere yet, approving is what applies it. Sending it back asks for a
+reason and returns it to progress; holding parks it with the reason attached.
 
-**Blocked is not a column.** A task is always blocked *out of* whichever
-status it is in — blocked in review because nobody can review that area,
-blocked in progress because the agent stopped. It rides on the card as a mark
-and a reason, so the board never has to guess which kind of stuck it means.
+**A colleague's review happens inside progress, not after it.** When a task's
+area calls for another pair of eyes, the office suggests someone who has been
+taught that area, and the two of them work it out while the work is still in
+progress. Review is not a stage of its own, because a task under review is
+still being worked on.
 
-Which statuses exist is the domain's call, and three places currently disagree:
-`docs/GAMEPLAY.md` lists six, `src/domain/task.ts` implements four, and the
-board shows five plus the blocked mark. That needs settling in the domain, and
-the board follows it rather than the other way round.
+**Time is what the work has taken, never a share of an estimate.** With a real
+agent doing the work, nobody knows when it ends, so a progress bar filling
+towards a guess would be a lie. A card in progress says how long it has been
+running; a finished one says how long it took. The estimate survives only as
+something the player wrote down.
+
+**Blocked is not a column.** A task is always blocked *out of* whichever status
+it is in — an agent that stopped, a dependency that never arrived. It rides on
+the card as a mark and a reason, so the board never has to guess which kind of
+stuck it means.
+
+Which statuses exist is the domain's call. `docs/GAMEPLAY.md` and
+`src/domain/task.ts` both predate this and need to catch up: the board shows
+backlog, working, approval, done and held, plus the blocked mark.
 
 ## Visual Direction
 
