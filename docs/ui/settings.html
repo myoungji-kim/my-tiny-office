@@ -10,7 +10,10 @@
 <style>
   /* One column of panels, each a thing this computer holds, narrow enough to
      read as a list rather than a dashboard. */
-  .set-list { display: flex; flex-direction: column; gap: 16px; max-width: 720px; }
+  .set-list { display: flex; flex-direction: column; gap: 16px; }
+
+  /* everything in the body keeps one width, the shared signed-out line included */
+  .body > * { max-width: 720px; }
 
   .data-acts { display: flex; gap: 8px; margin-top: 14px; }
 
