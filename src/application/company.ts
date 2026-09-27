@@ -19,10 +19,11 @@ export interface CreateCompanyOutput {
   readonly events: readonly [CompanyCreated];
 }
 
-export async function createCompany(
-  ctx: AppContext,
-  input: CreateCompanyInput,
-): Promise<CreateCompanyOutput> {
+export function createCompany(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyOutput> {
+  return ctx.withTransaction(() => create(ctx, input));
+}
+
+async function create(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyOutput> {
   const now = ctx.now();
 
   const { company, events } = companyDomain.createCompany(

@@ -1,5 +1,6 @@
 import type { EmployeeHired, EmployeeMoved, EmployeeReturned, EmployeeWentOnLeave } from "./events";
 import type { CompanyId, EmployeeId, EventId, RoleId, TeamId } from "./ids";
+import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
 
 export type Availability = "available" | "onLeave";
@@ -11,7 +12,6 @@ export const SPECIES = [
 ] as const;
 export type Species = (typeof SPECIES)[number];
 
-export const isSpecies = (value: string): value is Species => (SPECIES as readonly string[]).includes(value);
 export const MAX_EMPLOYEE_NAME = 20;
 
 export interface Employee {
@@ -37,7 +37,7 @@ export interface HireEmployeeInput {
 
 export type HireEmployeeResult =
   | { readonly ok: true; readonly employee: Employee; readonly events: readonly [EmployeeHired] }
-  | { readonly ok: false; readonly reason: "employeeNameRequired" | "employeeNameTooLong" };
+  | { readonly ok: false; readonly reason: NameFailure };
 
 // Hiring has no cap: every hire brings a desk.
 export function hireEmployee(
@@ -45,9 +45,9 @@ export function hireEmployee(
   eventId: EventId,
   now: Timestamp,
 ): HireEmployeeResult {
-  const name = input.name.trim();
-  if (name === "") return { ok: false, reason: "employeeNameRequired" };
-  if (name.length > MAX_EMPLOYEE_NAME) return { ok: false, reason: "employeeNameTooLong" };
+  const checked = checkName(input.name, MAX_EMPLOYEE_NAME);
+  if (!checked.ok) return checked;
+  const name = checked.name;
 
   const employee: Employee = {
     id: input.id,

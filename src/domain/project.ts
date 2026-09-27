@@ -36,15 +36,22 @@ type Transition<TEvent, TFailure extends string> =
   | { readonly ok: false; readonly reason: TFailure };
 
 const MAX_COMMAND = 200;
+export const MAX_COMMANDS = 20;
 
 // A command becomes a Claude Code permission rule, `Bash(<command>)`, where `*`
-// is a wildcard and a parenthesis ends the rule, so neither may appear in one.
+// is a wildcard and a parenthesis ends the rule. It is also shown to the user
+// to approve, so it is one plain command: no invisible or reordering
+// characters, and nothing that chains or redirects another command.
+const UNSEEN = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+const WIDENS = /[*();&|`$<>]/;
+
 export function isAllowableCommand(command: string): boolean {
   return (
     command.length > 0 &&
     command.length <= MAX_COMMAND &&
     command === command.trim() &&
-    !/[*()\r\n\t\0]/.test(command)
+    !UNSEEN.test(command) &&
+    !WIDENS.test(command)
   );
 }
 
@@ -58,7 +65,7 @@ export interface CreateProjectInput {
   readonly priority: Priority;
 }
 
-export type CreateProjectFailure = "projectNameRequired" | "commandNotAllowable";
+export type CreateProjectFailure = "projectNameRequired" | "commandNotAllowable" | "tooManyCommands";
 
 export function createProject(
   input: CreateProjectInput,
@@ -69,6 +76,7 @@ export function createProject(
   if (name === "") return { ok: false, reason: "projectNameRequired" };
   const commands = [...new Set(input.commands ?? [])];
   if (!commands.every(isAllowableCommand)) return { ok: false, reason: "commandNotAllowable" };
+  if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
 
   const project: Project = {
     id: input.id,
@@ -160,9 +168,10 @@ export function allowCommand(
   command: string,
   eventId: EventId,
   now: Timestamp,
-): Transition<ProjectCommandAllowed, "commandNotAllowable"> {
+): Transition<ProjectCommandAllowed, "commandNotAllowable" | "tooManyCommands"> {
   if (!isAllowableCommand(command)) return { ok: false, reason: "commandNotAllowable" };
   const commands = project.commands.includes(command) ? project.commands : [...project.commands, command];
+  if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
   return {
     ok: true,
     project: { ...project, commands },

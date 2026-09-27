@@ -3,11 +3,8 @@ import { join } from "node:path";
 
 import { isCompanyId } from "./company-files";
 
-export type Language = "ko" | "en";
-
 // What belongs to this computer rather than to a company.
 export interface AppSettings {
-  readonly language?: Language;
   readonly lastCompanyId?: string;
 }
 
@@ -26,11 +23,8 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { language, lastCompanyId } = raw as Record<string, unknown>;
-  return {
-    ...(language === "ko" || language === "en" ? { language } : {}),
-    ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
-  };
+  const { lastCompanyId } = raw as Record<string, unknown>;
+  return typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {};
 }
 
 // Written beside the target and renamed over it, so a crash never leaves half a file.

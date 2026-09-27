@@ -30,26 +30,27 @@ export async function renameRole(
 }
 
 // Removing a role people hold changes them to another first; the last role stays.
-export async function removeRole(
+export function removeRole(
   ctx: AppContext,
   companyId: CompanyId,
   roleId: RoleId,
   moveTo?: RoleId,
 ): Promise<UseCaseResult<{ readonly moved: number }, "roleNotFound" | "moveTargetNotFound" | "lastRole" | "roleHeld">> {
-  const roles = await ctx.roles.findByCompany(companyId);
-  const role = roles.find((r) => r.id === roleId);
-  if (role === undefined) return { ok: false, reason: "roleNotFound" };
-  if (moveTo !== undefined && (moveTo === roleId || !roles.some((r) => r.id === moveTo))) {
-    return { ok: false, reason: "moveTargetNotFound" };
-  }
-
   return ctx.withTransaction(async () => {
+    const roles = await ctx.roles.findByCompany(companyId);
+    if (!roles.some((r) => r.id === roleId)) return { ok: false, reason: "roleNotFound" };
+    if (moveTo !== undefined && (moveTo === roleId || !roles.some((r) => r.id === moveTo))) {
+      return { ok: false, reason: "moveTargetNotFound" };
+    }
+
     const holders = (await ctx.employees.findByCompany(companyId)).filter((e) => e.roleId === roleId);
-    const refused = org.canRemoveRole(role, roles, moveTo === undefined ? holders.length : 0);
-    if (refused !== undefined) return { ok: false as const, reason: refused };
-    for (const employee of holders) await ctx.employees.save({ ...employee, roleId: moveTo! });
-    await ctx.roles.remove(role.id);
-    return { ok: true as const, value: { moved: holders.length }, events: [] };
+    const refused = org.canRemoveRole(roles, holders.length, moveTo !== undefined);
+    if (refused !== undefined) return { ok: false, reason: refused };
+    if (moveTo !== undefined) {
+      for (const employee of holders) await ctx.employees.save({ ...employee, roleId: moveTo });
+    }
+    await ctx.roles.remove(roleId);
+    return { ok: true, value: { moved: holders.length }, events: [] };
   });
 }
 
@@ -79,19 +80,19 @@ export async function renameTeam(
 }
 
 // Removing a team moves its people to another team, or to none.
-export async function removeTeam(
+export function removeTeam(
   ctx: AppContext,
   companyId: CompanyId,
   teamId: TeamId,
   moveTo?: TeamId,
 ): Promise<UseCaseResult<{ readonly moved: number }, "teamNotFound" | "moveTargetNotFound">> {
-  const teams = await ctx.teams.findByCompany(companyId);
-  if (!teams.some((t) => t.id === teamId)) return { ok: false, reason: "teamNotFound" };
-  if (moveTo !== undefined && (moveTo === teamId || !teams.some((t) => t.id === moveTo))) {
-    return { ok: false, reason: "moveTargetNotFound" };
-  }
-
   return ctx.withTransaction(async () => {
+    const teams = await ctx.teams.findByCompany(companyId);
+    if (!teams.some((t) => t.id === teamId)) return { ok: false, reason: "teamNotFound" };
+    if (moveTo !== undefined && (moveTo === teamId || !teams.some((t) => t.id === moveTo))) {
+      return { ok: false, reason: "moveTargetNotFound" };
+    }
+
     const events: DomainEvent[] = [];
     const members = (await ctx.employees.findByCompany(companyId)).filter((e) => e.teamId === teamId);
     for (const employee of members) {
@@ -101,22 +102,24 @@ export async function removeTeam(
     }
     await ctx.teams.remove(teamId);
     await recordMilestones(ctx, companyId, events);
-    return { ok: true as const, value: { moved: members.length }, events };
+    return { ok: true, value: { moved: members.length }, events };
   });
 }
 
-export async function moveEmployee(
+export function moveEmployee(
   ctx: AppContext,
   employeeId: EmployeeId,
   teamId: TeamId | undefined,
 ): Promise<UseCaseResult<{ readonly employeeId: EmployeeId }, "employeeNotFound" | "teamNotFound">> {
-  const employee = await ctx.employees.findById(employeeId);
-  if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
-  if (teamId !== undefined && !(await ctx.teams.findByCompany(employee.companyId)).some((t) => t.id === teamId)) {
-    return { ok: false, reason: "teamNotFound" };
-  }
-  const moved = moveToTeam(employee, teamId, toEventId(ctx.newId()), ctx.now());
-  await ctx.employees.save(moved.employee);
-  await recordMilestones(ctx, employee.companyId, moved.events);
-  return { ok: true, value: { employeeId }, events: moved.events };
+  return ctx.withTransaction(async () => {
+    const employee = await ctx.employees.findById(employeeId);
+    if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
+    if (teamId !== undefined && !(await ctx.teams.findByCompany(employee.companyId)).some((t) => t.id === teamId)) {
+      return { ok: false, reason: "teamNotFound" };
+    }
+    const moved = moveToTeam(employee, teamId, toEventId(ctx.newId()), ctx.now());
+    await ctx.employees.save(moved.employee);
+    await recordMilestones(ctx, employee.companyId, moved.events);
+    return { ok: true, value: { employeeId }, events: moved.events };
+  });
 }

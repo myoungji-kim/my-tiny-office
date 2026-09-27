@@ -36,7 +36,27 @@ export interface CompanyFacts {
 }
 
 function teamFormedBy(teamId: TeamId | undefined, facts: CompanyFacts): Milestone[] {
-  return teamId !== undefined && facts.teamMembers(teamId) === 1 && !facts.teamFormed(teamId) ? [{ kind: "teamFormed", teamId }] : [];
+  return teamId !== undefined && facts.teamMembers(teamId) >= 1 && !facts.teamFormed(teamId) ? [{ kind: "teamFormed", teamId }] : [];
+}
+
+// Counts can fall and rise again (a memory forgotten and taught back), so a
+// mark already in the history is never recorded a second time.
+export function alreadyRecorded(milestone: Milestone, history: readonly Milestone[]): boolean {
+  switch (milestone.kind) {
+    case "founded":
+    case "firstTaskDone":
+    case "firstReview":
+      return history.some((m) => m.kind === milestone.kind);
+    case "tasksDone":
+    case "memories":
+      return history.some((m) => m.kind === milestone.kind && m.count === milestone.count);
+    case "teamFormed":
+      return history.some((m) => m.kind === "teamFormed" && m.teamId === milestone.teamId);
+    case "joined":
+      return history.some((m) => m.kind === "joined" && m.employeeId === milestone.employeeId);
+    case "projectFinished":
+      return false;
+  }
 }
 
 export function milestonesFor(event: DomainEvent, facts: CompanyFacts): Milestone[] {

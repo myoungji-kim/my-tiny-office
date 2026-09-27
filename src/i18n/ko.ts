@@ -76,9 +76,10 @@ export const ko: Dictionary = {
     switch: "회사",
     noDescription: "소개 없음",
   },
-  availability: {
+  employeeStatus: {
     available: "대기 중",
     working: "업무 중",
+    reviewing: "검토 중",
     onLeave: "휴가 중",
   },
   taskStatus: {

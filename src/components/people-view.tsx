@@ -4,7 +4,7 @@ import type { EmployeeView, RoleView } from "../server/view-model";
 
 import { ActionForm } from "./action-form";
 import { Field, Select, TextInput } from "./fields";
-import { StatusBadge, employeeStatus } from "./status";
+import { StatusBadge } from "./status";
 
 export function PeopleView({
   t,
@@ -29,7 +29,7 @@ export function PeopleView({
         ) : (
           <ul className="divide-y divide-line">
             {employees.map((employee) => {
-              const status = employeeStatus(employee.availability, employee.workingOn);
+              const { status } = employee;
 
               return (
                 <li
@@ -45,7 +45,7 @@ export function PeopleView({
                       </span>
                     )}
                   </div>
-                  <StatusBadge label={t.availability[status]} status={status} />
+                  <StatusBadge label={t.employeeStatus[status]} status={status} />
                 </li>
               );
             })}

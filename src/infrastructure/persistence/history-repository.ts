@@ -28,7 +28,7 @@ export function createSqliteReviewRepository(db: AppDatabase): ReviewRepository 
       return row === undefined ? undefined : toReview(row);
     },
     async findByCompany(companyId) {
-      return db.select().from(reviews).where(eq(reviews.companyId, companyId)).orderBy(asc(reviews.createdAt)).all().map(toReview);
+      return db.select().from(reviews).where(eq(reviews.companyId, companyId)).orderBy(asc(reviews.createdAt), asc(reviews.id)).all().map(toReview);
     },
     async save(review) {
       const row = {
@@ -76,7 +76,7 @@ export function createSqliteMilestoneRepository(db: AppDatabase): MilestoneRepos
         .select()
         .from(milestones)
         .where(eq(milestones.companyId, companyId))
-        .orderBy(asc(milestones.at))
+        .orderBy(asc(milestones.at), asc(milestones.id))
         .all()
         .map(toMilestone)
         .filter((m): m is RecordedMilestone => m !== undefined);

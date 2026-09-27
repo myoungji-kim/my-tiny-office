@@ -6,7 +6,6 @@ import { openDatabase, type DatabaseHandle } from "./database";
 
 export interface TestDatabase {
   readonly handle: DatabaseHandle;
-  readonly filePath: string;
   reopen: () => DatabaseHandle;
   cleanup: () => void;
 }
@@ -20,7 +19,6 @@ export function createTestDatabase(): TestDatabase {
     get handle() {
       return handle;
     },
-    filePath,
     reopen() {
       handle.close();
       handle = openDatabase(filePath);

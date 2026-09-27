@@ -1,11 +1,10 @@
 import { assert, describe, expect, it } from "vitest";
 
 import type { Employee } from "./employee";
-import { toAreaId, toCompanyId, toEmployeeId, toEventId, toMemoryId, toProjectId, toReviewId, toRoleId, toTaskId, toTeamId } from "./ids";
-import { milestonesFor, type CompanyFacts } from "./milestone";
+import { toAreaId, toCompanyId, toEmployeeId, toEventId, toProjectId, toReviewId, toRoleId, toTaskId } from "./ids";
 import { pickUps, reviewsToStart } from "./pick-up";
 import type { Project } from "./project";
-import { askReviewer, settleReview, startQueuedReview, statusOf, suggestReview, type Review } from "./review";
+import { askReviewer, liveReviews, releaseReview, settleReview, startQueuedReview, statusOf, suggestReview, withdrawReview, type Review } from "./review";
 import type { Task } from "./task";
 
 const t0 = 1_700_000_000_000;
@@ -54,6 +53,7 @@ const task = (id: string, extra: Partial<Task> = {}): Task => ({
   blocker: undefined,
   heldReason: undefined,
   heldFrom: undefined,
+  heldWithProject: false,
   changesRequested: undefined,
   createdAt: t0,
   startedAt: t0,
@@ -68,7 +68,7 @@ const webhook = task("webhook");
 const knowsSecurity = new Set([security]);
 
 function suggested(): Review {
-  const made = suggestReview({ id: toReviewId("r1"), task: webhook }, e, t0);
+  const made = suggestReview({ id: toReviewId("r1"), task: webhook, othersWhoKnow: 1 }, e, t0);
   assert(made.ok);
   return made.review;
 }
@@ -76,8 +76,8 @@ function suggested(): Review {
 describe("review", () => {
   it("is suggested only on work in progress that names an area", () => {
     expect(suggested()).toMatchObject({ state: "suggested", reviewerId: undefined });
-    expect(suggestReview({ id: toReviewId("r"), task: task("x", { area: undefined }) }, e, t0)).toMatchObject({ reason: "taskHasNoArea" });
-    expect(suggestReview({ id: toReviewId("r"), task: task("x", { status: "approval" }) }, e, t0)).toMatchObject({ reason: "taskNotWorking" });
+    expect(suggestReview({ id: toReviewId("r"), task: task("x", { area: undefined }), othersWhoKnow: 1 }, e, t0)).toMatchObject({ reason: "taskHasNoArea" });
+    expect(suggestReview({ id: toReviewId("r"), task: task("x", { status: "approval" }), othersWhoKnow: 1 }, e, t0)).toMatchObject({ reason: "taskNotWorking" });
   });
 
   it("asks only someone taught the area, never the assignee or someone on leave", () => {
@@ -102,7 +102,7 @@ describe("review", () => {
     assert(started.ok);
     expect(started.review).toMatchObject({ state: "reviewing", startedAt: t0 + 9 });
 
-    const settled = settleReview(started.review, e, t0 + 20);
+    const settled = settleReview(started.review, person("pip"), e, t0 + 20);
     assert(settled.ok);
     expect(settled.review).toMatchObject({ state: "settled", settledAt: t0 + 20 });
   });
@@ -129,45 +129,31 @@ describe("review", () => {
   });
 });
 
-describe("milestonesFor", () => {
-  const facts = (extra: Partial<CompanyFacts> = {}): CompanyFacts => ({
-    hires: 1,
-    tasksApplied: 0,
-    reviewsSettled: 0,
-    memories: 0,
-    teamMembers: () => 0,
-    teamFormed: () => false,
-    ...extra,
-  });
-  const base = { eventId: e, occurredAt: t0, companyId };
-
-  it("calls out the first hire, and forms a team with its first member once", () => {
-    const hired = { ...base, type: "EmployeeHired" as const, employeeId: toEmployeeId("m"), employeeName: "모카", roleId: toRoleId("r"), teamId: toTeamId("t") };
-
-    expect(milestonesFor(hired, facts({ teamMembers: () => 1 }))).toEqual([
-      { kind: "joined", employeeId: "m", employeeName: "모카", first: true },
-      { kind: "teamFormed", teamId: "t" },
-    ]);
-    expect(milestonesFor(hired, facts({ hires: 2, teamMembers: () => 1, teamFormed: () => true }))).toEqual([
-      { kind: "joined", employeeId: "m", employeeName: "모카", first: false },
-    ]);
+describe("a review that the work moved on from", () => {
+  it("is not offered when nobody else knows the area", () => {
+    expect(suggestReview({ id: toReviewId("r"), task: webhook, othersWhoKnow: 0 }, e, t0)).toMatchObject({ reason: "nobodyKnowsArea" });
   });
 
-  it("marks the first task applied, then 10 · 50 · 100 · 500", () => {
-    const applied = { ...base, type: "TaskApplied" as const, taskId: toTaskId("t"), taskTitle: "t" };
+  it("keeps nobody once its task is no longer in progress, and can be withdrawn", () => {
+    const reviewing = askReviewer(suggested(), webhook, person("pip"), knowsSecurity, false, e, t0);
+    assert(reviewing.ok);
+    const finished = { ...webhook, status: "approval" as const, runningSince: undefined, finishedAt: t0 };
 
-    expect(milestonesFor(applied, facts({ tasksApplied: 1 }))).toEqual([{ kind: "firstTaskDone" }]);
-    expect(milestonesFor(applied, facts({ tasksApplied: 2 }))).toEqual([]);
-    expect(milestonesFor(applied, facts({ tasksApplied: 50 }))).toEqual([{ kind: "tasksDone", count: 50 }]);
+    expect(liveReviews([finished], [reviewing.review])).toEqual([]);
+    expect(statusOf(person("pip"), [finished], [reviewing.review])).toBe("available");
+
+    const withdrawn = withdrawReview(reviewing.review, e, t0);
+    assert(withdrawn.ok);
+    expect(withdrawn.review.state).toBe("withdrawn");
+    expect(withdrawReview(withdrawn.review, e, t0)).toMatchObject({ reason: "reviewNotOpen" });
   });
 
-  it("marks the first review settled and memory at 10 · 50 · 100", () => {
-    const settled = { ...base, type: "ReviewSettled" as const, reviewId: toReviewId("r"), taskId: toTaskId("t"), reviewerId: toEmployeeId("p") };
-    const taught = { ...base, type: "MemoryTaught" as const, memoryId: toMemoryId("m"), kind: "company" as const, employeeId: undefined, areaId: undefined };
+  it("goes back to be offered again when its reviewer goes on leave", () => {
+    const queued = askReviewer(suggested(), webhook, person("pip"), knowsSecurity, true, e, t0);
+    assert(queued.ok);
 
-    expect(milestonesFor(settled, facts({ reviewsSettled: 1 }))).toEqual([{ kind: "firstReview" }]);
-    expect(milestonesFor(settled, facts({ reviewsSettled: 2 }))).toEqual([]);
-    expect(milestonesFor(taught, facts({ memories: 10 }))).toEqual([{ kind: "memories", count: 10 }]);
-    expect(milestonesFor(taught, facts({ memories: 11 }))).toEqual([]);
+    const released = releaseReview(queued.review, e, t0);
+    assert(released.ok);
+    expect(released.review).toMatchObject({ state: "suggested", reviewerId: undefined });
   });
 });

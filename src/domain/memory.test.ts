@@ -3,7 +3,6 @@ import { assert, describe, expect, it } from "vitest";
 import { toAreaId, toCompanyId, toEmployeeId, toEventId, toMemoryId, toTaskId } from "./ids";
 import {
   addArea,
-  carriedBy,
   expertiseOf,
   MAX_MEMORY_TEXT,
   removeArea,
@@ -44,7 +43,7 @@ describe("areas", () => {
     const renamed = renameArea(startingAreas(companyId, STARTING_AREAS.map((_, i) => toAreaId("a" + i)), t0)[2], "DB", eventId, t0);
     assert(renamed.ok);
     expect(renamed.value).toMatchObject({ starting: "database", name: "DB" });
-    expect(addArea({ id: toAreaId("x"), companyId, name: "  " }, eventId, t0)).toMatchObject({ reason: "areaNameRequired" });
+    expect(addArea({ id: toAreaId("x"), companyId, name: "  " }, eventId, t0)).toMatchObject({ reason: "nameRequired" });
   });
 
   it("are removed only once their memory has moved", () => {
@@ -88,11 +87,4 @@ describe("what follows from memory", () => {
     expect([...expertiseOf(tofu, memories)]).toEqual(["security"]);
   });
 
-  it("carries everything someone was taught into every task, company memory included", () => {
-    const company = taught({ kind: "company", employeeId: undefined, areaId: undefined });
-    const mine = taught({});
-    const theirs = taught({ employeeId: tofu });
-
-    expect(carriedBy(mocha, [company, mine, theirs])).toEqual([company, mine]);
-  });
 });

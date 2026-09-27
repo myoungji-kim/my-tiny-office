@@ -10,7 +10,6 @@ import type { Task } from "../domain/task";
 
 export interface CompanyRepository {
   findById(id: CompanyId): Promise<Company | undefined>;
-  findAll(): Promise<readonly Company[]>;
   save(company: Company): Promise<void>;
 }
 

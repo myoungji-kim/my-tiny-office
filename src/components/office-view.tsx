@@ -1,14 +1,16 @@
 import Link from "next/link";
 
+import type { EmployeeStatus } from "../domain/review";
 import type { Dictionary } from "../i18n";
 import type { EmployeeView, TaskView } from "../server/view-model";
 
-import { StatusBadge, employeeStatus, type EmployeeStatus } from "./status";
+import { StatusBadge } from "./status";
 import { viewHref } from "./shell";
 
 const deskTone: Record<EmployeeStatus, { screen: string; body: string }> = {
   available: { screen: "fill-sage/40", body: "fill-sage" },
   working: { screen: "fill-blue/50", body: "fill-blue" },
+  reviewing: { screen: "fill-lavender/50", body: "fill-lavender" },
   onLeave: { screen: "fill-parchment", body: "fill-amber" },
 };
 
@@ -72,13 +74,13 @@ export function OfficeView({
         ) : (
           <ul className="flex flex-wrap gap-6 px-5 py-6">
             {employees.map((employee) => {
-              const status = employeeStatus(employee.availability, employee.workingOn);
+              const { status } = employee;
 
               return (
                 <li key={employee.id} className="flex w-28 flex-col items-center gap-1 text-center">
                   <Desk status={status} />
                   <span className="text-sm font-medium text-ink">{employee.name}</span>
-                  <StatusBadge label={t.availability[status]} status={status} />
+                  <StatusBadge label={t.employeeStatus[status]} status={status} />
                 </li>
               );
             })}

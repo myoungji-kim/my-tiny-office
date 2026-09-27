@@ -9,6 +9,7 @@ import type { Task } from "../../domain/task";
 
 import { createSqliteCompanyRepository } from "./company-repository";
 import { createSqliteEmployeeRepository } from "./employee-repository";
+import { createSqliteAreaRepository } from "./memory-repository";
 import { createSqliteRoleRepository } from "./organisation-repository";
 import { createSqliteProjectRepository } from "./project-repository";
 import { createSqliteTaskRepository } from "./task-repository";
@@ -54,6 +55,7 @@ const backlog: Task = {
   blocker: undefined,
   heldReason: undefined,
   heldFrom: undefined,
+  heldWithProject: false,
   changesRequested: undefined,
   createdAt: t0,
   startedAt: undefined,
@@ -71,6 +73,7 @@ beforeEach(async () => {
   await createSqliteRoleRepository(database.handle.db).save({ id: toRoleId("r"), companyId: company.id, name: "Backend Engineer", createdAt: t0 });
   await createSqliteEmployeeRepository(database.handle.db).save(mocha);
   await createSqliteProjectRepository(database.handle.db).save(pay);
+  await createSqliteAreaRepository(database.handle.db).save({ id: toAreaId("db"), companyId: company.id, starting: "database", name: undefined, createdAt: t0 });
 });
 
 afterEach(() => {

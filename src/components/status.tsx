@@ -1,15 +1,17 @@
-import type { Availability } from "../domain/employee";
+import type { EmployeeStatus } from "../domain/review";
 import type { TaskStatus } from "../domain/task";
 
-const availabilityTone: Record<Availability | "working", string> = {
+const statusTone: Record<EmployeeStatus, string> = {
   available: "bg-sage/20 text-ink",
   working: "bg-blue/25 text-ink",
+  reviewing: "bg-lavender/30 text-ink",
   onLeave: "bg-amber/25 text-ink",
 };
 
-const availabilityDot: Record<Availability | "working", string> = {
+const statusDot: Record<EmployeeStatus, string> = {
   available: "bg-sage",
   working: "bg-blue",
+  reviewing: "bg-lavender",
   onLeave: "bg-amber",
 };
 
@@ -21,18 +23,6 @@ const taskTone: Record<TaskStatus, string> = {
   held: "bg-amber/25 text-ink",
 };
 
-export type EmployeeStatus = Availability | "working";
-
-export function employeeStatus(
-  availability: Availability,
-  workingOn: string | undefined,
-): EmployeeStatus {
-  if (availability === "onLeave") {
-    return "onLeave";
-  }
-  return workingOn === undefined ? "available" : "working";
-}
-
 export function StatusBadge({
   label,
   status,
@@ -42,9 +32,9 @@ export function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${availabilityTone[status]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${statusTone[status]}`}
     >
-      <span className={`size-1.5 rounded-full ${availabilityDot[status]}`} />
+      <span className={`size-1.5 rounded-full ${statusDot[status]}`} />
       {label}
     </span>
   );

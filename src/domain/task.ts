@@ -40,6 +40,8 @@ export interface Task {
   readonly blocker: Blocker | undefined;
   readonly heldReason: string | undefined;
   readonly heldFrom: "backlog" | "working" | "approval" | undefined;
+  // held because its project was, so resuming the project resumes it
+  readonly heldWithProject: boolean;
   readonly changesRequested: string | undefined;
   readonly createdAt: Timestamp;
   readonly startedAt: Timestamp | undefined;
@@ -109,6 +111,7 @@ export function createTask(input: CreateTaskInput, eventId: EventId, now: Timest
     blocker: undefined,
     heldReason: undefined,
     heldFrom: undefined,
+    heldWithProject: false,
     changesRequested: undefined,
     createdAt: now,
     startedAt: undefined,
@@ -184,7 +187,13 @@ export function sendBack(task: Task, reason: string, eventId: EventId, now: Time
   };
 }
 
-export function holdTask(task: Task, reason: string, eventId: EventId, now: Timestamp): Transition<TaskHeld, "taskNotHoldable" | "reasonRequired"> {
+export function holdTask(
+  task: Task,
+  reason: string,
+  eventId: EventId,
+  now: Timestamp,
+  withProject = false,
+): Transition<TaskHeld, "taskNotHoldable" | "reasonRequired"> {
   if (task.status !== "backlog" && task.status !== "working" && task.status !== "approval") {
     return { ok: false, reason: "taskNotHoldable" };
   }
@@ -192,7 +201,7 @@ export function holdTask(task: Task, reason: string, eventId: EventId, now: Time
   if (why === "") return { ok: false, reason: "reasonRequired" };
   return {
     ok: true,
-    task: { ...paused(task, now), status: "held", heldFrom: task.status, heldReason: why, blocker: undefined },
+    task: { ...paused(task, now), status: "held", heldFrom: task.status, heldReason: why, heldWithProject: withProject, blocker: undefined },
     events: [{ ...base(task, eventId, now), type: "TaskHeld", reason: why }],
   };
 }
@@ -203,7 +212,13 @@ export function resumeTask(task: Task, eventId: EventId, now: Timestamp): Transi
   if (task.status !== "held") return { ok: false, reason: "taskNotHeld" };
   return {
     ok: true,
-    task: { ...task, status: task.heldFrom === "approval" ? "approval" : "backlog", heldFrom: undefined, heldReason: undefined },
+    task: {
+      ...task,
+      status: task.heldFrom === "approval" ? "approval" : "backlog",
+      heldFrom: undefined,
+      heldReason: undefined,
+      heldWithProject: false,
+    },
     events: [{ ...base(task, eventId, now), type: "TaskResumed" }],
   };
 }
@@ -226,10 +241,11 @@ export function unblockTask(task: Task, eventId: EventId, now: Timestamp): Trans
   };
 }
 
-// When its employee goes on leave or is let go, work in progress goes back to
-// the backlog for whoever is free.
-export function returnToBacklog(task: Task, eventId: EventId, now: Timestamp): Transition<TaskReturned, "taskNotWorking"> {
-  if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
+// When its employee goes on leave or is let go, their work in progress and
+// what was waiting for them go back to the backlog for whoever is free.
+export function returnToBacklog(task: Task, eventId: EventId, now: Timestamp): Transition<TaskReturned, "taskNotTheirs"> {
+  if (task.status !== "working" && task.status !== "backlog") return { ok: false, reason: "taskNotTheirs" };
+  if (task.assigneeId === undefined) return { ok: false, reason: "taskNotTheirs" };
   return {
     ok: true,
     task: { ...paused(task, now), status: "backlog", assigneeId: undefined, blocker: undefined },

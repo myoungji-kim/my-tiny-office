@@ -13,7 +13,7 @@ export function createSqliteRoleRepository(db: AppDatabase): RoleRepository {
         .select()
         .from(roles)
         .where(eq(roles.companyId, companyId))
-        .orderBy(asc(roles.createdAt))
+        .orderBy(asc(roles.createdAt), asc(roles.id))
         .all()
         .map((row) => ({ id: toRoleId(row.id), companyId: toCompanyId(row.companyId), name: row.name, createdAt: row.createdAt }));
     },
@@ -34,7 +34,7 @@ export function createSqliteTeamRepository(db: AppDatabase): TeamRepository {
         .select()
         .from(teams)
         .where(eq(teams.companyId, companyId))
-        .orderBy(asc(teams.createdAt))
+        .orderBy(asc(teams.createdAt), asc(teams.id))
         .all()
         .map((row) => ({
           id: toTeamId(row.id),

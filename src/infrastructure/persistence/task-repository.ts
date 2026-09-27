@@ -39,6 +39,7 @@ function toTask(row: TaskRow): Task {
     blocker: toBlocker(row.blocker),
     heldReason: row.heldReason ?? undefined,
     heldFrom: row.heldFrom ?? undefined,
+    heldWithProject: row.heldWithProject,
     changesRequested: row.changesRequested ?? undefined,
     createdAt: row.createdAt,
     startedAt: row.startedAt ?? undefined,
@@ -63,6 +64,7 @@ function toRow(task: Task): typeof tasks.$inferInsert {
     blocker: task.blocker === undefined ? null : JSON.stringify(task.blocker),
     heldReason: task.heldReason ?? null,
     heldFrom: task.heldFrom ?? null,
+    heldWithProject: task.heldWithProject,
     changesRequested: task.changesRequested ?? null,
     createdAt: task.createdAt,
     startedAt: task.startedAt ?? null,
@@ -81,7 +83,7 @@ export function createSqliteTaskRepository(db: AppDatabase): TaskRepository {
     },
 
     async findByCompany(companyId) {
-      return db.select().from(tasks).where(eq(tasks.companyId, companyId)).orderBy(asc(tasks.createdAt)).all().map(toTask);
+      return db.select().from(tasks).where(eq(tasks.companyId, companyId)).orderBy(asc(tasks.createdAt), asc(tasks.id)).all().map(toTask);
     },
 
     async save(task) {

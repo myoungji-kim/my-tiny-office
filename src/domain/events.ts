@@ -167,6 +167,13 @@ export interface ReviewStarted extends ReviewEvent {
 export interface ReviewSettled extends ReviewEvent {
   readonly type: "ReviewSettled";
   readonly reviewerId: EmployeeId;
+  readonly reviewerName: string;
+}
+export interface ReviewWithdrawn extends ReviewEvent {
+  readonly type: "ReviewWithdrawn";
+}
+export interface ReviewReleased extends ReviewEvent {
+  readonly type: "ReviewReleased";
 }
 
 export type DomainEvent =
@@ -174,6 +181,8 @@ export type DomainEvent =
   | ReviewQueued
   | ReviewStarted
   | ReviewSettled
+  | ReviewWithdrawn
+  | ReviewReleased
   | AreaAdded
   | AreaRenamed
   | AreaRemoved

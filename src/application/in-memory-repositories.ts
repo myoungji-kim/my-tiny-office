@@ -31,9 +31,6 @@ export function createInMemoryCompanyRepository(): CompanyRepository {
     async findById(id) {
       return companies.get(id);
     },
-    async findAll() {
-      return [...companies.values()].sort((a, b) => a.foundedAt - b.foundedAt);
-    },
     async save(company) {
       companies.set(company.id, company);
     },
@@ -58,50 +55,16 @@ export function createInMemoryEmployeeRepository(): EmployeeRepository {
   };
 }
 
-export function createInMemoryProjectRepository(): ProjectRepository {
-  const projects = new Map<ProjectId, Project>();
-
-  return {
-    async findById(id) {
-      return projects.get(id);
-    },
-    async findByCompany(companyId) {
-      return [...projects.values()]
-        .filter((project) => project.companyId === companyId)
-        .sort((a, b) => a.createdAt - b.createdAt);
-    },
-    async save(project) {
-      projects.set(project.id, project);
-    },
-  };
-}
-
-export function createInMemoryTaskRepository(): TaskRepository {
-  const tasks = new Map<TaskId, Task>();
-
-  return {
-    async findById(id) {
-      return tasks.get(id);
-    },
-    async findByCompany(companyId) {
-      return [...tasks.values()]
-        .filter((task) => task.companyId === companyId)
-        .sort((a, b) => a.createdAt - b.createdAt);
-    },
-    async save(task) {
-      tasks.set(task.id, task);
-    },
-  };
-}
-
-function createInMemoryList<TId, TItem extends { readonly id: TId; readonly companyId: CompanyId; readonly createdAt: number }>() {
+function createInMemoryList<TId extends string, TItem extends { readonly id: TId; readonly companyId: CompanyId; readonly createdAt: number }>() {
   const items = new Map<TId, TItem>();
   return {
     async findById(id: TId) {
       return items.get(id);
     },
     async findByCompany(companyId: CompanyId) {
-      return [...items.values()].filter((item) => item.companyId === companyId).sort((a, b) => a.createdAt - b.createdAt);
+      return [...items.values()]
+        .filter((item) => item.companyId === companyId)
+        .sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
     },
     async save(item: TItem) {
       items.set(item.id, item);
@@ -112,6 +75,8 @@ function createInMemoryList<TId, TItem extends { readonly id: TId; readonly comp
   };
 }
 
+export const createInMemoryProjectRepository = (): ProjectRepository => createInMemoryList<ProjectId, Project>();
+export const createInMemoryTaskRepository = (): TaskRepository => createInMemoryList<TaskId, Task>();
 export const createInMemoryAreaRepository = (): AreaRepository => createInMemoryList<AreaId, Area>();
 export const createInMemoryMemoryRepository = (): MemoryRepository => createInMemoryList<MemoryId, Memory>();
 export const createInMemoryRoleRepository = (): RoleRepository => createInMemoryList<RoleId, Role>();

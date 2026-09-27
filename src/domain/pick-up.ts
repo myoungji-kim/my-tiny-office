@@ -1,7 +1,7 @@
 import type { Employee } from "./employee";
 import type { EmployeeId, ProjectId, ReviewId, TaskId } from "./ids";
 import { PRIORITY_RANK, type Project } from "./project";
-import type { Review } from "./review";
+import { liveReviews, type Review } from "./review";
 import type { Task } from "./task";
 
 export interface PickUp {
@@ -11,20 +11,21 @@ export interface PickUp {
 
 // Someone reviewing is busy, and someone with a review waiting looks at it
 // before they take anything else.
-function occupied(tasks: readonly Task[], reviews: readonly Review[]): Set<EmployeeId | undefined> {
+function occupied(tasks: readonly Task[], reviews: readonly Review[]): Set<EmployeeId> {
   return new Set([
-    ...tasks.filter((t) => t.status === "working").map((t) => t.assigneeId),
-    ...reviews.filter((r) => r.state === "reviewing" || r.state === "queued").map((r) => r.reviewerId),
+    ...tasks.flatMap((t) => (t.status === "working" && t.assigneeId !== undefined ? [t.assigneeId] : [])),
+    ...liveReviews(tasks, reviews).flatMap((r) => (r.reviewerId !== undefined ? [r.reviewerId] : [])),
   ]);
 }
 
 // Queued reviews whose reviewer is now free, the oldest first, one each.
 export function reviewsToStart(tasks: readonly Task[], reviews: readonly Review[], employees: readonly Employee[]): ReviewId[] {
   const working = new Set(tasks.filter((t) => t.status === "working").map((t) => t.assigneeId));
-  const reviewing = new Set(reviews.filter((r) => r.state === "reviewing").map((r) => r.reviewerId));
+  const live = liveReviews(tasks, reviews);
+  const reviewing = new Set(live.filter((r) => r.state === "reviewing").map((r) => r.reviewerId));
   const started = new Set<EmployeeId>();
   const result: ReviewId[] = [];
-  for (const review of [...reviews].filter((r) => r.state === "queued").sort((a, b) => a.createdAt - b.createdAt)) {
+  for (const review of live.filter((r) => r.state === "queued").sort((a, b) => a.createdAt - b.createdAt)) {
     const reviewer = employees.find((e) => e.id === review.reviewerId);
     if (reviewer === undefined || reviewer.availability !== "available") continue;
     if (working.has(reviewer.id) || reviewing.has(reviewer.id) || started.has(reviewer.id)) continue;
@@ -42,17 +43,18 @@ export function pickUps(
   projects: readonly Project[],
   tasks: readonly Task[],
   employees: readonly Employee[],
-  reviews: readonly Review[] = [],
+  reviews: readonly Review[],
 ): PickUp[] {
-  const projectById = new Map<ProjectId, Project>(projects.map((p) => [p.id, p]));
+  const projectRank = new Map<ProjectId, number>(projects.filter((p) => p.status === "active").map((p) => [p.id, PRIORITY_RANK[p.priority]]));
   const busy = occupied(tasks, reviews);
   const waiting = tasks
-    .filter((t) => t.status === "backlog" && projectById.get(t.projectId)?.status === "active")
+    .filter((t) => t.status === "backlog" && projectRank.has(t.projectId))
     .sort(
       (a, b) =>
-        PRIORITY_RANK[projectById.get(a.projectId)!.priority] - PRIORITY_RANK[projectById.get(b.projectId)!.priority] ||
+        (projectRank.get(a.projectId) ?? 0) - (projectRank.get(b.projectId) ?? 0) ||
         PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
-        a.createdAt - b.createdAt,
+        a.createdAt - b.createdAt ||
+        a.id.localeCompare(b.id),
     );
 
   const taken = new Set<TaskId>();

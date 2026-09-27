@@ -13,7 +13,7 @@ import { assignTask, createTask } from "../application/task";
 import { SPECIES, type Species } from "../domain/employee";
 import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, type CompanyId } from "../domain/ids";
 import type { Priority } from "../domain/project";
-import { companyContext, createAppContext } from "../infrastructure/app-context";
+import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 
@@ -35,7 +35,7 @@ function optionalText(formData: FormData, field: string): string | undefined {
 function contextOf(formData: FormData): AppContext | undefined {
   const id = text(formData, "companyId");
   const files = getCompanyFiles();
-  return files.has(id) ? companyContext(toCompanyId(id), files) : undefined;
+  return files.has(id) ? createAppContext(files.open(toCompanyId(id))) : undefined;
 }
 
 // Until the species picker is on this screen, a hire gets the first sprite nobody has.

@@ -101,7 +101,7 @@ describe("loadOffice", () => {
         id: expect.any(String),
         name: "Min-su",
         role: "Backend Engineer",
-        availability: "available",
+        status: "available",
         workingOn: undefined,
       },
     ]);
@@ -112,8 +112,9 @@ describe("loadOffice", () => {
     const rival = await seedCompany("RivalSoft");
 
     expect(files.ids()).toHaveLength(2);
-    await expect(createAppContext(files.open(tiny.id)).companies.findAll()).resolves.toEqual([tiny]);
-    await expect(createAppContext(files.open(rival.id)).companies.findAll()).resolves.toEqual([rival]);
+    await expect(createAppContext(files.open(tiny.id)).companies.findById(tiny.id)).resolves.toEqual(tiny);
+    await expect(createAppContext(files.open(tiny.id)).companies.findById(rival.id)).resolves.toBeUndefined();
+    await expect(createAppContext(files.open(rival.id)).companies.findById(rival.id)).resolves.toEqual(rival);
   });
 
   it("opens the company opened last when none is asked for", async () => {

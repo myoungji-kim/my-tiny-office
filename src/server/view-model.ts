@@ -1,7 +1,7 @@
 import type { Company } from "../domain/company";
-import type { Availability } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import type { Priority, ProjectStatus } from "../domain/project";
+import { statusOf, type EmployeeStatus } from "../domain/review";
 import { timeTaken, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
@@ -16,7 +16,7 @@ export interface EmployeeView {
   readonly id: string;
   readonly name: string;
   readonly role: string;
-  readonly availability: Availability;
+  readonly status: EmployeeStatus;
   readonly workingOn: string | undefined;
 }
 
@@ -47,6 +47,8 @@ export interface TaskView {
 
 export interface OfficeView {
   readonly companies: readonly CompanyOption[];
+  // company files that could not be opened, left untouched
+  readonly unreadable: number;
   readonly company:
     | {
         readonly id: string;
@@ -63,6 +65,7 @@ export interface OfficeView {
 
 const empty: OfficeView = {
   companies: [],
+  unreadable: 0,
   company: undefined,
   employees: [],
   roles: [],
@@ -75,23 +78,30 @@ export interface OfficeSource {
   readonly clock?: () => number;
 }
 
-// Every company is a file of its own; a file that holds no company yet is skipped.
-async function listCompanies(files: CompanyFiles): Promise<Company[]> {
+// Every company is a file of its own. One that holds no company yet is
+// skipped; one that cannot be opened is counted and left alone, so it never
+// keeps the others from opening.
+async function listCompanies(files: CompanyFiles): Promise<{ companies: Company[]; unreadable: number }> {
   const companies: Company[] = [];
+  let unreadable = 0;
   for (const id of files.ids()) {
-    const company = await createAppContext(files.open(id)).companies.findById(id);
-    if (company !== undefined) companies.push(company);
+    try {
+      const company = await createAppContext(files.open(id)).companies.findById(id);
+      if (company !== undefined) companies.push(company);
+    } catch {
+      unreadable += 1;
+    }
   }
-  return companies.sort((a, b) => a.foundedAt - b.foundedAt);
+  return { companies: companies.sort((a, b) => a.foundedAt - b.foundedAt || a.id.localeCompare(b.id)), unreadable };
 }
 
 export async function loadOffice(
   selectedCompanyId?: string,
   { files = getCompanyFiles(), clock }: OfficeSource = {},
 ): Promise<OfficeView> {
-  const companies = await listCompanies(files);
+  const { companies, unreadable } = await listCompanies(files);
   if (companies.length === 0) {
-    return empty;
+    return { ...empty, unreadable };
   }
 
   const byId = (id: string | undefined) =>
@@ -107,6 +117,7 @@ export async function loadOffice(
   const tasks = await ctx.tasks.findByCompany(company.id);
   const projects = await ctx.projects.findByCompany(company.id);
   const roles = await ctx.roles.findByCompany(company.id);
+  const reviews = await ctx.reviews.findByCompany(company.id);
   const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
@@ -119,6 +130,7 @@ export async function loadOffice(
 
   return {
     companies: companies.map((candidate) => ({ id: candidate.id, name: candidate.name })),
+    unreadable,
     company: {
       id: company.id,
       name: company.name,
@@ -129,7 +141,7 @@ export async function loadOffice(
       id: employee.id,
       name: employee.name,
       role: roleName.get(employee.roleId) ?? "",
-      availability: employee.availability,
+      status: statusOf(employee, tasks, reviews),
       workingOn: workingTitleById.get(employee.id),
     })),
     roles: roles.map((role) => ({ id: role.id, name: role.name })),

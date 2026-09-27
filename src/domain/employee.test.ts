@@ -1,6 +1,6 @@
 import { assert, describe, expect, it } from "vitest";
 
-import { goOnLeave, hireEmployee, isSpecies, moveToTeam, returnFromLeave, SPECIES } from "./employee";
+import { goOnLeave, hireEmployee, moveToTeam, returnFromLeave, SPECIES } from "./employee";
 import { toCompanyId, toEmployeeId, toEventId, toRoleId, toTeamId } from "./ids";
 
 const now = 1_700_000_000_000;
@@ -35,14 +35,12 @@ describe("hireEmployee", () => {
   });
 
   it("needs a name the user wrote, of a sensible length", () => {
-    expect(hireEmployee({ ...input, name: "  " }, toEventId("e"), now)).toEqual({ ok: false, reason: "employeeNameRequired" });
-    expect(hireEmployee({ ...input, name: "가".repeat(21) }, toEventId("e"), now)).toEqual({ ok: false, reason: "employeeNameTooLong" });
+    expect(hireEmployee({ ...input, name: "  " }, toEventId("e"), now)).toEqual({ ok: false, reason: "nameRequired" });
+    expect(hireEmployee({ ...input, name: "가".repeat(21) }, toEventId("e"), now)).toEqual({ ok: false, reason: "nameTooLong" });
   });
 
-  it("knows the twenty species and nothing else", () => {
+  it("knows the twenty species", () => {
     expect(SPECIES).toHaveLength(20);
-    expect(isSpecies("frog")).toBe(true);
-    expect(isSpecies("dragon")).toBe(false);
   });
 });
 

@@ -96,24 +96,8 @@ describe("pickUpWork", () => {
     expect(picked.events.map((e) => e.type)).toEqual(["TaskStarted"]);
   });
 
-  it("gives each person one thing, the higher project first", async () => {
-    const low = await project({ priority: "low" });
-    const high = await project({ priority: "high" });
-    const lowTask = await task(low, "low first written");
-    const highTask = await task(high, "high");
-    await hire("모카");
 
-    const picked = await pickUpWork(ctx, companyId);
-    assert(picked.ok);
-    expect(picked.value.started.map((t) => t.id)).toEqual([highTask.id]);
-    await expect(ctx.tasks.findById(lowTask.id)).resolves.toMatchObject({ status: "backlog" });
-
-    const again = await pickUpWork(ctx, companyId);
-    assert(again.ok);
-    expect(again.value.started).toEqual([]);
-  });
-
-  it("leaves work handed to someone for them", async () => {
+  it("frees work handed to someone who went on leave", async () => {
     const pay = await project();
     const mocha = await hire("모카");
     const tofu = await hire("두부");
@@ -123,9 +107,8 @@ describe("pickUpWork", () => {
 
     const picked = await pickUpWork(ctx, companyId);
     assert(picked.ok);
-    // 모카 is free, but the only work was handed to 두부
-    expect(picked.value.started).toEqual([]);
-    expect(mocha.availability).toBe("available");
+    // 두부 is on leave, so the work handed to them is anyone's again
+    expect(picked.value.started).toMatchObject([{ assigneeId: mocha.id }]);
   });
 });
 

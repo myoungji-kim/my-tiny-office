@@ -48,6 +48,7 @@ const task = (id: string, projectId: string, priority: Priority, createdAt: numb
   blocker: undefined,
   heldReason: undefined,
   heldFrom: undefined,
+  heldWithProject: false,
   changesRequested: undefined,
   createdAt,
   startedAt: undefined,
@@ -69,7 +70,7 @@ describe("pickUps", () => {
       task("pay-normal-old", "pay", "normal", 3),
     ];
 
-    const picked = pickUps(projects, tasks, [person("a"), person("b"), person("c"), person("d")]);
+    const picked = pickUps(projects, tasks, [person("a"), person("b"), person("c"), person("d")], []);
 
     expect(picked.map((p) => p.taskId)).toEqual(["pay-normal-old", "pay-normal-new", "pay-low", "order-high"]);
   });
@@ -77,7 +78,7 @@ describe("pickUps", () => {
   it("picks nothing from a held or planned project", () => {
     const tasks = [task("admin-1", "admin", "high", 1), task("settle-1", "settle", "high", 1)];
 
-    expect(pickUps(projects, tasks, [person("a")])).toEqual([]);
+    expect(pickUps(projects, tasks, [person("a")], [])).toEqual([]);
   });
 
   it("gives one thing at a time, and nothing to someone busy or on leave", () => {
@@ -86,7 +87,7 @@ describe("pickUps", () => {
       task("next", "pay", "high", 2),
     ];
 
-    expect(pickUps(projects, tasks, [person("busy"), person("away", "onLeave")])).toEqual([]);
+    expect(pickUps(projects, tasks, [person("busy"), person("away", "onLeave")], [])).toEqual([]);
   });
 
   it("keeps work handed to someone for them, and they take it before anything else", () => {
@@ -95,12 +96,12 @@ describe("pickUps", () => {
       task("for-b", "order", "low", 2, { assigneeId: toEmployeeId("b") }),
     ];
 
-    const picked = pickUps(projects, tasks, [person("a"), person("b")]);
+    const picked = pickUps(projects, tasks, [person("a"), person("b")], []);
 
     expect(picked).toEqual([
       { employeeId: "a", taskId: "unclaimed-high" },
       { employeeId: "b", taskId: "for-b" },
     ]);
-    expect(pickUps(projects, [tasks[1]], [person("a")])).toEqual([]);
+    expect(pickUps(projects, [tasks[1]], [person("a")], [])).toEqual([]);
   });
 });

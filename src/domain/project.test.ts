@@ -7,6 +7,7 @@ import {
   finishProject,
   holdProject,
   isAllowableCommand,
+  MAX_COMMANDS,
   reopenProject,
   resumeProject,
   startProject,
@@ -79,5 +80,26 @@ describe("commands", () => {
     expect(createProject({ id: toProjectId("p"), companyId: toCompanyId("c"), name: "p", priority: "low", commands: ["npm *"] }, eventId, t0)).toMatchObject({
       reason: "commandNotAllowable",
     });
+  });
+});
+
+describe("what an approval shows is what runs", () => {
+  it("refuses invisible, reordering and chaining characters", () => {
+    const hidden = ["npm test\u202e;hs|lruc", "npm\u200btest", "npm test\u2028rm", "npm test\u000b", "npm test ; curl x", "npm test && rm -rf .", "npm test | sh", "echo `id`", "echo $HOME", "npm test > out", "cat < in"];
+    for (const command of hidden) expect(isAllowableCommand(command)).toBe(false);
+    for (const command of ["npm test", "npm run lint", "pnpm --filter web test", "go test ./...", "cargo test -p core"]) {
+      expect(isAllowableCommand(command)).toBe(true);
+    }
+  });
+
+  it("keeps a project's list short enough to read", () => {
+    let project = active();
+    for (let i = 0; i < MAX_COMMANDS - 1; i++) {
+      const next = allowCommand(project, "npm run task" + i, eventId, t0);
+      assert(next.ok);
+      project = next.project;
+    }
+    expect(allowCommand(project, "npm run one-more", eventId, t0)).toMatchObject({ reason: "tooManyCommands" });
+    expect(allowCommand(project, "npm test", eventId, t0)).toMatchObject({ ok: true });
   });
 });

@@ -1,5 +1,5 @@
 import type { Employee } from "./employee";
-import type { ReviewQueued, ReviewSettled, ReviewStarted, ReviewSuggested } from "./events";
+import type { ReviewQueued, ReviewReleased, ReviewSettled, ReviewStarted, ReviewSuggested, ReviewWithdrawn } from "./events";
 import type { AreaId, CompanyId, EmployeeId, EventId, ReviewId } from "./ids";
 import type { Task } from "./task";
 import type { Timestamp } from "./time";
@@ -7,7 +7,8 @@ import type { Timestamp } from "./time";
 // A PullRequest in the MVP is the app's own record of a colleague's review,
 // never a hosting provider's. It lives inside `working`: the task is worked on
 // throughout, and moves to approval when the work itself is finished.
-export type ReviewState = "suggested" | "queued" | "reviewing" | "settled";
+// Withdrawn is a review the work moved on from before it settled.
+export type ReviewState = "suggested" | "queued" | "reviewing" | "settled" | "withdrawn";
 
 export interface Review {
   readonly id: ReviewId;
@@ -33,13 +34,16 @@ const base = (review: Review, eventId: EventId, now: Timestamp) => ({
 });
 
 // The office offers a second pair of eyes on work in an area someone else knows.
+// If nobody else has been taught the area there is nobody to suggest, and the
+// user is told so rather than shown an empty review.
 export function suggestReview(
-  input: { readonly id: ReviewId; readonly task: Task },
+  input: { readonly id: ReviewId; readonly task: Task; readonly othersWhoKnow: number },
   eventId: EventId,
   now: Timestamp,
-): Transition<ReviewSuggested, "taskNotWorking" | "taskHasNoArea"> {
+): Transition<ReviewSuggested, "taskNotWorking" | "taskHasNoArea" | "nobodyKnowsArea"> {
   if (input.task.status !== "working") return { ok: false, reason: "taskNotWorking" };
   if (input.task.area === undefined) return { ok: false, reason: "taskHasNoArea" };
+  if (input.othersWhoKnow === 0) return { ok: false, reason: "nobodyKnowsArea" };
   const review: Review = {
     id: input.id,
     companyId: input.task.companyId,
@@ -86,18 +90,41 @@ export function startQueuedReview(review: Review, reviewer: Employee, eventId: E
   return { ok: true, review: started, events: [{ ...base(started, eventId, now), type: "ReviewStarted", reviewerId: reviewer.id, reviewerName: reviewer.name }] };
 }
 
-export function settleReview(review: Review, eventId: EventId, now: Timestamp): Transition<ReviewSettled, "reviewNotUnderWay"> {
-  if (review.state !== "reviewing" || review.reviewerId === undefined) return { ok: false, reason: "reviewNotUnderWay" };
+export function settleReview(review: Review, reviewer: Employee, eventId: EventId, now: Timestamp): Transition<ReviewSettled, "reviewNotUnderWay"> {
+  if (review.state !== "reviewing" || review.reviewerId !== reviewer.id) return { ok: false, reason: "reviewNotUnderWay" };
   const settled: Review = { ...review, state: "settled", settledAt: now };
-  return { ok: true, review: settled, events: [{ ...base(settled, eventId, now), type: "ReviewSettled", reviewerId: review.reviewerId }] };
+  return { ok: true, review: settled, events: [{ ...base(settled, eventId, now), type: "ReviewSettled", reviewerId: reviewer.id, reviewerName: reviewer.name }] };
+}
+
+export const isOpen = (review: Review): boolean => review.state !== "settled" && review.state !== "withdrawn";
+
+// A review lives inside `working`: once the work is finished, held or handed
+// back, whatever was still open about it ends.
+export function withdrawReview(review: Review, eventId: EventId, now: Timestamp): Transition<ReviewWithdrawn, "reviewNotOpen"> {
+  if (!isOpen(review)) return { ok: false, reason: "reviewNotOpen" };
+  const withdrawn: Review = { ...review, state: "withdrawn" };
+  return { ok: true, review: withdrawn, events: [{ ...base(withdrawn, eventId, now), type: "ReviewWithdrawn" }] };
+}
+
+// A reviewer going on leave gives the review back to be offered to someone else.
+export function releaseReview(review: Review, eventId: EventId, now: Timestamp): Transition<ReviewReleased, "reviewNotAsked"> {
+  if (review.state !== "queued" && review.state !== "reviewing") return { ok: false, reason: "reviewNotAsked" };
+  const released: Review = { ...review, state: "suggested", reviewerId: undefined, startedAt: undefined };
+  return { ok: true, review: released, events: [{ ...base(released, eventId, now), type: "ReviewReleased" }] };
 }
 
 // Working and reviewing are both the one thing someone is on.
 export type EmployeeStatus = "working" | "reviewing" | "available" | "onLeave";
 
+// Reviews on work that is no longer in progress do not keep anyone.
+export function liveReviews(tasks: readonly Task[], reviews: readonly Review[]): Review[] {
+  const working = new Set(tasks.filter((t) => t.status === "working").map((t) => t.id));
+  return reviews.filter((r) => isOpen(r) && working.has(r.taskId));
+}
+
 export function statusOf(employee: Employee, tasks: readonly Task[], reviews: readonly Review[]): EmployeeStatus {
   if (employee.availability === "onLeave") return "onLeave";
-  if (reviews.some((r) => r.state === "reviewing" && r.reviewerId === employee.id)) return "reviewing";
+  if (liveReviews(tasks, reviews).some((r) => r.state === "reviewing" && r.reviewerId === employee.id)) return "reviewing";
   if (tasks.some((t) => t.status === "working" && t.assigneeId === employee.id)) return "working";
   return "available";
 }

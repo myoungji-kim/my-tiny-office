@@ -1,5 +1,6 @@
 import type { AreaAdded, AreaRemoved, AreaRenamed, MemoryRemoved, MemoryTaught } from "./events";
 import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, TaskId } from "./ids";
+import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
 
 // The company owns its areas. The seven it starts with are named by the
@@ -40,28 +41,27 @@ type Result<TValue, TEvent, TFailure extends string> =
   | { readonly ok: false; readonly reason: TFailure };
 
 export function startingAreas(companyId: CompanyId, ids: readonly AreaId[], now: Timestamp): Area[] {
-  return STARTING_AREAS.map((starting, i) => ({ id: ids[i], companyId, starting, name: undefined, createdAt: now }));
+  // a millisecond apart, so they read back in the order they are listed
+  return STARTING_AREAS.map((starting, i) => ({ id: ids[i], companyId, starting, name: undefined, createdAt: now + i }));
 }
-
-const areaName = (raw: string) => raw.trim();
 
 export function addArea(
   input: { readonly id: AreaId; readonly companyId: CompanyId; readonly name: string },
   eventId: EventId,
   now: Timestamp,
-): Result<Area, AreaAdded, "areaNameRequired" | "areaNameTooLong"> {
-  const name = areaName(input.name);
-  if (name === "") return { ok: false, reason: "areaNameRequired" };
-  if (name.length > MAX_AREA_NAME) return { ok: false, reason: "areaNameTooLong" };
+): Result<Area, AreaAdded, NameFailure> {
+  const checked = checkName(input.name, MAX_AREA_NAME);
+  if (!checked.ok) return checked;
+  const name = checked.name;
   const area: Area = { id: input.id, companyId: input.companyId, starting: undefined, name, createdAt: now };
   return { ok: true, value: area, events: [{ eventId, type: "AreaAdded", occurredAt: now, companyId: area.companyId, areaId: area.id, areaName: name }] };
 }
 
 // Memory and tasks point at an area by id, so a rename changes nothing else.
-export function renameArea(area: Area, raw: string, eventId: EventId, now: Timestamp): Result<Area, AreaRenamed, "areaNameRequired" | "areaNameTooLong"> {
-  const name = areaName(raw);
-  if (name === "") return { ok: false, reason: "areaNameRequired" };
-  if (name.length > MAX_AREA_NAME) return { ok: false, reason: "areaNameTooLong" };
+export function renameArea(area: Area, raw: string, eventId: EventId, now: Timestamp): Result<Area, AreaRenamed, NameFailure> {
+  const checked = checkName(raw, MAX_AREA_NAME);
+  if (!checked.ok) return checked;
+  const name = checked.name;
   return { ok: true, value: { ...area, name }, events: [{ eventId, type: "AreaRenamed", occurredAt: now, companyId: area.companyId, areaId: area.id, areaName: name }] };
 }
 
@@ -122,11 +122,7 @@ export function forget(memory: Memory, eventId: EventId, now: Timestamp): Memory
 // been taught something in it, and that is what lets them review it.
 export function expertiseOf(employeeId: EmployeeId, memories: readonly Memory[]): Set<AreaId> {
   return new Set(
-    memories.filter((m) => m.kind === "expertise" && m.employeeId === employeeId && m.areaId !== undefined).map((m) => m.areaId!),
+    memories.flatMap((m) => (m.kind === "expertise" && m.employeeId === employeeId && m.areaId !== undefined ? [m.areaId] : [])),
   );
 }
 
-// Everything someone has been taught travels with every task, whatever its area.
-export function carriedBy(employeeId: EmployeeId, memories: readonly Memory[]): Memory[] {
-  return memories.filter((m) => m.kind === "company" || m.employeeId === employeeId);
-}

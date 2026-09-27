@@ -65,8 +65,8 @@ describe("settings", () => {
 
   it("round-trips what it writes", () => {
     const lastCompanyId = randomUUID();
-    writeSettings(directory, { language: "ko", lastCompanyId });
-    expect(readSettings(directory)).toEqual({ language: "ko", lastCompanyId });
+    writeSettings(directory, { lastCompanyId });
+    expect(readSettings(directory)).toEqual({ lastCompanyId });
   });
 });
 

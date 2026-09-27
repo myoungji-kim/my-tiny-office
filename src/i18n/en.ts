@@ -74,9 +74,10 @@ export const en = {
     switch: "Company",
     noDescription: "No description",
   },
-  availability: {
+  employeeStatus: {
     available: "Available",
     working: "Working",
+    reviewing: "Reviewing",
     onLeave: "On leave",
   },
   taskStatus: {

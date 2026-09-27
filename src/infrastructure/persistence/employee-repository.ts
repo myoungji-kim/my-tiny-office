@@ -49,7 +49,7 @@ export function createSqliteEmployeeRepository(db: AppDatabase): EmployeeReposit
         .select()
         .from(employees)
         .where(eq(employees.companyId, companyId))
-        .orderBy(asc(employees.hiredAt))
+        .orderBy(asc(employees.hiredAt), asc(employees.id))
         .all()
         .map(toEmployee);
     },

@@ -33,10 +33,10 @@ export function createCompanyFiles(directory: string): CompanyFiles {
     return join(folder, `${id}.db`);
   };
 
-  const connect = (id: CompanyId): DatabaseHandle => {
+  const connect = (id: CompanyId, create: boolean): DatabaseHandle => {
     let handle = handles.get(id);
     if (handle === undefined) {
-      handle = openDatabase(pathOf(id));
+      handle = openDatabase(pathOf(id), { create });
       handles.set(id, handle);
     }
     return handle;
@@ -54,17 +54,12 @@ export function createCompanyFiles(directory: string): CompanyFiles {
             .map(toCompanyId)
         : [],
     has: (id) => isCompanyId(id) && existsSync(pathOf(id)),
-    open(id) {
-      if (!existsSync(pathOf(id))) {
-        throw new Error("No such company");
-      }
-      return connect(id);
-    },
+    open: (id) => connect(id, false),
     create(id) {
       if (existsSync(pathOf(id))) {
         throw new Error("Company already exists");
       }
-      return connect(id);
+      return connect(id, true);
     },
     close() {
       for (const handle of handles.values()) handle.close();

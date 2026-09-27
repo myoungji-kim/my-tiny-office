@@ -62,7 +62,7 @@ export function createSqliteProjectRepository(db: AppDatabase): ProjectRepositor
     },
 
     async findByCompany(companyId) {
-      return db.select().from(projects).where(eq(projects.companyId, companyId)).orderBy(asc(projects.createdAt)).all().map(toProject);
+      return db.select().from(projects).where(eq(projects.companyId, companyId)).orderBy(asc(projects.createdAt), asc(projects.id)).all().map(toProject);
     },
 
     async save(project) {

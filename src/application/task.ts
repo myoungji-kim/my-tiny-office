@@ -1,12 +1,13 @@
 import type { DomainEvent } from "../domain/events";
 import { toEventId, toTaskId, type AreaId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
 import { pickUps, reviewsToStart } from "../domain/pick-up";
-import { startQueuedReview, type Review } from "../domain/review";
 import type { Priority } from "../domain/project";
+import { startQueuedReview, type Review } from "../domain/review";
 import * as taskDomain from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
+import { withdrawReviewsOn } from "./review";
 
 type TaskResult<TFailure extends string> = UseCaseResult<{ readonly task: taskDomain.Task }, TFailure>;
 
@@ -75,39 +76,56 @@ type TaskTransition<TFailure extends string> =
   | { readonly ok: true; readonly task: taskDomain.Task; readonly events: readonly DomainEvent[] }
   | { readonly ok: false; readonly reason: TFailure };
 
-async function changeTask<TFailure extends string>(
+// Loads the task, applies one transition and saves it; `after` reacts to the
+// change inside the same transaction and may add events of its own.
+function changeTask<TFailure extends string>(
   ctx: AppContext,
   taskId: TaskId,
   change: (task: taskDomain.Task) => TaskTransition<TFailure>,
+  after: (before: taskDomain.Task, events: readonly DomainEvent[]) => Promise<readonly DomainEvent[]> = async () => [],
 ): Promise<TaskResult<"taskNotFound" | TFailure>> {
-  const task = await ctx.tasks.findById(taskId);
-  if (task === undefined) return { ok: false, reason: "taskNotFound" };
-  const changed = change(task);
-  if (!changed.ok) return changed;
-  await ctx.tasks.save(changed.task);
-  return { ok: true, value: { task: changed.task }, events: changed.events };
+  return ctx.withTransaction(async () => {
+    const task = await ctx.tasks.findById(taskId);
+    if (task === undefined) return { ok: false, reason: "taskNotFound" };
+    const changed = change(task);
+    if (!changed.ok) return changed;
+    await ctx.tasks.save(changed.task);
+    const events = [...changed.events, ...(await after(task, changed.events))];
+    return { ok: true, value: { task: changed.task }, events };
+  });
 }
 
 const eventId = (ctx: AppContext) => toEventId(ctx.newId());
 
-export async function applyTask(ctx: AppContext, taskId: TaskId) {
-  const result = await changeTask(ctx, taskId, (t) => taskDomain.applyTask(t, eventId(ctx), ctx.now()));
-  if (result.ok) await recordMilestones(ctx, result.value.task.companyId, result.events);
-  return result;
-}
+export const applyTask = (ctx: AppContext, taskId: TaskId) =>
+  changeTask(
+    ctx,
+    taskId,
+    (t) => taskDomain.applyTask(t, eventId(ctx), ctx.now()),
+    async (task, events) => {
+      await recordMilestones(ctx, task.companyId, events);
+      return [];
+    },
+  );
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
   changeTask(ctx, taskId, (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()));
 
+// Work that stops being in progress takes its open review with it.
 export const holdTask = (ctx: AppContext, taskId: TaskId, reason: string) =>
-  changeTask(ctx, taskId, (t) => taskDomain.holdTask(t, reason, eventId(ctx), ctx.now()));
+  changeTask(
+    ctx,
+    taskId,
+    (t) => taskDomain.holdTask(t, reason, eventId(ctx), ctx.now()),
+    async (task) => (task.status === "working" ? withdrawReviewsOn(ctx, task.companyId, [task.id]) : []),
+  );
 
 export const resumeTask = (ctx: AppContext, taskId: TaskId) =>
   changeTask(ctx, taskId, (t) => taskDomain.resumeTask(t, eventId(ctx), ctx.now()));
 
 // Everyone who is free takes their next thing: a review waiting for them
-// first, otherwise a task. Called by the runtime, which is
-// what actually starts the work: a task never starts without an agent on it.
+// first, otherwise a task. Called by the runtime, which is what actually
+// starts the work: a task never starts without an agent on it.
 export async function pickUpWork(
   ctx: AppContext,
   companyId: CompanyId,
@@ -128,8 +146,9 @@ export async function pickUpWork(
 
     let current = [...reviews];
     for (const reviewId of reviewsToStart(tasks, reviews, employees)) {
-      const review = current.find((r) => r.id === reviewId)!;
-      const reviewer = employees.find((e) => e.id === review.reviewerId)!;
+      const review = current.find((r) => r.id === reviewId);
+      const reviewer = employees.find((e) => e.id === review?.reviewerId);
+      if (review === undefined || reviewer === undefined) continue;
       const result = startQueuedReview(review, reviewer, eventId(ctx), now);
       if (!result.ok) continue;
       await ctx.reviews.save(result.review);
@@ -139,14 +158,15 @@ export async function pickUpWork(
     }
 
     for (const { employeeId, taskId } of pickUps(projects, tasks, employees, current)) {
-      const task = tasks.find((t) => t.id === taskId)!;
-      const employee = employees.find((e) => e.id === employeeId)!;
+      const task = tasks.find((t) => t.id === taskId);
+      const employee = employees.find((e) => e.id === employeeId);
+      if (task === undefined || employee === undefined) continue;
       const result = taskDomain.startTask(task, employee, eventId(ctx), now);
       if (!result.ok) continue;
       await ctx.tasks.save(result.task);
       started.push(result.task);
       events.push(...result.events);
     }
-    return { ok: true as const, value: { started, reviewing }, events };
+    return { ok: true, value: { started, reviewing }, events };
   });
 }

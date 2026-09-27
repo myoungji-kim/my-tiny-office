@@ -6,11 +6,11 @@ import { finishWork } from "../domain/task";
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { hireEmployee, sendOnLeave } from "./employee";
-import { teachMemory } from "./memory";
-import { addTeam, moveEmployee } from "./organisation";
+import { forgetMemory, teachMemory } from "./memory";
+import { addTeam, moveEmployee, removeTeam } from "./organisation";
 import { createProject, finishProject, startProject } from "./project";
 import { askForReview, settleReview, suggestReview } from "./review";
-import { applyTask, createTask, pickUpWork } from "./task";
+import { applyTask, createTask, holdTask, pickUpWork } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 
 const companyId = toCompanyId("c");
@@ -147,5 +147,83 @@ describe("the history", () => {
       { employeeName: "모카", first: true },
       { employeeName: "삐약", first: false },
     ]);
+  });
+});
+
+describe("a review when the work or the reviewer moves on", () => {
+  it("is not offered when nobody besides the assignee knows the area", async () => {
+    await hire("모카", true);
+    const webhook = await workInProgress();
+    assert((await pickUpWork(ctx, companyId)).ok);
+
+    await expect(suggestReview(ctx, webhook.id)).resolves.toMatchObject({ reason: "nobodyKnowsArea" });
+  });
+
+  it("ends when its task is held, and the reviewer is free again", async () => {
+    const mocha = await hire("모카");
+    const pip = await hire("삐약", true);
+    const webhook = await workInProgress();
+    assert((await pickUpWork(ctx, companyId)).ok);
+    const suggested = await suggestReview(ctx, webhook.id);
+    assert(suggested.ok);
+    const asked = await askForReview(ctx, suggested.value.review.id, pip.id);
+    assert(asked.ok);
+
+    assert((await holdTask(ctx, webhook.id, "after the release")).ok);
+
+    await expect(ctx.reviews.findById(asked.value.review.id)).resolves.toMatchObject({ state: "withdrawn" });
+    // both are free again: 모카 from the held task, 삐약 from the review
+    await workInProgress("next");
+    await workInProgress("after");
+    const next = await pickUpWork(ctx, companyId);
+    assert(next.ok);
+    expect(next.value.started.map((t) => t.assigneeId)).toEqual([mocha.id, pip.id]);
+  });
+
+  it("goes back to be offered when its reviewer goes on leave", async () => {
+    await hire("모카");
+    const pip = await hire("삐약", true);
+    const webhook = await workInProgress();
+    assert((await pickUpWork(ctx, companyId)).ok);
+    const suggested = await suggestReview(ctx, webhook.id);
+    assert(suggested.ok);
+    assert((await askForReview(ctx, suggested.value.review.id, pip.id)).ok);
+
+    assert((await sendOnLeave(ctx, pip.id)).ok);
+
+    await expect(ctx.reviews.findById(suggested.value.review.id)).resolves.toMatchObject({ state: "suggested", reviewerId: undefined });
+  });
+});
+
+describe("the history keeps each mark once", () => {
+  it("does not record 10 memories twice when one is forgotten and taught back", async () => {
+    const mocha = await hire("모카");
+    const teachOne = async (n: number) => {
+      const taught = await teachMemory(ctx, { companyId, kind: "style", employeeId: mocha.id, text: "rule " + n });
+      assert(taught.ok);
+      return taught.value.memory;
+    };
+    const memories = [];
+    for (let i = 0; i < 10; i++) memories.push(await teachOne(i));
+    assert((await forgetMemory(ctx, companyId, memories[0].id)).ok);
+    await teachOne(10);
+
+    const marks = (await ctx.milestones.findByCompany(companyId)).filter((m) => m.kind === "memories");
+    expect(marks).toHaveLength(1);
+  });
+
+  it("forms a team that people move into all at once", async () => {
+    const backend = await addTeam(ctx, companyId, { suggested: "backend" });
+    const old = await addTeam(ctx, companyId, { suggested: "frontend" });
+    assert(backend.ok && old.ok);
+    for (const name of ["모카", "두부"]) {
+      const person = await hire(name);
+      assert((await moveEmployee(ctx, person.id, old.value.team.id)).ok);
+    }
+
+    assert((await removeTeam(ctx, companyId, old.value.team.id, backend.value.team.id)).ok);
+
+    const formed = (await ctx.milestones.findByCompany(companyId)).filter((m) => m.kind === "teamFormed");
+    expect(formed.map((m) => m.kind === "teamFormed" && m.teamId)).toEqual([old.value.team.id, backend.value.team.id]);
   });
 });

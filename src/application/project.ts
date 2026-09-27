@@ -1,9 +1,11 @@
 import type { DomainEvent } from "../domain/events";
 import { toEventId, toProjectId, type CompanyId, type ProjectId } from "../domain/ids";
 import * as projectDomain from "../domain/project";
+import * as taskDomain from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
+import { withdrawReviewsOn } from "./review";
 
 type ProjectResult<TFailure extends string> = UseCaseResult<{ readonly project: projectDomain.Project }, TFailure>;
 
@@ -20,14 +22,8 @@ export async function createProject(
   ctx: AppContext,
   input: CreateProjectInput,
 ): Promise<ProjectResult<"companyNotFound" | projectDomain.CreateProjectFailure>> {
-  if ((await ctx.companies.findById(input.companyId)) === undefined) {
-    return { ok: false, reason: "companyNotFound" };
-  }
-  const created = projectDomain.createProject(
-    { ...input, id: toProjectId(ctx.newId()) },
-    toEventId(ctx.newId()),
-    ctx.now(),
-  );
+  if ((await ctx.companies.findById(input.companyId)) === undefined) return { ok: false, reason: "companyNotFound" };
+  const created = projectDomain.createProject({ ...input, id: toProjectId(ctx.newId()) }, toEventId(ctx.newId()), ctx.now());
   if (!created.ok) return created;
   await ctx.projects.save(created.project);
   return { ok: true, value: { project: created.project }, events: created.events };
@@ -37,44 +33,98 @@ type Transition<TFailure extends string> =
   | { readonly ok: true; readonly project: projectDomain.Project; readonly events: readonly DomainEvent[] }
   | { readonly ok: false; readonly reason: TFailure };
 
-async function changeProject<TFailure extends string>(
+// Loads the project, applies one transition and saves it; `after` carries the
+// change to the project's tasks inside the same transaction.
+function changeProject<TFailure extends string>(
   ctx: AppContext,
   projectId: ProjectId,
-  change: (project: projectDomain.Project) => Transition<TFailure> | Promise<Transition<TFailure>>,
+  change: (project: projectDomain.Project, tasks: readonly taskDomain.Task[]) => Transition<TFailure>,
+  after: (project: projectDomain.Project, tasks: readonly taskDomain.Task[], events: readonly DomainEvent[]) => Promise<readonly DomainEvent[]> = async () => [],
 ): Promise<ProjectResult<"projectNotFound" | TFailure>> {
-  const project = await ctx.projects.findById(projectId);
-  if (project === undefined) return { ok: false, reason: "projectNotFound" };
-  const changed = await change(project);
-  if (!changed.ok) return changed;
-  await ctx.projects.save(changed.project);
-  return { ok: true, value: { project: changed.project }, events: changed.events };
+  return ctx.withTransaction(async () => {
+    const project = await ctx.projects.findById(projectId);
+    if (project === undefined) return { ok: false, reason: "projectNotFound" };
+    const tasks = (await ctx.tasks.findByCompany(project.companyId)).filter((t) => t.projectId === project.id);
+    const changed = change(project, tasks);
+    if (!changed.ok) return changed;
+    await ctx.projects.save(changed.project);
+    const events = [...changed.events, ...(await after(changed.project, tasks, changed.events))];
+    return { ok: true, value: { project: changed.project }, events };
+  });
 }
 
 const eventId = (ctx: AppContext) => toEventId(ctx.newId());
 
-export const startProject = (ctx: AppContext, projectId: ProjectId) =>
-  changeProject(ctx, projectId, async (p) => projectDomain.startProject(p, eventId(ctx), ctx.now()));
+type TaskChange =
+  | { readonly ok: true; readonly task: taskDomain.Task; readonly events: readonly DomainEvent[] }
+  | { readonly ok: false };
 
-export const holdProject = (ctx: AppContext, projectId: ProjectId, reason: string) =>
-  changeProject(ctx, projectId, async (p) => projectDomain.holdProject(p, reason, eventId(ctx), ctx.now()));
-
-export const resumeProject = (ctx: AppContext, projectId: ProjectId) =>
-  changeProject(ctx, projectId, async (p) => projectDomain.resumeProject(p, eventId(ctx), ctx.now()));
-
-export const reopenProject = (ctx: AppContext, projectId: ProjectId) =>
-  changeProject(ctx, projectId, async (p) => projectDomain.reopenProject(p, eventId(ctx), ctx.now()));
-
-// Open work is what is in progress or waiting for approval; unstarted work closes as it is.
-export async function finishProject(ctx: AppContext, projectId: ProjectId) {
-  const result = await changeProject(ctx, projectId, async (p) => {
-    const open = (await ctx.tasks.findByCompany(p.companyId)).filter(
-      (t) => t.projectId === p.id && (t.status === "working" || t.status === "approval"),
-    ).length;
-    return projectDomain.finishProject(p, open, eventId(ctx), ctx.now());
-  });
-  if (result.ok) await recordMilestones(ctx, result.value.project.companyId, result.events);
-  return result;
+// Saves the tasks that changed; one a transition refused is left as it was.
+async function saveAll(ctx: AppContext, changes: readonly TaskChange[]): Promise<DomainEvent[]> {
+  const events: DomainEvent[] = [];
+  for (const change of changes) {
+    if (!change.ok) continue;
+    await ctx.tasks.save(change.task);
+    events.push(...change.events);
+  }
+  return events;
 }
 
+export const startProject = (ctx: AppContext, projectId: ProjectId) =>
+  changeProject(ctx, projectId, (p) => projectDomain.startProject(p, eventId(ctx), ctx.now()));
+
+// Holding a project holds its work in progress with the same reason; finished
+// work waiting for approval can still be applied.
+export const holdProject = (ctx: AppContext, projectId: ProjectId, reason: string) =>
+  changeProject(
+    ctx,
+    projectId,
+    (p) => projectDomain.holdProject(p, reason, eventId(ctx), ctx.now()),
+    async (project, tasks) => {
+      const working = tasks.filter((t) => t.status === "working");
+      const held = await saveAll(ctx, working.map((t) => taskDomain.holdTask(t, project.heldReason ?? reason, eventId(ctx), ctx.now(), true)));
+      return [...held, ...(await withdrawReviewsOn(ctx, project.companyId, working.map((t) => t.id)))];
+    },
+  );
+
+// Resuming gives the work held with the project back to whoever had it.
+export const resumeProject = (ctx: AppContext, projectId: ProjectId) =>
+  changeProject(
+    ctx,
+    projectId,
+    (p) => projectDomain.resumeProject(p, eventId(ctx), ctx.now()),
+    async (_, tasks) =>
+      saveAll(ctx, tasks.filter((t) => t.status === "held" && t.heldWithProject).map((t) => taskDomain.resumeTask(t, eventId(ctx), ctx.now()))),
+  );
+
+export const reopenProject = (ctx: AppContext, projectId: ProjectId) =>
+  changeProject(ctx, projectId, (p) => projectDomain.reopenProject(p, eventId(ctx), ctx.now()));
+
+// Open work is what is in progress or waiting for approval; unstarted work closes as it is.
+export const finishProject = (ctx: AppContext, projectId: ProjectId) =>
+  changeProject(
+    ctx,
+    projectId,
+    (p, tasks) =>
+      projectDomain.finishProject(p, tasks.filter((t) => t.status === "working" || t.status === "approval").length, eventId(ctx), ctx.now()),
+    async (project, _, events) => {
+      await recordMilestones(ctx, project.companyId, events);
+      return [];
+    },
+  );
+
+// A command allowed from a stopped task is the project's from then on, and
+// every task stopped on that same command carries on.
 export const allowCommand = (ctx: AppContext, projectId: ProjectId, command: string) =>
-  changeProject(ctx, projectId, async (p) => projectDomain.allowCommand(p, command, eventId(ctx), ctx.now()));
+  changeProject(
+    ctx,
+    projectId,
+    (p) => projectDomain.allowCommand(p, command, eventId(ctx), ctx.now()),
+    async (_, tasks) =>
+      saveAll(
+        ctx,
+        tasks
+          .filter((t) => t.blocker?.kind === "commandNotAllowed" && t.blocker.command === command)
+          .map((t) => taskDomain.unblockTask(t, eventId(ctx), ctx.now())),
+      ),
+  );

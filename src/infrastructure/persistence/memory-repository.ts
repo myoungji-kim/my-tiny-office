@@ -33,7 +33,7 @@ function toMemory(row: typeof memories.$inferSelect): Memory {
 export function createSqliteAreaRepository(db: AppDatabase): AreaRepository {
   return {
     async findByCompany(companyId) {
-      return db.select().from(areas).where(eq(areas.companyId, companyId)).orderBy(asc(areas.createdAt)).all().map(toArea);
+      return db.select().from(areas).where(eq(areas.companyId, companyId)).orderBy(asc(areas.createdAt), asc(areas.id)).all().map(toArea);
     },
     async save(area) {
       const row = { companyId: area.companyId, starting: area.starting ?? null, name: area.name ?? null, createdAt: area.createdAt };
@@ -48,7 +48,7 @@ export function createSqliteAreaRepository(db: AppDatabase): AreaRepository {
 export function createSqliteMemoryRepository(db: AppDatabase): MemoryRepository {
   return {
     async findByCompany(companyId) {
-      return db.select().from(memories).where(eq(memories.companyId, companyId)).orderBy(asc(memories.createdAt)).all().map(toMemory);
+      return db.select().from(memories).where(eq(memories.companyId, companyId)).orderBy(asc(memories.createdAt), asc(memories.id)).all().map(toMemory);
     },
     async save(memory) {
       const row = {
