@@ -535,7 +535,6 @@ const WORDS = {
       species: "어떤 친구인가요", name: "이름", nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
       role: "역할", team: "팀", noTeam: "팀 없음", cancel: "취소",
       editTitle: "정보 바꾸기", editSub: "외형과 이름, 역할, 팀을 바꿔요.", save: "저장",
-      simulated: "시뮬레이션 직원으로 시작해요. 실제로 일하게 하려면 고용한 뒤 Claude Code를 연결해요.",
       hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
     },
     teach: {
@@ -567,7 +566,6 @@ const WORDS = {
       species: "Who are they?", name: "Name", nameHint: "Shorter is better. You can change it later.",
       role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
-      simulated: "They start simulated. Connect Claude Code after hiring to put them to real work.",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
     },
     teach: {
@@ -799,7 +797,6 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
         <span class="select-wrap"><select class="select" id="hireTeam"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
       </div>
     </div>
-    ${edit ? "" : `<div class="m-sec"><span class="hint" style="margin:0">${w.simulated}</span></div>`}
     <div class="m-foot">
       <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
       <button class="btn btn-primary btn-md" type="button" data-ok disabled></button>
