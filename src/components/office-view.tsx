@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Dictionary } from "../i18n";
 import type { EmployeeView, TaskView } from "../server/view-model";
 
-import { ProgressBar, StatusBadge, employeeStatus, type EmployeeStatus } from "./status";
+import { StatusBadge, employeeStatus, type EmployeeStatus } from "./status";
 import { viewHref } from "./shell";
 
 const deskTone: Record<EmployeeStatus, { screen: string; body: string }> = {
@@ -45,7 +45,7 @@ export function OfficeView({
   readonly employees: readonly EmployeeView[];
   readonly tasks: readonly TaskView[];
 }) {
-  const activeTasks = tasks.filter((task) => task.status === "working" || task.status === "ready");
+  const activeTasks = tasks.filter((task) => task.status === "working" || task.status === "approval");
 
   return (
     <>
@@ -106,7 +106,7 @@ export function OfficeView({
                     {task.assigneeName ?? t.work.unassigned} · {t.taskStatus[task.status]}
                   </span>
                 </div>
-                {task.status === "working" && <ProgressBar value={task.progress} />}
+                <span className="font-mono text-xs text-muted">{t.work.minutes(task.minutesTaken)}</span>
               </li>
             ))}
           </ul>

@@ -1,5 +1,6 @@
-import type { CompanyId, EmployeeId, EventId, TaskId } from "./ids";
-import type { TaskPriority } from "./task";
+import type { CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
+import type { Priority } from "./project";
+import type { Blocker } from "./task";
 import type { Duration, Timestamp } from "./time";
 
 interface DomainEventBase {
@@ -13,52 +14,124 @@ export interface CompanyCreated extends DomainEventBase {
   readonly name: string;
 }
 
-export interface EmployeeHired extends DomainEventBase {
-  readonly type: "EmployeeHired";
+interface EmployeeEvent extends DomainEventBase {
   readonly employeeId: EmployeeId;
   readonly employeeName: string;
+}
+
+export interface EmployeeHired extends EmployeeEvent {
+  readonly type: "EmployeeHired";
   readonly role: string;
 }
 
-export interface TaskCreated extends DomainEventBase {
+export interface EmployeeWentOnVacation extends EmployeeEvent {
+  readonly type: "EmployeeWentOnVacation";
+}
+
+export interface EmployeeReturned extends EmployeeEvent {
+  readonly type: "EmployeeReturned";
+}
+
+interface ProjectEvent extends DomainEventBase {
+  readonly projectId: ProjectId;
+  readonly projectName: string;
+}
+
+export interface ProjectCreated extends ProjectEvent {
+  readonly type: "ProjectCreated";
+}
+export interface ProjectStarted extends ProjectEvent {
+  readonly type: "ProjectStarted";
+}
+export interface ProjectHeld extends ProjectEvent {
+  readonly type: "ProjectHeld";
+  readonly reason: string;
+}
+export interface ProjectResumed extends ProjectEvent {
+  readonly type: "ProjectResumed";
+}
+export interface ProjectFinished extends ProjectEvent {
+  readonly type: "ProjectFinished";
+}
+export interface ProjectReopened extends ProjectEvent {
+  readonly type: "ProjectReopened";
+}
+export interface ProjectCommandAllowed extends ProjectEvent {
+  readonly type: "ProjectCommandAllowed";
+  readonly command: string;
+}
+
+interface TaskEvent extends DomainEventBase {
+  readonly taskId: TaskId;
+  readonly taskTitle: string;
+}
+
+export interface TaskCreated extends TaskEvent {
   readonly type: "TaskCreated";
-  readonly taskId: TaskId;
-  readonly taskTitle: string;
-  readonly priority: TaskPriority;
-  readonly estimatedDuration: Duration;
+  readonly projectId: ProjectId;
+  readonly priority: Priority;
 }
-
-export interface TaskAssigned extends DomainEventBase {
+export interface TaskAssigned extends TaskEvent {
   readonly type: "TaskAssigned";
-  readonly taskId: TaskId;
-  readonly taskTitle: string;
   readonly employeeId: EmployeeId;
   readonly employeeName: string;
 }
-
-export interface TaskStarted extends DomainEventBase {
+export interface TaskStarted extends TaskEvent {
   readonly type: "TaskStarted";
-  readonly taskId: TaskId;
-  readonly taskTitle: string;
   readonly employeeId: EmployeeId;
   readonly employeeName: string;
 }
-
-// completedAt is the in-game completion time, which is earlier than occurredAt
-// when a task is settled after the application was closed.
-export interface TaskCompleted extends DomainEventBase {
-  readonly type: "TaskCompleted";
-  readonly taskId: TaskId;
-  readonly taskTitle: string;
-  readonly employeeId: EmployeeId;
-  readonly employeeName: string;
-  readonly completedAt: Timestamp;
+// The work is done on this computer and waits for the user to apply it.
+export interface TaskFinished extends TaskEvent {
+  readonly type: "TaskFinished";
+  readonly employeeId: EmployeeId | undefined;
+  readonly took: Duration;
+}
+export interface TaskApplied extends TaskEvent {
+  readonly type: "TaskApplied";
+}
+export interface TaskSentBack extends TaskEvent {
+  readonly type: "TaskSentBack";
+  readonly reason: string;
+}
+export interface TaskHeld extends TaskEvent {
+  readonly type: "TaskHeld";
+  readonly reason: string;
+}
+export interface TaskResumed extends TaskEvent {
+  readonly type: "TaskResumed";
+}
+export interface TaskBlocked extends TaskEvent {
+  readonly type: "TaskBlocked";
+  readonly blocker: Blocker;
+}
+export interface TaskUnblocked extends TaskEvent {
+  readonly type: "TaskUnblocked";
+}
+export interface TaskReturned extends TaskEvent {
+  readonly type: "TaskReturned";
 }
 
 export type DomainEvent =
   | CompanyCreated
   | EmployeeHired
+  | EmployeeWentOnVacation
+  | EmployeeReturned
+  | ProjectCreated
+  | ProjectStarted
+  | ProjectHeld
+  | ProjectResumed
+  | ProjectFinished
+  | ProjectReopened
+  | ProjectCommandAllowed
   | TaskCreated
   | TaskAssigned
   | TaskStarted
-  | TaskCompleted;
+  | TaskFinished
+  | TaskApplied
+  | TaskSentBack
+  | TaskHeld
+  | TaskResumed
+  | TaskBlocked
+  | TaskUnblocked
+  | TaskReturned;

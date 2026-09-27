@@ -1,27 +1,51 @@
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import type { TaskRepository } from "../../application/repositories";
-import { toCompanyId, toEmployeeId, toTaskId } from "../../domain/ids";
-import type { Task } from "../../domain/task";
+import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
+import type { Blocker, Task } from "../../domain/task";
 
 import type { AppDatabase } from "./database";
 import { tasks } from "./schema";
 
 type TaskRow = typeof tasks.$inferSelect;
 
+// Anything unreadable in the column reads as a lost connection: the task
+// stays visibly blocked rather than silently runnable.
+function toBlocker(raw: string | null): Blocker | undefined {
+  if (raw === null) return undefined;
+  try {
+    const value = JSON.parse(raw) as { kind?: unknown; command?: unknown };
+    if (value.kind === "commandNotAllowed" && typeof value.command === "string") {
+      return { kind: "commandNotAllowed", command: value.command };
+    }
+    if (value.kind === "budgetReached") return { kind: "budgetReached" };
+  } catch {
+    // fall through
+  }
+  return { kind: "disconnected" };
+}
+
 function toTask(row: TaskRow): Task {
   return {
     id: toTaskId(row.id),
     companyId: toCompanyId(row.companyId),
+    projectId: toProjectId(row.projectId),
     title: row.title,
     description: row.description ?? undefined,
-    status: row.status,
+    area: row.area ?? undefined,
     priority: row.priority,
     assigneeId: row.assigneeId === null ? undefined : toEmployeeId(row.assigneeId),
-    estimatedDuration: row.estimatedDuration,
+    status: row.status,
+    blocker: toBlocker(row.blocker),
+    heldReason: row.heldReason ?? undefined,
+    heldFrom: row.heldFrom ?? undefined,
+    changesRequested: row.changesRequested ?? undefined,
     createdAt: row.createdAt,
     startedAt: row.startedAt ?? undefined,
-    completedAt: row.completedAt ?? undefined,
+    workedFor: row.workedFor,
+    runningSince: row.runningSince ?? undefined,
+    finishedAt: row.finishedAt ?? undefined,
+    appliedAt: row.appliedAt ?? undefined,
   };
 }
 
@@ -29,15 +53,23 @@ function toRow(task: Task): typeof tasks.$inferInsert {
   return {
     id: task.id,
     companyId: task.companyId,
+    projectId: task.projectId,
     title: task.title,
     description: task.description ?? null,
-    status: task.status,
+    area: task.area ?? null,
     priority: task.priority,
     assigneeId: task.assigneeId ?? null,
-    estimatedDuration: task.estimatedDuration,
+    status: task.status,
+    blocker: task.blocker === undefined ? null : JSON.stringify(task.blocker),
+    heldReason: task.heldReason ?? null,
+    heldFrom: task.heldFrom ?? null,
+    changesRequested: task.changesRequested ?? null,
     createdAt: task.createdAt,
     startedAt: task.startedAt ?? null,
-    completedAt: task.completedAt ?? null,
+    workedFor: task.workedFor,
+    runningSince: task.runningSince ?? null,
+    finishedAt: task.finishedAt ?? null,
+    appliedAt: task.appliedAt ?? null,
   };
 }
 
@@ -49,13 +81,7 @@ export function createSqliteTaskRepository(db: AppDatabase): TaskRepository {
     },
 
     async findByCompany(companyId) {
-      return db
-        .select()
-        .from(tasks)
-        .where(eq(tasks.companyId, companyId))
-        .orderBy(asc(tasks.createdAt))
-        .all()
-        .map(toTask);
+      return db.select().from(tasks).where(eq(tasks.companyId, companyId)).orderBy(asc(tasks.createdAt)).all().map(toTask);
     },
 
     async save(task) {
@@ -64,15 +90,6 @@ export function createSqliteTaskRepository(db: AppDatabase): TaskRepository {
         .values({ id, ...updatable })
         .onConflictDoUpdate({ target: tasks.id, set: updatable })
         .run();
-    },
-
-    async findWorkingByCompany(companyId) {
-      return db
-        .select()
-        .from(tasks)
-        .where(and(eq(tasks.companyId, companyId), eq(tasks.status, "working")))
-        .all()
-        .map(toTask);
     },
   };
 }

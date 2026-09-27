@@ -1,242 +1,238 @@
 import type { Employee } from "./employee";
-import type { TaskAssigned, TaskCompleted, TaskCreated, TaskStarted } from "./events";
-import type { CompanyId, EmployeeId, EventId, TaskId } from "./ids";
+import type {
+  TaskApplied,
+  TaskAssigned,
+  TaskBlocked,
+  TaskCreated,
+  TaskFinished,
+  TaskHeld,
+  TaskResumed,
+  TaskReturned,
+  TaskSentBack,
+  TaskStarted,
+  TaskUnblocked,
+} from "./events";
+import type { CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
+import type { Priority } from "./project";
 import type { Duration, Timestamp } from "./time";
 
-export type TaskStatus = "backlog" | "ready" | "working" | "done";
-export type TaskPriority = "low" | "normal" | "high";
+// backlog → working → approval → done, and held off to the side. Work is
+// picked up, never started by hand, and stops at approval: applying it is the
+// one step the office does not take on its own.
+export type TaskStatus = "backlog" | "working" | "approval" | "done" | "held";
+
+// Blocked is not a status: a task is blocked out of the one it is in.
+export type Blocker =
+  | { readonly kind: "disconnected" }
+  | { readonly kind: "commandNotAllowed"; readonly command: string }
+  | { readonly kind: "budgetReached" };
 
 export interface Task {
   readonly id: TaskId;
   readonly companyId: CompanyId;
+  readonly projectId: ProjectId;
   readonly title: string;
   readonly description: string | undefined;
-  readonly status: TaskStatus;
-  readonly priority: TaskPriority;
+  readonly area: string | undefined;
+  readonly priority: Priority;
   readonly assigneeId: EmployeeId | undefined;
-  readonly estimatedDuration: Duration;
+  readonly status: TaskStatus;
+  readonly blocker: Blocker | undefined;
+  readonly heldReason: string | undefined;
+  readonly heldFrom: "backlog" | "working" | "approval" | undefined;
+  readonly changesRequested: string | undefined;
   readonly createdAt: Timestamp;
   readonly startedAt: Timestamp | undefined;
-  readonly completedAt: Timestamp | undefined;
+  // Time is what the work has taken: runs add up, and a pause adds nothing.
+  readonly workedFor: Duration;
+  readonly runningSince: Timestamp | undefined;
+  readonly finishedAt: Timestamp | undefined;
+  readonly appliedAt: Timestamp | undefined;
 }
 
-type TaskTransition<TEvent, TFailure extends string> =
+type Transition<TEvent, TFailure extends string> =
   | { readonly ok: true; readonly task: Task; readonly events: readonly [TEvent] }
   | { readonly ok: false; readonly reason: TFailure };
+
+export function timeTaken(task: Task, now: Timestamp): Duration {
+  return task.workedFor + (task.runningSince === undefined ? 0 : Math.max(now - task.runningSince, 0));
+}
+
+// Stops the clock, keeping what has run so far.
+const paused = (task: Task, now: Timestamp): Task => ({
+  ...task,
+  workedFor: timeTaken(task, now),
+  runningSince: undefined,
+});
+
+const base = (task: Task, eventId: EventId, now: Timestamp) => ({
+  eventId,
+  occurredAt: now,
+  companyId: task.companyId,
+  taskId: task.id,
+  taskTitle: task.title,
+});
+
+const assignable = (task: Task, employee: Employee) =>
+  employee.companyId !== task.companyId
+    ? ("employeeFromAnotherCompany" as const)
+    : employee.availability !== "available"
+      ? ("employeeOnVacation" as const)
+      : undefined;
 
 export interface CreateTaskInput {
   readonly id: TaskId;
   readonly companyId: CompanyId;
+  readonly projectId: ProjectId;
   readonly title: string;
   readonly description?: string;
-  readonly priority: TaskPriority;
-  readonly estimatedDuration: Duration;
+  readonly area?: string;
+  readonly priority: Priority;
 }
 
-export type CreateTaskFailure = "invalidEstimatedDuration";
-export type AssignTaskFailure =
-  | "taskNotAssignable"
-  | "employeeFromAnotherCompany"
-  | "employeeOnVacation";
-export type StartTaskFailure = "taskNotReady" | "taskHasNoAssignee" | "employeeNotAssignee";
-export type CompleteTaskFailure = "taskNotWorking" | "employeeNotAssignee";
-export type SettleTaskFailure = "taskNotWorking" | "employeeNotAssignee" | "taskNotDueYet";
+export type CreateTaskFailure = "taskTitleRequired";
 
-export type CreateTaskResult = TaskTransition<TaskCreated, CreateTaskFailure>;
-export type AssignTaskResult = TaskTransition<TaskAssigned, AssignTaskFailure>;
-export type StartTaskResult = TaskTransition<TaskStarted, StartTaskFailure>;
-export type CompleteTaskResult = TaskTransition<TaskCompleted, CompleteTaskFailure>;
-export type SettleTaskResult = TaskTransition<TaskCompleted, SettleTaskFailure>;
-
-export function createTask(
-  input: CreateTaskInput,
-  eventId: EventId,
-  now: Timestamp,
-): CreateTaskResult {
-  if (!Number.isFinite(input.estimatedDuration) || input.estimatedDuration <= 0) {
-    return { ok: false, reason: "invalidEstimatedDuration" };
-  }
+export function createTask(input: CreateTaskInput, eventId: EventId, now: Timestamp): Transition<TaskCreated, CreateTaskFailure> {
+  const title = input.title.trim();
+  if (title === "") return { ok: false, reason: "taskTitleRequired" };
 
   const task: Task = {
     id: input.id,
     companyId: input.companyId,
-    title: input.title,
-    description: input.description,
-    status: "backlog",
+    projectId: input.projectId,
+    title,
+    description: input.description?.trim() || undefined,
+    area: input.area,
     priority: input.priority,
     assigneeId: undefined,
-    estimatedDuration: input.estimatedDuration,
+    status: "backlog",
+    blocker: undefined,
+    heldReason: undefined,
+    heldFrom: undefined,
+    changesRequested: undefined,
     createdAt: now,
     startedAt: undefined,
-    completedAt: undefined,
+    workedFor: 0,
+    runningSince: undefined,
+    finishedAt: undefined,
+    appliedAt: undefined,
   };
-
   return {
     ok: true,
     task,
-    events: [
-      {
-        eventId,
-        type: "TaskCreated",
-        occurredAt: now,
-        companyId: task.companyId,
-        taskId: task.id,
-        taskTitle: task.title,
-        priority: task.priority,
-        estimatedDuration: task.estimatedDuration,
-      },
-    ],
+    events: [{ ...base(task, eventId, now), type: "TaskCreated", projectId: task.projectId, priority: task.priority }],
   };
 }
 
-export function assignTask(
-  task: Task,
-  employee: Employee,
-  eventId: EventId,
-  now: Timestamp,
-): AssignTaskResult {
-  if (task.status !== "backlog" && task.status !== "ready") {
-    return { ok: false, reason: "taskNotAssignable" };
-  }
-  if (employee.companyId !== task.companyId) {
-    return { ok: false, reason: "employeeFromAnotherCompany" };
-  }
-  if (employee.availability !== "available") {
-    return { ok: false, reason: "employeeOnVacation" };
-  }
+export type AssignTaskFailure = "taskNotAssignable" | "employeeFromAnotherCompany" | "employeeOnVacation";
 
-  const assigned: Task = { ...task, status: "ready", assigneeId: employee.id };
-
+// Naming who does it; whether they start now is the pick-up's business.
+export function assignTask(task: Task, employee: Employee, eventId: EventId, now: Timestamp): Transition<TaskAssigned, AssignTaskFailure> {
+  if (task.status !== "backlog") return { ok: false, reason: "taskNotAssignable" };
+  const refused = assignable(task, employee);
+  if (refused !== undefined) return { ok: false, reason: refused };
   return {
     ok: true,
-    task: assigned,
-    events: [
-      {
-        eventId,
-        type: "TaskAssigned",
-        occurredAt: now,
-        companyId: assigned.companyId,
-        taskId: assigned.id,
-        taskTitle: assigned.title,
-        employeeId: employee.id,
-        employeeName: employee.name,
-      },
-    ],
+    task: { ...task, assigneeId: employee.id },
+    events: [{ ...base(task, eventId, now), type: "TaskAssigned", employeeId: employee.id, employeeName: employee.name }],
   };
 }
 
-export function startTask(
-  task: Task,
-  employee: Employee,
-  eventId: EventId,
-  now: Timestamp,
-): StartTaskResult {
-  if (task.status !== "ready") {
-    return { ok: false, reason: "taskNotReady" };
-  }
-  if (task.assigneeId === undefined) {
-    return { ok: false, reason: "taskHasNoAssignee" };
-  }
-  if (employee.id !== task.assigneeId) {
-    return { ok: false, reason: "employeeNotAssignee" };
-  }
+export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnVacation";
 
-  const started: Task = { ...task, status: "working", startedAt: now };
-
+export function startTask(task: Task, employee: Employee, eventId: EventId, now: Timestamp): Transition<TaskStarted, StartTaskFailure> {
+  if (task.status !== "backlog") return { ok: false, reason: "taskNotInBacklog" };
+  if (task.assigneeId !== undefined && task.assigneeId !== employee.id) return { ok: false, reason: "taskHasAnotherAssignee" };
+  const refused = assignable(task, employee);
+  if (refused !== undefined) return { ok: false, reason: refused };
   return {
     ok: true,
-    task: started,
-    events: [
-      {
-        eventId,
-        type: "TaskStarted",
-        occurredAt: now,
-        companyId: started.companyId,
-        taskId: started.id,
-        taskTitle: started.title,
-        employeeId: employee.id,
-        employeeName: employee.name,
-      },
-    ],
+    task: { ...task, status: "working", assigneeId: employee.id, startedAt: task.startedAt ?? now, runningSince: now },
+    events: [{ ...base(task, eventId, now), type: "TaskStarted", employeeId: employee.id, employeeName: employee.name }],
   };
 }
 
-export function completeTask(
-  task: Task,
-  employee: Employee,
-  eventId: EventId,
-  now: Timestamp,
-): CompleteTaskResult {
-  if (task.status !== "working") {
-    return { ok: false, reason: "taskNotWorking" };
-  }
-  if (employee.id !== task.assigneeId) {
-    return { ok: false, reason: "employeeNotAssignee" };
-  }
-
+export function finishWork(task: Task, eventId: EventId, now: Timestamp): Transition<TaskFinished, "taskNotWorking" | "taskBlocked"> {
+  if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
+  if (task.blocker !== undefined) return { ok: false, reason: "taskBlocked" };
+  const finished: Task = { ...paused(task, now), status: "approval", finishedAt: now, changesRequested: undefined };
   return {
     ok: true,
-    task: { ...task, status: "done", completedAt: now },
-    events: [taskCompletedEvent(task, employee, eventId, now, now)],
+    task: finished,
+    events: [{ ...base(task, eventId, now), type: "TaskFinished", employeeId: task.assigneeId, took: finished.workedFor }],
   };
 }
 
-export function settleTask(
-  task: Task,
-  employee: Employee,
-  eventId: EventId,
-  now: Timestamp,
-): SettleTaskResult {
-  if (task.status !== "working" || task.startedAt === undefined) {
-    return { ok: false, reason: "taskNotWorking" };
-  }
-  if (employee.id !== task.assigneeId) {
-    return { ok: false, reason: "employeeNotAssignee" };
-  }
-
-  const scheduledCompletedAt = task.startedAt + task.estimatedDuration;
-  if (now < scheduledCompletedAt) {
-    return { ok: false, reason: "taskNotDueYet" };
-  }
-
+export function applyTask(task: Task, eventId: EventId, now: Timestamp): Transition<TaskApplied, "taskNotAwaitingApproval"> {
+  if (task.status !== "approval") return { ok: false, reason: "taskNotAwaitingApproval" };
   return {
     ok: true,
-    task: { ...task, status: "done", completedAt: scheduledCompletedAt },
-    events: [taskCompletedEvent(task, employee, eventId, now, scheduledCompletedAt)],
+    task: { ...task, status: "done", appliedAt: now },
+    events: [{ ...base(task, eventId, now), type: "TaskApplied" }],
   };
 }
 
-export function taskProgress(task: Task, now: Timestamp): number {
-  switch (task.status) {
-    case "backlog":
-    case "ready":
-      return 0;
-    case "done":
-      return 1;
-    case "working":
-      if (task.startedAt === undefined) {
-        return 0;
-      }
-      return Math.min(Math.max((now - task.startedAt) / task.estimatedDuration, 0), 1);
-  }
+// Back to whoever did it: they pick it up as soon as they are free.
+export function sendBack(task: Task, reason: string, eventId: EventId, now: Timestamp): Transition<TaskSentBack, "taskNotAwaitingApproval" | "reasonRequired"> {
+  if (task.status !== "approval") return { ok: false, reason: "taskNotAwaitingApproval" };
+  const why = reason.trim();
+  if (why === "") return { ok: false, reason: "reasonRequired" };
+  return {
+    ok: true,
+    task: { ...task, status: "backlog", changesRequested: why, finishedAt: undefined },
+    events: [{ ...base(task, eventId, now), type: "TaskSentBack", reason: why }],
+  };
 }
 
-function taskCompletedEvent(
-  task: Task,
-  employee: Employee,
-  eventId: EventId,
-  occurredAt: Timestamp,
-  completedAt: Timestamp,
-): TaskCompleted {
+export function holdTask(task: Task, reason: string, eventId: EventId, now: Timestamp): Transition<TaskHeld, "taskNotHoldable" | "reasonRequired"> {
+  if (task.status !== "backlog" && task.status !== "working" && task.status !== "approval") {
+    return { ok: false, reason: "taskNotHoldable" };
+  }
+  const why = reason.trim();
+  if (why === "") return { ok: false, reason: "reasonRequired" };
   return {
-    eventId,
-    type: "TaskCompleted",
-    occurredAt,
-    companyId: task.companyId,
-    taskId: task.id,
-    taskTitle: task.title,
-    employeeId: employee.id,
-    employeeName: employee.name,
-    completedAt,
+    ok: true,
+    task: { ...paused(task, now), status: "held", heldFrom: task.status, heldReason: why, blocker: undefined },
+    events: [{ ...base(task, eventId, now), type: "TaskHeld", reason: why }],
+  };
+}
+
+// Finished work comes back waiting for approval; anything else queues again
+// for whoever had it.
+export function resumeTask(task: Task, eventId: EventId, now: Timestamp): Transition<TaskResumed, "taskNotHeld"> {
+  if (task.status !== "held") return { ok: false, reason: "taskNotHeld" };
+  return {
+    ok: true,
+    task: { ...task, status: task.heldFrom === "approval" ? "approval" : "backlog", heldFrom: undefined, heldReason: undefined },
+    events: [{ ...base(task, eventId, now), type: "TaskResumed" }],
+  };
+}
+
+export function blockTask(task: Task, blocker: Blocker, eventId: EventId, now: Timestamp): Transition<TaskBlocked, "taskNotWorking"> {
+  if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
+  return {
+    ok: true,
+    task: { ...paused(task, now), blocker },
+    events: [{ ...base(task, eventId, now), type: "TaskBlocked", blocker }],
+  };
+}
+
+export function unblockTask(task: Task, eventId: EventId, now: Timestamp): Transition<TaskUnblocked, "taskNotBlocked"> {
+  if (task.status !== "working" || task.blocker === undefined) return { ok: false, reason: "taskNotBlocked" };
+  return {
+    ok: true,
+    task: { ...task, blocker: undefined, runningSince: now },
+    events: [{ ...base(task, eventId, now), type: "TaskUnblocked" }],
+  };
+}
+
+// When its employee goes on leave or is let go, work in progress goes back to
+// the backlog for whoever is free.
+export function returnToBacklog(task: Task, eventId: EventId, now: Timestamp): Transition<TaskReturned, "taskNotWorking"> {
+  if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
+  return {
+    ok: true,
+    task: { ...paused(task, now), status: "backlog", assigneeId: undefined, blocker: undefined },
+    events: [{ ...base(task, eventId, now), type: "TaskReturned" }],
   };
 }

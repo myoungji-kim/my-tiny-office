@@ -15,9 +15,10 @@ const availabilityDot: Record<Availability | "working", string> = {
 
 const taskTone: Record<TaskStatus, string> = {
   backlog: "bg-parchment text-muted",
-  ready: "bg-lavender/30 text-ink",
   working: "bg-blue/25 text-ink",
+  approval: "bg-lavender/30 text-ink",
   done: "bg-sage/25 text-ink",
+  held: "bg-amber/25 text-ink",
 };
 
 export type EmployeeStatus = Availability | "working";
@@ -62,18 +63,5 @@ export function TaskStatusBadge({
     >
       {label}
     </span>
-  );
-}
-
-export function ProgressBar({ value }: { readonly value: number }) {
-  const percent = Math.round(value * 100);
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 w-28 overflow-hidden rounded-full bg-parchment">
-        <div className="h-full rounded-full bg-blue" style={{ width: `${percent}%` }} />
-      </div>
-      <span className="font-mono text-xs text-muted">{percent}%</span>
-    </div>
   );
 }

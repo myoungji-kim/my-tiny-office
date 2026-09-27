@@ -23,6 +23,7 @@ const employee: Employee = {
   name: "Min-su",
   role: "Backend Engineer",
   availability: "available",
+  vacationSince: undefined,
   hiredAt,
 };
 
@@ -48,7 +49,7 @@ describe("sqlite employee repository", () => {
 
   it("round trips an employee on vacation", async () => {
     const repository = createSqliteEmployeeRepository(database.handle.db);
-    const onVacation: Employee = { ...employee, availability: "onVacation" };
+    const onVacation: Employee = { ...employee, availability: "onVacation", vacationSince: hiredAt + 1 };
 
     await repository.save(onVacation);
 

@@ -15,6 +15,20 @@
       "when": 1790396245533,
       "tag": "0001_exotic_typhoid_mary",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790536718984,
+      "tag": "0002_project_board",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790536751865,
+      "tag": "0003_drop_simulated_time",
+      "breakpoints": true
     }
   ]
 }

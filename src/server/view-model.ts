@@ -1,8 +1,8 @@
-import { settleDueTasks } from "../application/task";
 import type { Company } from "../domain/company";
 import type { Availability } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
-import { taskProgress, type TaskPriority, type TaskStatus } from "../domain/task";
+import type { Priority, ProjectStatus } from "../domain/project";
+import { timeTaken, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
@@ -20,15 +20,24 @@ export interface EmployeeView {
   readonly workingOn: string | undefined;
 }
 
+export interface ProjectView {
+  readonly id: string;
+  readonly name: string;
+  readonly status: ProjectStatus;
+  readonly priority: Priority;
+}
+
 export interface TaskView {
   readonly id: string;
+  readonly projectName: string;
   readonly title: string;
   readonly description: string | undefined;
   readonly status: TaskStatus;
-  readonly priority: TaskPriority;
+  readonly priority: Priority;
   readonly assigneeId: string | undefined;
   readonly assigneeName: string | undefined;
-  readonly progress: number;
+  readonly minutesTaken: number;
+  readonly blocked: boolean;
 }
 
 export interface OfficeView {
@@ -42,6 +51,7 @@ export interface OfficeView {
       }
     | undefined;
   readonly employees: readonly EmployeeView[];
+  readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }
 
@@ -49,6 +59,7 @@ const empty: OfficeView = {
   companies: [],
   company: undefined,
   employees: [],
+  projects: [],
   tasks: [],
 };
 
@@ -84,11 +95,11 @@ export async function loadOffice(
   const base = createAppContext(files.open(company.id));
   const ctx = clock === undefined ? base : { ...base, now: clock };
 
-  await settleDueTasks(ctx, { companyId: company.id });
-
   const now = ctx.now();
   const employees = await ctx.employees.findByCompany(company.id);
   const tasks = await ctx.tasks.findByCompany(company.id);
+  const projects = await ctx.projects.findByCompany(company.id);
+  const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
   const nameById = new Map(employees.map((employee) => [employee.id, employee.name]));
   const workingTitleById = new Map(
@@ -112,15 +123,23 @@ export async function loadOffice(
       availability: employee.availability,
       workingOn: workingTitleById.get(employee.id),
     })),
+    projects: projects.map((project) => ({
+      id: project.id,
+      name: project.name,
+      status: project.status,
+      priority: project.priority,
+    })),
     tasks: tasks.map((task) => ({
       id: task.id,
+      projectName: projectName.get(task.projectId) ?? "",
       title: task.title,
       description: task.description,
       status: task.status,
       priority: task.priority,
       assigneeId: task.assigneeId,
       assigneeName: task.assigneeId === undefined ? undefined : nameById.get(task.assigneeId),
-      progress: taskProgress(task, now),
+      minutesTaken: Math.floor(timeTaken(task, now) / 60_000),
+      blocked: task.blocker !== undefined,
     })),
   };
 }

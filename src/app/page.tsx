@@ -36,7 +36,7 @@ export default async function HomePage({
     return <Onboarding t={t} />;
   }
 
-  const { company, companies, employees, tasks } = office;
+  const { company, companies, employees, projects, tasks } = office;
   const view = resolveView(single(params, "view"));
 
   return (
@@ -52,7 +52,7 @@ export default async function HomePage({
       )}
       {view === "people" && <PeopleView t={t} companyId={company.id} employees={employees} />}
       {view === "work" && (
-        <WorkView t={t} companyId={company.id} employees={employees} tasks={tasks} />
+        <WorkView t={t} companyId={company.id} employees={employees} projects={projects} tasks={tasks} />
       )}
       {view === "company" && (
         <CompanyView

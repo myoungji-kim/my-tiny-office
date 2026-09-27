@@ -1,10 +1,11 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { CompanyId, EmployeeId, TaskId } from "../domain/ids";
+import type { CompanyId, EmployeeId, ProjectId, TaskId } from "../domain/ids";
+import type { Project } from "../domain/project";
 import type { Task } from "../domain/task";
 
 import type { TransactionRunner } from "./context";
-import type { CompanyRepository, EmployeeRepository, TaskRepository } from "./repositories";
+import type { CompanyRepository, EmployeeRepository, ProjectRepository, TaskRepository } from "./repositories";
 
 export const withoutTransaction: TransactionRunner = (work) => work();
 
@@ -42,6 +43,24 @@ export function createInMemoryEmployeeRepository(): EmployeeRepository {
   };
 }
 
+export function createInMemoryProjectRepository(): ProjectRepository {
+  const projects = new Map<ProjectId, Project>();
+
+  return {
+    async findById(id) {
+      return projects.get(id);
+    },
+    async findByCompany(companyId) {
+      return [...projects.values()]
+        .filter((project) => project.companyId === companyId)
+        .sort((a, b) => a.createdAt - b.createdAt);
+    },
+    async save(project) {
+      projects.set(project.id, project);
+    },
+  };
+}
+
 export function createInMemoryTaskRepository(): TaskRepository {
   const tasks = new Map<TaskId, Task>();
 
@@ -53,11 +72,6 @@ export function createInMemoryTaskRepository(): TaskRepository {
       return [...tasks.values()]
         .filter((task) => task.companyId === companyId)
         .sort((a, b) => a.createdAt - b.createdAt);
-    },
-    async findWorkingByCompany(companyId) {
-      return [...tasks.values()].filter(
-        (task) => task.companyId === companyId && task.status === "working",
-      );
     },
     async save(task) {
       tasks.set(task.id, task);

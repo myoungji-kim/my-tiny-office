@@ -8,7 +8,8 @@ import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
-import { assignTask, completeTask, createTask, startTask } from "../application/task";
+import { createProject, startProject } from "../application/project";
+import { assignTask, createTask, pickUpWork } from "../application/task";
 import { toCompanyId, toEmployeeId, type CompanyId } from "../domain/ids";
 import { createAppContext } from "../infrastructure/app-context";
 import {
@@ -16,13 +17,11 @@ import {
   type CompanyFiles,
 } from "../infrastructure/persistence/company-files";
 import { writeSettings } from "../infrastructure/persistence/settings";
-import { createSqliteTaskRepository } from "../infrastructure/persistence/task-repository";
 
 import { loadOffice } from "./view-model";
 
 const minute = 60_000;
 const baseTime = 1_700_000_000_000;
-const estimatedDuration = 30 * minute;
 
 let directory: string;
 let files: CompanyFiles;
@@ -156,108 +155,74 @@ describe("loadOffice", () => {
   });
 });
 
-describe("task lifecycle through the office view", () => {
-  async function seedAssignedTask() {
+describe("work through the office view", () => {
+  async function seedWork() {
     const company = await seedCompany();
     const employee = await seedEmployee(company.id);
-
+    const made = await createProject(ctx, { companyId: company.id, name: "결제 개편", priority: "high", folder: "/code/pay" });
+    assert(made.ok);
     const created = await createTask(ctx, {
       companyId: company.id,
+      projectId: made.value.project.id,
       title: "Implement payment API",
       description: "Add payment endpoint and validation",
       priority: "high",
-      estimatedDuration,
     });
     assert(created.ok);
-
-    return { company, employee, task: created.value.task };
+    return { company, employee, project: made.value.project, task: created.value.task };
   }
 
-  it("shows a new task as unassigned backlog work", async () => {
-    const { company } = await seedAssignedTask();
+  it("shows a new task as unassigned backlog work in its project", async () => {
+    const { company } = await seedWork();
 
     const office = await load(company.id);
 
+    expect(office.projects).toMatchObject([{ name: "결제 개편", status: "planned", priority: "high" }]);
     expect(office.tasks).toEqual([
       {
         id: expect.any(String),
+        projectName: "결제 개편",
         title: "Implement payment API",
         description: "Add payment endpoint and validation",
         status: "backlog",
         priority: "high",
         assigneeId: undefined,
         assigneeName: undefined,
-        progress: 0,
+        minutesTaken: 0,
+        blocked: false,
       },
     ]);
   });
 
   it("names the assignee once the task is assigned", async () => {
-    const { company, employee, task } = await seedAssignedTask();
-
-    const assigned = await assignTask(ctx, { taskId: task.id, employeeId: employee.id });
-    assert(assigned.ok);
+    const { company, employee, task } = await seedWork();
+    assert((await assignTask(ctx, { taskId: task.id, employeeId: employee.id })).ok);
 
     const office = await load(company.id);
 
-    expect(office.tasks[0]).toMatchObject({ status: "ready", assigneeName: "Min-su" });
+    expect(office.tasks[0]).toMatchObject({ status: "backlog", assigneeName: "Min-su" });
   });
 
-  it("derives progress from the clock while the task is being worked on", async () => {
-    const { company, employee, task } = await seedAssignedTask();
-    await assignTask(ctx, { taskId: task.id, employeeId: employee.id });
-    await startTask(ctx, { taskId: task.id });
+  it("shows the time work has taken, and who is on it", async () => {
+    const { company, project } = await seedWork();
+    assert((await startProject(ctx, project.id)).ok);
+    assert((await pickUpWork(ctx, company.id)).ok);
 
-    current = baseTime + 15 * minute;
+    current = baseTime + 23 * minute;
     const office = await load(company.id);
 
-    expect(office.tasks[0]).toMatchObject({ status: "working", progress: 0.5 });
+    expect(office.tasks[0]).toMatchObject({ status: "working", minutesTaken: 23 });
     expect(office.employees[0]).toMatchObject({ workingOn: "Implement payment API" });
   });
 
-  it("shows a completed task as done", async () => {
-    const { company, employee, task } = await seedAssignedTask();
-    await assignTask(ctx, { taskId: task.id, employeeId: employee.id });
-    await startTask(ctx, { taskId: task.id });
-
-    current = baseTime + 10 * minute;
-    const completed = await completeTask(ctx, { taskId: task.id });
-    assert(completed.ok);
-
-    const office = await load(company.id);
-
-    expect(office.tasks[0]).toMatchObject({ status: "done", progress: 1 });
-    expect(office.employees[0]).toMatchObject({ workingOn: undefined });
-  });
-
-  it("settles a task that became due while the office was closed", async () => {
-    const { company, employee, task } = await seedAssignedTask();
-    await assignTask(ctx, { taskId: task.id, employeeId: employee.id });
-    await startTask(ctx, { taskId: task.id });
+  it("never starts work by itself when the office is opened", async () => {
+    const { company, project } = await seedWork();
+    assert((await startProject(ctx, project.id)).ok);
 
     current = baseTime + 5 * 60 * minute;
     const office = await load(company.id);
 
-    expect(office.tasks[0]).toMatchObject({ status: "done" });
-    await expect(
-      createSqliteTaskRepository(files.open(company.id).db).findById(task.id),
-    ).resolves.toMatchObject({ completedAt: baseTime + estimatedDuration });
-  });
-
-  it("ignores a task that belongs to another company", async () => {
-    const { company } = await seedAssignedTask();
-    const rival = await seedCompany("RivalSoft");
-    const rivalTask = await createTask(ctx, {
-      companyId: rival.id,
-      title: "Rival work",
-      priority: "low",
-      estimatedDuration,
-    });
-    assert(rivalTask.ok);
-
-    const office = await load(company.id);
-
-    expect(office.tasks.map((task) => task.title)).toEqual(["Implement payment API"]);
+    expect(office.tasks[0]).toMatchObject({ status: "backlog", minutesTaken: 0 });
   });
 });
 

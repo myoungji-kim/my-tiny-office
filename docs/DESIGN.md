@@ -586,11 +586,12 @@ measured flags behind it.
 
 ## Open questions
 
-- **The domain predates the board.** `src/domain/task.ts` needs backlog,
-  working, approval, done and held, plus the blocked mark, and time taken rather
-  than progress derived from `estimatedDuration`. Projects need their status
-  and priority and allowed commands, employees the `reviewing` status, and a
-  task its worktree, branch and blocked reason.
+- **The domain is half way to the board.** Projects, the five task statuses,
+  the blocked mark, time taken, the pick-up order and leave are built
+  (`src/domain`). Still to come: the `reviewing` status with the PullRequest
+  and review, areas, roles and teams, memory and ways of working, the
+  milestones, and a task's worktree and branch. The screens in `src/components`
+  are the placeholder until they are rebuilt from `docs/ui`.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

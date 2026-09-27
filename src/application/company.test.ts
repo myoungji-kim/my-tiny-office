@@ -7,6 +7,7 @@ import type { AppContext } from "./context";
 import {
   createInMemoryCompanyRepository,
   createInMemoryEmployeeRepository,
+  createInMemoryProjectRepository,
   createInMemoryTaskRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
@@ -19,6 +20,7 @@ function createContext(): AppContext {
   return {
     companies: createInMemoryCompanyRepository(),
     employees: createInMemoryEmployeeRepository(),
+    projects: createInMemoryProjectRepository(),
     tasks: createInMemoryTaskRepository(),
     now: () => foundedAt,
     newId: () => `id-${(counter += 1)}`,

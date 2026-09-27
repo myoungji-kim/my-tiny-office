@@ -16,6 +16,7 @@ function toEmployee(row: EmployeeRow): Employee {
     name: row.name,
     role: row.role,
     availability: row.availability,
+    vacationSince: row.vacationSince ?? undefined,
     hiredAt: row.hiredAt,
   };
 }
@@ -27,6 +28,7 @@ function toRow(employee: Employee): typeof employees.$inferInsert {
     name: employee.name,
     role: employee.role,
     availability: employee.availability,
+    vacationSince: employee.vacationSince ?? null,
     hiredAt: employee.hiredAt,
   };
 }

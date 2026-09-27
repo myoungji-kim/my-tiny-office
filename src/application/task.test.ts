@@ -1,470 +1,215 @@
-import { assert, describe, expect, it } from "vitest";
+import { assert, beforeEach, describe, expect, it } from "vitest";
 
-import type { DomainEvent } from "../domain/events";
-import { toCompanyId, toEmployeeId, toTaskId } from "../domain/ids";
-import type { Task } from "../domain/task";
+import type { Employee } from "../domain/employee";
+import { toCompanyId, toEventId, type ProjectId } from "../domain/ids";
+import { finishWork } from "../domain/task";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
-import { hireEmployee } from "./employee";
+import { bringBack, hireEmployee, sendOnVacation } from "./employee";
 import {
   createInMemoryCompanyRepository,
   createInMemoryEmployeeRepository,
+  createInMemoryProjectRepository,
   createInMemoryTaskRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
-import { assignTask, completeTask, createTask, settleDueTasks, startTask } from "./task";
+import { allowCommand, createProject, finishProject, holdProject, startProject } from "./project";
+import { applyTask, assignTask, createTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
 
 const minute = 60_000;
-const baseTime = 1_700_000_000_000;
-const estimatedDuration = 30 * minute;
+const t0 = 1_700_000_000_000;
+const companyId = toCompanyId("company");
 
-interface TestContext {
-  readonly ctx: AppContext;
-  setNow(time: number): void;
-  nowCalls(): number;
-}
+let ctx: AppContext;
+let now: number;
 
-function createContext(): TestContext {
-  let current = baseTime;
-  let idCounter = 0;
-  let calls = 0;
-
-  const ctx: AppContext = {
+beforeEach(async () => {
+  let counter = 0;
+  now = t0;
+  ctx = {
     companies: createInMemoryCompanyRepository(),
     employees: createInMemoryEmployeeRepository(),
+    projects: createInMemoryProjectRepository(),
     tasks: createInMemoryTaskRepository(),
-    now: () => {
-      calls += 1;
-      return current;
-    },
-    newId: () => `id-${(idCounter += 1)}`,
+    now: () => now,
+    newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,
   };
+  await createCompany(ctx, { id: companyId, name: "TinySoft" });
+});
 
-  return {
-    ctx,
-    setNow: (time) => {
-      current = time;
-    },
-    nowCalls: () => calls,
-  };
+async function project(options: { folder?: string; start?: boolean; priority?: "low" | "normal" | "high" } = {}): Promise<ProjectId> {
+  const made = await createProject(ctx, { companyId, name: "결제 개편", priority: options.priority ?? "normal", folder: options.folder ?? "/code/pay" });
+  assert(made.ok);
+  if (options.start !== false) assert((await startProject(ctx, made.value.project.id)).ok);
+  return made.value.project.id;
 }
 
-async function seedCompanyEmployeeAndTask(t: TestContext) {
-  const { company } = await createCompany(t.ctx, { name: "TinySoft" });
-
-  const hired = await hireEmployee(t.ctx, {
-    companyId: company.id,
-    name: "Min-su",
-    role: "Backend Engineer",
-  });
+async function hire(name: string): Promise<Employee> {
+  const hired = await hireEmployee(ctx, { companyId, name, role: "Backend Engineer" });
   assert(hired.ok);
-
-  const created = await createTask(t.ctx, {
-    companyId: company.id,
-    title: "Payment API",
-    priority: "normal",
-    estimatedDuration,
-  });
-  assert(created.ok);
-
-  return { company, employee: hired.value.employee, task: created.value.task };
+  return hired.value.employee;
 }
 
-describe("task lifecycle", () => {
-  it("runs the full company to completed task flow", async () => {
-    const t = createContext();
-    const startedAt = baseTime + 5 * minute;
-    const completedAt = baseTime + 20 * minute;
+async function task(projectId: ProjectId, title = "Paginate", priority: "low" | "normal" | "high" = "normal") {
+  const made = await createTask(ctx, { companyId, projectId, title, priority });
+  assert(made.ok);
+  now += 1;
+  return made.value.task;
+}
 
-    const { company, employee, task } = await seedCompanyEmployeeAndTask(t);
-    expect(task.status).toBe("backlog");
+describe("writing work down", () => {
+  it("goes into a planned or active project and waits in the backlog", async () => {
+    const planned = await project({ start: false });
+    const written = await task(planned);
 
-    const assigned = await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-    assert(assigned.ok);
-    expect(assigned.value.task.status).toBe("ready");
-    expect(assigned.value.task.assigneeId).toBe(employee.id);
-
-    t.setNow(startedAt);
-    const started = await startTask(t.ctx, { taskId: task.id });
-    assert(started.ok);
-    expect(started.value.task.status).toBe("working");
-    expect(started.value.task.startedAt).toBe(startedAt);
-
-    t.setNow(completedAt);
-    const completed = await completeTask(t.ctx, { taskId: task.id });
-    assert(completed.ok);
-    expect(completed.value.task.status).toBe("done");
-    expect(completed.value.task.completedAt).toBe(completedAt);
-
-    await expect(t.ctx.tasks.findById(task.id)).resolves.toEqual(completed.value.task);
-    await expect(t.ctx.companies.findById(company.id)).resolves.toEqual(company);
-    await expect(t.ctx.tasks.findWorkingByCompany(company.id)).resolves.toEqual([]);
+    expect(written).toMatchObject({ status: "backlog", projectId: planned });
   });
 
-  it("collects the domain events in order", async () => {
-    const t = createContext();
-    const events: DomainEvent[] = [];
+  it("is refused in a held or unknown project", async () => {
+    const pay = await project();
+    assert((await holdProject(ctx, pay, "later")).ok);
 
-    const { company, events: companyEvents } = await createCompany(t.ctx, { name: "TinySoft" });
-    const hired = await hireEmployee(t.ctx, {
-      companyId: company.id,
-      name: "Min-su",
-      role: "Backend Engineer",
+    await expect(createTask(ctx, { companyId, projectId: pay, title: "x", priority: "low" })).resolves.toMatchObject({ reason: "projectClosed" });
+    await expect(createTask(ctx, { companyId, projectId: "nope" as ProjectId, title: "x", priority: "low" })).resolves.toMatchObject({
+      reason: "projectNotFound",
     });
-    assert(hired.ok);
-    const created = await createTask(t.ctx, {
-      companyId: company.id,
-      title: "Payment API",
-      priority: "normal",
-      estimatedDuration,
-    });
-    assert(created.ok);
-    const assigned = await assignTask(t.ctx, {
-      taskId: created.value.task.id,
-      employeeId: hired.value.employee.id,
-    });
-    assert(assigned.ok);
-    const started = await startTask(t.ctx, { taskId: created.value.task.id });
-    assert(started.ok);
-    const completed = await completeTask(t.ctx, { taskId: created.value.task.id });
-    assert(completed.ok);
+  });
 
-    events.push(
-      ...companyEvents,
-      ...hired.events,
-      ...created.events,
-      ...assigned.events,
-      ...started.events,
-      ...completed.events,
-    );
+  it("can name who takes it, and not someone on leave", async () => {
+    const pay = await project();
+    const mocha = await hire("모카");
+    assert((await sendOnVacation(ctx, mocha.id)).ok);
 
-    expect(events.map((event) => event.type)).toEqual([
-      "CompanyCreated",
-      "EmployeeHired",
-      "TaskCreated",
-      "TaskAssigned",
-      "TaskStarted",
-      "TaskCompleted",
-    ]);
-    expect(events.every((event) => event.companyId === company.id)).toBe(true);
-    expect(assigned.events[0]).toMatchObject({
-      taskTitle: "Payment API",
-      employeeName: "Min-su",
+    await expect(createTask(ctx, { companyId, projectId: pay, title: "x", priority: "low", assigneeId: mocha.id })).resolves.toMatchObject({
+      reason: "employeeOnVacation",
     });
   });
 });
 
-describe("createTask", () => {
-  it("rejects a company that does not exist", async () => {
-    const t = createContext();
+describe("pickUpWork", () => {
+  it("starts nothing in a planned project, and what is free once it starts", async () => {
+    const pay = await project({ start: false });
+    await task(pay);
+    const mocha = await hire("모카");
 
-    const result = await createTask(t.ctx, {
-      companyId: toCompanyId("missing"),
-      title: "Payment API",
-      priority: "normal",
-      estimatedDuration,
-    });
+    await expect(pickUpWork(ctx, companyId)).resolves.toMatchObject({ value: { started: [] } });
 
-    expect(result).toEqual({ ok: false, reason: "companyNotFound" });
+    assert((await startProject(ctx, pay)).ok);
+    const picked = await pickUpWork(ctx, companyId);
+    assert(picked.ok);
+    expect(picked.value.started).toMatchObject([{ status: "working", assigneeId: mocha.id }]);
+    expect(picked.events.map((e) => e.type)).toEqual(["TaskStarted"]);
   });
 
-  it("propagates the domain rejection for a non-positive duration", async () => {
-    const t = createContext();
-    const { company } = await createCompany(t.ctx, { name: "TinySoft" });
+  it("gives each person one thing, the higher project first", async () => {
+    const low = await project({ priority: "low" });
+    const high = await project({ priority: "high" });
+    const lowTask = await task(low, "low first written");
+    const highTask = await task(high, "high");
+    await hire("모카");
 
-    const result = await createTask(t.ctx, {
-      companyId: company.id,
-      title: "Payment API",
-      priority: "normal",
-      estimatedDuration: 0,
-    });
+    const picked = await pickUpWork(ctx, companyId);
+    assert(picked.ok);
+    expect(picked.value.started.map((t) => t.id)).toEqual([highTask.id]);
+    await expect(ctx.tasks.findById(lowTask.id)).resolves.toMatchObject({ status: "backlog" });
 
-    expect(result).toEqual({ ok: false, reason: "invalidEstimatedDuration" });
-  });
-});
-
-describe("assignTask", () => {
-  it("rejects a task that does not exist", async () => {
-    const t = createContext();
-    const { employee } = await seedCompanyEmployeeAndTask(t);
-
-    const result = await assignTask(t.ctx, {
-      taskId: toTaskId("missing"),
-      employeeId: employee.id,
-    });
-
-    expect(result).toEqual({ ok: false, reason: "taskNotFound" });
+    const again = await pickUpWork(ctx, companyId);
+    assert(again.ok);
+    expect(again.value.started).toEqual([]);
   });
 
-  it("rejects an employee that does not exist", async () => {
-    const t = createContext();
-    const { task } = await seedCompanyEmployeeAndTask(t);
+  it("leaves work handed to someone for them", async () => {
+    const pay = await project();
+    const mocha = await hire("모카");
+    const tofu = await hire("두부");
+    const forTofu = await task(pay);
+    assert((await assignTask(ctx, { taskId: forTofu.id, employeeId: tofu.id })).ok);
+    assert((await sendOnVacation(ctx, tofu.id)).ok);
 
-    const result = await assignTask(t.ctx, {
-      taskId: task.id,
-      employeeId: toEmployeeId("missing"),
-    });
-
-    expect(result).toEqual({ ok: false, reason: "employeeNotFound" });
-  });
-
-  it("rejects an employee from another company", async () => {
-    const t = createContext();
-    const { task } = await seedCompanyEmployeeAndTask(t);
-
-    const { company: rival } = await createCompany(t.ctx, { name: "RivalSoft" });
-    const outsider = await hireEmployee(t.ctx, {
-      companyId: rival.id,
-      name: "Sam",
-      role: "Backend Engineer",
-    });
-    assert(outsider.ok);
-
-    const result = await assignTask(t.ctx, {
-      taskId: task.id,
-      employeeId: outsider.value.employee.id,
-    });
-
-    expect(result).toEqual({ ok: false, reason: "employeeFromAnotherCompany" });
-  });
-
-  it("rejects an employee on vacation", async () => {
-    const t = createContext();
-    const { employee, task } = await seedCompanyEmployeeAndTask(t);
-    await t.ctx.employees.save({ ...employee, availability: "onVacation" });
-
-    const result = await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-
-    expect(result).toEqual({ ok: false, reason: "employeeOnVacation" });
-  });
-
-  it("does not save a new task state when it is rejected", async () => {
-    const t = createContext();
-    const { employee, task } = await seedCompanyEmployeeAndTask(t);
-    await t.ctx.employees.save({ ...employee, availability: "onVacation" });
-
-    await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-
-    await expect(t.ctx.tasks.findById(task.id)).resolves.toEqual(task);
+    const picked = await pickUpWork(ctx, companyId);
+    assert(picked.ok);
+    // 모카 is free, but the only work was handed to 두부
+    expect(picked.value.started).toEqual([]);
+    expect(mocha.availability).toBe("available");
   });
 });
 
-describe("startTask", () => {
-  it("rejects a task that does not exist", async () => {
-    const t = createContext();
-
-    const result = await startTask(t.ctx, { taskId: toTaskId("missing") });
-
-    expect(result).toEqual({ ok: false, reason: "taskNotFound" });
-  });
-
-  it("rejects a task that has no assignee", async () => {
-    const t = createContext();
-    const { task } = await seedCompanyEmployeeAndTask(t);
-
-    const result = await startTask(t.ctx, { taskId: task.id });
-
-    expect(result).toEqual({ ok: false, reason: "taskHasNoAssignee" });
-  });
-
-  it("propagates the domain rejection for a task that is already done", async () => {
-    const t = createContext();
-    const { employee, task } = await seedCompanyEmployeeAndTask(t);
-
-    await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-    await startTask(t.ctx, { taskId: task.id });
-    await completeTask(t.ctx, { taskId: task.id });
-
-    const result = await startTask(t.ctx, { taskId: task.id });
-
-    expect(result).toEqual({ ok: false, reason: "taskNotReady" });
-  });
-});
-
-describe("completeTask", () => {
-  it("propagates the domain rejection for a task that is not working", async () => {
-    const t = createContext();
-    const { employee, task } = await seedCompanyEmployeeAndTask(t);
-    await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-
-    const result = await completeTask(t.ctx, { taskId: task.id });
-
-    expect(result).toEqual({ ok: false, reason: "taskNotWorking" });
-  });
-});
-
-describe("settleDueTasks", () => {
-  async function seedWorkingTask(t: TestContext) {
-    const { company, employee, task } = await seedCompanyEmployeeAndTask(t);
-    await assignTask(t.ctx, { taskId: task.id, employeeId: employee.id });
-    const started = await startTask(t.ctx, { taskId: task.id });
-    assert(started.ok);
-
-    return { company, employee, task: started.value.task };
+describe("approval", () => {
+  async function waitingForApproval() {
+    const pay = await project();
+    const mocha = await hire("모카");
+    const written = await task(pay);
+    assert((await pickUpWork(ctx, companyId)).ok);
+    const working = (await ctx.tasks.findById(written.id))!;
+    // what the runtime does when the run ends
+    now += 52 * minute;
+    const finished = finishWork(working, toEventId("finished"), now);
+    assert(finished.ok);
+    await ctx.tasks.save(finished.task);
+    return { pay, mocha, task: finished.task };
   }
 
-  it("rejects a company that does not exist", async () => {
-    const t = createContext();
+  it("applies finished work", async () => {
+    const { task: done } = await waitingForApproval();
 
-    const result = await settleDueTasks(t.ctx, { companyId: toCompanyId("missing") });
-
-    expect(result).toEqual({ ok: false, reason: "companyNotFound" });
+    const applied = await applyTask(ctx, done.id);
+    assert(applied.ok);
+    expect(applied.value.task).toMatchObject({ status: "done", appliedAt: now });
   });
 
-  it("completes a task that became due while the application was closed", async () => {
-    const t = createContext();
-    const { company, task } = await seedWorkingTask(t);
-    const scheduledCompletedAt = baseTime + estimatedDuration;
-    const relaunchedAt = baseTime + 5 * 60 * minute;
+  it("sends it back to whoever did it, who picks it up again", async () => {
+    const { task: done, mocha } = await waitingForApproval();
 
-    t.setNow(relaunchedAt);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    assert(result.ok);
-    expect(result.value.settledTasks).toHaveLength(1);
-    expect(result.value.settledTasks[0].completedAt).toBe(scheduledCompletedAt);
-    await expect(t.ctx.tasks.findById(task.id)).resolves.toMatchObject({ status: "done" });
+    assert((await sendBack(ctx, done.id, "split the retryable failures")).ok);
+    const picked = await pickUpWork(ctx, companyId);
+    assert(picked.ok);
+    expect(picked.value.started).toMatchObject([{ id: done.id, assigneeId: mocha.id, changesRequested: "split the retryable failures" }]);
   });
 
-  it("records the scheduled completion time and the time it was observed", async () => {
-    const t = createContext();
-    const { company } = await seedWorkingTask(t);
-    const relaunchedAt = baseTime + 5 * 60 * minute;
+  it("holds and resumes it as finished work", async () => {
+    const { task: done } = await waitingForApproval();
 
-    t.setNow(relaunchedAt);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    assert(result.ok);
-    expect(result.events).toEqual([
-      expect.objectContaining({
-        type: "TaskCompleted",
-        occurredAt: relaunchedAt,
-        completedAt: baseTime + estimatedDuration,
-      }),
-    ]);
+    assert((await holdTask(ctx, done.id, "after the release")).ok);
+    const resumed = await resumeTask(ctx, done.id);
+    assert(resumed.ok);
+    expect(resumed.value.task.status).toBe("approval");
   });
 
-  it("leaves a task that is not due yet untouched", async () => {
-    const t = createContext();
-    const { company, task } = await seedWorkingTask(t);
+  it("keeps a project from finishing while it waits", async () => {
+    const { pay, task: done } = await waitingForApproval();
 
-    t.setNow(baseTime + estimatedDuration - 1);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    assert(result.ok);
-    expect(result.value.settledTasks).toEqual([]);
-    expect(result.events).toEqual([]);
-    await expect(t.ctx.tasks.findById(task.id)).resolves.toMatchObject({ status: "working" });
-  });
-
-  it("settles several tasks in scheduled completion order", async () => {
-    const t = createContext();
-    const { company, employee } = await seedWorkingTask(t);
-
-    const shorter = await createTask(t.ctx, {
-      companyId: company.id,
-      title: "Fix typo",
-      priority: "low",
-      estimatedDuration: 10 * minute,
-    });
-    assert(shorter.ok);
-    await assignTask(t.ctx, { taskId: shorter.value.task.id, employeeId: employee.id });
-
-    t.setNow(baseTime + 5 * minute);
-    await startTask(t.ctx, { taskId: shorter.value.task.id });
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    assert(result.ok);
-    expect(result.value.settledTasks.map((task) => task.title)).toEqual([
-      "Fix typo",
-      "Payment API",
-    ]);
-    expect(result.events.map((event) => event.occurredAt)).toEqual([
-      baseTime + 5 * 60 * minute,
-      baseTime + 5 * 60 * minute,
-    ]);
-  });
-
-  it("reads the clock once for the whole settlement", async () => {
-    const t = createContext();
-    const { company } = await seedWorkingTask(t);
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    const callsBefore = t.nowCalls();
-    await settleDueTasks(t.ctx, { companyId: company.id });
-
-    expect(t.nowCalls() - callsBefore).toBe(1);
-  });
-
-  it("rejects a working task that has no assignee", async () => {
-    const t = createContext();
-    const { company } = await seedWorkingTask(t);
-    await t.ctx.tasks.save(inconsistentTask(company.id, { assigneeId: undefined }));
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    expect(result).toEqual({ ok: false, reason: "taskHasNoAssignee" });
-  });
-
-  it("rejects a working task whose assignee no longer exists", async () => {
-    const t = createContext();
-    const { company } = await seedWorkingTask(t);
-    await t.ctx.tasks.save(
-      inconsistentTask(company.id, { assigneeId: toEmployeeId("gone") }),
-    );
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    expect(result).toEqual({ ok: false, reason: "employeeNotFound" });
-  });
-
-  it("rejects a working task that was never started", async () => {
-    const t = createContext();
-    const { company } = await seedWorkingTask(t);
-    await t.ctx.tasks.save(
-      inconsistentTask(company.id, { assigneeId: toEmployeeId("gone"), startedAt: undefined }),
-    );
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    const result = await settleDueTasks(t.ctx, { companyId: company.id });
-
-    expect(result).toEqual({ ok: false, reason: "taskNotWorking" });
-  });
-
-  it("saves nothing when one of the due tasks is inconsistent", async () => {
-    const t = createContext();
-    const { company, task } = await seedWorkingTask(t);
-    await t.ctx.tasks.save(inconsistentTask(company.id, { assigneeId: undefined }));
-
-    t.setNow(baseTime + 5 * 60 * minute);
-    await settleDueTasks(t.ctx, { companyId: company.id });
-
-    await expect(t.ctx.tasks.findById(task.id)).resolves.toEqual(task);
+    await expect(finishProject(ctx, pay)).resolves.toMatchObject({ reason: "workStillOpen" });
+    assert((await applyTask(ctx, done.id)).ok);
+    await expect(finishProject(ctx, pay)).resolves.toMatchObject({ ok: true });
   });
 });
 
-function inconsistentTask(
-  companyId: Task["companyId"],
-  overrides: Partial<Task>,
-): Task {
-  return {
-    id: toTaskId("broken"),
-    companyId,
-    title: "Broken",
-    description: undefined,
-    status: "working",
-    priority: "normal",
-    assigneeId: toEmployeeId("employee-x"),
-    estimatedDuration,
-    createdAt: baseTime,
-    startedAt: baseTime,
-    completedAt: undefined,
-    ...overrides,
-  };
-}
+describe("leave", () => {
+  it("returns work in progress to the backlog, and the person comes back to nothing", async () => {
+    const pay = await project();
+    const mocha = await hire("모카");
+    const written = await task(pay);
+    assert((await pickUpWork(ctx, companyId)).ok);
+
+    const away = await sendOnVacation(ctx, mocha.id);
+    assert(away.ok);
+    expect(away.value.employee).toMatchObject({ availability: "onVacation", vacationSince: now });
+    expect(away.events.map((e) => e.type)).toEqual(["EmployeeWentOnVacation", "TaskReturned"]);
+    await expect(ctx.tasks.findById(written.id)).resolves.toMatchObject({ status: "backlog", assigneeId: undefined });
+
+    const back = await bringBack(ctx, mocha.id);
+    assert(back.ok);
+    expect(back.value.employee).toMatchObject({ availability: "available", vacationSince: undefined });
+  });
+});
+
+describe("allowCommand", () => {
+  it("adds an exact command to the project and refuses a pattern", async () => {
+    const pay = await project();
+
+    await expect(allowCommand(ctx, pay, "npm run typecheck")).resolves.toMatchObject({ value: { project: { commands: ["npm run typecheck"] } } });
+    await expect(allowCommand(ctx, pay, "npm *")).resolves.toMatchObject({ reason: "commandNotAllowable" });
+  });
+});

@@ -8,14 +8,13 @@ import { redirect } from "next/navigation";
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
-import { assignTask, completeTask, createTask, startTask } from "../application/task";
-import { toCompanyId, toEmployeeId, toTaskId } from "../domain/ids";
-import type { TaskPriority } from "../domain/task";
+import { createProject } from "../application/project";
+import { assignTask, createTask } from "../application/task";
+import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
+import type { Priority } from "../domain/project";
 import { companyContext, createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
-
-const MINUTE = 60_000;
 
 export interface ActionState {
   readonly error?: string;
@@ -38,7 +37,7 @@ function contextOf(formData: FormData): AppContext | undefined {
   return files.has(id) ? companyContext(toCompanyId(id), files) : undefined;
 }
 
-function priority(formData: FormData): TaskPriority {
+function priority(formData: FormData): Priority {
   const value = formData.get("priority");
   return value === "low" || value === "high" ? value : "normal";
 }
@@ -111,8 +110,8 @@ export async function createTaskAction(
     companyId: toCompanyId(text(formData, "companyId")),
     title,
     description: optionalText(formData, "description"),
+    projectId: toProjectId(text(formData, "projectId")),
     priority: priority(formData),
-    estimatedDuration: Number(formData.get("estimatedMinutes")) * MINUTE,
   });
   if (!result.ok) {
     return { error: result.reason };
@@ -143,7 +142,7 @@ export async function assignTaskAction(
   return {};
 }
 
-export async function startTaskAction(
+export async function createProjectAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
@@ -152,28 +151,10 @@ export async function startTaskAction(
     return { error: "companyNotFound" };
   }
 
-  const result = await startTask(ctx, {
-    taskId: toTaskId(text(formData, "taskId")),
-  });
-  if (!result.ok) {
-    return { error: result.reason };
-  }
-
-  revalidatePath("/");
-  return {};
-}
-
-export async function completeTaskAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const ctx = contextOf(formData);
-  if (ctx === undefined) {
-    return { error: "companyNotFound" };
-  }
-
-  const result = await completeTask(ctx, {
-    taskId: toTaskId(text(formData, "taskId")),
+  const result = await createProject(ctx, {
+    companyId: toCompanyId(text(formData, "companyId")),
+    name: text(formData, "name"),
+    priority: priority(formData),
   });
   if (!result.ok) {
     return { error: result.reason };

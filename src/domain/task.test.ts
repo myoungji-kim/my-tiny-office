@@ -1,293 +1,186 @@
 import { assert, describe, expect, it } from "vitest";
 
 import type { Employee } from "./employee";
-import { toCompanyId, toEmployeeId, toEventId, toTaskId } from "./ids";
+import { toCompanyId, toEmployeeId, toEventId, toProjectId, toTaskId } from "./ids";
 import {
+  applyTask,
   assignTask,
-  completeTask,
+  blockTask,
   createTask,
-  settleTask,
+  finishWork,
+  holdTask,
+  resumeTask,
+  returnToBacklog,
+  sendBack,
   startTask,
-  taskProgress,
-  type CreateTaskInput,
+  timeTaken,
+  unblockTask,
+  type Task,
 } from "./task";
 
 const minute = 60_000;
-
-const companyId = toCompanyId("company-1");
-const otherCompanyId = toCompanyId("company-2");
+const t0 = 1_700_000_000_000;
 const eventId = toEventId("event-1");
+const companyId = toCompanyId("company-1");
 
-const createdAt = 1_700_000_000_000;
-const startedAt = createdAt + 5 * minute;
-const estimatedDuration = 30 * minute;
-const scheduledCompletedAt = startedAt + estimatedDuration;
-
-const minsu: Employee = {
-  id: toEmployeeId("employee-1"),
+const mocha: Employee = {
+  id: toEmployeeId("mocha"),
   companyId,
-  name: "Min-su",
+  name: "모카",
   role: "Backend Engineer",
   availability: "available",
-  hiredAt: createdAt,
+  vacationSince: undefined,
+  hiredAt: t0,
 };
+const tofu: Employee = { ...mocha, id: toEmployeeId("tofu"), name: "두부" };
 
-const jieun: Employee = { ...minsu, id: toEmployeeId("employee-2"), name: "Ji-eun" };
-const alex: Employee = { ...minsu, id: toEmployeeId("employee-3"), availability: "onVacation" };
-const outsider: Employee = { ...minsu, id: toEmployeeId("employee-4"), companyId: otherCompanyId };
+function backlog(): Task {
+  const created = createTask(
+    { id: toTaskId("t1"), companyId, projectId: toProjectId("pay"), title: " Paginate the history ", priority: "high" },
+    eventId,
+    t0,
+  );
+  assert(created.ok);
+  return created.task;
+}
 
-const input: CreateTaskInput = {
-  id: toTaskId("task-1"),
-  companyId,
-  title: "Payment API",
-  priority: "normal",
-  estimatedDuration,
-};
-
-const created = createTask(input, eventId, createdAt);
-assert(created.ok);
-const backlogTask = created.task;
-
-const assigned = assignTask(backlogTask, minsu, eventId, createdAt);
-assert(assigned.ok);
-const readyTask = assigned.task;
-
-const started = startTask(readyTask, minsu, eventId, startedAt);
-assert(started.ok);
-const workingTask = started.task;
-
-const completed = completeTask(workingTask, minsu, eventId, scheduledCompletedAt);
-assert(completed.ok);
-const doneTask = completed.task;
+function working(at = t0): Task {
+  const started = startTask(backlog(), mocha, eventId, at);
+  assert(started.ok);
+  return started.task;
+}
 
 describe("createTask", () => {
-  it("creates an unassigned backlog task", () => {
-    expect(backlogTask).toEqual({
-      id: input.id,
-      companyId,
-      title: "Payment API",
-      description: undefined,
-      status: "backlog",
-      priority: "normal",
-      assigneeId: undefined,
-      estimatedDuration,
-      createdAt,
-      startedAt: undefined,
-      completedAt: undefined,
+  it("starts in the backlog with no one on it and no time taken", () => {
+    const task = backlog();
+
+    expect(task).toMatchObject({ status: "backlog", title: "Paginate the history", assigneeId: undefined, workedFor: 0 });
+    expect(timeTaken(task, t0 + 99 * minute)).toBe(0);
+  });
+
+  it("needs a title", () => {
+    expect(createTask({ id: toTaskId("t"), companyId, projectId: toProjectId("p"), title: "  ", priority: "low" }, eventId, t0)).toEqual({
+      ok: false,
+      reason: "taskTitleRequired",
     });
-  });
-
-  it("emits TaskCreated", () => {
-    expect(created.events).toEqual([
-      {
-        eventId,
-        type: "TaskCreated",
-        occurredAt: createdAt,
-        companyId,
-        taskId: input.id,
-        taskTitle: "Payment API",
-        priority: "normal",
-        estimatedDuration,
-      },
-    ]);
-  });
-
-  it.each([0, -1, Number.NaN])("rejects an estimatedDuration of %s", (duration) => {
-    const result = createTask({ ...input, estimatedDuration: duration }, eventId, createdAt);
-
-    expect(result).toEqual({ ok: false, reason: "invalidEstimatedDuration" });
   });
 });
 
 describe("assignTask", () => {
-  it("marks the task ready for the assignee", () => {
-    expect(readyTask.status).toBe("ready");
-    expect(readyTask.assigneeId).toBe(minsu.id);
-  });
-
-  it("emits TaskAssigned with the employee name", () => {
-    expect(assigned.events).toEqual([
-      {
-        eventId,
-        type: "TaskAssigned",
-        occurredAt: createdAt,
-        companyId,
-        taskId: input.id,
-        taskTitle: "Payment API",
-        employeeId: minsu.id,
-        employeeName: "Min-su",
-      },
-    ]);
-  });
-
-  it("leaves the original task untouched", () => {
-    expect(backlogTask.status).toBe("backlog");
-    expect(backlogTask.assigneeId).toBeUndefined();
-  });
-
-  it("reassigns a task that is still ready", () => {
-    const result = assignTask(readyTask, jieun, eventId, createdAt);
-
+  it("names who will do backlog work without starting it", () => {
+    const result = assignTask(backlog(), mocha, eventId, t0);
     assert(result.ok);
-    expect(result.task.assigneeId).toBe(jieun.id);
+
+    expect(result.task).toMatchObject({ status: "backlog", assigneeId: mocha.id });
   });
 
-  it("rejects an employee from another company", () => {
-    const result = assignTask(backlogTask, outsider, eventId, createdAt);
-
-    expect(result).toEqual({ ok: false, reason: "employeeFromAnotherCompany" });
+  it("refuses someone on leave or from another company", () => {
+    expect(assignTask(backlog(), { ...mocha, availability: "onVacation" }, eventId, t0)).toMatchObject({ reason: "employeeOnVacation" });
+    expect(assignTask(backlog(), { ...mocha, companyId: toCompanyId("other") }, eventId, t0)).toMatchObject({ reason: "employeeFromAnotherCompany" });
   });
 
-  it("rejects an employee on vacation", () => {
-    const result = assignTask(backlogTask, alex, eventId, createdAt);
-
-    expect(result).toEqual({ ok: false, reason: "employeeOnVacation" });
-  });
-
-  it.each([
-    ["working", workingTask],
-    ["done", doneTask],
-  ])("rejects a task that is %s", (_status, task) => {
-    const result = assignTask(task, minsu, eventId, createdAt);
-
-    expect(result).toEqual({ ok: false, reason: "taskNotAssignable" });
+  it("refuses work that has left the backlog", () => {
+    expect(assignTask(working(), tofu, eventId, t0)).toMatchObject({ reason: "taskNotAssignable" });
   });
 });
 
 describe("startTask", () => {
-  it("starts the task at the given time", () => {
-    expect(workingTask.status).toBe("working");
-    expect(workingTask.startedAt).toBe(startedAt);
+  it("puts the one who picks it up on it and starts the clock", () => {
+    const task = working();
+
+    expect(task).toMatchObject({ status: "working", assigneeId: mocha.id, startedAt: t0, runningSince: t0 });
+    expect(timeTaken(task, t0 + 7 * minute)).toBe(7 * minute);
   });
 
-  it("emits TaskStarted", () => {
-    expect(started.events).toEqual([
-      {
-        eventId,
-        type: "TaskStarted",
-        occurredAt: startedAt,
-        companyId,
-        taskId: input.id,
-        taskTitle: "Payment API",
-        employeeId: minsu.id,
-        employeeName: "Min-su",
-      },
-    ]);
-  });
+  it("leaves work handed to someone else for them", () => {
+    const handed = assignTask(backlog(), tofu, eventId, t0);
+    assert(handed.ok);
 
-  it("rejects a task that is not ready", () => {
-    const result = startTask(backlogTask, minsu, eventId, startedAt);
-
-    expect(result).toEqual({ ok: false, reason: "taskNotReady" });
-  });
-
-  it("rejects an employee who is not the assignee", () => {
-    const result = startTask(readyTask, jieun, eventId, startedAt);
-
-    expect(result).toEqual({ ok: false, reason: "employeeNotAssignee" });
+    expect(startTask(handed.task, mocha, eventId, t0)).toMatchObject({ reason: "taskHasAnotherAssignee" });
   });
 });
 
-describe("completeTask", () => {
-  it("completes the task at the given time", () => {
-    expect(doneTask.status).toBe("done");
-    expect(doneTask.completedAt).toBe(scheduledCompletedAt);
+describe("the way to approval", () => {
+  it("stops at approval with the time it took", () => {
+    const done = finishWork(working(), eventId, t0 + 52 * minute);
+    assert(done.ok);
+
+    expect(done.task).toMatchObject({ status: "approval", finishedAt: t0 + 52 * minute, runningSince: undefined });
+    expect(timeTaken(done.task, t0 + 500 * minute)).toBe(52 * minute);
   });
 
-  it("emits TaskCompleted with matching occurredAt and completedAt", () => {
-    expect(completed.events).toEqual([
-      {
-        eventId,
-        type: "TaskCompleted",
-        occurredAt: scheduledCompletedAt,
-        companyId,
-        taskId: input.id,
-        taskTitle: "Payment API",
-        employeeId: minsu.id,
-        employeeName: "Min-su",
-        completedAt: scheduledCompletedAt,
-      },
-    ]);
+  it("is applied only by the user, from approval", () => {
+    const done = finishWork(working(), eventId, t0 + minute);
+    assert(done.ok);
+    const applied = applyTask(done.task, eventId, t0 + 2 * minute);
+    assert(applied.ok);
+
+    expect(applied.task).toMatchObject({ status: "done", appliedAt: t0 + 2 * minute });
+    expect(applyTask(working(), eventId, t0)).toMatchObject({ reason: "taskNotAwaitingApproval" });
   });
 
-  it("rejects a task that is not working", () => {
-    const result = completeTask(readyTask, minsu, eventId, scheduledCompletedAt);
+  it("goes back to whoever did it with the reason, and keeps the time already taken", () => {
+    const done = finishWork(working(), eventId, t0 + 10 * minute);
+    assert(done.ok);
+    const back = sendBack(done.task, " split the retryable failures ", eventId, t0 + 11 * minute);
+    assert(back.ok);
 
-    expect(result).toEqual({ ok: false, reason: "taskNotWorking" });
-  });
+    expect(back.task).toMatchObject({ status: "backlog", assigneeId: mocha.id, changesRequested: "split the retryable failures" });
+    expect(sendBack(done.task, " ", eventId, t0)).toMatchObject({ reason: "reasonRequired" });
 
-  it("rejects an employee who is not the assignee", () => {
-    const result = completeTask(workingTask, jieun, eventId, scheduledCompletedAt);
-
-    expect(result).toEqual({ ok: false, reason: "employeeNotAssignee" });
-  });
-});
-
-describe("settleTask", () => {
-  const relaunchedAt = startedAt + 180 * minute;
-
-  it("completes a task that finished while the application was closed", () => {
-    const result = settleTask(workingTask, minsu, eventId, relaunchedAt);
-
-    assert(result.ok);
-    expect(result.task.status).toBe("done");
-    expect(result.task.completedAt).toBe(scheduledCompletedAt);
-  });
-
-  it("records the scheduled completion time, not the time it was observed", () => {
-    const result = settleTask(workingTask, minsu, eventId, relaunchedAt);
-
-    assert(result.ok);
-    expect(result.events[0].completedAt).toBe(scheduledCompletedAt);
-    expect(result.events[0].occurredAt).toBe(relaunchedAt);
-  });
-
-  it("settles a task at the exact moment it becomes due", () => {
-    const result = settleTask(workingTask, minsu, eventId, scheduledCompletedAt);
-
-    assert(result.ok);
-    expect(result.task.completedAt).toBe(scheduledCompletedAt);
-  });
-
-  it("rejects a task that is not due yet", () => {
-    const result = settleTask(workingTask, minsu, eventId, scheduledCompletedAt - 1);
-
-    expect(result).toEqual({ ok: false, reason: "taskNotDueYet" });
-  });
-
-  it("rejects a task that is not working", () => {
-    const result = settleTask(readyTask, minsu, eventId, relaunchedAt);
-
-    expect(result).toEqual({ ok: false, reason: "taskNotWorking" });
-  });
-
-  it("rejects an employee who is not the assignee", () => {
-    const result = settleTask(workingTask, jieun, eventId, relaunchedAt);
-
-    expect(result).toEqual({ ok: false, reason: "employeeNotAssignee" });
+    const again = startTask(back.task, mocha, eventId, t0 + 20 * minute);
+    assert(again.ok);
+    const redone = finishWork(again.task, eventId, t0 + 25 * minute);
+    assert(redone.ok);
+    expect(timeTaken(redone.task, t0 + 99 * minute)).toBe(15 * minute);
+    expect(redone.task.changesRequested).toBeUndefined();
   });
 });
 
-describe("taskProgress", () => {
-  it("is zero before the task starts", () => {
-    expect(taskProgress(backlogTask, startedAt)).toBe(0);
-    expect(taskProgress(readyTask, startedAt)).toBe(0);
+describe("blocked", () => {
+  it("is a mark on working work that pauses the clock", () => {
+    const blocked = blockTask(working(), { kind: "commandNotAllowed", command: "npm run typecheck" }, eventId, t0 + 8 * minute);
+    assert(blocked.ok);
+
+    expect(blocked.task).toMatchObject({ status: "working", blocker: { kind: "commandNotAllowed" } });
+    expect(timeTaken(blocked.task, t0 + 60 * minute)).toBe(8 * minute);
+    expect(finishWork(blocked.task, eventId, t0 + 9 * minute)).toMatchObject({ reason: "taskBlocked" });
+
+    const unblocked = unblockTask(blocked.task, eventId, t0 + 30 * minute);
+    assert(unblocked.ok);
+    expect(timeTaken(unblocked.task, t0 + 32 * minute)).toBe(10 * minute);
+  });
+});
+
+describe("hold and resume", () => {
+  it("parks work in progress with its reason and queues it again for whoever had it", () => {
+    const held = holdTask(working(), "agree on the scope first", eventId, t0 + 5 * minute);
+    assert(held.ok);
+    expect(held.task).toMatchObject({ status: "held", heldReason: "agree on the scope first", runningSince: undefined });
+
+    const resumed = resumeTask(held.task, eventId, t0 + 60 * minute);
+    assert(resumed.ok);
+    expect(resumed.task).toMatchObject({ status: "backlog", assigneeId: mocha.id, heldReason: undefined });
+    expect(timeTaken(resumed.task, t0 + 90 * minute)).toBe(5 * minute);
   });
 
-  it("is one when the task is done", () => {
-    expect(taskProgress(doneTask, scheduledCompletedAt)).toBe(1);
-  });
+  it("brings finished work back waiting for approval", () => {
+    const done = finishWork(working(), eventId, t0 + minute);
+    assert(done.ok);
+    const held = holdTask(done.task, "later", eventId, t0 + 2 * minute);
+    assert(held.ok);
+    const resumed = resumeTask(held.task, eventId, t0 + 3 * minute);
+    assert(resumed.ok);
 
-  it.each([
-    [0, 0],
-    [15 * minute, 0.5],
-    [30 * minute, 1],
-    [90 * minute, 1],
-  ])("reports progress %s ms into the work", (elapsed, expected) => {
-    expect(taskProgress(workingTask, startedAt + elapsed)).toBe(expected);
+    expect(resumed.task.status).toBe("approval");
   });
+});
 
-  it("never reports negative progress", () => {
-    expect(taskProgress(workingTask, startedAt - minute)).toBe(0);
+describe("returnToBacklog", () => {
+  it("frees work in progress for whoever is free", () => {
+    const returned = returnToBacklog(working(), eventId, t0 + 4 * minute);
+    assert(returned.ok);
+
+    expect(returned.task).toMatchObject({ status: "backlog", assigneeId: undefined, workedFor: 4 * minute });
   });
 });
