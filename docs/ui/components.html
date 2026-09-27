@@ -8,12 +8,7 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  body {
-    margin: 0; padding: 26px 20px 70px;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    background: var(--page); color: var(--ink);
-    font-family: var(--sans); font-size: 15px; line-height: 1.6;
-  }
+  body { padding: 26px 20px 70px; }
 
   .wrap { max-width: 1060px; margin: 0 auto; }
 
@@ -34,17 +29,6 @@
   .spec { display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line); }
 
   /* ═══ the button system ═══ */
-
-  .btn:focus-visible, .ibtn:focus-visible, .addcard:focus-visible, .mrow:focus-visible,
-  .notice:focus-visible, .dlg:focus-visible {
-    outline: 2px solid var(--brand); outline-offset: 2px;
-  }
-
-  .chip {
-    display: inline-flex; align-items: center; gap: 5px; flex: none;
-    border-radius: 999px; padding: 2px 9px;
-    font-size: 12.5px; font-weight: 600;
-  }
 
   .chip.ok { background: var(--ok-soft); color: var(--ok-ink); }
 
@@ -71,18 +55,13 @@
 
   .p-task { display: block; font-size: 14.5px; font-weight: 500; margin-top: 2px; }
 
-  .track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; margin-top: 9px; }
+  .track { margin-top: 9px; }
 
   /* ═══ notices, empty states, dialogs ═══ */
-
 
   .notice-ok { border-color: var(--ok-line); }
 
   .notice-ok .n-ic { background: var(--ok-soft); color: var(--ok-ink); }
-
-  .notice-warn { border-color: var(--warn-line); }
-
-  .notice-bad { border-color: var(--bad-line); }
 
   .locked {
     display: flex; align-items: center; gap: 9px;
@@ -137,8 +116,6 @@
   .dlg-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
   /* ═══ modal ═══ */
-
-  .m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
   .scrim.inline { position: static; padding: 0; background: none; display: block; }
 

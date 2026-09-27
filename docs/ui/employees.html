@@ -8,43 +8,11 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  body {
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: var(--page);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
-    padding: 22px 18px 40px;
-  }
-
-  button { font: inherit; color: inherit; }
-
-  /* ═══ buttons ═══ */
-
-  .btn:focus-visible, .ibtn:focus-visible, .row-item:focus-visible,
-  .tab:focus-visible, .nav a:focus-visible, .tcard:focus-visible, .mem-add:focus-visible {
-    outline: 2px solid var(--brand); outline-offset: 2px;
-  }
-
-  /* ═══ sidebar ═══ */
-
-  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
-
-  .logo svg { width: 14px; height: 14px; color: #fff; }
+  body { padding: 22px 18px 40px; }
 
   /* ═══ main ═══ */
 
   .view[hidden] { display: none; }
-
-  /* ═══ status ═══ */
-
-  .chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    border-radius: 999px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; flex: none;
-  }
 
   /* ═══ master / detail ═══ */
 
@@ -102,8 +70,6 @@
   .d-sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
 
   .d-sec:last-child { border-bottom: none; }
-
-  .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 3px 0; }
 
   /* ═══ memory ═══ */
 
@@ -205,12 +171,6 @@
 
   .vacant:hover { border-color: var(--muted); color: var(--muted); background: var(--surface); }
 
-  /* ═══ notice ═══ */
-
-  .notice-warn { border-color: var(--warn-line); }
-
-  .notice-bad { border-color: var(--bad-line); }
-
   /* ═══ memory tab ═══ */
 
   .mem-cols { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 16px; align-items: start; }
@@ -297,7 +257,6 @@
 
   /* ═══ modal ═══ */
 
-  .m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 </style>
 
 <div class="app">

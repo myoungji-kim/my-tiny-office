@@ -48,6 +48,19 @@
   --r-app: 18px;
 }
 
+/* ═══ page ═══ */
+
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  }
+
+button { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
 /* ═══ buttons ═══ */
 
 .btn {
@@ -112,6 +125,8 @@
 
 /* ═══ status ═══ */
 
+.chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; flex: none; }
+
 .tag {
     position: absolute; left: 50%; transform: translateX(-50%);
     font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap;
@@ -139,6 +154,10 @@
 .chip.sim { background: var(--sunk); color: var(--muted); }
 
 /* ═══ notices, empty states, dialogs ═══ */
+
+.notice-warn { border-color: var(--warn-line); }
+
+.notice-bad { border-color: var(--bad-line); }
 
 .n-ic {
     width: 22px; height: 22px; border-radius: 999px; flex: none; margin-top: 1px;
@@ -172,6 +191,10 @@
     }
 
 /* ═══ the app shell ═══ */
+
+.logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
+
+.logo svg { width: 14px; height: 14px; color: #fff; }
 
 .app {
     max-width: 1400px; margin: 0 auto;
@@ -256,8 +279,6 @@
 
 .input::placeholder, .textarea::placeholder { color: var(--faint); }
 
-.input:focus-visible, .select:focus-visible, .textarea:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-
 .hint { display: block; font-size: 13px; color: var(--faint); margin-top: 6px; }
 
 .req { color: var(--bad); }
@@ -299,8 +320,6 @@
 
 .devbar [aria-current], .devbar [aria-pressed="true"] { background: var(--ink); color: #fff; }
 
-.devbar a:focus-visible, .devbar button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-
 .devbar .sep { width: 1px; height: 18px; background: var(--line-2); flex: none; margin-inline: 4px; }
 
 .devbar .home { padding-inline: 9px; }
@@ -326,6 +345,8 @@
 :root[lang="en"] .langscope span[lang="en"] { color: var(--faint); }
 
 /* ═══ shared odds and ends ═══ */
+
+.m-av { width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
 * { box-sizing: border-box; }
 
@@ -397,6 +418,8 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .p-acts { padding-top: 5px; }
 
 .p-why { margin: 0; font-size: 13px; color: var(--muted); padding: 1px 10px 7px; }
+
+.track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 
 .track i { display: block; height: 100%; border-radius: 999px; }
 
@@ -548,6 +571,8 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .c-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 7px; }
 
 .c-nums b { font-weight: 600; color: var(--ink); flex: none; }
+
+.kv { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 4px 0; }
 
 .kv span:first-child { color: var(--muted); flex: none; }
 

@@ -8,14 +8,7 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  body {
-    margin: 0; padding: 26px 20px 70px;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    background: var(--page); color: var(--ink);
-    font-family: var(--sans); font-size: 15px; line-height: 1.6;
-  }
-
-  button { font: inherit; color: inherit; }
+  body { padding: 26px 20px 70px; }
 
   .wrap { max-width: 1060px; margin: 0 auto; }
 
@@ -37,14 +30,12 @@
 
   /* ═══ buttons ═══ */
 
-  .btn:focus-visible, .pick:focus-visible, .copy:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-
   /* shown inline on this page instead of over a scrim */
 
   .modal-inline { max-width: 100%; overflow: hidden; border: 1px solid var(--line);
     box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14); }
 
-  .m-av { position: relative; width: 44px; height: 44px; border-radius: 12px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+  .m-av { position: relative; }
 
   .pick:disabled { opacity: .5; cursor: default; }
 
@@ -101,13 +92,9 @@
 
   .rt-bd { padding: 12px 14px; }
 
-  .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 4px 0; }
-
   .kv b.mono { font-size: 13.5px; font-weight: 500; }
 
   .rt-acts { display: flex; gap: 8px; padding: 0 14px 13px; }
-
-  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; flex: none; }
 
   .chip.live { background: var(--ok-soft); color: var(--ok-ink); }
 
@@ -144,13 +131,10 @@
     box-shadow: 0 1px 3px rgb(20 20 25 / .2);
   }
 
-
   .bubble .live-ic { width: 11px; height: 11px; color: var(--ok); }
 
   .floor-demo { background: var(--floor); border-radius: var(--r-card); padding: 16px; display: flex; gap: 22px; align-items: center; }
 
-
-  .notice-bad { border-color: var(--bad-line); }
 </style>
 
 <div class="wrap">

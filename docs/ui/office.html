@@ -8,33 +8,7 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  body {
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: var(--page);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
-    padding: 22px 18px 40px;
-  }
-
-  button { font: inherit; color: inherit; }
-
-  /* ═══ buttons ═══ */
-
-  .btn:focus-visible, .ibtn:focus-visible, .desk:focus-visible, .mrow:focus-visible,
-  .c-menu:focus-visible, .member:focus-visible,
-  .tab:focus-visible, .nav a:focus-visible {
-    outline: 2px solid var(--brand); outline-offset: 2px;
-  }
-
-  /* ═══ sidebar ═══ */
-
-  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
-
-  .logo svg { width: 14px; height: 14px; color: #fff; }
+  body { padding: 22px 18px 40px; }
 
   /* ═══ office ═══ */
 
@@ -79,10 +53,6 @@
 
   /* Menu rows replace buttons inside the popover: a card never carries a
      near-black primary. The first row is the one the player came for. */
-
-  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; flex: none; }
-
-  .track { display: block; height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 
   @media (max-width: 960px) {
     .app { grid-template-columns: 1fr; }
