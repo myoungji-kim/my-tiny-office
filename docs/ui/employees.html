@@ -590,7 +590,7 @@
           ${
             seats.length
               ? `<span class="areas">${seats
-                  .map((a) => `<span class="area-chip">${t().areas[a]} ${p.memories.filter((m) => m.area === a).length}</span>`)
+                  .map((a) => `<span class="area-chip">${t().areas[a]}</span>`)
                   .join("")}</span><p class="why">${t().expertiseWhy}</p>`
               : `<p class="why" style="margin:0">${t().noExpertise}</p>`
           }
