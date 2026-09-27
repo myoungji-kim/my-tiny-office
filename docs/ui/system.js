@@ -528,6 +528,7 @@ const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
     companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
+    agentLost: "에이전트 연결이 끊겼어요",
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
@@ -560,6 +561,7 @@ const WORDS = {
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
     companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
+    agentLost: "The agent disconnected",
     status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
@@ -600,7 +602,7 @@ const WORDS = {
 const STAFF = [
   { id: "p1", name: "모카", species: "cat", role: "Backend Engineer",
     team: "backend", status: "working", joined: "2026. 3. 2.",
-    task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, done: 41, reviews: 18,
+    task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, agentLost: true, done: 41, reviews: 18,
     style: [{ ko: "설명은 짧게, 코드로 보여줘", en: "Keep explanations short; show me code" }, { ko: "테스트를 먼저 써", en: "Write the test first" }, { ko: "PR은 300줄을 넘기지 않아요. 넘으면 쪼개요.", en: "Keep a PR under 300 lines. Split it if it grows." }],
     memories: [
       { area: "db", text: { ko: "복합 인덱스는 컬럼 순서가 중요해요. (a,b)와 (b,a)는 다른 인덱스예요.", en: "Composite indexes care about column order. (a,b) is not (b,a)." }, from: { ko: "결제 조회가 느린 이슈", en: "the slow payment lookup" }, used: 14 },
@@ -651,6 +653,14 @@ const STAFF = [
 // they are doing. That is the whole job, so it is one implementation and every
 // screen shows the same five people with the same status.
 
+const PLUG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z"/><path d="M8 11.8V14"/></svg>';
+
+// The mark for an agent that stopped; `inline` puts it in a line of text.
+function agentMark(inline = false) {
+  const label = WORDS[uiLang()].agentLost;
+  return `<span class="agent-mark${inline ? " inline" : ""}" role="img" aria-label="${label}" title="${label}">${PLUG}</span>`;
+}
+
 function mountRoster(el, onPick) {
   for (const p of STAFF) {
     const b = document.createElement("button");
@@ -660,7 +670,7 @@ function mountRoster(el, onPick) {
     b.innerHTML =
       '<span class="av"><canvas aria-hidden="true" width="22" height="22"></canvas></span>' +
       "<span>" + p.name + "</span>" +
-      '<span class="dot ' + p.status + '"></span>';
+      '<span class="m-state">' + (p.agentLost ? agentMark(true) : "") + '<span class="dot ' + p.status + '"></span></span>';
 
     const c = b.querySelector("canvas");
     const ctx = c.getContext("2d");

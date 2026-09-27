@@ -63,6 +63,12 @@
 
   .today-row.you .today-ic { color: var(--brand); }
 
+  .today-row.bad .today-ic { color: var(--bad); }
+
+  .bub .agent-mark { margin-left: 2px; }
+
+  .p-lost { display: block; font-size: 13px; line-height: 1.45; color: var(--bad-ink); margin-top: 8px; }
+
   .today-tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
 
   .today-tx b { color: var(--ink); font-weight: 600; }
@@ -175,7 +181,8 @@
       emptyDesk: "빈 책상", emptySeat: "빈 자리", addRoom: "방 추가",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
       feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
-      feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기",
+      feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기", feedLook: "보러 가기",
+      lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.",
       feed: {
         started: (e) => subj(e.name) + " " + objB(e.task) + " 시작했어요",
         reviewStarted: (e) => subj(e.name) + " " + objB(e.task) + " " + e.area + " 관점에서 보기 시작했어요",
@@ -183,6 +190,7 @@
         waiting: (e) => subj(e.name) + " " + objB(e.task) + " 마쳤어요 · " + e.took + "분 · 승인을 기다려요",
         applied: (e) => objB(e.task) + " 반영했어요",
         leave: (e) => subj(e.name) + " 휴가를 떠났어요",
+        lost: (e) => e.name + "의 에이전트 연결이 끊겼어요 · <b>" + e.task + "</b>",
       },
       tabs: { all: "전체", lounge: "휴게실" },
       deskSub: (used, seats) => "책상 " + seats + "석 중 " + used + "석 사용",
@@ -202,7 +210,7 @@
       waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
       inProgress: "진행 중", lastDone: "최근 완료", vacationLabel: "휴가",
       actions: {
-        detail: "업무 상세", reassign: "담당 변경",
+        reconnect: "다시 연결", detail: "업무 상세", reassign: "담당 변경",
         assign: "업무 맡기기", teach: "기억 가르치기", leave: "휴가 보내기", comeBack: "복귀 처리",
       },
       cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
@@ -217,7 +225,8 @@
       emptyDesk: "Empty desk", emptySeat: "Empty", addRoom: "Add a room",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
       feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
-      feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it",
+      feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it", feedLook: "Take a look",
+      lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.",
       feed: {
         started: (e) => e.name + " started <b>" + e.task + "</b>",
         reviewStarted: (e) => e.name + " started looking at the " + e.area + " side of <b>" + e.task + "</b>",
@@ -225,6 +234,7 @@
         waiting: (e) => e.name + " finished <b>" + e.task + "</b> in " + e.took + " min · waiting on you",
         applied: (e) => "<b>" + e.task + "</b> was applied",
         leave: (e) => e.name + " went on leave",
+        lost: (e) => e.name + "'s agent disconnected · <b>" + e.task + "</b>",
       },
       tabs: { all: "All", lounge: "Lounge" },
       deskSub: (used, seats) => used + " of " + seats + " desks in use",
@@ -244,7 +254,7 @@
       waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",
       inProgress: "In progress", lastDone: "Last finished", vacationLabel: "On leave",
       actions: {
-        detail: "Task details", reassign: "Reassign",
+        reconnect: "Reconnect", detail: "Task details", reassign: "Reassign",
         assign: "Give work", teach: "Teach", leave: "Send on leave", comeBack: "Bring back",
       },
       cannotAssign: "They cannot take work while on leave.",
@@ -366,7 +376,7 @@
     bub.style.left = x * T + T + "px";
     bub.style.top = y * T - T - 24 + "px";
     // Someone in the lounge is available; the bubble only says where they are.
-    bub.innerHTML = '<span class="dot ' + (state === "lounge" ? "available" : state) + '"></span>' + (state === "lounge" ? t().atLounge : label(state));
+    bub.innerHTML = '<span class="dot ' + (state === "lounge" ? "available" : state) + '"></span>' + (state === "lounge" ? t().atLounge : label(state)) + (p?.agentLost ? agentMark(true) : "");
     overlay.appendChild(bub);
   }
 
@@ -472,6 +482,7 @@
       <span class="c-av">
         <canvas aria-hidden="true" width="34" height="34"></canvas>
         <span class="c-live" style="background:${STATUS[p.status].color}"></span>
+        ${p.agentLost ? agentMark() : ""}
       </span>
       <span class="c-name">${p.name}</span>
       <span class="c-role">${p.role}</span>
@@ -487,6 +498,7 @@
   const subj = (n) => (lang === "en" ? n : withParticle(n, "이", "가"));
   const objB = (w) => "<b>" + w + "</b>" + (lang === "en" ? "" : hasBatchim(w) ? "을" : "를");
   const EVENTS = [
+    { at: "10:18", kind: "lost", who: "p1", project: "pay", task: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" } },
     { at: "10:16", kind: "started", who: "p2", task: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" } },
     { at: "10:12", kind: "reviewStarted", who: "p4", area: "security", task: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" } },
     { at: "10:09", kind: "memoryUsed", who: "p1", mem: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요", en: "No Date.now() in the domain layer" } },
@@ -503,6 +515,7 @@
     memoryUsed: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.8 3.2h3.6A1.8 1.8 0 0 1 8 5v8a1.6 1.6 0 0 0-1.6-1.4H2.8zM13.2 3.2H9.6A1.8 1.8 0 0 0 8 5v8a1.6 1.6 0 0 1 1.6-1.4h3.6z"/></svg>',
     waiting: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 9.4h3.2l1 1.8h2.8l1-1.8h3.2"/><path d="M3.6 3.4h8.8l1.2 6v3.2H2.4V9.4z"/></svg>',
     applied: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 8.4l3 3 6.2-6.6"/></svg>',
+    lost: PLUG,
     leave: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.6"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1"/></svg>',
   };
   const FEED_SHOWN = 6;
@@ -520,10 +533,10 @@
     for (const e of rows) {
       const words = { name: e.who ? fromCompany.get(e.who).name : "", task: e.task?.[lang], mem: e.mem?.[lang], area: t().areas[e.area], took: e.took };
       const row = document.createElement("div");
-      row.className = "today-row" + (e.kind === "waiting" ? " you" : "");
+      row.className = "today-row" + (e.kind === "waiting" ? " you" : e.kind === "lost" ? " bad" : "");
       row.innerHTML = `<span class="today-at">${e.at}</span><span class="today-ic">${FEED_ICON[e.kind]}</span>
         <span class="today-tx">${t().feed[e.kind](words)}</span>
-        ${e.kind === "waiting" ? `<a class="btn btn-secondary btn-sm" href="projects.html${suffix}#${e.project}">${t().feedApprove}</a>` : "<span></span>"}`;
+        ${e.project ? `<a class="btn btn-secondary btn-sm" href="projects.html${suffix}#${e.project}">${e.kind === "lost" ? t().feedLook : t().feedApprove}</a>` : "<span></span>"}`;
       row.querySelector(".today-tx").title = row.querySelector(".today-tx").textContent;
       box.appendChild(row);
     }
@@ -612,6 +625,7 @@
 
   /* ── anchored popover ────────────────────────────────────────── */
   const I = {
+    plug: PLUG,
     plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
     swap: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>',
     book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.8 3.2h3.6A1.8 1.8 0 0 1 8 5v8a1.6 1.6 0 0 0-1.6-1.4H2.8zM13.2 3.2H9.6A1.8 1.8 0 0 0 8 5v8a1.6 1.6 0 0 1 1.6-1.4h3.6z"/></svg>',
@@ -652,7 +666,8 @@
   function stateBlock(p) {
     if (p.status === "working")
       return `<span class="c-k">${t().inProgress}</span><span class="c-task">${t().tasks[p.task.key]}</span>
-        <span class="p-nums"><span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b></span>`;
+        <span class="p-nums"><span>${t().spent(p.task.spent)}</span><b>${t().status.working}</b></span>
+        ${p.agentLost ? `<span class="p-lost"><b>${WORDS[lang].agentLost}</b> · ${t().lostWhy}</span>` : ""}`;
     if (p.status === "reviewing")
       return `<span class="c-k">${t().reviewingNow}</span><span class="c-task">${t().tasks[p.review.key]}</span>
         <span class="p-nums"><span>${t().spent(p.review.spent)}</span><b>${t().status.reviewing}</b></span>`;
@@ -671,7 +686,10 @@
       n.setAttribute("aria-expanded", String(n.dataset.id === id));
     });
 
-    const rows = ACTIONS[p.status]
+    const acts = p.agentLost
+      ? [{ icon: I.plug, label: t().actions.reconnect, key: true }, ...ACTIONS[p.status].map((a) => ({ ...a, key: false }))]
+      : ACTIONS[p.status];
+    const rows = acts
       .map((a) => {
         const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");
         const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}${a.teach ? " data-teach" : ""}>${a.icon}${a.label}</button>`;
@@ -684,6 +702,7 @@
         <span class="p-av">
           <canvas aria-hidden="true" width="32" height="32"></canvas>
           <span class="c-live" style="background:${STATUS[p.status].color}"></span>
+          ${p.agentLost ? agentMark() : ""}
         </span>
         <span style="flex:1;min-width:0">
           <span class="p-name">${p.name}</span>

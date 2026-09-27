@@ -21,16 +21,7 @@
 
   /* ═══ a dropped session on an employee ═══ */
 
-  .agent-mark {
-    width: 15px; height: 15px; border-radius: 999px; background: var(--bad);
-    border: 2.5px solid var(--surface); display: grid; place-items: center; color: #fff;
-  }
-
-  .agent-mark svg { width: 8px; height: 8px; }
-
   .av-demo { position: relative; width: 46px; height: 46px; border-radius: 13px; background: var(--subtle); display: grid; place-items: center; }
-
-  .av-demo .corner { position: absolute; left: -4px; top: -4px; }
 
   .av-demo .status { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); background: var(--warn); }
 
@@ -309,7 +300,7 @@
     el.innerHTML = `
       <span class="av-demo">
         <span class="status"${opts.statusColor ? ` style="background:${opts.statusColor}"` : ""}></span>
-        ${opts.lost ? `<span class="corner"><span class="agent-mark">${I.plug}</span></span>` : ""}
+        ${opts.lost ? agentMark() : ""}
       </span>
       <span>
         <span class="nm">${opts.name}</span>

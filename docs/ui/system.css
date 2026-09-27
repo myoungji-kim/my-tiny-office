@@ -439,6 +439,19 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 
 .p-hd { display: flex; align-items: center; gap: 11px; padding: 9px 10px 11px; }
 
+/* An agent that stopped: a red mark in the avatar's other corner from the
+   status dot, never a change to the status colour. Inline, it sits in a line. */
+.agent-mark {
+  position: absolute; left: -4px; top: -4px; width: 15px; height: 15px; border-radius: 999px;
+  background: var(--bad); border: 2.5px solid var(--surface); display: grid; place-items: center; color: #fff;
+}
+
+.agent-mark svg { width: 8px; height: 8px; }
+
+.agent-mark.inline { position: static; width: 13px; height: 13px; border: none; flex: none; }
+
+.agent-mark.inline svg { width: 7px; height: 7px; }
+
 .p-av { position: relative; width: 38px; height: 38px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
 .p-name { display: block; font-size: 17px; font-weight: 600; line-height: 1.3; }
@@ -542,6 +555,9 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .member:hover { background: var(--sunk); }
 
 .member[aria-expanded="true"], .member[aria-current="page"] { background: var(--surface); box-shadow: 0 1px 2px rgb(20 20 25 / .06); font-weight: 600; }
+
+/* the last column holds the status, and beside it an agent that stopped */
+.member .m-state { display: flex; align-items: center; gap: 5px; }
 
 .member .av { width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); display: grid; place-items: center; }
 

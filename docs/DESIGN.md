@@ -125,7 +125,8 @@ on, work finished and waiting on the user, work applied, someone going on
 leave. Each row is a domain event worded by the dictionary, with its time. The
 feed follows the room — a team's room and the lounge show the people in them —
 and shows six before 더 보기. Only what waits on the user carries an action, the way to it
-(승인하러 가기); the rest is there to be read.
+(승인하러 가기, and 보러 가기 for an agent that stopped); the rest is there to
+be read.
 
 ### Status
 
@@ -498,7 +499,8 @@ task. A runtime that stops for the company is one line at the top of the
 office, and nothing new starts until it is back. A dropped session stops only
 its employee: **status is the dot at bottom-right; a dropped agent is a red mark
 at top-left**, with no mark while it works, and the task card carries the
-blocked mark. Never fold the agent's state into the status colour.
+blocked mark. The mark is the same wherever the person is — office card,
+floor bubble, popover, sidebar — and the popover leads with 다시 연결. Never fold the agent's state into the status colour.
 
 ## Agent connection
 
