@@ -285,7 +285,6 @@ Examples:
 - `ReviewApproved`
 - `ChangesRequested`
 - `EmployeeWentOnVacation`
-- `OfficeExpanded`
 
 Do not create a full event-sourcing architecture unless explicitly required.
 

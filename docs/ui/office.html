@@ -174,8 +174,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      hireDesk: "빈 책상에 직원 채우기", noTeam: "팀 없음", noDesk: "빈 책상이 없어요", justHired: "방금 입사",
-      emptyDesk: "빈 책상", emptySeat: "빈 자리",
+      hireDesk: "이 팀에 직원 고용", noTeam: "팀 없음", justHired: "방금 입사",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
       feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
       feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기", feedLook: "보러 가기",
@@ -190,7 +189,7 @@
         lost: (e) => e.name + "의 에이전트 연결이 끊겼어요 · <b>" + e.task + "</b>",
       },
       tabs: { all: "전체", lounge: "휴게실" },
-      deskSub: (used, seats) => "책상 " + seats + "석 중 " + used + "석 사용",
+      peopleSub: (n) => "직원 " + n + "명",
       loungeSub: "일이 없는 사람은 여기 있어요.",
       nobodyHere: "지금은 아무도 없어요.", meetingSub: "검토하는 사람이 여기 앉아요. 검토가 끝나면 자리로 돌아가요.",
       atLounge: "휴게실", atMeeting: "회의실",
@@ -211,8 +210,7 @@
     },
     en: {
       ...WORDS.en,
-      hireDesk: "Fill this desk", noTeam: "No team", noDesk: "No free desk", justHired: "Just joined",
-      emptyDesk: "Empty desk", emptySeat: "Empty",
+      hireDesk: "Hire into this team", noTeam: "No team", justHired: "Just joined",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
       feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
       feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it", feedLook: "Take a look",
@@ -227,7 +225,7 @@
         lost: (e) => e.name + "'s agent disconnected · <b>" + e.task + "</b>",
       },
       tabs: { all: "All", lounge: "Lounge" },
-      deskSub: (used, seats) => used + " of " + seats + " desks in use",
+      peopleSub: (n) => n + (n === 1 ? " person" : " people"),
       loungeSub: "Whoever has no work to do is here.",
       nobodyHere: "Nobody is here right now.", meetingSub: "Whoever is reviewing sits here, and goes back to their desk when it is done.",
       atLounge: "Lounge", atMeeting: "Meeting room",
@@ -270,17 +268,18 @@
 
   // Who these people are is the company's answer, not this screen's. The floor
   // adds only where each of them sits and what is on their desk today.
+  // Everyone has a desk and there are no empty ones: a hire adds one, three to a row.
   const DESKS = [
-    { id: "p1", col: 3, row: 3, task: { key: "paging", spent: 23 } },
-    { id: "p2", col: 8, row: 3, task: { key: "orderType", spent: 8 } },
-    { id: "p3", col: 13, row: 3, task: { key: "webhook", spent: 41 } },
-    { id: "p4", col: 3, row: 6, review: { key: "webhook", spent: 6 } },
-    { id: "p5", col: 8, row: 6 },
-    { id: null, col: 13, row: 6 },
+    { id: "p1", task: { key: "paging", spent: 23 } },
+    { id: "p2", task: { key: "orderType", spent: 8 } },
+    { id: "p3", task: { key: "webhook", spent: 41 } },
+    { id: "p4", review: { key: "webhook", spent: 6 } },
+    { id: "p5" },
   ];
+  const seatAt = (i) => ({ col: 3 + (i % 3) * 5, row: 3 + Math.floor(i / 3) * 3 });
   const fromCompany = new Map(STAFF.map((p) => [p.id, p]));
-  const people = DESKS.map((d) => (d.id ? { ...fromCompany.get(d.id), ...d } : d));
-  const staffed = people.filter((p) => p.id);
+  const people = DESKS.map((d, i) => ({ ...fromCompany.get(d.id), ...d, ...seatAt(i) }));
+  const staffed = people;
   const byId = new Map(staffed.map((p) => [p.id, p]));
 
   /* ── rooms ───────────────────────────────────────────────────── */
@@ -343,7 +342,7 @@
     btn.style.top = y * T - T - 6 + "px";
     btn.style.width = 2 * T + 8 + "px";
     btn.style.height = 2 * T + 10 + "px";
-    btn.setAttribute("aria-label", p?.id ? p.name : t().emptyDesk);
+    btn.setAttribute("aria-label", p.name);
     if (p?.id) btn.addEventListener("click", (e) => open(p.id, btn, e.detail === 0));
     overlay.appendChild(btn);
 
@@ -383,7 +382,7 @@
       paint(ctx, TILES.deskR, S, dx + T, dy);
       paint(ctx, MONITOR, S, dx + T / 2, dy - 2 * S, { M: p.status === "working" ? P.M : P.o });
       // An empty chair still belongs to someone, and the tag says where they went.
-      mark(p, p.col, p.row, p.id ? p.name : t().emptySeat, p.id ? (inLounge(p) ? "lounge" : inMeeting(p) ? "meeting" : p.status) : null);
+      mark(p, p.col, p.row, p.name, inLounge(p) ? "lounge" : inMeeting(p) ? "meeting" : p.status);
     }
   }
 
@@ -434,11 +433,10 @@
     else if (here.kind === "meeting") drawMeeting();
     else drawDesks(room);
 
-    const seats = here.kind === "all" || here.kind === "team" ? seatsOf(room) : [];
     document.getElementById("headSub").textContent =
       here.kind === "lounge" ? t().loungeSub
         : here.kind === "meeting" ? t().meetingSub
-        : t().deskSub(seats.filter((p) => p.id).length, seats.length);
+        : t().peopleSub(seatsOf(room).length);
 
     drawCards();
   }
@@ -574,8 +572,7 @@
         add.type = "button";
         add.innerHTML =
           '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' +
-          (freeDesk() < 0 ? t().noDesk : t().hireDesk);
-        add.disabled = freeDesk() < 0;
+          t().hireDesk;
         add.addEventListener("click", () => hireAt(key));
         grid.appendChild(add);
       }
@@ -585,22 +582,18 @@
   }
 
   /* ── hiring ──────────────────────────────────────────────────── */
-  // Hiring needs a free desk, and the new person sits at it.
-  const freeDesk = () => DESKS.findIndex((d) => !d.id);
-
   function hireAt(team) {
     openHire({
       team,
+      // A hire brings their own desk.
       onSave: (h) => {
-        const i = freeDesk();
-        if (i < 0) return;
         const base = { ...h, id: "p" + (STAFF.length + 1), status: "available", memories: [], style: [], done: 0, reviews: 0 };
         STAFF.push(base);
         fromCompany.set(base.id, base);
-        Object.assign(DESKS[i], { id: base.id, last: "justHired" });
-        const p = { ...base, ...DESKS[i] };
-        people[i] = p;
-        staffed.push(p);
+        const desk = { id: base.id, last: "justHired" };
+        DESKS.push(desk);
+        const p = { ...base, ...desk, ...seatAt(DESKS.length - 1) };
+        people.push(p);
         byId.set(p.id, p);
         renderMembers();
         render();

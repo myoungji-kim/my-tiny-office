@@ -533,7 +533,7 @@ const WORDS = {
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     hire: {
-      title: "직원 고용", sub: "새 동료가 빈 책상에 앉아요.",
+      title: "직원 고용", sub: "새 동료가 자기 책상과 함께 들어와요.",
       species: "어떤 친구인가요", name: "이름", nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
       role: "역할", team: "팀", noTeam: "팀 없음", cancel: "취소",
       editTitle: "정보 바꾸기", editSub: "외형과 이름, 역할, 팀을 바꿔요.", save: "저장",
@@ -566,7 +566,7 @@ const WORDS = {
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
     hire: {
-      title: "Hire", sub: "Someone new takes a free desk.",
+      title: "Hire", sub: "Someone new joins, with a desk of their own.",
       species: "Who are they?", name: "Name", nameHint: "Shorter is better. You can change it later.",
       role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",

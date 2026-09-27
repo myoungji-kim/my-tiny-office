@@ -510,7 +510,6 @@ The domain owns events such as:
 - EmployeeWentOnVacation
 - EmployeeReturned
 - EmployeeLetGo
-- OfficeExpanded
 
 Runtime events can be translated into domain events:
 

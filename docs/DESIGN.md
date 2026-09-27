@@ -62,7 +62,7 @@ blockers, recent activity, team workload.
 ```text
 ┌─────────────┬──────────────────────────────────────────────┐
 │ ⌂ My Tiny ⌄ │ 사무실                  2026. 9. 26. (토) 10:24 │
-│   Office    │ 책상 6석 중 5석 사용                            │
+│   Office    │ 직원 5명                                        │
 │             ├──────────────────────────────────────────────┤
 │ 사무실      │ 전체 · 백엔드팀 · 프론트엔드팀 · 회의실 · 휴게실 │
 │ 프로젝트    ├──────────────────────────────────────────────┤
@@ -73,7 +73,7 @@ blockers, recent activity, team workload.
 │ · 두부      │ 오늘  10:18 모카의 에이전트 연결이 끊겼어요 … │
 │             │ 백엔드팀 3                                    │
 │ · 단풍      │ ┌────────┐ ┌────────┐ ┌────────┐ ┌ ─ ─ ─ ┐  │
-│             │ │ card   │ │ card   │ │ card   │  빈 책상  │
+│             │ │ card   │ │ card   │ │ card   │  + 고용   │
 │ ─────────   │ └────────┘ └────────┘ └────────┘ └ ─ ─ ─ ┘  │
 │ 설정        │ 프론트엔드팀 2                                │
 └─────────────┴──────────────────────────────────────────────┘
@@ -121,8 +121,9 @@ there are as many as there are reviews and none when nobody reviews — and
 goes back when it is done; the floor shows their desk empty with 회의실 above
 it, as it shows 휴게실 for the lounge. The whole floor
 groups cards by team, with anyone without a team first under 팀 없음. A team's
-cards end in 빈 책상에 직원 채우기, which hires into the free desk and reads
-빈 책상이 없어요 when none is left.
+cards end in 이 팀에 직원 고용, which hires into that team. There is no desk
+count to run out of: every hire brings a desk, and the floor grows with the
+people, three to a row.
 
 ### Today
 
@@ -425,7 +426,7 @@ name the user wrote, and says who it hires (*호두 고용하기*).
 | --- | --- |
 | 직원 고용 on the people screen | Nothing — the team offers 팀 없음 first |
 | An empty team on the org chart | The team |
-| 빈 책상에 직원 채우기 in the office | The team; the new person sits at the free desk |
+| 이 팀에 직원 고용 in the office | The team; a desk is added for them |
 
 Their page opens next, where the first thing to do is teach them.
 
@@ -586,8 +587,6 @@ the measured runtime surface.
 - **Which outside tools a company may use.** Every company's agents reach the
   same tools Claude Code is connected to. Choosing them per company would need
   a list in the company's settings and a matching `--allowedTools` per session.
-- **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
-  are the likeliest lever: hiring already needs a free one.
 - **A 내 차례 / Needs you inbox.** Today's feed already carries what waits on
   the user — approvals, agents that stopped — with the way to each. A separate
   inbox earns its place only if those rows turn out easy to miss.

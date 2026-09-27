@@ -74,14 +74,9 @@ office. The screens are in DESIGN.md.
 
 ## Office Progression
 
-The direction, not yet a design:
-
-1. One room / one desk / one employee
-2. More desks
-3. Full software company
-
-Rooms are not built: a team's room, the meeting room and the lounge follow
-from who is doing what.
+The office grows with its people: every hire brings a desk, and there is no
+count to run out of. Rooms are not built: a team's room, the meeting room and
+the lounge follow from who is doing what.
 
 ## Localization
 

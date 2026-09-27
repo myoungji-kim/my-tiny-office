@@ -15,7 +15,8 @@ Each employee has:
 
 ## People and teams
 
-**Hiring needs a free desk.** A new hire starts with no memory and no way of
+**Hiring has no cap.** Every hire brings a desk, so the office grows with its
+people. A new hire starts with no memory and no way of
 working, and works through the company's Claude Code from the start. The first
 hire is made in first run, the rest from the office, the org chart or the
 people screen.
