@@ -150,7 +150,7 @@
       tabs: { all: "전체", lounge: "휴게실" },
       deskSub: (used, seats) => "책상 " + seats + "석 중 " + used + "석 사용",
       loungeSub: "일이 없는 사람은 여기 있어요.",
-      loungeEmpty: "지금은 아무도 없어요.",
+      nobodyHere: "지금은 아무도 없어요.", meetingSub: "같이 볼 일이 있을 때 쓰는 방이에요.",
       atLounge: "휴게실",
       addRoomTitle: "방 추가", addRoomWhich: "어떤 방을 만들까요?", makeRoom: "방 만들기", cancel: "취소",
       forTeam: "어느 팀",
@@ -182,7 +182,7 @@
       tabs: { all: "All", lounge: "Lounge" },
       deskSub: (used, seats) => used + " of " + seats + " desks in use",
       loungeSub: "Whoever has no work to do is here.",
-      loungeEmpty: "Nobody is here right now.",
+      nobodyHere: "Nobody is here right now.", meetingSub: "A room for going through something together.",
       atLounge: "Lounge",
       addRoomTitle: "Add a room", addRoomWhich: "What kind of room?", makeRoom: "Add the room", cancel: "Cancel",
       forTeam: "Which team",
@@ -258,16 +258,28 @@
   const TEAMS = [...new Set(staffed.map((p) => p.team))];
   const inLounge = (p) => p.status === "available";
   const atDesk = (p) => p.status === "working" || p.status === "ready";
-  const headcount = (key) =>
-    key === "all" ? staffed.length : key === "lounge" ? staffed.filter(inLounge).length : staffed.filter((p) => p.team === key).length;
 
+  const ROOMS = [
+    { key: "all", kind: "all" },
+    ...TEAMS.map((team) => ({ key: team, kind: "team", team })),
+    { key: "lounge", kind: "lounge" },
+  ];
   let room = "all";
 
+  const roomOf = (key) => ROOMS.find((r) => r.key === key);
+  const roomName = (r) => (r.kind === "team" ? t().teams[r.team] : t().rooms[r.kind] ?? t().tabs[r.kind]);
+  const headcount = (r) =>
+    r.kind === "all" ? staffed.length
+      : r.kind === "team" ? staffed.filter((p) => p.team === r.team).length
+      : r.kind === "lounge" ? staffed.filter(inLounge).length
+      : 0;
+
   // The whole floor keeps the seats it was drawn with; a team room lays its
-  // own out, three to a row.
+  // own out, three to a row, and a new one starts as empty desks to fill.
   function seatsOf(key) {
     if (key === "all") return people;
     const mine = people.filter((p) => p.id && p.team === key);
+    if (!mine.length) return [{ id: null, col: 3, row: 3 }, { id: null, col: 8, row: 3 }];
     return mine.map((p, i) => ({ ...p, col: 3 + (i % 3) * 5, row: 3 + Math.floor(i / 3) * 3 }));
   }
 
@@ -336,24 +348,36 @@
   function drawLounge() {
     const here = staffed.filter(inLounge);
     drawRoom(13, 6, [["window", 2, 0], ["coffee", 8, 0], ["shelf", 11, 0], ["plant", 0, 5], ["plant", 12, 5], ["table", 7, 3]]);
+    paint(ctx, TILES.sofaBackL, S, 4 * T, 2 * T);
+    paint(ctx, TILES.sofaBackR, S, 5 * T, 2 * T);
+    // Between the back and the seat, which is what sitting in it looks like.
+    here.forEach((p, i) => {
+      const col = 4 + (i % 2);
+      paint(ctx, SPECIES.get(p.species).sprite, S, col * T, 2 * T + 4 * S, skin(SPECIES.get(p.species)));
+    });
     paint(ctx, TILES.sofaL, S, 4 * T, 3 * T);
     paint(ctx, TILES.sofaR, S, 5 * T, 3 * T);
-    // Drawn after the sofa and low enough to sit in it rather than behind it.
-    here.forEach((p, i) => {
-      const col = 4 + (i % 2), row = 3;
-      paint(ctx, SPECIES.get(p.species).sprite, S, col * T, row * T - 10 * S, skin(SPECIES.get(p.species)));
-      mark(p, col - 0.5, row, p.name, p.status);
-    });
+    here.forEach((p, i) => mark(p, 4 + (i % 2) - 0.5, 3, p.name, p.status));
+  }
+
+  function drawMeeting() {
+    drawRoom(11, 6, [["window", 2, 0], ["board", 6, 0], ["plant", 0, 5], ["plant", 10, 5]]);
+    // One table, however many tiles long, with the far side seated.
+    const from = 3, wide = 5;
+    for (let i = 0; i < wide; i++) {
+      paint(ctx, CHAIR, S, (from + i) * T, 2 * T);
+      paint(ctx, TILES[i === 0 ? "deskL" : i === wide - 1 ? "deskR" : "deskM"], S, (from + i) * T, 3 * T);
+    }
   }
 
   function render() {
     tabs.innerHTML = "";
-    for (const key of ["all", ...TEAMS, "lounge"]) {
+    for (const r of ROOMS) {
       const b = document.createElement("button");
       b.className = "tab";
-      b.setAttribute("aria-selected", String(key === room));
-      b.innerHTML = `<span>${key === "all" || key === "lounge" ? t().tabs[key] : t().teams[key]}</span><span class="n">${headcount(key)}</span>`;
-      b.addEventListener("click", () => { room = key; close(); render(); });
+      b.setAttribute("aria-selected", String(r.key === room));
+      b.innerHTML = `<span>${roomName(r)}</span><span class="n">${headcount(r)}</span>`;
+      b.addEventListener("click", () => { room = r.key; close(); render(); });
       tabs.appendChild(b);
     }
     const add = document.createElement("button");
@@ -364,13 +388,15 @@
     add.addEventListener("click", openAddRoom);
     tabs.appendChild(add);
 
-    if (room === "lounge") drawLounge();
+    const here = roomOf(room);
+    if (here.kind === "lounge") drawLounge();
+    else if (here.kind === "meeting") drawMeeting();
     else drawDesks(room);
 
-    const seats = room === "lounge" ? [] : seatsOf(room);
+    const seats = here.kind === "all" || here.kind === "team" ? seatsOf(room) : [];
     document.getElementById("headSub").textContent =
-      room === "lounge"
-        ? t().loungeSub
+      here.kind === "lounge" ? t().loungeSub
+        : here.kind === "meeting" ? t().meetingSub
         : t().deskSub(seats.filter((p) => p.id).length, seats.length);
 
     drawCards();
@@ -414,15 +440,16 @@
 
   function drawCards() {
     teams.innerHTML = "";
+    const here = roomOf(room);
     const groups =
-      room === "lounge" ? [["lounge", staffed.filter(inLounge)]]
-      : room === "all" ? TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])
-      : [[room, staffed.filter((p) => p.team === room)]];
+      here.kind === "all" ? TEAMS.map((team) => [team, staffed.filter((p) => p.team === team)])
+      : here.kind === "team" ? [[room, staffed.filter((p) => p.team === room)]]
+      : [[here.kind, here.kind === "lounge" ? staffed.filter(inLounge) : []]];
 
     for (const [key, group] of groups) {
       const wrap = document.createElement("div");
       wrap.style.marginBottom = "18px";
-      const heading = key === "lounge" ? t().tabs.lounge : t().teams[key];
+      const heading = t().teams[key] ?? t().rooms[key];
       wrap.innerHTML = `<div class="grp"><h2>${heading}</h2><span class="cnt">${group.length}</span></div>`;
       const grid = document.createElement("div");
       grid.className = "cards";
@@ -438,10 +465,10 @@
       if (!group.length) {
         const e = document.createElement("p");
         e.className = "col-empty";
-        e.textContent = t().loungeEmpty;
+        e.textContent = t().nobodyHere;
         grid.appendChild(e);
       }
-      if (key !== "lounge" && group.length) {
+      if (t().teams[key] && group.length) {
         const add = document.createElement("button");
         add.className = "addcard";
         add.type = "button";
@@ -593,16 +620,19 @@
   const dialog = document.getElementById("modal");
   const chevron = `<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>`;
 
+  const spareTeams = () => Object.keys(t().teams).filter((k) => !ROOMS.some((r) => r.team === k));
+  const has = (kind) => ROOMS.some((r) => r.kind === kind);
+
   const KINDS = [
-    { key: "team", open: () => TEAMS.length < Object.keys(t().teams).length },
-    { key: "meeting", open: () => true },
+    { key: "team", open: () => spareTeams().length > 0 },
+    { key: "meeting", open: () => !has("meeting") },
     { key: "server", open: () => staffed.length >= 8 },
-    { key: "lounge", open: () => false },
+    { key: "lounge", open: () => !has("lounge") },
   ];
 
   function renderAddRoom() {
-    const kind = dialog.dataset.kind || "team";
-    const spare = Object.keys(t().teams).filter((k) => !TEAMS.includes(k));
+    const kind = dialog.dataset.kind || KINDS.find((k) => k.open())?.key;
+    const spare = spareTeams();
 
     dialog.setAttribute("aria-label", t().addRoomTitle);
     dialog.innerHTML = `
@@ -635,7 +665,7 @@
 
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
-        <button class="btn btn-primary btn-md" data-make>${t().makeRoom}</button>
+        <button class="btn btn-primary btn-md" data-make${kind ? "" : " disabled"}>${t().makeRoom}</button>
       </div>`;
 
     for (const b of dialog.querySelectorAll("[data-kind]")) {
@@ -646,7 +676,14 @@
       });
     }
     dialog.querySelector("[data-close]").addEventListener("click", closeModal);
-    dialog.querySelector("[data-make]").addEventListener("click", closeModal);
+    dialog.querySelector("[data-make]").addEventListener("click", () => {
+      const team = dialog.querySelector("#roomTeam")?.value;
+      const made = kind === "team" ? { key: team, kind: "team", team } : { key: kind, kind };
+      ROOMS.splice(ROOMS.length - 1, 0, made);
+      room = made.key;
+      closeModal();
+      render();
+    });
   }
 
   function openAddRoom() {
@@ -654,7 +691,7 @@
     delete dialog.dataset.kind;
     scrim.hidden = false;
     renderAddRoom();
-    dialog.querySelector(".pick").focus({ preventScroll: true });
+    dialog.querySelector(".pick:not(:disabled)")?.focus({ preventScroll: true });
   }
 
   function closeModal() {
