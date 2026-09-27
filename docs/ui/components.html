@@ -91,11 +91,6 @@
 
   /* ═══ notices, empty states, dialogs ═══ */
 
-  .notice {
-    display: flex; align-items: flex-start; gap: 11px;
-    background: var(--surface); border: 1px solid var(--line-2);
-    border-radius: var(--r-card); padding: 13px 14px;
-  }
 
   .notice-ok { border-color: var(--ok-line); }
 
@@ -612,6 +607,61 @@
     <div class="spec"><code>닫기</code><span><code>Escape</code>와 바깥 클릭 둘 다 닫습니다. 닫기는 아무것도 저장하지 않습니다.</span></div>
     <div class="spec"><code>확인 버튼</code><span>고른 것을 말합니다 — <code>이 업무 맡기기</code>. <code>확인</code>이 아닙니다.</span></div>
     <div class="spec"><code>결과 미리보기</code><span>맡기기 전에 <strong>무엇이 달라지는지</strong> 같은 창에서 보여줍니다.</span></div>
+  </section>
+
+  <section>
+    <h2>폼</h2>
+    <p class="note">
+      라벨은 필드 위에, 필수 표시는 라벨에 붙습니다. 설명이 필요하면 필드 아래
+      한 줄로 답니다. 입력 높이는 38px, 첫 실행처럼 화면에 필드가 셋뿐인 곳만
+      <code>input-lg</code>로 44px를 씁니다.
+    </p>
+
+    <div class="grid2">
+      <div>
+        <div class="field" style="margin-top:0">
+          <span class="label">제목 <span class="req">*</span></span>
+          <input class="input" placeholder="결제 API 에러 응답 구조 변경" />
+        </div>
+
+        <div class="field">
+          <span class="label">분야</span>
+          <select class="select">
+            <option>데이터베이스</option>
+            <option>아키텍처</option>
+            <option>보안</option>
+          </select>
+          <span class="hint">분야가 누가 검토할 수 있는지를 정합니다.</span>
+        </div>
+
+        <div class="field">
+          <span class="label">설명</span>
+          <textarea class="textarea" placeholder="무엇을 바꾸는지 한두 줄"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="exlabel bad-ex">이렇게 하지 않습니다</div>
+        <div class="field" style="margin-top:0">
+          <input class="input" placeholder="제목 *" />
+          <span class="hint">라벨을 placeholder로 대신하면, 입력하는 순간 무엇을 적는 칸이었는지 사라집니다.</span>
+        </div>
+
+        <div class="exlabel good-ex">이렇게 합니다</div>
+        <div class="field" style="margin-top:0">
+          <span class="label">제목 <span class="req">*</span></span>
+          <input class="input" placeholder="결제 API 에러 응답 구조 변경" />
+          <span class="hint">placeholder는 예시를 보여주는 자리입니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="spec">
+      <li>라벨은 필드 <strong>위</strong>에 둡니다. placeholder로 대신하지 않습니다.</li>
+      <li>선택의 <strong>결과</strong>를 아는 필드는 그것을 <code>hint</code>로 말합니다.</li>
+      <li>필수 표시는 라벨에 붙이고, 색만으로 구분하지 않습니다.</li>
+      <li>높이는 38px 하나, 큰 변형이 필요하면 <code>-lg</code>로 이름을 줍니다.</li>
+    </ul>
   </section>
 
   <section>

@@ -1,40 +1,61 @@
 import { readFileSync } from "node:fs";
 
-// Everything the pages once kept their own copy of now lives in system.css.
-// `.notice` is the exception: it has two variants, so five pages still define
-// it themselves, and audit rule 1 waves padding and margin through on purpose.
-// This is what is left to compare.
-const PAGES = ["components", "index", "employees", "connect", "first-run"];
-const SELECTORS = [".notice"];
+// Whatever a page still defines itself may also be defined by another page,
+// and then the two have to agree. The list is derived rather than written
+// down, so it shrinks on its own as components move into system.css.
+//
+// audit rule 1 makes the same comparison but waives padding, margin, width and
+// height, so that pages may space things differently. This is the pass that
+// does not waive them: a component's own box is part of the component.
+// Only the product screens: they are one application in one shell, so a
+// selector they share is the same component in the same context. A landing
+// page and an onboarding step legitimately size a logo differently, and
+// comparing across them would report the system working as a fault.
+const PAGES = ["office", "projects", "employees"];
 
 const styleOf = (p) =>
   (readFileSync(`docs/ui/${p}.html`, "utf8").match(/<style>([\s\S]*?)<\/style>/) ?? [, ""])[1];
-const css = Object.fromEntries(PAGES.map((p) => [p, styleOf(p)]));
 
-const rule = (text, selector) => {
-  const at = text.indexOf("\n  " + selector + " {");
-  if (at === -1) return null;
-  const open = text.indexOf("{", at);
-  return text.slice(open + 1, text.indexOf("}", open)).replace(/\s+/g, " ").trim();
+const stripMedia = (css) => {
+  let out = "";
+  for (let i = 0; i < css.length; ) {
+    const at = css.indexOf("@media", i);
+    if (at === -1) { out += css.slice(i); break; }
+    out += css.slice(i, at);
+    let depth = 0, j = css.indexOf("{", at);
+    for (; j < css.length; j++) {
+      if (css[j] === "{") depth++;
+      else if (css[j] === "}" && --depth === 0) { j++; break; }
+    }
+    i = j;
+  }
+  return out;
 };
 
-let bad = 0;
-const fail = (m) => { console.log("✗ " + m); bad++; };
-
-for (const selector of SELECTORS) {
-  const [reference, ...rest] = PAGES;
-  const base = rule(css[reference], selector);
-  if (base === null) { fail(`${reference}.html has no ${selector}`); continue; }
-
-  for (const p of rest) {
-    const here = rule(css[p], selector);
-    if (here === null) fail(`${p}.html has no ${selector}`);
-    else if (here !== base) {
-      fail(`${selector} differs\n    ${reference}.html: ${base}\n    ${p}.html: ${here}`);
-    }
+const rules = new Map(); // selector -> Map(declaration -> [pages])
+for (const p of PAGES) {
+  for (const m of stripMedia(styleOf(p)).matchAll(/(^|\n)\s*([.#][a-zA-Z][^{}\n]*?)\s*\{([^}]*)\}/g)) {
+    const sel = m[2].trim();
+    const decl = m[3].replace(/\s+/g, " ").trim().replace(/;$/, "");
+    if (!rules.has(sel)) rules.set(sel, new Map());
+    const v = rules.get(sel);
+    if (!v.has(decl)) v.set(decl, []);
+    v.get(decl).push(p);
   }
-  console.log(`${selector}: the same on ${PAGES.length} pages`);
 }
 
-console.log(bad ? `\n${bad} parity problem(s)` : "\nno drift between the pages");
+let bad = 0;
+let compared = 0;
+for (const [sel, variants] of rules) {
+  const pages = [...variants.values()].flat();
+  if (pages.length < 2) continue;
+  compared++;
+  if (variants.size === 1) continue;
+  bad++;
+  console.log(`✗ ${sel} differs`);
+  for (const [decl, where] of variants) console.log(`    ${where.join(", ")}: ${decl}`);
+}
+
+console.log(`\n${compared} selector(s) live on more than one page`);
+console.log(bad ? `${bad} of them disagree` : "none of them disagree");
 process.exit(bad ? 1 : 0);

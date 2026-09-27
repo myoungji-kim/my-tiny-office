@@ -15,9 +15,9 @@
     font-family: var(--sans); font-size: 14px; line-height: 1.6;
   }
 
-  .logo { width: 28px; height: 28px; border-radius: 8px; background: var(--ink); display: grid; place-items: center; flex: none; }
+  .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
 
-  .logo svg { width: 15px; height: 15px; color: #fff; }
+  .logo svg { width: 14px; height: 14px; color: #fff; }
 
   .sub { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
 
@@ -189,7 +189,7 @@
           <span class="sub" id="headSub"></span>
         </span>
         <div class="head-right">
-          <button class="btn btn-primary btn-lg"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="newTask">새 업무</span></button>
+          <button class="btn btn-primary btn-lg" data-new-task><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg><span data-t="newTask">새 업무</span></button>
         </div>
       </div>
 
@@ -203,6 +203,10 @@
 </div>
 
 <div class="pop" id="pop" role="dialog" aria-label="업무"></div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" id="newTask" role="dialog" aria-modal="true" aria-label="새 업무"></div>
+</div>
 
 <script>
   /* ── the work on the board ───────────────────────────────────── */
@@ -290,6 +294,15 @@
       whySeat: (a) => a + " 기억이 있어요",
       noSeat: "이 분야를 아는 사람을 먼저 만들어야 해요",
       blocked: "막힘",
+      newTaskTitle: "새 업무", newTaskWhere: (p) => p + "에 추가해요",
+      fTitle: "제목", fArea: "분야", fDesc: "설명", fPriority: "우선순위", fProject: "프로젝트",
+      fTitlePlaceholder: "결제 API 에러 응답 구조 변경",
+      fDescPlaceholder: "무엇을 바꾸는지 한두 줄",
+      areaHint: "분야가 누가 검토할 수 있는지를 정해요.",
+      canReview: (names) => names.join(" · ") + subjectParticle(names[names.length - 1]) + " 검토할 수 있어요",
+      canReviewNobody: (a) => a + " 아는 사람이 아직 없어요. 만들 수는 있지만 검토를 받을 수 없어요.",
+      cancel: "취소", create: "업무 만들기", fAssignee: "담당자",
+      whoTakes: "비는 사람이 가져가요",
     },
     en: {
       nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
@@ -315,6 +328,15 @@
       whySeat: (a) => "has " + a + " memories",
       noSeat: "Someone has to learn this area first",
       blocked: "Blocked",
+      newTaskTitle: "New task", newTaskWhere: (p) => "Goes into " + p,
+      fTitle: "Title", fArea: "Area", fDesc: "Description", fPriority: "Priority", fProject: "Project",
+      fTitlePlaceholder: "Change the payment API error shape",
+      fDescPlaceholder: "A line or two on what changes",
+      areaHint: "The area decides who can review it.",
+      canReview: (names) => names.join(" · ") + " can review it",
+      canReviewNobody: (a) => "Nobody knows " + a + " yet. You can still make it, but it cannot be reviewed.",
+      cancel: "Cancel", create: "Create task", fAssignee: "Assignee",
+      whoTakes: "Whoever is free picks it up",
     },
   };
   const lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
@@ -473,6 +495,7 @@
       if (status === "backlog") {
         const a = document.createElement("button");
         a.className = "col-add";
+        a.dataset.newTask = "";
         a.innerHTML = icon.plus + `<span>${t().addTask}</span>`;
         col.appendChild(a);
       }
@@ -615,5 +638,102 @@
   mountRoster(document.getElementById("members"), (p) => {
     location.href = "employees.html" + (lang === "en" ? "?lang=en" : "");
   });
+  /* ── making a task ───────────────────────────────────────────── */
+  // The one choice worth making carefully is the area, because it decides who
+  // can review the work later. So the dialog answers that while it is being
+  // made, rather than leaving it to be discovered in the review column.
+
+  const scrim = document.getElementById("scrim");
+  const dialog = document.getElementById("newTask");
+
+  function renderNewTask() {
+    const area = dialog.dataset.area || SEAT_AREAS[0];
+    const into = project === "all" ? PROJECTS[0] : PROJECTS.find((p) => p.id === project);
+    const knowers = reviewersFor(area).map((p) => p.name);
+
+    dialog.innerHTML = `
+      <div class="m-hd">
+        <span style="flex:1;min-width:0">
+          <span class="m-t">${t().newTaskTitle}</span>
+          <span class="m-s">${t().newTaskWhere(tx(into.name))}</span>
+        </span>
+      </div>
+
+      <div class="m-sec">
+        <div class="field" style="margin-top:0">
+          <span class="label">${t().fTitle} <span class="req">*</span></span>
+          <input class="input" id="ntTitle" placeholder="${t().fTitlePlaceholder}" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <span class="label">${t().fDesc}</span>
+          <textarea class="textarea" placeholder="${t().fDescPlaceholder}"></textarea>
+        </div>
+      </div>
+
+      <div class="m-sec">
+        <div class="grid2" style="gap:14px">
+          <div class="field" style="margin-top:0">
+            <span class="label">${t().fArea}</span>
+            <select class="select" id="ntArea">
+              ${SEAT_AREAS.map((a) => `<option value="${a}"${a === area ? " selected" : ""}>${t().areas[a]}</option>`).join("")}
+            </select>
+          </div>
+          <div class="field" style="margin-top:0">
+            <span class="label">${t().fPriority}</span>
+            <select class="select">
+              <option value="low">${t().priority.low}</option>
+              <option value="normal" selected>${t().priority.normal}</option>
+              <option value="high">${t().priority.high}</option>
+            </select>
+          </div>
+        </div>
+
+        ${
+          knowers.length
+            ? `<span class="hint">${t().areaHint} ${t().canReview(knowers)}</span>`
+            : `<div class="notice notice-warn" style="margin-top:12px">
+                 <span class="n-ic">${icon.none}</span>
+                 <span class="n-tx"><span>${t().canReviewNobody(areaObject(area))}</span></span>
+               </div>`
+        }
+      </div>
+
+      <div class="m-sec">
+        <span class="k">${t().fAssignee}</span>
+        <p class="hint" style="margin-top:4px">${t().whoTakes}</p>
+      </div>
+
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
+        <button class="btn btn-primary btn-md">${t().create}</button>
+      </div>`;
+
+    dialog.querySelector("#ntArea").addEventListener("change", (e) => {
+      dialog.dataset.area = e.target.value;
+      const keep = dialog.querySelector("#ntTitle").value;
+      renderNewTask();
+      dialog.querySelector("#ntTitle").value = keep;
+      dialog.querySelector("#ntArea").focus();
+    });
+    dialog.querySelector("[data-close]").addEventListener("click", closeNewTask);
+  }
+
+  function openNewTask() {
+    close();
+    scrim.hidden = false;
+    renderNewTask();
+    dialog.querySelector("#ntTitle").focus({ preventScroll: true });
+  }
+
+  function closeNewTask() {
+    scrim.hidden = true;
+  }
+
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeNewTask(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeNewTask(); });
+  // the column button is built by render(), so this listens rather than binds
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-new-task]")) openNewTask(); });
+
   render();
 </script>

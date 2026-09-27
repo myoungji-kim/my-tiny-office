@@ -151,6 +151,12 @@
 
 .n-acts { margin-left: auto; display: flex; gap: 7px; flex: none; padding-top: 1px; }
 
+.notice {
+  display: flex; align-items: flex-start; gap: 11px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: var(--r-card); padding: 13px 14px;
+}
+
 .notice-warn .n-ic { background: var(--warn-soft); color: var(--warn-ink); }
 
 .notice-bad .n-ic { background: var(--bad-soft); color: var(--bad-ink); }
@@ -212,6 +218,33 @@
     border-radius: var(--r-card); background: var(--subtle);
     border: 1px solid var(--line); padding: 12px; overflow: auto; position: relative;
   }
+
+/* ═══ form controls ═══ */
+
+.field { margin-top: 18px; }
+
+.label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+
+.input, .select, .textarea {
+    width: 100%; padding: 8px 13px;
+    border: 1px solid var(--line-2); border-radius: var(--r-ctl);
+    background: var(--surface); font: inherit; font-size: 14px; color: var(--ink);
+  }
+
+.input, .select { height: 38px; padding-block: 0; }
+
+/* onboarding asks for very little, so its fields can afford to be large */
+.input-lg, .select-lg { height: 44px; font-size: 14.5px; }
+
+.textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+
+.input::placeholder, .textarea::placeholder { color: var(--faint); }
+
+.input:focus-visible, .select:focus-visible, .textarea:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.hint { display: block; font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+.req { color: var(--bad); }
 
 /* ═══ the sample-page bar ═══ */
 
