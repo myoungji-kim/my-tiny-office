@@ -125,19 +125,24 @@ worktree of its project's repository, so two people in one project never write
 over each other and what changed is always one task's. Approving commits that
 work to the task's branch; pushing, merging and deploying stay the user's.
 
-**Outside the folder, work reads and approval writes.** An agent can look at
-the tools Claude Code is connected to — an issue, a page — while it works, but
-nothing it would write there — a comment, an edit, a status — happens then. It
-is kept as a draft beside the code's changes and made when the task is
-approved, so sending work back never leaves a half-written page behind.
+**Work stays in the folder.** An agent reads and edits files only in its
+task's worktree, runs only the commands its project allows, and reaches no
+network and no outside tool. What it needs beyond that it does not work
+around: the task stops, blocked with the reason, and the user decides.
+SECURITY.md is the full boundary.
+
+**A project allows its commands.** The list starts from the folder's
+`package.json` scripts when the folder is chosen, and the user edits it in the
+project dialog. Allowing a command from a blocked task adds it to the project,
+so the same command does not stop the next task.
 
 **Time is what the work has taken, not a share of an estimate.** With a real
 agent doing the work nobody knows when it ends, so a task carries how long it
 has been running and, once finished, how long it took.
 
 **Blocked is not a status.** A task is blocked *out of* whichever status it is
-in — an agent that stopped, a dependency that never arrived — so it is a field
-on the task rather than a place in the flow.
+in — an agent that stopped, a command the project does not allow, the spending
+cap reached — so it is a field on the task rather than a place in the flow.
 
 ## Review
 

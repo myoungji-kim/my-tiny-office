@@ -19,6 +19,7 @@ Important documents:
 - `docs/DESIGN.md` — visual and UX direction
 - `docs/RULES.md` — how work, review, memory, teams and hiring behave
 - `docs/ARCHITECTURE.md` — technical architecture
+- `docs/SECURITY.md` — what an agent may do on the user's computer, and how that is enforced
 - `CONTRIBUTING.md` — contribution and development rules
 
 Follow those documents unless the user explicitly changes a requirement.

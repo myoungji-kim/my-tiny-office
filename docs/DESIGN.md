@@ -9,6 +9,7 @@ holds, and how the user moves between them. The rest lives elsewhere:
 | [`RULES.md`](RULES.md) | The rules — tasks, review, memory, expertise, teams, hiring, history |
 | [`STYLE-GUIDE.md`](STYLE-GUIDE.md) | Written visual rules — tokens, type, copy, i18n, accessibility |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How it is built |
+| [`SECURITY.md`](SECURITY.md) | What an agent may do, and how it is enforced |
 
 ## The standard lives in `docs/ui/`
 
@@ -22,8 +23,8 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, a task's page, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/settings.html` | The company's Claude Code, language, the open company's file, export, import and deleting it |
-| `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session, what a move leaves behind |
+| `ui/settings.html` | The company's Claude Code, what employees may do and its guide, language, the open company's file, export, import and deleting it |
+| `ui/connect.html` | The company's Claude Code, blocked states, a folder and what is safe in it, work that stops itself, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
 
@@ -134,7 +135,7 @@ leave. Each row is a domain event worded by the dictionary, with its time. The
 feed follows the room — a team's room, the meeting room and the lounge show
 what happened to the people in them — and shows six before 더 보기. Only what
 waits on the user carries an action, the way to it
-(승인하러 가기, and 보러 가기 for an agent that stopped); the rest is there to
+(승인하러 가기, and 보러 가기 for work that stopped — a dropped agent, a command not allowed); the rest is there to
 be read.
 
 ### Status
@@ -245,17 +246,16 @@ so above everything.
 | Panel | Holds | From |
 | --- | --- | --- |
 | 지금 하는 일 | The agent's latest steps — reading, editing, running — and its last words | The runtime's event stream |
-| 바뀐 것 | Every file with lines added and removed, a file opening to its diff; then 승인하면 바깥에 쓸 것 — each draft write to an outside tool, by tool and target | The task's worktree, and the agent's drafts |
+| 바뀐 것 | Every file with lines added and removed, a file opening to its diff | The task's worktree |
 | 검토 | Where the review stands and what was said | The task's PullRequest |
 | 업무 설명 | What the task is for | The task |
 | 들고 간 기억 | Everything the person carries, ✓ on what they report drawing on | The person's memory |
 | 기록 | Created, started, sent back, held, disconnected, finished, applied | Domain events |
-| 세션 | The worktree, its branch, and `claude attach` to watch it in a terminal | The session |
+| 세션 | The worktree, its branch, and `claude --resume` to open it in a terminal once it stops | The session |
 
 The page follows the status: a queued task shows only what it is and who will
 take it; one waiting for approval leads with what changed and says what
-approving does — it commits to the task's branch and makes the drafted writes
-outside, nothing is pushed; a done
+approving does — it commits to the task's branch, nothing is pushed; a done
 one is its record, with the commit.
 
 ### The two dialogs
@@ -475,7 +475,8 @@ to earn their place.
 
 | Panel | Holds |
 | --- | --- |
-| Claude Code | The same check as first run — installed, logged in — with 다시 확인, and the outside tools it is connected to. Folder trust is not here: it is per project |
+| Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
+| 직원이 할 수 있는 일 | The boundary in three lines, with 안내 보기 to 안전 범위, the guide in full. The commands are not here: they are per project |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 이 회사 삭제 | Set apart in red, last before the version |
@@ -487,8 +488,8 @@ screen, not here.
 **A company moves as its file.** 내보내기 saves the open company's; 가져오기
 adds the file's company as one more, chosen in the system's file dialog — it
 never replaces or merges, so it asks nothing. What belongs to the computer
-does not travel: the Claude Code sign-in, project folders, folder trust and
-running sessions. Each is asked for where it is used — a project whose folder
+does not travel: the Claude Code sign-in, project folders and what was
+allowed in them, and running sessions. Each is asked for where it is used — a project whose folder
 is not here says so and asks for it, a task whose session stayed behind starts
 again — and nothing is deleted. connect.html shows both.
 
@@ -571,25 +572,31 @@ The second row is the one that matters. The fix happens somewhere the app
 cannot reach, so the screen has to say so plainly. **Never add a token field.**
 Never read a credential store.
 
-A folder belongs to a project, and each needs trust once. **That has no
-non-interactive path** — one `claude` run in the folder, accepted by the
-user — so it is checked where the project's folder is chosen, as plainly as
-login, and a task in an untrusted folder does not start. ARCHITECTURE.md has
-the measured runtime surface.
+A folder belongs to a project, and **choosing it is the consent.** The project
+dialog shows, the moment a folder is chosen, what employees do there and what
+they never do, and the commands they may run — from its `package.json`,
+edited in place. Creating or saving the project allows exactly that; a project
+without a folder asks nothing, because there is nothing to allow. 안전 범위 in
+settings is the same promise in full, and the dialog links to it.
+
+When work needs more than it was allowed it stops and asks, on the task's page
+and in today's feed: a command the project does not allow (허용하고 이어서),
+or the spending cap (이어서 하기). SECURITY.md has the boundary and the
+measured flags behind it.
 
 ## Open questions
 
 - **The domain predates the board.** `src/domain/task.ts` needs backlog,
   working, approval, done and held, plus the blocked mark, and time taken rather
   than progress derived from `estimatedDuration`. Projects need their status
-  and priority, employees the `reviewing` status, and a task its worktree,
-  branch and drafted outside writes.
+  and priority and allowed commands, employees the `reviewing` status, and a
+  task its worktree, branch and blocked reason.
 - **The code opens one database.** `src/infrastructure/persistence/database.ts`
   opens a single `my-tiny-office.db`; a file per company, the list of them, and
   the language and last company in `settings.json` are not built yet.
-- **Which outside tools a company may use.** Every company's agents reach the
-  same tools Claude Code is connected to. Choosing them per company would need
-  a list in the company's settings and a matching `--allowedTools` per session.
+- **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
+  removes them too. Bringing them back is a per-company list of MCP servers,
+  reads allowed and writes made on approval — SECURITY.md §8.
 - **A 내 차례 / Needs you inbox.** Today's feed already carries what waits on
   the user — approvals, agents that stopped — with the way to each. A separate
   inbox earns its place only if those rows turn out easy to miss.

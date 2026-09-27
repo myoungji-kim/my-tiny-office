@@ -297,29 +297,32 @@ not a guess.
 
 | `AgentRuntime` | Claude Code |
 | --- | --- |
-| availability | `claude auth status --json` |
-| `launch` | `claude --bg <prompt>` → prints a short id |
-| `attach` | `claude attach <id>` |
-| `getStatus` | `claude agents --json` (also `--cwd <path>`) |
-| events / output | `claude logs <id>`, or `--print --output-format stream-json` |
-| `detach` | `claude stop <id>` — conversation is kept |
-| `dispose` | `claude rm <id>` |
-| resume | `claude --resume <session-id>` |
+| availability | `claude --version` and `claude auth status --json` |
+| `launch` | `claude -p --output-format stream-json …`, a child process of the app, prompt on stdin |
+| `attach` | `claude -p --resume <session-id> …` with the same flags |
+| `getStatus` | The child process and its last event |
+| events / output | The process's `stream-json` lines |
+| `detach` | End the process; the conversation is kept |
+| `dispose` | `git worktree remove` once the task is settled |
 
-A `--print` run returns JSON carrying `session_id`, `result`, `is_error`,
-`subtype`, `num_turns`, `permission_denials` and full `usage` with
-`total_cost_usd`. That is the whole `AgentStatus` surface without parsing
-terminal output.
+**A task runs as `-p`, not `--bg`.** Only `-p` gives structured events —
+each tool call and result, a `permission_denied` event, and a final
+`result` with `session_id`, `subtype`, `num_turns`, `permission_denials`,
+`usage` and `total_cost_usd` — and only `-p` takes `--max-budget-usd`.
+`--bg` is managed by `claude agents`/`logs`/`stop`, whose logs are terminal
+output. The cost is that a run is the app's child: closing the app ends it,
+and the next launch finds the task disconnected and resumes it on reconnect.
+The exact flags, and why each is there, are in SECURITY.md.
 
 ### Changing a task that is already running
 
 The user can correct a task while an agent is working on it, which the
-interface calls `sendTask`. There is no command that speaks into a run in
-progress, so the mapping is two of the commands above:
+interface calls `sendTask`. There is no way to speak into a run in progress,
+so the run is ended and resumed with the change:
 
 ```text
-claude stop <id>            # the run ends, the conversation is kept
-claude --resume <session-id> "<what changed>"
+end the process             # the conversation is kept
+claude -p --resume <session-id> …   # stdin: what changed
 ```
 
 The agent keeps what it knows and what it has already written to the folder.
@@ -359,38 +362,35 @@ agent's own account, not a trace.
 Two tasks in one project would otherwise write into the same folder. Each task
 runs in `git worktree add <folder>/.worktrees/<task> -b mto/<task>`, listed in
 the repository's `.git/info/exclude` so the user's history never sees it.
-What changed is that worktree's diff. Approving commits it to `mto/<task>`;
-nothing is pushed. Whether the project folder's trust covers a worktree under
-it is still to be measured against the CLI, as the mappings above were.
+What changed is that worktree's diff, untracked files included. Approving
+commits it to `mto/<task>`; nothing is pushed. The session's file tools are
+confined to the worktree (SECURITY.md §2).
 
-### External tools are read while working and written on approval
+### A session carries nothing of the user's own setup
 
-A session uses the MCP servers the user has connected to Claude Code; the app
-lists them (`claude mcp list`) and never handles their credentials. During a
-task the session runs with those servers' write tools disallowed
-(`--disallowedTools`), and the prompt asks the agent to end with the writes it
-would make, as drafts. Approving resumes the session with exactly those tools
-allowed and asks it to make exactly those writes. Which tools count as writes,
-and whether `--disallowedTools` takes MCP tool names, are still to be
-measured.
+`--setting-sources project` keeps the user's hooks, skills, plugins, MCP
+servers and auto-memory out of every session, so an employee carries only
+what they were taught. It also removes the account's outside tools, which is
+why those are out of the MVP; SECURITY.md §8 has the measurement and the way
+back in.
 
-### Two things happen outside the app
+### What may run is the project's
 
-Neither can be done for the user, and both need a screen that says so.
+Commands are denied unless the project allows them (`--permission-mode
+dontAsk` with an allow list). A denial arrives as a `permission_denied` event
+and blocks the task with the command as its reason; allowing it adds it to the
+project and resumes the run. SECURITY.md §3.
 
-1. **Login.** `claude auth login` opens a browser; `--claudeai`, `--console`
-   and `--sso` skip the interactive choice. The app may spawn this command —
-   that is invoking the vendor's own flow, not implementing authentication —
-   but it must never collect a token itself.
-2. **Workspace trust.** A background session in an untrusted folder refuses:
-   *"Workspace not trusted. Run `claude` in <dir> once and accept the trust
-   prompt."* **There is no non-interactive flag for this.** `-p` skips the
-   dialog instead of satisfying it, which is why a print run succeeds where
-   `--bg` does not.
+### One thing happens outside the app
 
-So every project folder needs one interactive `claude` run, whatever we do
-about login. One honest instruction beats two partial
-automations.
+**Login.** `claude auth login` opens a browser; `--claudeai`, `--console` and
+`--sso` skip the interactive choice. The app may spawn this command — that is
+invoking the vendor's own flow, not implementing authentication — but it must
+never collect a token itself.
+
+Workspace trust does not: `-p` skips Claude Code's trust dialog, so the app
+asks for the folder itself, where the project's folder is chosen, and choosing
+it is the consent.
 
 ### `--bare` is not available to us
 
@@ -413,7 +413,9 @@ before the 10-token question. Per-task cost is therefore dominated by a fixed
 overhead, not by the prompt.
 
 Two consequences: memory length matters less than the number of tasks, and
-`--max-budget-usd` belongs on every launch.
+`--max-budget-usd` belongs on every launch. It is checked after a turn, so a
+run can pass it; it is a stop for a runaway task, fixed and not a setting, and
+reaching it blocks the task until the user carries on.
 
 ### API integration is separate
 
@@ -535,9 +537,10 @@ The app must distinguish:
 
 - employee unavailable
 - runtime unavailable
-- workspace not trusted
+- project without a folder, or its folder missing on this computer
 - session disconnected
-- task blocked
+- command not allowed
+- spending cap reached
 - AI request failed
 
 A runtime failure must not corrupt company state.
@@ -669,6 +672,10 @@ A single connection holds one transaction at a time, so concurrent callers are
 queued.
 
 ## 16. Security
+
+SECURITY.md is the boundary: what an agent may do, the flags that enforce it,
+how the local server, processes, output and company files are protected, and
+how to re-measure it on a new Claude Code version.
 
 Never:
 - commit API keys
