@@ -53,6 +53,8 @@ export function openDatabase(filePath: string): DatabaseHandle {
   connection.pragma("journal_mode = WAL");
   connection.pragma("foreign_keys = ON");
   connection.pragma("busy_timeout = 5000");
+  // A company file can come from another computer; its schema never runs functions with the app's rights.
+  connection.pragma("trusted_schema = OFF");
 
   const db = drizzle(connection, { schema });
   migrate(db, { migrationsFolder: join(process.cwd(), MIGRATIONS_FOLDER) });

@@ -90,3 +90,10 @@ describe("withTransaction", () => {
     await expect(repository.findById(rival.id)).resolves.toEqual(rival);
   });
 });
+
+describe("connection safety", () => {
+  it("does not trust functions named in a file's schema", () => {
+    const handle = database.handle as unknown as { db: { $client: { pragma: (q: string, o: { simple: boolean }) => unknown } } };
+    expect(handle.db.$client.pragma("trusted_schema", { simple: true })).toBe(0);
+  });
+});

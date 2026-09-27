@@ -628,7 +628,8 @@ that one is gone; with no company file at all it shows first run.
 ### Initialization
 
 Opening the database creates the file and its directory if they are missing,
-sets `journal_mode = WAL`, `foreign_keys = ON`, and `busy_timeout`, then applies
+sets `journal_mode = WAL`, `foreign_keys = ON`, `busy_timeout` and
+`trusted_schema = OFF`, then applies
 pending migrations. SQLite disables foreign key enforcement per connection by
 default, so that pragma is required rather than optional.
 
