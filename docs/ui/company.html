@@ -123,9 +123,9 @@
 
   .knows .who span { width: 20px; height: 20px; border-radius: 6px; background: var(--subtle); display: grid; place-items: center; overflow: hidden; }
 
-  .nobody { font: inherit; font-size: 14px; color: var(--bad-ink); font-weight: 600; background: none; border: none; padding: 0; cursor: pointer; }
+  .teach-link { font: inherit; font-size: 14px; color: var(--ink); font-weight: 600; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 
-  .nobody:hover { text-decoration: underline; }
+  .teach-link:hover { color: var(--brand-ink); }
 
   .area-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 
@@ -285,7 +285,7 @@
         project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
       },
       areasTitle: "전문 분야", areasSub: "우리 회사가 다루는 분야예요. 직원에게 알려준 기억은 모두 이 중 하나에 속해요.",
-      nobodyKnows: "아무도 몰라요", addArea: "분야 추가하기",
+      teachLink: "알려주기", addArea: "분야 추가하기",
       memCount: (n) => "기억 " + n + "개",
       nobodyKnowsArea: (list) => list.join(" · ") + (hasBatchim(list.at(-1)) ? "을" : "를") + " 아는 직원이 없어요",
       nobodyKnowsWhy: "이 분야 업무는 참고할 기억 없이 시작하고, PR 리뷰를 맡을 사람도 없어요. 누구에게든 한 줄 알려주면 시작돼요.",
@@ -297,7 +297,7 @@
       moveTo: "옮길 분야", moveAndRemove: "옮기고 지우기",
       rolesTitle: "역할", rolesSub: "고용할 때 고르는 직함이에요. 직원마다 하나씩 있어요.",
       addRole: "역할 추가", roleMenu: "역할 메뉴", roleName: "역할 이름", rolePlaceholder: "예: Game Server Engineer",
-      peopleCount: (n) => n + "명", nobodyInRole: "아직 아무도 없어요",
+      peopleCount: (n) => n + "명", nobodyYet: "아직 아무도 없어요",
       moveRoleTitle: (r) => "‘" + r + "’ 역할 지우기",
       moveRoleSub: (n) => "이 역할인 직원이 " + n + "명 있어요. 지우기 전에 바꿀 역할을 골라요.",
       moveRoleTo: "바꿀 역할", changeAndRemove: "바꾸고 지우기",
@@ -332,7 +332,7 @@
         project: (m) => "Finished ‘" + m.name + "’<span> · " + m.days + " days</span>",
       },
       areasTitle: "Expertise", areasSub: "What this company works in. Every memory taught belongs to one of these.",
-      nobodyKnows: "Nobody knows this", addArea: "Add an area",
+      teachLink: "Teach someone", addArea: "Add an area",
       memCount: (n) => n + (n === 1 ? " memory" : " memories"),
       nobodyKnowsArea: (list) => "Nobody knows " + list.join(" · "),
       nobodyKnowsWhy: "Work here starts with nothing to draw on, and nobody can review it. Teach anyone one line to start.",
@@ -344,7 +344,7 @@
       moveTo: "Move them to", moveAndRemove: "Move and delete",
       rolesTitle: "Roles", rolesSub: "The titles you hire for. Everyone has one.",
       addRole: "Add a role", roleMenu: "Role actions", roleName: "Role name", rolePlaceholder: "e.g. Game Server Engineer",
-      peopleCount: (n) => (n === 1 ? "1 person" : n + " people"), nobodyInRole: "Nobody yet",
+      peopleCount: (n) => (n === 1 ? "1 person" : n + " people"), nobodyYet: "Nobody yet",
       moveRoleTitle: (r) => "Delete ‘" + r + "’",
       moveRoleSub: (n) => (n === 1 ? "1 person has" : n + " people have") + " this role. Choose what they become first.",
       moveRoleTo: "Change them to", changeAndRemove: "Change and delete",
@@ -665,7 +665,7 @@
     create: (label) => AREAS.push({ name: "custom-" + Date.now(), label }),
     members: (a) => knowersOf(a.name),
     count: (a) => t().memCount(countOf(a.name)),
-    empty: (a) => `<button class="nobody" type="button" data-pick="${a.name}">${t().nobodyKnows}</button>`,
+    empty: (a) => `<span class="none">${t().nobodyYet} · <button class="teach-link" type="button" data-pick="${a.name}">${t().teachLink}</button></span>`,
     holds: (a) => countOf(a.name),
     remove: (a, into) => {
       for (const p of people) for (const m of p.memories) if (m.area === a.name) m.area = into?.name ?? null;
@@ -689,7 +689,7 @@
     create: (label) => ROLE_LIST.push({ label }),
     members: inRole,
     count: (r) => t().peopleCount(inRole(r).length),
-    empty: () => `<span class="none">${t().nobodyInRole}</span>`,
+    empty: () => `<span class="none">${t().nobodyYet}</span>`,
     holds: (r) => inRole(r).length,
     remove: (r, into) => {
       for (const p of inRole(r)) p.role = into.label;
