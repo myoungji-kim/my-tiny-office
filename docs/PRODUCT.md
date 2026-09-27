@@ -65,7 +65,7 @@ office. The screens are in DESIGN.md.
 - hire, and let go
 - send on leave, and bring back
 - give work
-- create projects
+- create, hold, finish and reopen projects
 - review and approve
 - teach a memory
 - manage teams, roles and areas of expertise

@@ -10,18 +10,7 @@
 <style>
   /* ═══ list ═══ */
 
-  .list { border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
-
-  .row-item {
-    display: grid; grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.6fr) 84px;
-    align-items: center; gap: 12px; width: 100%;
-    padding: 11px 14px; border-bottom: 1px solid var(--line);
-    color: inherit; text-decoration: none;
-  }
-
-  .row-item:last-child { border-bottom: none; }
-
-  .row-item:hover { background: var(--subtle); }
+  #roster .row-item { grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.6fr) 84px; }
 
   .r-av { position: relative; width: 40px; height: 40px; border-radius: 11px; background: var(--subtle); display: grid; place-items: center; }
 
@@ -41,14 +30,6 @@
 
   /* ═══ person ═══ */
 
-  .crumb {
-    display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px;
-    font-size: 14px; color: var(--muted); text-decoration: none;
-  }
-
-  .crumb:hover { color: var(--ink); }
-
-  .crumb svg { width: 14px; height: 14px; }
 
   .person-hd { align-items: center; }
 

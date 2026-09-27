@@ -19,7 +19,7 @@ before building or changing a screen.
 | --- | --- |
 | `ui/first-run.html` | First run: the Claude Code check, the company, the first hire, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
-| `ui/projects.html` | The task board, the review queue, and choosing who reviews |
+| `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
 | `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session |
@@ -142,6 +142,31 @@ hidden; the rule is the thing worth teaching. 기억 가르치기 is offered in 
 state because it is not a transition: it changes what someone knows, not what
 they are doing.
 
+## Projects
+
+The projects screen is a list, like people: 진행 중 · 보류 · 완료 tabs, and
+every row opens that project's board at its own address (`#pay`). An active or
+held row carries its folder, how many tasks sit in each column, with 승인 대기
+lifted when it is not zero, and when it started; a done one carries its record
+— tasks done and days taken — and when it finished. There is no board across
+all projects: the office shows who is on what, and the list shows where work
+waits on the user.
+
+A project's page is its board under a header with its name, its status, where
+it lives, a `⋯` and 새 업무. The `⋯` follows the project's status:
+
+| Status | Actions |
+| --- | --- |
+| 진행 중 | 프로젝트 수정 · 보류 · 완료 처리 *(disabled while work is in progress or waiting, with the count)* · 프로젝트 삭제 |
+| 보류 | 다시 진행 · 프로젝트 수정 · 프로젝트 삭제 |
+| 완료 | 다시 열기 · 프로젝트 삭제 |
+
+A held or done project says so above its board, with the reason or the date
+and the one action that undoes it. Neither offers 새 업무. Holding asks for the
+reason in the dialog and says how many tasks in progress go with it; finishing
+says how many unstarted ones close. A done project's cards open with nothing
+to do: it is a record. The rules are in RULES.md.
+
 ## The board
 
 ```text
@@ -184,18 +209,19 @@ costs: the tasks can be written down, but nobody can start them.
 ### An action sits with what it acts on
 
 ```text
-프로젝트                                   [+ 새 프로젝트]   ← the page, and its action
-[전체][결제 개편][주문 v2]                                  ← which project
+프로젝트                                   [+ 새 프로젝트]   ← the list, and its action
+[진행 중][보류][완료]
 ───────────────────────────────────────────────────────
-결제 개편                              [⋯] [+ 새 업무]      ← this project, and its actions
+‹ 프로젝트 목록
+결제 개편 진행 중                          [⋯] [+ 새 업무]   ← this project, and its actions
 결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요. · ~/Projects/tinysoft
 ───────────────────────────────────────────────────────
 [the board]
 ```
 
-The project has a line of its own between the tabs and the board, carrying its
-name, what it is for, where it lives, and the two actions that are its own. A
-project with no folder says so there. **The rarer action can be the page's, and
+The list's header holds what makes a project; a project's header holds what
+it is for, where it lives, and the actions that are its own. A project with no
+folder says so there. **The rarer action can be the page's, and
 the frequent one still gets the only solid button**, because primary is about
 what the screen is for, not which row it sits in.
 

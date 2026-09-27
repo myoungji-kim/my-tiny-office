@@ -63,6 +63,22 @@ Session
 
 This prevents unrelated local AI sessions from appearing in the office.
 
+## Projects
+
+A project is a piece of work with a folder. It is **active**, **held** or
+**done**, and only the user moves it: tasks running out does not finish a
+project, because more can always be added.
+
+- **Hold** takes a reason. Its tasks in progress are held with it, and nobody
+  starts anything new; finished work waiting for approval can still be applied.
+- **Resume** gives held work back to whoever had it, or queues it behind what
+  they took on meanwhile.
+- **Finish** is possible once nothing is in progress or waiting for approval.
+  What is left unstarted closes as it is. The project is kept as its record —
+  its span and how many tasks were done — and can be reopened.
+- **Delete** takes its tasks with it. A finished one leaves the company
+  overview, but its line in the history stays.
+
 ## Tasks
 
 Tasks have:
@@ -219,6 +235,6 @@ later, so a hire stays in it after the person leaves:
 | 업무 N건 | 10 · 50 · 100 · 500 |
 | 첫 리뷰 | The first peer review settles |
 | 기억 N개 | 10 · 50 · 100 |
-| 프로젝트 완료 | A project's last task is done |
+| 프로젝트 완료 | The user finishes a project |
 
 There are no growth stages yet; the history is what shows the company growing.
