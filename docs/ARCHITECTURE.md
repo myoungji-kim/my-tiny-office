@@ -581,7 +581,7 @@ Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/
 The list of companies is the `companies` folder; each file names its own
 company. `MY_TINY_OFFICE_DATA_DIR` overrides the directory.
 
-### Moving a company
+### Moving and deleting a company
 
 Export writes a consistent copy of the open company's database while the app
 runs (`VACUUM INTO`). Import runs the migrations on a copy of the chosen file
@@ -591,6 +591,10 @@ the company and nothing of the machine: Claude Code stays signed in or out on
 its own, and a workspace path or a runtime session id from another computer is
 kept but reconciled on launch — a missing folder or session becomes a state
 the user resolves, never a deletion.
+
+Deleting a company stops its running sessions, then removes its file. On
+launch the app opens the company named in `settings.json`, or any other when
+that one is gone; with no company file at all it shows first run.
 
 ### Initialization
 

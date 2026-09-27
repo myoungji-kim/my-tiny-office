@@ -17,6 +17,15 @@
   #moved:empty { display: none; }
 
   #moved { margin-top: 12px; }
+
+  /* The one thing here that cannot be undone reads as such before it is opened. */
+  .panel-danger { border-color: var(--bad-line); }
+
+  .panel-danger .panel-hd h2 { color: var(--bad-ink); }
+
+  .danger-row { display: flex; align-items: center; gap: 14px; }
+
+  .danger-row p { margin: 0; flex: 1; font-size: 14px; color: var(--muted); }
 </style>
 
 <div class="app">
@@ -106,6 +115,16 @@
           </div>
         </div>
 
+        <div class="panel panel-danger" id="dangerPanel">
+          <div class="panel-hd"><h2 data-t="deleteTitle">이 회사 삭제</h2></div>
+          <div class="panel-bd">
+            <div class="danger-row">
+              <p data-t="deleteWhy">직원, 기억, 프로젝트, 업무, 연혁이 모두 지워지고 되돌릴 수 없어요. 프로젝트 폴더의 코드는 그대로예요.</p>
+              <button class="btn btn-danger btn-sm" type="button" id="deleteCompany" data-t="deleteButton">회사 삭제</button>
+            </div>
+          </div>
+        </div>
+
         <div class="panel">
           <div class="panel-bd">
             <div class="kv"><span data-t="version">버전</span><b>v0.1.0</b></div>
@@ -114,6 +133,10 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" id="modal" role="alertdialog" aria-modal="true"></div>
 </div>
 
 <script>
@@ -130,6 +153,13 @@
       dataHint: "코드 폴더와 따로 있어서 브랜치를 바꾸거나 저장소를 지워도 회사는 남아요.",
       version: "버전",
       exportDb: "내보내기", importDb: "가져오기",
+      deleteTitle: "이 회사 삭제", deleteButton: "회사 삭제", cancel: "취소",
+      deleteWhy: "직원, 기억, 프로젝트, 업무, 연혁이 모두 지워지고 되돌릴 수 없어요. 프로젝트 폴더의 코드는 그대로예요.",
+      deleteAsk: (n) => withParticle(n, "을", "를") + " 삭제할까요?",
+      deleteLoses: (p, m) => "직원 " + p + "명과 기억 " + m + "개, 프로젝트와 업무, 연혁이 모두 지워져요. 진행 중인 업무는 멈춰요. 프로젝트 폴더의 코드는 그대로예요.",
+      deleteKeep: "지우기 전에 내보내 두면 나중에 다시 가져올 수 있어요.",
+      deleteType: "확인하려면 회사 이름을 그대로 입력해요",
+      deleted: (n, next) => withParticle(n, "을", "를") + " 삭제했어요. " + withParticle(next, "을", "를") + " 열었어요.",
       moveHint: "내보내기는 이 회사를 파일로 저장하고, 가져오기는 파일의 회사를 하나 더 추가해요. Claude Code 로그인과 폴더 신뢰는 파일에 담기지 않아요.",
       exported: "내려받기 폴더에 저장했어요 · my-tiny-office-2026-09-26.db",
       importedTitle: "TinySoft를 가져왔어요",
@@ -149,6 +179,13 @@
       dataHint: "It lives apart from the code, so switching branches or deleting the checkout leaves the company alone.",
       version: "Version",
       exportDb: "Export", importDb: "Import",
+      deleteTitle: "Delete this company", deleteButton: "Delete company", cancel: "Cancel",
+      deleteWhy: "Its people, memory, projects, work and history are all deleted, for good. The code in project folders stays.",
+      deleteAsk: (n) => "Delete " + n + "?",
+      deleteLoses: (p, m) => p + " people and " + m + " memories, every project and task, and the history are deleted. Work in progress stops. The code in project folders stays.",
+      deleteKeep: "Export it first and it can be imported again later.",
+      deleteType: "Type the company's name to confirm",
+      deleted: (n, next) => "Deleted " + n + ". " + next + " is open now.",
       moveHint: "Export saves this company as a file; import adds the file's company as one more. The Claude Code sign-in and folder trust are not in the file.",
       exported: "Saved to Downloads · my-tiny-office-2026-09-26.db",
       importedTitle: "Imported TinySoft",
@@ -212,6 +249,42 @@
   document.getElementById("exportDb").addEventListener("click", () => {
     moved.innerHTML = `<span class="hint">${t().exported}</span>`;
   });
+  /* ── deleting ────────────────────────────────────────────────── */
+  // Nothing else on this screen is lost for good, so this one asks for the
+  // company's name typed out rather than a second click.
+  const scrim = document.getElementById("scrim");
+  const modal = document.getElementById("modal");
+  const open = COMPANIES.find((c) => c.open);
+  const closeModal = () => { scrim.hidden = true; };
+  document.getElementById("deleteCompany").addEventListener("click", () => {
+    const memories = STAFF.reduce((n, p) => n + p.memories.length, 0);
+    modal.setAttribute("aria-label", t().deleteAsk(open.name));
+    modal.innerHTML = `
+      <div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${t().deleteAsk(open.name)}</span></span></div>
+      <div class="m-sec">
+        <span class="m-s">${t().deleteLoses(STAFF.length, memories)}</span>
+        <span class="hint">${t().deleteKeep}</span>
+        <div class="field"><label class="label" for="typedName">${t().deleteType}</label><input class="input" id="typedName" placeholder="${open.name}" autocomplete="off" /></div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
+        <button class="btn btn-danger btn-md" type="button" data-yes disabled>${t().deleteButton}</button>
+      </div>`;
+    const yes = modal.querySelector("[data-yes]");
+    const typed = modal.querySelector("#typedName");
+    typed.addEventListener("input", () => { yes.disabled = typed.value.trim() !== open.name; });
+    modal.querySelector("[data-close]").addEventListener("click", closeModal);
+    yes.addEventListener("click", () => {
+      closeModal();
+      const next = COMPANIES.find((c) => !c.open);
+      document.querySelector("#dangerPanel .panel-bd").innerHTML = `<span class="hint" style="margin:0">${t().deleted(open.name, next.name)}</span>`;
+    });
+    scrim.hidden = false;
+    typed.focus({ preventScroll: true });
+  });
+  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !scrim.hidden) closeModal(); });
+
   document.getElementById("importDb").addEventListener("click", () => {
     moved.innerHTML = `<div class="notice notice-warn"><span class="n-ic">${WARN}</span>
       <span class="n-tx"><b>${t().importedTitle}</b><span>${t().importedBody}</span></span>

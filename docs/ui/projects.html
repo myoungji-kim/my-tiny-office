@@ -1342,7 +1342,7 @@
         </div>
         <div class="m-sec">
           <span class="m-s">${why}</span>
-          ${field ? `<label class="field"><span class="label">${field.label}</span><input class="input" id="stepText" placeholder="${field.placeholder}" /></label>` : ""}
+          ${field ? `<div class="field"><label class="label" for="stepText">${field.label}</label><input class="input" id="stepText" placeholder="${field.placeholder}" /></div>` : ""}
         </div>
         <div class="m-foot">
           <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>

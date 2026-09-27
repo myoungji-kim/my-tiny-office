@@ -22,7 +22,7 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/settings.html` | The company's Claude Code, language, the open company's file, export and import |
+| `ui/settings.html` | The company's Claude Code, language, the open company's file, export, import and deleting it |
 | `ui/connect.html` | The company's Claude Code, blocked states, folder trust, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -430,6 +430,7 @@ to earn their place.
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인. Folder trust is not here: it is per project |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
+| 이 회사 삭제 | Set apart in red, last before the version |
 | 버전 | The app's version |
 
 What the company decides — its name, areas, roles, memory — is on the company
@@ -442,6 +443,13 @@ does not travel: the Claude Code sign-in, project folders, folder trust and
 running sessions. Each is asked for where it is used — a project whose folder
 is not here says so and asks for it, a task whose session stayed behind starts
 again — and nothing is deleted. connect.html shows both.
+
+**Deleting a company is the one thing here that cannot be undone,** so its
+panel is red and its dialog asks for the company's name typed out. It says
+what goes — people and memories by count, projects, work, history — that work
+in progress stops, that the code in project folders stays, and that exporting
+first keeps a way back. The company opened next is the one opened last; with
+none left, the app is at first run again.
 
 ## First run
 
@@ -462,6 +470,10 @@ It does not ask for a team.
 가져오기 imports one instead and skips the company and the first hire; arrival
 then lists what this computer still has to do — folders to choose again,
 tasks whose sessions stayed on the old one.
+
+First run is what the app shows when this computer has no company; with one,
+the app opens the company opened last, and first run is only reached through
+the switcher's 새 회사 만들기 and 기존 회사 가져오기.
 
 It ends at the **first employee**, not at the company. A user dropped into an
 empty office has nothing to look at, and the office is the product. Every field
