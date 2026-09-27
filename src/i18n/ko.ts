@@ -16,7 +16,7 @@ export const ko: Dictionary = {
     heading: "첫 회사를 만들어 보세요",
     intro: "작은 사무실에도 이름이 있어야 일을 시작할 수 있습니다.",
     name: "회사 이름",
-    namePlaceholder: "아크메 타이니 소프트웨어",
+    namePlaceholder: "My Tiny Office",
     description: "소개",
     descriptionPlaceholder: "이 회사는 무엇을 만드나요?",
     optional: "선택",

@@ -14,7 +14,7 @@ export const en = {
     heading: "Create your first company",
     intro: "A tiny office needs a name before anyone can start working.",
     name: "Company name",
-    namePlaceholder: "Acme Tiny Software",
+    namePlaceholder: "My Tiny Office",
     description: "Description",
     descriptionPlaceholder: "What does this company build?",
     optional: "optional",

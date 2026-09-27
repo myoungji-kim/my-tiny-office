@@ -170,7 +170,7 @@
 
     <div class="field">
       <label class="label" for="co" data-t="companyLabel">회사 이름</label>
-      <input class="input" id="co" value="Acme Tiny Software" autocomplete="off" />
+      <input class="input" id="co" value="My Tiny Office" autocomplete="off" />
       <span class="hint" data-t="companyHint">나중에 바꿀 수 있어요.</span>
     </div>
 
@@ -444,7 +444,7 @@
   function applyLang() {
     for (const el of document.querySelectorAll("[data-t]")) el.textContent = t()[el.dataset.t];
     const co = document.getElementById("co");
-    if (!co.value) co.value = "Acme Tiny Software";
+    if (!co.value) co.value = "My Tiny Office";
     document.getElementById("nm").placeholder = chosen ? chosen[lang === "ko" ? "ko" : "en"] : lang === "ko" ? "모카" : "Mocha";
     if (chosen) picked.innerHTML = `<b>${tx(chosen.species)}</b><span>${tx(chosen.family)}</span>`;
     }
