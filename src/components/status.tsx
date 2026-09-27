@@ -4,13 +4,13 @@ import type { TaskStatus } from "../domain/task";
 const availabilityTone: Record<Availability | "working", string> = {
   available: "bg-sage/20 text-ink",
   working: "bg-blue/25 text-ink",
-  onVacation: "bg-amber/25 text-ink",
+  onLeave: "bg-amber/25 text-ink",
 };
 
 const availabilityDot: Record<Availability | "working", string> = {
   available: "bg-sage",
   working: "bg-blue",
-  onVacation: "bg-amber",
+  onLeave: "bg-amber",
 };
 
 const taskTone: Record<TaskStatus, string> = {
@@ -27,8 +27,8 @@ export function employeeStatus(
   availability: Availability,
   workingOn: string | undefined,
 ): EmployeeStatus {
-  if (availability === "onVacation") {
-    return "onVacation";
+  if (availability === "onLeave") {
+    return "onLeave";
   }
   return workingOn === undefined ? "available" : "working";
 }

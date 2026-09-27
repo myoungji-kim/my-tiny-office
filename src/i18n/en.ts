@@ -78,7 +78,7 @@ export const en = {
   availability: {
     available: "Available",
     working: "Working",
-    onVacation: "On vacation",
+    onLeave: "On leave",
   },
   taskStatus: {
     backlog: "Backlog",
@@ -102,7 +102,7 @@ export const en = {
     taskNotFound: "That task no longer exists.",
     taskNotAssignable: "This task can no longer be reassigned.",
     employeeFromAnotherCompany: "That person works for another company.",
-    employeeOnVacation: "This employee is currently on vacation.",
+    employeeOnLeave: "This employee is currently on leave.",
     areaNotFound: "That area no longer exists.",
     projectNotFound: "That project no longer exists.",
     projectClosed: "Work is written down only in a planned or active project.",

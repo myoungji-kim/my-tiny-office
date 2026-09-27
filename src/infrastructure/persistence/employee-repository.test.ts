@@ -23,7 +23,7 @@ const employee: Employee = {
   name: "Min-su",
   role: "Backend Engineer",
   availability: "available",
-  vacationSince: undefined,
+  leaveSince: undefined,
   hiredAt,
 };
 
@@ -47,13 +47,13 @@ describe("sqlite employee repository", () => {
     await expect(repository.findById(employee.id)).resolves.toEqual(employee);
   });
 
-  it("round trips an employee on vacation", async () => {
+  it("round trips an employee on leave", async () => {
     const repository = createSqliteEmployeeRepository(database.handle.db);
-    const onVacation: Employee = { ...employee, availability: "onVacation", vacationSince: hiredAt + 1 };
+    const onLeave: Employee = { ...employee, availability: "onLeave", leaveSince: hiredAt + 1 };
 
-    await repository.save(onVacation);
+    await repository.save(onLeave);
 
-    await expect(repository.findById(employee.id)).resolves.toEqual(onVacation);
+    await expect(repository.findById(employee.id)).resolves.toEqual(onLeave);
   });
 
   it("updates an existing employee instead of failing on the primary key", async () => {

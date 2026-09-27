@@ -515,7 +515,7 @@ const STATUS = {
   working:   { color: "var(--warn)" },
   reviewing: { color: "var(--info)" },
   available: { color: "var(--ok)" },
-  vacation:  { color: "var(--faint)" },
+  leave:     { color: "var(--faint)" },
 };
 
 
@@ -534,7 +534,7 @@ const WORDS = {
       offWhy: "하던 업무와 기억은 그대로예요. 터미널에서 claude auth login을 실행한 뒤 다시 확인해 주세요. 그때까지 새 업무는 시작하지 않아요.",
       recheck: "다시 확인", cannotStart: "Claude Code가 멈춰서 지금은 새 업무를 시작할 수 없어요.",
     },
-    status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", vacation: "휴가 중" },
+    status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", leave: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     hire: {
@@ -573,7 +573,7 @@ const WORDS = {
       offWhy: "Tasks in progress and everything remembered are untouched. Run claude auth login in a terminal, then check again. Nothing new starts until then.",
       recheck: "Check again", cannotStart: "Claude Code has stopped, so nothing new can start right now.",
     },
-    status: { working: "Working", reviewing: "Reviewing", available: "Free", vacation: "On leave" },
+    status: { working: "Working", reviewing: "Reviewing", available: "Free", leave: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
     teams: { backend: "Backend", frontend: "Frontend", planning: "Planning", design: "Design" },
     hire: {
@@ -652,7 +652,7 @@ const STAFF = [
       { area: "security", text: { ko: "쿼리에 사용자 입력을 문자열로 이어 붙이지 않아요.", en: "Never concatenate user input into a query." }, from: null, used: 0 },
     ] },
   { id: "p5", name: "완두", species: "frog", role: "DevOps Engineer",
-    team: "frontend", status: "vacation", joined: "2026. 1. 12.",
+    team: "frontend", status: "leave", joined: "2026. 1. 12.",
     leaveSince: { ko: "9월 23일부터", en: "Since Sep 23" }, done: 52, reviews: 14,
     style: [{ ko: "두 번 할 일이면 자동화해", en: "If you will do it twice, automate it" }, { ko: "배포 전에 typecheck · lint · test 세 개를 모두 돌려요.", en: "Run typecheck, lint and test before any deploy." }],
     memories: [
@@ -1137,7 +1137,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
         lines.push(`<span class="gain"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>${w.gainArea(p.name, areaName(state.area))}</span>`);
       }
     }
-    if (p?.status === "vacation") lines.push(`<span class="hint">${w.onLeave}</span>`);
+    if (p?.status === "leave") lines.push(`<span class="hint">${w.onLeave}</span>`);
     const before = p ? liveChars(p) : isCompany() ? carried : null;
     if (before !== null) lines.push(`<span class="hint">${w.carried(before, before + len)}</span>`);
     const box = $("[data-effect]");

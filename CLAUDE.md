@@ -161,7 +161,7 @@ Bad:
 ```ts
 // We first check whether the employee is available because
 // originally we had a bug where employees could receive tasks
-// while they were on vacation, which caused several state
+// while they were on leave, which caused several state
 // synchronization issues...
 if (employee.availability === "available") {
   assignTask(employee, task);
@@ -285,7 +285,7 @@ Examples:
 - `ReviewStarted`
 - `ReviewApproved`
 - `ChangesRequested`
-- `EmployeeWentOnVacation`
+- `EmployeeWentOnLeave`
 
 Do not create a full event-sourcing architecture unless explicitly required.
 

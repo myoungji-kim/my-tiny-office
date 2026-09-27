@@ -45,17 +45,17 @@ export async function hireEmployee(
   return { ok: true, value: { employee }, events };
 }
 
-export type LeaveFailure = "employeeNotFound" | "employeeOnVacation" | "employeeNotOnVacation";
+export type LeaveFailure = "employeeNotFound" | "employeeOnLeave" | "employeeNotOnLeave";
 
 // Going on leave returns their work in progress to the backlog for whoever is free.
-export async function sendOnVacation(
+export async function sendOnLeave(
   ctx: AppContext,
   employeeId: EmployeeId,
 ): Promise<UseCaseResult<{ readonly employee: employeeDomain.Employee }, LeaveFailure>> {
   const employee = await ctx.employees.findById(employeeId);
   if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
   const now = ctx.now();
-  const away = employeeDomain.goOnVacation(employee, toEventId(ctx.newId()), now);
+  const away = employeeDomain.goOnLeave(employee, toEventId(ctx.newId()), now);
   if (!away.ok) return away;
 
   return ctx.withTransaction(async () => {
@@ -78,7 +78,7 @@ export async function bringBack(
 ): Promise<UseCaseResult<{ readonly employee: employeeDomain.Employee }, LeaveFailure>> {
   const employee = await ctx.employees.findById(employeeId);
   if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
-  const back = employeeDomain.returnFromVacation(employee, toEventId(ctx.newId()), ctx.now());
+  const back = employeeDomain.returnFromLeave(employee, toEventId(ctx.newId()), ctx.now());
   if (!back.ok) return back;
   await ctx.employees.save(back.employee);
   return { ok: true, value: { employee: back.employee }, events: back.events };

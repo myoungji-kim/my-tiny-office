@@ -176,7 +176,7 @@ and greyscale.
 | `working` | `--warn` | Filled, with a ring |
 | `reviewing` | `--info` | Hollow ring |
 | `available` | `--ok` | Filled |
-| `vacation` | `--faint` | Short dash |
+| `leave` | `--faint` | Short dash |
 
 A status is always accompanied by a text label somewhere in the same view.
 

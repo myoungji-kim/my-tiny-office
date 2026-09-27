@@ -8,7 +8,7 @@ import type { TaskStatus } from "../../domain/task";
 
 // Listing the values here keeps the schema in sync with the domain unions:
 // widening a union without updating these arrays fails to compile.
-const availabilities = ["available", "onVacation"] as const satisfies readonly Availability[];
+const availabilities = ["available", "onLeave"] as const satisfies readonly Availability[];
 const priorities = ["low", "normal", "high"] as const satisfies readonly Priority[];
 const projectStatuses = ["planned", "active", "held", "done"] as const satisfies readonly ProjectStatus[];
 const taskStatuses = ["backlog", "working", "approval", "done", "held"] as const satisfies readonly TaskStatus[];
@@ -31,12 +31,12 @@ export const employees = sqliteTable(
     name: text("name").notNull(),
     role: text("role").notNull(),
     availability: text("availability", { enum: availabilities }).notNull(),
-    vacationSince: integer("vacation_since"),
+    leaveSince: integer("leave_since"),
     hiredAt: integer("hired_at").notNull(),
   },
   (table) => [
     index("idx_employees_company").on(table.companyId),
-    check("employees_availability", sql`${table.availability} in ('available', 'onVacation')`),
+    check("employees_availability", sql`${table.availability} in ('available', 'onLeave')`),
   ],
 );
 

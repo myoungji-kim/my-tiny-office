@@ -77,7 +77,7 @@ const assignable = (task: Task, employee: Employee) =>
   employee.companyId !== task.companyId
     ? ("employeeFromAnotherCompany" as const)
     : employee.availability !== "available"
-      ? ("employeeOnVacation" as const)
+      ? ("employeeOnLeave" as const)
       : undefined;
 
 export interface CreateTaskInput {
@@ -124,7 +124,7 @@ export function createTask(input: CreateTaskInput, eventId: EventId, now: Timest
   };
 }
 
-export type AssignTaskFailure = "taskNotAssignable" | "employeeFromAnotherCompany" | "employeeOnVacation";
+export type AssignTaskFailure = "taskNotAssignable" | "employeeFromAnotherCompany" | "employeeOnLeave";
 
 // Naming who does it; whether they start now is the pick-up's business.
 export function assignTask(task: Task, employee: Employee, eventId: EventId, now: Timestamp): Transition<TaskAssigned, AssignTaskFailure> {
@@ -138,7 +138,7 @@ export function assignTask(task: Task, employee: Employee, eventId: EventId, now
   };
 }
 
-export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnVacation";
+export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnLeave";
 
 export function startTask(task: Task, employee: Employee, eventId: EventId, now: Timestamp): Transition<TaskStarted, StartTaskFailure> {
   if (task.status !== "backlog") return { ok: false, reason: "taskNotInBacklog" };

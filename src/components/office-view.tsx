@@ -9,7 +9,7 @@ import { viewHref } from "./shell";
 const deskTone: Record<EmployeeStatus, { screen: string; body: string }> = {
   available: { screen: "fill-sage/40", body: "fill-sage" },
   working: { screen: "fill-blue/50", body: "fill-blue" },
-  onVacation: { screen: "fill-parchment", body: "fill-amber" },
+  onLeave: { screen: "fill-parchment", body: "fill-amber" },
 };
 
 function Desk({ status }: { readonly status: EmployeeStatus }) {

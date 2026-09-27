@@ -867,7 +867,7 @@
       : task.status !== "backlog" && task.spent !== undefined ? t().took(task.spent)
       : null;
 
-  const away = (p) => p.status === "vacation";
+  const away = (p) => p.status === "leave";
   const free = (p) => p.status === "available";
 
   // Who is on it decides where it sits: nobody means the backlog, and a person
@@ -950,7 +950,7 @@
     document.getElementById("tkCrumbName").textContent = tx(p.name);
     document.getElementById("tkTitle").textContent = tx(task.title);
     const chip = document.getElementById("tkChip");
-    chip.className = "chip " + ({ working: "working", approval: "reviewing", done: "available", held: "vacation" }[task.status] ?? "planned");
+    chip.className = "chip " + ({ working: "working", approval: "reviewing", done: "available", held: "leave" }[task.status] ?? "planned");
     chip.textContent = t().columns[task.status];
     document.getElementById("tkSub").innerHTML = [
       `<span class="area-chip">${areaLabel(task.area)}</span>`,
@@ -1117,7 +1117,7 @@
   const RANK = { high: 0, normal: 1, low: 2 };
   const prioMark = (k) => `<span class="prio ${k}">${icon.flag}${t().priority[k]}</span>`;
 
-  const STATUS_CHIP = { planned: "planned", active: "working", held: "vacation", done: "available" };
+  const STATUS_CHIP = { planned: "planned", active: "working", held: "leave", done: "available" };
   const projectMark = (status) =>
     status === "active" ? `<span class="dot working"></span>`
     : status === "held" ? `<span class="pmark held">${icon.pause}</span>`

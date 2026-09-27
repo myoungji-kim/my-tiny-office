@@ -14,7 +14,7 @@ const person = (id: string, availability: Employee["availability"] = "available"
   name: id,
   role: "Engineer",
   availability,
-  vacationSince: undefined,
+  leaveSince: undefined,
   hiredAt: 0,
 });
 
@@ -84,7 +84,7 @@ describe("pickUps", () => {
       task("next", "pay", "high", 2),
     ];
 
-    expect(pickUps(projects, tasks, [person("busy"), person("away", "onVacation")])).toEqual([]);
+    expect(pickUps(projects, tasks, [person("busy"), person("away", "onLeave")])).toEqual([]);
   });
 
   it("keeps work handed to someone for them, and they take it before anything else", () => {

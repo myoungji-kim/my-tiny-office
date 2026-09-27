@@ -145,7 +145,7 @@ button { font: inherit; color: inherit; }
 
 .dot.available { background: var(--ok); }
 
-.dot.vacation { background: var(--faint); border-radius: 1px; height: 3px; }
+.dot.leave { background: var(--faint); border-radius: 1px; height: 3px; }
 
 .chip.working { background: var(--warn-soft); color: var(--warn-ink); }
 
@@ -153,7 +153,7 @@ button { font: inherit; color: inherit; }
 
 .chip.available { background: var(--ok-soft); color: var(--ok-ink); }
 
-.chip.vacation { background: var(--sunk); color: var(--muted); }
+.chip.leave { background: var(--sunk); color: var(--muted); }
 
 /* ═══ notices, empty states, dialogs ═══ */
 

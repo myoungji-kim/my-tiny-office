@@ -46,6 +46,23 @@ function createTransactionRunner(connection: Sqlite.Database) {
   };
 }
 
+// A migration that rebuilds a table others point at has to run with foreign
+// keys off, and SQLite ignores that pragma inside a transaction, which is how
+// the migrator runs. So it is switched off around the whole run, and every
+// reference is checked before it is switched back on.
+export function migrateDatabase(connection: Sqlite.Database, db: AppDatabase, migrationsFolder: string): void {
+  connection.pragma("foreign_keys = OFF");
+  try {
+    migrate(db, { migrationsFolder });
+    const broken = connection.pragma("foreign_key_check") as unknown[];
+    if (broken.length > 0) {
+      throw new Error("A migration left references to rows that do not exist");
+    }
+  } finally {
+    connection.pragma("foreign_keys = ON");
+  }
+}
+
 export function openDatabase(filePath: string): DatabaseHandle {
   mkdirSync(dirname(filePath), { recursive: true });
 
@@ -57,7 +74,7 @@ export function openDatabase(filePath: string): DatabaseHandle {
   connection.pragma("trusted_schema = OFF");
 
   const db = drizzle(connection, { schema });
-  migrate(db, { migrationsFolder: join(process.cwd(), MIGRATIONS_FOLDER) });
+  migrateDatabase(connection, db, join(process.cwd(), MIGRATIONS_FOLDER));
 
   return {
     db,

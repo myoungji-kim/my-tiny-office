@@ -21,7 +21,7 @@ const mocha: Employee = {
   name: "모카",
   role: "Backend Engineer",
   availability: "available",
-  vacationSince: undefined,
+  leaveSince: undefined,
   hiredAt: t0,
 };
 const pay: Project = {

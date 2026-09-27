@@ -276,7 +276,7 @@
     { c: pick("bunny"),   col: 8,  row: 3, status: "working",   task: { ko: "로그인 폼 구현", en: "Build the login form" },              spent: 12 },
     { c: pick("deer"),    col: 13, row: 3, status: "working",   task: { ko: "API 문서 작성", en: "Write the API docs" },               spent: 4 },
     { c: pick("chick"),   col: 3,  row: 6, status: "available", last: { ko: "인덱스 튜닝 완료", en: "Finished tuning indexes" } },
-    { c: pick("frog"),    col: 8,  row: 6, status: "vacation",  leaveSince: { ko: "9월 23일부터", en: "Since Sep 23" } },
+    { c: pick("frog"),    col: 8,  row: 6, status: "leave",  leaveSince: { ko: "9월 23일부터", en: "Since Sep 23" } },
     { c: pick("penguin"), col: 13, row: 6, status: "working",   task: { ko: "회귀 테스트 작성", en: "Write the regression tests" },            spent: 7 },
   ];
 
@@ -327,7 +327,7 @@
 
     const el = document.createElement("div");
     el.className = "card";
-    if (s.status === "vacation") el.style.opacity = ".72";
+    if (s.status === "leave") el.style.opacity = ".72";
     el.innerHTML = `
       <span class="c-av"><span class="c-live" style="background:${STATUS[s.status].color}"></span></span>
       <span class="c-name">${s.c.ko}</span>

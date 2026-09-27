@@ -25,7 +25,7 @@ describe("hireEmployee", () => {
       name: "Min-su",
       role: "Backend Engineer",
       availability: "available",
-      vacationSince: undefined,
+      leaveSince: undefined,
       hiredAt: now,
     });
   });

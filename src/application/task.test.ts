@@ -6,7 +6,7 @@ import { finishWork } from "../domain/task";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
-import { bringBack, hireEmployee, sendOnVacation } from "./employee";
+import { bringBack, hireEmployee, sendOnLeave } from "./employee";
 import {
   createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
@@ -92,10 +92,10 @@ describe("writing work down", () => {
   it("can name who takes it, and not someone on leave", async () => {
     const pay = await project();
     const mocha = await hire("모카");
-    assert((await sendOnVacation(ctx, mocha.id)).ok);
+    assert((await sendOnLeave(ctx, mocha.id)).ok);
 
     await expect(createTask(ctx, { companyId, projectId: pay, title: "x", priority: "low", assigneeId: mocha.id })).resolves.toMatchObject({
-      reason: "employeeOnVacation",
+      reason: "employeeOnLeave",
     });
   });
 });
@@ -138,7 +138,7 @@ describe("pickUpWork", () => {
     const tofu = await hire("두부");
     const forTofu = await task(pay);
     assert((await assignTask(ctx, { taskId: forTofu.id, employeeId: tofu.id })).ok);
-    assert((await sendOnVacation(ctx, tofu.id)).ok);
+    assert((await sendOnLeave(ctx, tofu.id)).ok);
 
     const picked = await pickUpWork(ctx, companyId);
     assert(picked.ok);
@@ -205,15 +205,15 @@ describe("leave", () => {
     const written = await task(pay);
     assert((await pickUpWork(ctx, companyId)).ok);
 
-    const away = await sendOnVacation(ctx, mocha.id);
+    const away = await sendOnLeave(ctx, mocha.id);
     assert(away.ok);
-    expect(away.value.employee).toMatchObject({ availability: "onVacation", vacationSince: now });
-    expect(away.events.map((e) => e.type)).toEqual(["EmployeeWentOnVacation", "TaskReturned"]);
+    expect(away.value.employee).toMatchObject({ availability: "onLeave", leaveSince: now });
+    expect(away.events.map((e) => e.type)).toEqual(["EmployeeWentOnLeave", "TaskReturned"]);
     await expect(ctx.tasks.findById(written.id)).resolves.toMatchObject({ status: "backlog", assigneeId: undefined });
 
     const back = await bringBack(ctx, mocha.id);
     assert(back.ok);
-    expect(back.value.employee).toMatchObject({ availability: "available", vacationSince: undefined });
+    expect(back.value.employee).toMatchObject({ availability: "available", leaveSince: undefined });
   });
 });
 

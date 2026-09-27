@@ -4,11 +4,12 @@ import { join } from "node:path";
 
 import Sqlite from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { toCompanyId } from "../../domain/ids";
 
+import { migrateDatabase } from "./database";
+import { createSqliteEmployeeRepository } from "./employee-repository";
 import { createSqliteAreaRepository } from "./memory-repository";
 import { createSqliteProjectRepository } from "./project-repository";
 import * as schema from "./schema";
@@ -38,19 +39,20 @@ describe("moving to projects", () => {
   it("keeps every task made before projects, in a planned project of its company", async () => {
     const connection = new Sqlite(join(directory, "old.db"));
     const db = drizzle(connection, { schema });
-    migrate(db, { migrationsFolder: migrationsUpTo(2) });
+    migrateDatabase(connection, db, migrationsUpTo(2));
 
     const t0 = 1_700_000_000_000;
     connection.exec(`
       insert into companies values ('c', 'TinySoft', null, ${t0});
       insert into employees values ('mocha', 'c', '모카', 'Backend Developer', 'available', ${t0});
+      insert into employees values ('tofu', 'c', '두부', 'Frontend Developer', 'onVacation', ${t0});
       insert into tasks values ('queued', 'c', 'Queued', null, 'backlog', 'low', null, 60000, ${t0}, null, null);
       insert into tasks values ('ready', 'c', 'Ready', null, 'ready', 'normal', 'mocha', 60000, ${t0 + 1}, null, null);
       insert into tasks values ('running', 'c', 'Running', null, 'working', 'high', 'mocha', 60000, ${t0 + 2}, ${t0 + 3}, null);
       insert into tasks values ('done', 'c', 'Done', 'kept', 'done', 'normal', 'mocha', 60000, ${t0 + 4}, ${t0 + 5}, ${t0 + 65});
     `);
 
-    migrate(db, { migrationsFolder: join(process.cwd(), "drizzle") });
+    migrateDatabase(connection, db, join(process.cwd(), "drizzle"));
 
     const projects = await createSqliteProjectRepository(db).findByCompany(toCompanyId("c"));
     expect(projects).toMatchObject([{ status: "planned", folder: undefined, companyId: "c" }]);
@@ -64,6 +66,9 @@ describe("moving to projects", () => {
     ]);
     expect(tasks[3]).toMatchObject({ description: "kept", workedFor: 60, finishedAt: t0 + 65, appliedAt: t0 + 65 });
 
+    const people = await createSqliteEmployeeRepository(db).findByCompany(toCompanyId("c"));
+    expect(people.map((e) => [e.id, e.availability])).toEqual([["mocha", "available"], ["tofu", "onLeave"]]);
+
     const areas = await createSqliteAreaRepository(db).findByCompany(toCompanyId("c"));
     expect(areas.map((a) => a.starting)).toEqual(["architecture", "typeSafety", "database", "security", "localization", "product", "quality"]);
     connection.close();
@@ -72,10 +77,10 @@ describe("moving to projects", () => {
   it("makes no project for a company that had no tasks", async () => {
     const connection = new Sqlite(join(directory, "empty.db"));
     const db = drizzle(connection, { schema });
-    migrate(db, { migrationsFolder: migrationsUpTo(2) });
+    migrateDatabase(connection, db, migrationsUpTo(2));
     connection.exec(`insert into companies values ('c', 'TinySoft', null, 1)`);
 
-    migrate(db, { migrationsFolder: join(process.cwd(), "drizzle") });
+    migrateDatabase(connection, db, join(process.cwd(), "drizzle"));
 
     await expect(createSqliteProjectRepository(db).findByCompany(toCompanyId("c"))).resolves.toEqual([]);
     connection.close();

@@ -4,7 +4,7 @@ import { toAreaId, toCompanyId } from "../domain/ids";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
-import { hireEmployee, sendOnVacation } from "./employee";
+import { hireEmployee, sendOnLeave } from "./employee";
 import {
   createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
@@ -56,7 +56,7 @@ describe("a new company's areas", () => {
 describe("teachMemory", () => {
   it("teaches someone on leave too", async () => {
     const mocha = await hire();
-    assert((await sendOnVacation(ctx, mocha.id)).ok);
+    assert((await sendOnLeave(ctx, mocha.id)).ok);
     const db = await areaByStart("database");
 
     const taught = await teachMemory(ctx, { companyId, kind: "expertise", employeeId: mocha.id, areaId: db.id, text: "복합 인덱스는 컬럼 순서가 중요해요" });

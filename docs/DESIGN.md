@@ -147,7 +147,7 @@ Status mirrors the domain rather than inventing its own vocabulary:
 | `working` | A task is in progress | Amber dot with ring, time taken |
 | `reviewing` | Looking at a colleague's task | Hollow blue ring, time taken |
 | `available` | No task assigned | Solid green dot |
-| `vacation` | Employee is away | Grey dash |
+| `leave` | Employee is away | Grey dash |
 
 Colour never carries status alone — **the dot shape differs too**. An agent
 that stops is not a status but a mark beside it (see When the agent is
@@ -163,7 +163,7 @@ it does not re-implement them.
 | `working` | 업무 상세 · 담당 변경 · 기억 가르치기 |
 | `reviewing` | 업무 상세 · 기억 가르치기 |
 | `available` | 업무 할당 · 기억 가르치기 · 휴가 보내기 |
-| `vacation` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 · 기억 가르치기 |
+| `leave` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 · 기억 가르치기 |
 
 Each action goes where the work already is: 업무 상세 to the task's page, 담당 변경
 to its assignee there, 업무 맡기기 to the person's page with its dialog open;

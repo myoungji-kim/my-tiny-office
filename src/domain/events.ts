@@ -25,8 +25,8 @@ export interface EmployeeHired extends EmployeeEvent {
   readonly role: string;
 }
 
-export interface EmployeeWentOnVacation extends EmployeeEvent {
-  readonly type: "EmployeeWentOnVacation";
+export interface EmployeeWentOnLeave extends EmployeeEvent {
+  readonly type: "EmployeeWentOnLeave";
 }
 
 export interface EmployeeReturned extends EmployeeEvent {
@@ -149,7 +149,7 @@ export type DomainEvent =
   | MemoryRemoved
   | CompanyCreated
   | EmployeeHired
-  | EmployeeWentOnVacation
+  | EmployeeWentOnLeave
   | EmployeeReturned
   | ProjectCreated
   | ProjectStarted

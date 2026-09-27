@@ -29,7 +29,7 @@ const mocha: Employee = {
   name: "모카",
   role: "Backend Engineer",
   availability: "available",
-  vacationSince: undefined,
+  leaveSince: undefined,
   hiredAt: t0,
 };
 const tofu: Employee = { ...mocha, id: toEmployeeId("tofu"), name: "두부" };
@@ -75,7 +75,7 @@ describe("assignTask", () => {
   });
 
   it("refuses someone on leave or from another company", () => {
-    expect(assignTask(backlog(), { ...mocha, availability: "onVacation" }, eventId, t0)).toMatchObject({ reason: "employeeOnVacation" });
+    expect(assignTask(backlog(), { ...mocha, availability: "onLeave" }, eventId, t0)).toMatchObject({ reason: "employeeOnLeave" });
     expect(assignTask(backlog(), { ...mocha, companyId: toCompanyId("other") }, eventId, t0)).toMatchObject({ reason: "employeeFromAnotherCompany" });
   });
 

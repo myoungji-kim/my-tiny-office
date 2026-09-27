@@ -47,7 +47,7 @@ feat(office): add office map
 feat(employee): add employee hiring
 feat(agent): add Claude Code runtime
 feat(agent): scope sessions to company
-fix(employee): prevent vacation assignment
+fix(employee): prevent assigning work to someone on leave
 refactor(agent): separate runtime adapter
 docs(architecture): document company agent ownership
 ```

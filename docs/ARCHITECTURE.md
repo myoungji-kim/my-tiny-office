@@ -509,7 +509,7 @@ The domain owns events such as:
 - ReviewStarted
 - ReviewApproved
 - ChangesRequested
-- EmployeeWentOnVacation
+- EmployeeWentOnLeave
 - EmployeeReturned
 - EmployeeLetGo
 
@@ -647,6 +647,13 @@ Schema changes are generated with `npm run db:generate` and the resulting SQL
 is committed under `drizzle/`. It is the only reproducible record of the
 schema, so a fresh clone can build the same database. `drizzle-kit push` is not
 used.
+
+Migrations run with foreign keys off, because one that rebuilds a table other
+tables point at would otherwise fail, and SQLite ignores that pragma inside the
+migrator's transaction. `PRAGMA foreign_key_check` must come back empty before
+they are switched on again, or the file is not opened. A migration that changes
+what a row means rewrites the rows it changes, so nothing made before it is
+dropped.
 
 ### Mapping
 

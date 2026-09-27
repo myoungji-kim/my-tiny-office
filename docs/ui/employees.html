@@ -567,7 +567,7 @@
     document.getElementById("pnStyle").textContent = p.style.length;
     // Leave, or Claude Code stopping, forbids new work; the button stays,
     // disabled, with the reason beside it.
-    const away = p.status === "vacation";
+    const away = p.status === "leave";
     const blocked = away || RUNTIME.off;
     document.getElementById("pAssign").disabled = blocked;
     document.getElementById("pAssignWhy").hidden = !blocked;
@@ -741,7 +741,7 @@
   // the one that cannot be undone, so it asks in a dialog.
   document.getElementById("pMore").addEventListener("click", (e) => {
     const p = shown;
-    const away = p.status === "vacation";
+    const away = p.status === "leave";
     openRowMenu(e.currentTarget, [
       {
         label: t().editInfo, icon: ICON.pen,
@@ -757,7 +757,7 @@
             rerenderPeople(); renderMembers();
           } }
         : { label: t().sendOnLeave, icon: ICON.sun, confirm: p.task ? t().leaveWhy(tx(p.task)) : null, run: () => {
-            Object.assign(p, { status: "vacation", task: null, returned: false, leaveSince: { ko: "오늘부터", en: "Since today" } });
+            Object.assign(p, { status: "leave", task: null, returned: false, leaveSince: { ko: "오늘부터", en: "Since today" } });
             rerenderPeople(); renderMembers();
           } },
       {
@@ -1261,7 +1261,7 @@
     // another screen's 업무 맡기기 arrives here with the dialog open
     if (shown && sub === "assign") {
       history.replaceState(null, "", "#" + shown.id);
-      if (shown.status !== "vacation") openAssign(shown);
+      if (shown.status !== "leave") openAssign(shown);
     }
     show(view);
     window.scrollTo(0, 0);

@@ -197,13 +197,13 @@
       rooms: { meeting: "회의실" },
       work: "업무", noTask: "할당된 업무 없음", away: "자리 비움",
       spent: (m) => m + "분째",
-      waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있습니다",
-      inProgress: "진행 중", lastDone: "최근 완료", vacationLabel: "휴가",
+      waiting: "대기", onLeave: "휴가", deskFree: "지금은 비어 있어요",
+      inProgress: "진행 중", lastDone: "최근 완료", leaveLabel: "휴가",
       actions: {
         reconnect: "다시 연결", detail: "업무 상세", reassign: "담당 변경",
         assign: "업무 맡기기", teach: "기억 가르치기", leave: "휴가 보내기", comeBack: "복귀 처리",
       },
-      cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
+      cannotAssign: "휴가 중에는 업무를 맡길 수 없어요.",
       actionOf: (n) => n + " 행동",
       tasks: { paging: "결제 내역 페이지네이션", orderType: "주문 상태 타입 좁히기", webhook: "결제 웹훅 서명 검증" },
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
@@ -236,7 +236,7 @@
       work: "WORK", noTask: "Nothing assigned", away: "Away",
       spent: (m) => m + " min so far",
       waiting: "Free", onLeave: "Leave", deskFree: "Nothing on right now",
-      inProgress: "In progress", lastDone: "Last finished", vacationLabel: "On leave",
+      inProgress: "In progress", lastDone: "Last finished", leaveLabel: "On leave",
       actions: {
         reconnect: "Reconnect", detail: "Task details", reassign: "Reassign",
         assign: "Give work", teach: "Teach", leave: "Send on leave", comeBack: "Bring back",
@@ -267,7 +267,7 @@
 
   /* ── data ────────────────────────────────────────────────────── */
   // Status mirrors the domain: an employee is working, reviewing someone
-  // else's work, available or on vacation. The actions offered follow from that alone.
+  // else's work, available or on leave. The actions offered follow from that alone.
   const label = (k) => t().status[k];
 
   // Who these people are is the company's answer, not this screen's. The floor
@@ -561,7 +561,7 @@
       for (const p of group) {
         const c = document.createElement("div");
         c.className = "card";
-        if (p.status === "vacation") c.style.opacity = ".72";
+        if (p.status === "leave") c.style.opacity = ".72";
         c.innerHTML = cardInner(p);
         c.addEventListener("click", (e) => open(p.id, c, e.detail === 0));
         grid.appendChild(c);
@@ -657,9 +657,9 @@
     available: [
       { icon: I.plus, label: t().actions.assign, key: true, starts: true, run: (p) => go("employees.html", p.id + "/assign") },
       TEACH,
-      { icon: I.sun, label: t().actions.leave, run: (p) => change(p, { status: "vacation", leaveSince: { ko: TEXT.ko.sinceToday, en: TEXT.en.sinceToday } }) },
+      { icon: I.sun, label: t().actions.leave, run: (p) => change(p, { status: "leave", leaveSince: { ko: TEXT.ko.sinceToday, en: TEXT.en.sinceToday } }) },
     ],
-    vacation: [
+    leave: [
       { icon: I.plus, label: t().actions.assign, key: true, off: t().cannotAssign },
       { icon: I.undo, label: t().actions.comeBack, run: (p) => change(p, { status: "available", leaveSince: null, last: "justBack" }) },
       TEACH,
@@ -681,7 +681,7 @@
       // just back or just hired is not finished work, so it is not headed as such
       return `<span class="c-k">${["justBack", "justHired"].includes(p.last) ? t().noTask : t().lastDone}</span><span class="c-task">${t()[p.last]}</span>
         <span class="p-nums"><span>${t().deskFree}</span><b>${t().waiting}</b></span>`;
-    return `<span class="c-k">${t().vacationLabel}</span><span class="c-task">${p.leaveSince[lang]}</span>`;
+    return `<span class="c-k">${t().leaveLabel}</span><span class="c-task">${p.leaveSince[lang]}</span>`;
   }
 
   function open(id, el, viaKey) {
