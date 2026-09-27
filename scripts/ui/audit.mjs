@@ -388,5 +388,30 @@ console.log("the menu goes somewhere");
 console.log("");
 
 
+/* ── 16. a button is the size of the place it sits in ── */
+// The guide reads lg for a screen's own action, md in a dialog, sm inside a
+// card or a row. Two of those are places a rule can point at, so it does.
+console.log("a button is the size of its place");
+{
+  const PLACES = [
+    ['<div class="head-right">', "btn-lg"],
+    ['<div class="m-foot">', "btn-md"],
+  ];
+  for (const p of PAGES) {
+    for (const [open, want] of PLACES) {
+      let at = 0;
+      while ((at = src[p].indexOf(open, at)) !== -1) {
+        const end = src[p].indexOf("</div>", at);
+        for (const b of src[p].slice(at, end).matchAll(/class="btn ([^"]*)"/g)) {
+          if (!b[1].split(/\s+/).includes(want)) flag(`${p}: a button in ${open.match(/"([^"]+)"/)[1]} is ${b[1]}, not ${want}`);
+        }
+        at = end;
+      }
+    }
+  }
+}
+console.log("");
+
+
 console.log(problems ? `\n${problems} problem(s)` : "\nno inconsistency found");
 process.exit(problems ? 1 : 0);
