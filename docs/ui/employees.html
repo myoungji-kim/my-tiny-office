@@ -35,6 +35,8 @@
 
   .person-name { display: flex; align-items: center; gap: 10px; }
 
+  .now-lost { margin-top: 12px; }
+
   .d-av { position: relative; width: 56px; height: 56px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
   .p-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
@@ -319,7 +321,8 @@
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
       areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
-      nothingAssigned: "맡은 업무가 없어요", reviewingNow: "검토 중인 업무", justJoined: "방금 입사했어요", justBack: "휴가에서 막 돌아왔어요",
+      nothingAssigned: "맡은 업무가 없어요", reviewingNow: "검토 중인 업무",
+      lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.", reconnect: "다시 연결", justJoined: "방금 입사했어요", justBack: "휴가에서 막 돌아왔어요",
       allAreas: "전체", noMemory: "아직 알려준 게 없어요.", styleMenu: "방식 메뉴",
       edit: "고치기", remove: "지우기", removeWhy: "지우면 되돌릴 수 없어요.", keep: "그대로 두기",
       justTaught: "방금 알려줌", save: "저장",
@@ -367,7 +370,8 @@
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
       areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
-      nothingAssigned: "Nothing assigned", reviewingNow: "Reviewing", justJoined: "Just joined", justBack: "Just back from leave",
+      nothingAssigned: "Nothing assigned", reviewingNow: "Reviewing",
+      lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.", reconnect: "Reconnect", justJoined: "Just joined", justBack: "Just back from leave",
       allAreas: "All", noMemory: "Nothing taught yet.", styleMenu: "Rule actions",
       edit: "Edit", remove: "Delete", removeWhy: "This cannot be undone.", keep: "Keep it",
       justTaught: "Just taught", save: "Save",
@@ -509,7 +513,7 @@
       b.className = "row-item";
       b.href = "#" + p.id;
       b.innerHTML = `
-        <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+        <span class="r-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span>${p.agentLost ? agentMark() : ""}</span>
         <span><span class="r-name">${p.name}</span><span class="r-role">${p.role}</span></span>
         <span class="r-team">${teamName(p.team) || t().noTeam}</span>
         <span class="areas">${areas.map((a) => `<span class="area-chip">${t().areas[a]}</span>`).join("")}</span>
@@ -552,6 +556,7 @@
 
   function renderHead(p) {
     document.getElementById("pAv").replaceChildren(spriteCanvas(p.species, 56));
+    if (p.agentLost) document.getElementById("pAv").insertAdjacentHTML("beforeend", agentMark());
     document.getElementById("pName").textContent = p.name;
     document.getElementById("pRole").textContent = roleLine(p);
     const chip = document.getElementById("pChip");
@@ -578,10 +583,15 @@
       ? `<span class="k">${t().onLeave}</span><span class="now-task">${tx(p.back)}</span>`
       : `<span class="k">${t().nothingAssigned}</span><span class="now-note">${p.returned ? t().justBack : p.last ? t().lastFinished + " · " + tx(p.last) : t().justJoined}</span>`;
 
+    const lost = p.agentLost
+      ? `<div class="notice notice-bad now-lost"><span class="n-ic">${PLUG}</span>
+          <span class="n-tx"><b>${WORDS[lang].agentLost}</b><span>${t().lostWhy}</span></span>
+          <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">${t().reconnect}</button></span></div>`
+      : "";
     document.getElementById("ovLeft").innerHTML = `
       <div class="panel">
         <div class="panel-hd"><h2>${t().now}</h2></div>
-        <div class="panel-bd">${now}</div>
+        <div class="panel-bd">${now}${lost}</div>
       </div>
       <div class="panel">
         <div class="panel-hd"><h2>${t().record}</h2></div>
@@ -835,7 +845,7 @@
     const wrap = document.createElement("div");
     wrap.className = "tcard-wrap";
     wrap.innerHTML = `<button class="tcard" type="button" data-open="${p.id}">
-        <span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span></span>
+        <span class="t-av"><span class="r-live" style="background:${STATUS[p.status].color}"></span>${p.agentLost ? agentMark() : ""}</span>
         <span style="min-width:0"><span class="t-name">${p.name}</span><span class="t-role">${p.role}</span></span>
       </button>
       <button class="ibtn ibtn-sm" type="button" data-move="${p.id}" aria-label="${t().personMenu}" aria-expanded="false">${ICON.more}</button>`;

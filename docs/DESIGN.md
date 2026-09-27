@@ -500,7 +500,8 @@ office, and nothing new starts until it is back. A dropped session stops only
 its employee: **status is the dot at bottom-right; a dropped agent is a red mark
 at top-left**, with no mark while it works, and the task card carries the
 blocked mark. The mark is the same wherever the person is — office card,
-floor bubble, popover, sidebar — and the popover leads with 다시 연결. Never fold the agent's state into the status colour.
+floor bubble, popover, sidebar, the people list, org chart and a person's page —
+and the popover and the person's 지금 lead with 다시 연결. Never fold the agent's state into the status colour.
 
 ## Agent connection
 
