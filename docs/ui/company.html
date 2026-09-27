@@ -102,7 +102,7 @@
 
   .mile-tx span { color: var(--muted); }
 
-  /* ═══ rules ═══ */
+  /* ═══ areas and roles ═══ */
 
   .flow { display: flex; flex-direction: column; gap: 22px; }
 
@@ -179,7 +179,8 @@
       <div class="tabs" id="tabs">
         <button class="tab" data-view="overview" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.4" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="9" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="2.4" y="9" width="4.6" height="4.6" rx="1"/><rect x="9" y="9" width="4.6" height="4.6" rx="1"/></svg><span data-t="tabs.overview">개요</span></button>
         <button class="tab" data-view="history"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 4.8V8l2.2 1.4"/></svg><span data-t="tabs.history">연혁</span><span class="n" id="nHistory"></span></button>
-        <button class="tab" data-view="rules"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg><span data-t="tabs.rules">규칙</span></button>
+        <button class="tab" data-view="lists"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.8" cy="4" r=".6"/><circle cx="2.8" cy="8" r=".6"/><circle cx="2.8" cy="12" r=".6"/></svg><span data-t="tabs.lists">분야·역할</span></button>
+        <button class="tab" data-view="memory"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg><span data-t="tabs.memory">회사 기억</span><span class="n" id="nCompanyMem"></span></button>
       </div>
     </div>
 
@@ -217,7 +218,7 @@
         <div class="panel"><div class="panel-bd" id="history"></div></div>
       </div>
 
-      <div class="view" id="view-rules" hidden>
+      <div class="view" id="view-lists" hidden>
         <div class="flow">
           <div class="flow" id="ruleNotices"></div>
           <div class="panel">
@@ -234,6 +235,11 @@
             </div>
             <div class="panel-bd" id="roleTable"></div>
           </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-memory" hidden>
+        <div class="flow">
           <div class="panel">
             <div class="panel-hd">
               <h2 data-t="companyTitle">회사 기억</h2>
@@ -255,7 +261,7 @@
       ...WORDS.ko,
       title: "회사",
       headSub: (days, n) => "창업 " + days + "일째 · 직원 " + n + "명",
-      tabs: { overview: "개요", history: "연혁", rules: "규칙" },
+      tabs: { overview: "개요", history: "연혁", lists: "분야·역할", memory: "회사 기억" },
       rename: "이름 바꾸기", save: "저장", cancel: "취소",
       since: (date, days) => date + " 창업 · " + days + "일째",
       tiles: {
@@ -302,7 +308,7 @@
       ...WORDS.en,
       title: "Company",
       headSub: (days, n) => "Day " + days + " · " + n + " people",
-      tabs: { overview: "Overview", history: "History", rules: "Rules" },
+      tabs: { overview: "Overview", history: "History", lists: "Areas & roles", memory: "Company memory" },
       rename: "Rename", save: "Save", cancel: "Cancel",
       since: (date, days) => "Founded " + date + " · day " + days,
       tiles: {
@@ -536,7 +542,7 @@
     .map(([month, list]) => `<div class="month"><h3>${month}</h3>${list.map(mileRow).join("")}</div>`)
     .join("");
 
-  /* ── rules ───────────────────────────────────────────────────── */
+  /* ── areas and roles ───────────────────────────────────────────────────── */
   // Both lists the company owns are edited the same way: add at the foot, and a
   // row's ⋯ renames it or deletes it, asking where its contents go first.
   function listEditor(cfg) {
@@ -706,6 +712,7 @@
     document.getElementById("companyMem").innerHTML =
       companyMemories.map(memCard).join("") + `<button class="mem-add" type="button" data-tellall>${ICON.plus}${t().tellCompany}</button>`;
     for (const m of companyMemories) m.flash = false;
+    document.getElementById("nCompanyMem").textContent = companyMemories.length;
   }
 
   areas.render();
@@ -713,7 +720,7 @@
   renderCompanyMem();
 
   const fresh = (memory) => ({ ...memory, used: 0, fresh: true, flash: true });
-  document.getElementById("view-rules").addEventListener("click", (e) => {
+  document.getElementById("view-lists").addEventListener("click", (e) => {
     const pick = e.target.closest("[data-pick]");
     if (pick) {
       openTeach({
@@ -726,6 +733,8 @@
         },
       });
     }
+  });
+  document.getElementById("view-memory").addEventListener("click", (e) => {
     if (e.target.closest("[data-tellall]")) {
       openTeach({
         to: "company",
@@ -740,8 +749,8 @@
   });
 
   /* ── tabs ────────────────────────────────────────────────────── */
-  // Each tab has an address, so teaching elsewhere can send the player to 규칙.
-  const VIEWS = ["overview", "history", "rules"];
+  // Each tab has an address, so teaching elsewhere can send the player to 분야·역할.
+  const VIEWS = ["overview", "history", "lists", "memory"];
   function show(view) {
     for (const tab of document.querySelectorAll(".tab")) tab.setAttribute("aria-selected", String(tab.dataset.view === view));
     for (const v of document.querySelectorAll(".view")) v.toggleAttribute("hidden", v.id !== "view-" + view);

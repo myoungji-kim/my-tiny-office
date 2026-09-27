@@ -549,7 +549,7 @@ const WORDS = {
       who: "받는 사람", area: "분야", text: "내용", from: "어디서 알게 됐나요",
       placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
       hint: "한두 문장이 좋아요.",
-      areaHint: "찾는 분야가 없나요?", areaHintLink: "회사 › 규칙에서 추가하기",
+      areaHint: "찾는 분야가 없나요?", areaHintLink: "회사 › 분야·역할에서 추가하기",
       told: "직접 알려줌", nowTask: (x) => "지금 하는 업무 · " + x,
       inArea: (n) => "이 분야 기억 " + n,
       gainArea: (name, area) => withParticle(area, "이", "가") + " " + name + "의 전문 분야가 돼요",
@@ -581,7 +581,7 @@ const WORDS = {
       who: "Who", area: "Area", text: "What to remember", from: "Where it came from",
       placeholder: "e.g. The payments table is partitioned by month.",
       hint: "A sentence or two is best.",
-      areaHint: "Not the right area?", areaHintLink: "Add one in Company › Rules",
+      areaHint: "Not the right area?", areaHintLink: "Add one in Company › Areas & roles",
       told: "Told directly", nowTask: (x) => "Current task · " + x,
       inArea: (n) => n + " here",
       gainArea: (name, area) => area + " becomes one of " + name + "'s areas",
@@ -980,7 +980,7 @@ function openTeach({ to = null, area = null, edit = null, carried = null, areas 
     <div class="m-sec">
       <div data-areafield>
         <span class="k">${w.area}</span><div class="opts" role="radiogroup" aria-label="${w.area}" data-areas></div>
-        ${areas ? "" : `<p class="hint">${w.areaHint} <a href="company.html${lang === "en" ? "?lang=en" : ""}#rules">${w.areaHintLink}</a></p>`}
+        ${areas ? "" : `<p class="hint">${w.areaHint} <a href="company.html${lang === "en" ? "?lang=en" : ""}#lists">${w.areaHintLink}</a></p>`}
       </div>
       <div class="field">
         <label class="label" for="teachText">${w.text}</label>

@@ -305,12 +305,12 @@ Review follows from expertise without being explained on screen: whoever has
 been taught an area can review a PR in it. Every area counts; there are no
 seats to turn on or off.
 
-The list lives on the company's 규칙 tab as a coverage table rather than in
+The list lives on the company's 분야·역할 tab as a coverage table rather than in
 settings, because the useful question is never "what areas exist" but "who
 knows this one". Two things are worth saying out loud:
 
 - an area **no employee knows** — its work starts with nothing to draw on and
-  nobody can review it. The 규칙 tab leads with it, and its button opens
+  nobody can review it. The 분야·역할 tab leads with it, and its button opens
   teaching with the area already chosen
 - a memory that has **never been referenced**, which is either wrong or was
   given to the wrong person — the people screen's memory tab leads with it
@@ -325,7 +325,7 @@ the table for a name; each row's `⋯` renames it or deletes it.
 - Memory and tasks point at an area by id, so a rename changes nothing else.
 
 Areas are made only here. The teaching dialog offers the list as it stands and
-a line pointing back — 찾는 분야가 없나요? 회사 › 규칙에서 추가하기 — rather than a
+a line pointing back — 찾는 분야가 없나요? 회사 › 분야·역할에서 추가하기 — rather than a
 second place to create them.
 
 ### When memory gets long
@@ -367,7 +367,7 @@ only what is already filled in:
 | --- | --- |
 | A person's page, or the office popover | Who |
 | 지금 알려주기 in the assign modal | Who, and the task's area |
-| 알려줄 직원 고르기 on the 규칙 tab | The area; the player picks who |
+| 알려줄 직원 고르기 on the 분야·역할 tab | The area; the player picks who |
 | 회사 전체에 알려주기 | The whole company; company memory has no area |
 
 The dialog asks for an **area**, because a memory is always expertise in
@@ -430,7 +430,7 @@ to do is teach them. Until they have done anything, 지금 says 방금 입사했
 rather than inventing a last task.
 
 **Roles are the company's list.** Hiring picks one; the company adds, renames
-and deletes them on the 규칙 tab, like its areas of expertise. A role is a job
+and deletes them on the 분야·역할 tab, beside its areas of expertise. A role is a job
 title, written the same in either language. Everyone has one, so the last role
 cannot be deleted, and one with people in it asks what they become first. No
 game rule hangs on a role — expertise and review come from memory.
@@ -459,7 +459,12 @@ and the company's name at the top of the sidebar leads there too.
 | --- | --- |
 | 개요 | The company's name (editable here), four running totals with this week's gain, the people and how long each has been here, finished projects, the latest milestones |
 | 연혁 | Milestones by month, newest first |
-| 규칙 | Expertise, roles and company memory — what the company owns rather than any one person. The two lists are edited in place |
+| 분야·역할 | The two lists the company keeps — expertise and roles — edited in place |
+| 회사 기억 | What everyone knows, taught to the whole company |
+
+Each tab is named for what it holds, so a player looking for roles finds them
+without opening a tab to see. The tabs have addresses (`#lists`, `#memory`)
+so teaching elsewhere can point straight at 분야·역할.
 
 **Totals, not a dashboard.** Four numbers and a weekly gain, no charts. A
 finished project is kept as its name, its span, its task count and the
