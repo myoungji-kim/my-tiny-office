@@ -201,6 +201,12 @@
 
 .head-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 
+.head h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
+
+.head .sub { display: block; font-size: 14px; color: var(--muted); margin-top: 1px; }
+
+.head .ghost-note { font-size: 14px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
 .tabs { display: flex; align-items: center; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line); overflow-x: auto; overflow-y: hidden; }
 
 .tab {
