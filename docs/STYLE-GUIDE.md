@@ -175,6 +175,10 @@ and greyscale.
 
 A status is always accompanied by a text label somewhere in the same view.
 
+An agent that stopped is not a status. It is `.agent-mark` — a red disc with a
+plug, in the avatar's top-left corner, opposite the dot — or its `inline` form
+in a line of text, and it carries its own label.
+
 ### Numbers
 
 **Every number shown to the user is a count of something that happened** —

@@ -61,7 +61,7 @@ blockers, recent activity, team workload.
 
 ```text
 ┌─────────────┬──────────────────────────────────────────────┐
-│ ⌂ My Tiny   │ 사무실                  2026. 9. 26. (토) 10:24 │
+│ ⌂ My Tiny ⌄ │ 사무실                  2026. 9. 26. (토) 10:24 │
 │   Office    │ 책상 6석 중 5석 사용                            │
 │             ├──────────────────────────────────────────────┤
 │ 사무실      │ 전체 · 백엔드팀 · 프론트엔드팀 · 휴게실 · +    │
@@ -70,7 +70,8 @@ blockers, recent activity, team workload.
 │ 회사        │ │        office tilemap (canvas)           │ │
 │ ─────────   │ │   desks · characters · status bubbles    │ │
 │ · 모카      │ └──────────────────────────────────────────┘ │
-│ · 두부      │ 백엔드팀 3                                    │
+│ · 두부      │ 오늘  10:18 모카의 에이전트 연결이 끊겼어요 … │
+│             │ 백엔드팀 3                                    │
 │ · 단풍      │ ┌────────┐ ┌────────┐ ┌────────┐ ┌ ─ ─ ─ ┐  │
 │             │ │ card   │ │ card   │ │ card   │  빈 책상  │
 │ ─────────   │ └────────┘ └────────┘ └────────┘ └ ─ ─ ─ ┘  │
@@ -549,5 +550,6 @@ the measured runtime surface.
   the language and last company in `settings.json` are not built yet.
 - **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
   are the likeliest lever: hiring already needs a free one.
-- **A 내 차례 / Needs you inbox**, holding reviews waiting on the user, blocked
-  employees and lost connections, if reviews on the floor turn out easy to miss.
+- **A 내 차례 / Needs you inbox.** Today's feed already carries what waits on
+  the user — approvals, agents that stopped — with the way to each. A separate
+  inbox earns its place only if those rows turn out easy to miss.

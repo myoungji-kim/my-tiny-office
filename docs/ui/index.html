@@ -110,9 +110,9 @@
       <div class="meta">
         <h2>첫 실행</h2>
         <code>ui/first-run.html</code>
-        <p>회사 만들기부터 첫 직원까지 3단계. 첫 화면부터 사무실을 보여주고, Claude Code 없이 끝납니다.</p>
+        <p>Claude Code 확인부터 첫 직원까지. 확인이 먼저이고, 새 회사를 만들거나 기존 회사를 가져옵니다.</p>
         <ul class="owns">
-          <li>단계 표시</li><li>입력 필드</li><li>사무실 미리보기</li><li>종족 고르기</li>
+          <li>Claude Code 확인</li><li>기존 회사 가져오기</li><li>단계 표시</li><li>종족 고르기</li>
         </ul>
       </div>
     </a>
@@ -127,9 +127,9 @@
       <div class="meta">
         <h2>사무실 화면</h2>
         <code>ui/office.html</code>
-        <p>화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.</p>
+        <p>화면 전체의 기준. 사이드바와 회사 바꾸기, 헤더·탭, 사무실 타일맵, 오늘 피드, 직원 카드가 실제로 붙어 있는 모습입니다.</p>
         <ul class="owns">
-          <li>레이아웃</li><li>컬러 토큰</li><li>타일 엔진</li><li>상태 표시</li><li>행동 팝오버</li>
+          <li>레이아웃</li><li>타일 엔진</li><li>상태 표시</li><li>행동 팝오버</li><li>오늘 피드</li><li>회사 바꾸기</li>
         </ul>
       </div>
     </a>
@@ -197,7 +197,7 @@
         <code>ui/settings.html</code>
         <p>이 컴퓨터에서 쓰는 것들. 회사가 일하는 Claude Code, 화면의 언어, 회사가 저장된 파일.</p>
         <ul class="owns">
-          <li>Claude Code 상태</li><li>언어</li><li>데이터 위치</li>
+          <li>Claude Code 상태</li><li>언어</li><li>내보내기 · 가져오기</li><li>회사 삭제</li>
         </ul>
       </div>
     </a>
@@ -212,9 +212,9 @@
       <div class="meta">
         <h2>에이전트 연결</h2>
         <code>ui/connect.html</code>
-        <p>직원을 실제로 일하게 만드는 화면. 막힌 상태 셋과, 우리가 대신 해줄 수 없는 것을 말하는 방식이 들어 있습니다.</p>
+        <p>회사가 일하는 Claude Code의 상태들. 막힌 상태, 폴더 신뢰, 끊긴 세션, 다른 컴퓨터에서 옮긴 뒤를 — 우리가 대신 해줄 수 없는 것을 말하는 방식으로 보여줍니다.</p>
         <ul class="owns">
-          <li>연결 모달</li><li>준비 확인</li><li>막힌 상태</li><li>에이전트 표식</li>
+          <li>준비 확인</li><li>막힌 상태</li><li>폴더 신뢰</li><li>에이전트 표식</li><li>옮긴 뒤</li>
         </ul>
       </div>
     </a>
@@ -275,18 +275,19 @@
     "페이지를 고치면 이 카드의 그림도 같이 바뀌어요. 그래서 이 화면은 낡을 수가 없어요.": "Change a page and its picture here changes with it, so this screen cannot go stale.",
     "규칙 문서": "The written rules",
     "첫 실행": "First run",
-    "회사 만들기부터 첫 직원까지 3단계. 첫 화면부터 사무실을 보여주고, Claude Code 없이 끝납니다.": "Three steps from company to first hire. It shows the office on screen one and finishes without Claude Code.",
+    "Claude Code 확인부터 첫 직원까지. 확인이 먼저이고, 새 회사를 만들거나 기존 회사를 가져옵니다.": "From the Claude Code check to the first hire. The check comes first; then a new company, or an existing one imported.",
     "단계 표시": "Steps",
-    "입력 필드": "Fields",
-    "사무실 미리보기": "Office preview",
+    "Claude Code 확인": "Claude Code check",
+    "기존 회사 가져오기": "Importing a company",
     "종족 고르기": "Species picker",
     "사무실 화면": "Office screen",
-    "화면 전체의 기준. 사이드바·헤더·탭·사무실 타일맵·직원 카드가 실제로 붙어 있는 모습입니다.": "The standard for a whole screen: sidebar, header, tabs, the tilemap and the employee cards, assembled.",
+    "화면 전체의 기준. 사이드바와 회사 바꾸기, 헤더·탭, 사무실 타일맵, 오늘 피드, 직원 카드가 실제로 붙어 있는 모습입니다.": "The reference for the whole screen: the sidebar and its company switcher, header and tabs, the office tilemap, today's feed and the cards, put together for real.",
     "레이아웃": "Layout",
-    "컬러 토큰": "Colour tokens",
     "타일 엔진": "Tile engine",
     "상태 표시": "Status",
     "행동 팝오버": "Action popover",
+    "오늘 피드": "Today's feed",
+    "회사 바꾸기": "Company switcher",
     "프로젝트 화면": "Projects screen",
     "프로젝트가 사는 곳. 대기·진행 중·보류·완료 목록과 우선순위, 프로젝트마다 대기열에서 완료까지의 보드, 누가 언제 검토하는지가 여기서 정해집니다.": "Where projects live: planned, active, held and done, ranked; each one's board from backlog to done; and who reviews what, and when.",
     "업무 보드": "Task board",
@@ -295,7 +296,8 @@
     "이 컴퓨터에서 쓰는 것들. 회사가 일하는 Claude Code, 화면의 언어, 회사가 저장된 파일.": "What this computer holds: the Claude Code the company works through, the language on screen, and the file the company lives in.",
     "Claude Code 상태": "Claude Code status",
     "언어": "Language",
-    "데이터 위치": "Where the data lives",
+    "내보내기 · 가져오기": "Export and import",
+    "회사 삭제": "Deleting a company",
     "프로젝트 상태": "Project status",
     "검토자 고르기": "Picking a reviewer",
     "보완 요청": "Sending back",
@@ -317,10 +319,11 @@
     "역할": "Roles",
     "회사 기억": "Company memory",
     "에이전트 연결": "Agent connection",
-    "직원을 실제로 일하게 만드는 화면. 막힌 상태 셋과, 우리가 대신 해줄 수 없는 것을 말하는 방식이 들어 있습니다.": "Putting an employee to real work: the three blocked states, and how to say what we cannot do for you.",
-    "연결 모달": "Connect modal",
+    "회사가 일하는 Claude Code의 상태들. 막힌 상태, 폴더 신뢰, 끊긴 세션, 다른 컴퓨터에서 옮긴 뒤를 — 우리가 대신 해줄 수 없는 것을 말하는 방식으로 보여줍니다.": "The states of the Claude Code the company works through: blocked, folder trust, a dropped session, and after a move — shown by saying what we cannot do for the user.",
     "준비 확인": "Readiness",
     "막힌 상태": "Blocked states",
+    "폴더 신뢰": "Folder trust",
+    "옮긴 뒤": "After a move",
     "에이전트 표식": "Agent mark",
     "컴포넌트": "Components",
     "버튼·메뉴 행·알림·빈 상태·확인 창의 기준. 하면 안 되는 예시가 짝으로 들어 있습니다.": "Buttons, menu rows, notices, empty states and dialogs — each paired with what not to do.",

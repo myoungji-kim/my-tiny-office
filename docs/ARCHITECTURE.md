@@ -473,6 +473,8 @@ The domain owns events such as:
 - TaskAssigned
 - TaskStarted
 - TaskCompleted
+- TaskApplied
+- AgentDisconnected
 - MemoryTaught
 - MemoryUsed
 - MemoryRemoved
