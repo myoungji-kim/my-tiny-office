@@ -675,17 +675,23 @@
         <div class="grid2" style="gap:14px">
           <div class="field" style="margin-top:0">
             <span class="label">${t().fArea}</span>
-            <select class="select" id="ntArea">
-              ${SEAT_AREAS.map((a) => `<option value="${a}"${a === area ? " selected" : ""}>${t().areas[a]}</option>`).join("")}
-            </select>
+            <span class="select-wrap">
+              <select class="select" id="ntArea">
+                ${SEAT_AREAS.map((a) => `<option value="${a}"${a === area ? " selected" : ""}>${t().areas[a]}</option>`).join("")}
+              </select>
+              <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
+            </span>
           </div>
           <div class="field" style="margin-top:0">
             <span class="label">${t().fPriority}</span>
-            <select class="select">
-              <option value="low">${t().priority.low}</option>
-              <option value="normal" selected>${t().priority.normal}</option>
-              <option value="high">${t().priority.high}</option>
-            </select>
+            <span class="select-wrap">
+              <select class="select">
+                <option value="low">${t().priority.low}</option>
+                <option value="normal" selected>${t().priority.normal}</option>
+                <option value="high">${t().priority.high}</option>
+              </select>
+              <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
+            </span>
           </div>
         </div>
 

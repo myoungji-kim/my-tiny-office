@@ -236,6 +236,12 @@
 /* onboarding asks for very little, so its fields can afford to be large */
 .input-lg, .select-lg { height: 44px; font-size: 14.5px; }
 
+.select { appearance: none; -webkit-appearance: none; padding-right: 34px; cursor: pointer; }
+
+.select-wrap { position: relative; display: block; }
+
+.select-wrap svg { position: absolute; right: 12px; top: 50%; width: 11px; height: 8px; margin-top: -4px; color: var(--muted); pointer-events: none; }
+
 .textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
 
 .input::placeholder, .textarea::placeholder { color: var(--faint); }

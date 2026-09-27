@@ -626,11 +626,14 @@
 
         <div class="field">
           <span class="label">분야</span>
-          <select class="select">
-            <option>데이터베이스</option>
-            <option>아키텍처</option>
-            <option>보안</option>
-          </select>
+          <span class="select-wrap">
+            <select class="select">
+              <option>데이터베이스</option>
+              <option>아키텍처</option>
+              <option>보안</option>
+            </select>
+            <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 2L6 6l4.5-4"/></svg>
+          </span>
           <span class="hint">분야가 누가 검토할 수 있는지를 정합니다.</span>
         </div>
 
@@ -661,6 +664,8 @@
       <li>선택의 <strong>결과</strong>를 아는 필드는 그것을 <code>hint</code>로 말합니다.</li>
       <li>필수 표시는 라벨에 붙이고, 색만으로 구분하지 않습니다.</li>
       <li>높이는 38px 하나, 큰 변형이 필요하면 <code>-lg</code>로 이름을 줍니다.</li>
+      <li>select은 <code>appearance: none</code>으로 네이티브 화살표를 걷어내고,
+          셰브론을 인라인 <code>svg</code>로 그립니다 — 다른 아이콘처럼 색이 토큰에서 옵니다.</li>
     </ul>
   </section>
 
