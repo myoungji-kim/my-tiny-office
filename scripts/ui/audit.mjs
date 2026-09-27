@@ -164,10 +164,13 @@ for (const [page, text] of Object.entries(src)) {
 console.log("");
 
 /* ── 8. the app shell is one component ── */
-// office and employees are the same application. Building its shell twice by
-// hand is how one of them ended up with a different line-height.
+// The product screens are one application. Building its shell by hand on each
+// of them is how one ended up with a different line-height, and how a company
+// rename reached two of the three.
 console.log("app shell");
 {
+  const SCREENS = ["office", "projects", "employees"];
+
   const region = (text, open, close) => {
     const i = text.indexOf(open);
     if (i === -1) return null;
@@ -194,27 +197,31 @@ console.log("app shell");
       .split(/(?=<)/)
       .filter(Boolean);
 
-  const compare = (what, A, B) => {
-    if (!A.length || !B.length) return flag(`one of the product pages has no ${what}`);
+  const compare = (what, aName, A, bName, B) => {
+    if (!A.length || !B.length) return flag(`${what}: one of ${aName} and ${bName} has none`);
     for (let i = 0; i < Math.max(A.length, B.length); i++) {
       if (A[i] !== B[i]) {
-        flag(`${what} differs at ${i}\n      office   : ${(A[i] ?? "(none)").slice(0, 88)}\n      employees: ${(B[i] ?? "(none)").slice(0, 88)}`);
-        break; // one report per region: past a divergence the rest is noise
+        flag(`${what} differs at ${i}\n      ${aName.padEnd(9)}: ${(A[i] ?? "(none)").slice(0, 84)}\n      ${bName.padEnd(9)}: ${(B[i] ?? "(none)").slice(0, 84)}`);
+        break; // one report per pair: past a divergence the rest is noise
       }
     }
   };
 
-  const side = (p) => region(src[p], '<nav class="side">', "</nav>");
-  compare("sidebar", lines(side("office") ?? ""), lines(side("employees") ?? ""));
-
-  // Which actions and tabs a screen offers is its own business; that both build
-  // the same frame around them is not.
+  // Which actions and tabs a screen offers is its own business; that they all
+  // build the same frame around them is not.
   const opaque = (html) =>
     html
       .replace(/(<div class="head-right">)[\s\S]*?(<\/div>)/, "$1…$2")
       .replace(/(<div class="tabs"[^>]*>)[\s\S]*?(<\/div>)/, "$1…$2");
+
+  const side = (p) => region(src[p], '<nav class="side">', "</nav>");
   const head = (p) => region(src[p], '<div class="head">', '</div>\n    </div>');
-  compare("header frame", bones(opaque(head("office") ?? "")), bones(opaque(head("employees") ?? "")));
+
+  const [first, ...rest] = SCREENS;
+  for (const p of rest) {
+    compare("sidebar", first, lines(side(first) ?? ""), p, lines(side(p) ?? ""));
+    compare("header frame", first, bones(opaque(head(first) ?? "")), p, bones(opaque(head(p) ?? "")));
+  }
 }
 console.log("");
 
