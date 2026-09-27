@@ -16,8 +16,9 @@ Each employee has:
 ## People and teams
 
 **Hiring needs a free desk.** A new hire starts with no memory and no way of
-working, and works through the company's Claude Code from the start; the first hire is made in first-run, the rest from the office,
-the org chart or the people screen.
+working, and works through the company's Claude Code from the start. The first
+hire is made in first run, the rest from the office, the org chart or the
+people screen.
 
 **A role is a job title from the company's list.** Everyone has one, so the last
 role cannot be removed, and removing one that people hold changes them to
@@ -37,16 +38,12 @@ history keeps their hire.
 
 An Agent is an execution layer attached to an employee.
 
-MVP runtime:
-- Claude Code
+The runtime is Claude Code. Another one fits behind the same runtime interface
+without changing the employee (ARCHITECTURE.md §14).
 
-Future:
-- other CLI agents
-- local models
-- API-based runtimes
-
-An employee outlives a failed agent: when the runtime is unavailable they stay,
-with their memory and their task, but cannot start work.
+An employee outlives a failed agent: when the runtime is unavailable or their
+session drops they stay, with their memory and their task, and nothing new
+starts until the user brings it back.
 
 One employee works on one task at a time.
 
@@ -92,8 +89,7 @@ deploying — is the one step the office does not take on its own.
 
 **Time is what the work has taken, not a share of an estimate.** With a real
 agent doing the work nobody knows when it ends, so a task carries how long it
-has been running and, once finished, how long it took. The estimate the user
-wrote down stays a note.
+has been running and, once finished, how long it took.
 
 **Blocked is not a status.** A task is blocked *out of* whichever status it is
 in — an agent that stopped, a dependency that never arrived — so it is a field
@@ -209,19 +205,6 @@ Examples:
 
 The feed should consume domain events.
 
-## When the runtime fails
-
-If a Claude Code session disconnects:
-
-Employee:
-- remains a company employee
-- remains assigned to the task
-- can display "Agent disconnected"
-
-The user can reconnect/retry.
-
-A runtime failure should not delete the employee or task.
-
 ## Progression
 
 The company's history records milestones as they happen, not reconstructed
@@ -239,22 +222,3 @@ later, so a hire stays in it after the person leaves:
 | 프로젝트 완료 | A project's last task is done |
 
 There are no growth stages yet; the history is what shows the company growing.
-
-A small company:
-- one employee
-- one workspace
-- simple tasks
-
-A growing company:
-- multiple employees
-- teams
-- projects
-- PR reviews
-- teaching memory
-
-A larger company:
-- multiple rooms
-- larger company
-- multiple projects/workspaces
-- multiple agent runtimes
-- deeper collaboration

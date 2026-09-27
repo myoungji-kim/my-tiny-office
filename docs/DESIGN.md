@@ -17,7 +17,7 @@ before building or changing a screen.
 
 | Page | Authoritative for |
 | --- | --- |
-| `ui/first-run.html` | The three first-run steps, fields, species picker |
+| `ui/first-run.html` | First run: the Claude Code check, the company, the first hire, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/projects.html` | The task board, the review queue, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
@@ -123,9 +123,9 @@ Status mirrors the domain rather than inventing its own vocabulary:
 | `available` | No task assigned | Solid green dot |
 | `vacation` | Employee is away | Grey dash |
 
-Colour never carries status alone — **the dot shape differs too**. Further
-runtime states (`blocked`, `disconnected`, `failed`, `reviewing`) get the same
-treatment when their systems exist.
+Colour never carries status alone — **the dot shape differs too**. An agent
+that stops is not a status but a mark beside it (see When the agent is
+unavailable), and review happens inside `working`.
 
 ### The action popover
 

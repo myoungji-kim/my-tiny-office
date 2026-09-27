@@ -253,7 +253,7 @@
 
 <script>
   /* ── i18n ────────────────────────────────────────────────────── */
-  // The company's name, nicknames and project names are absent: the player wrote them.
+  // The company's name, nicknames and project names are absent: the user wrote them.
   const TEXT = {
     ko: {
       ...WORDS.ko,
@@ -373,12 +373,12 @@
   let companyName = "My Tiny Office";
   const FOUNDED = day("2026. 1. 12.");
 
-  // The company owns this list; an area gets a label once the player names it.
+  // The company owns this list; an area gets a label once the user names it.
   const AREAS = Object.keys(WORDS.ko.areas).map((name) => ({ name }));
 
   const companyMemories = [
     { text: { ko: "커밋 메시지는 conventional prefix로 시작해요.", en: "Commit messages start with a conventional prefix." }, from: null, used: 34 },
-    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 플레이어가 입력한 이름은 예외예요.", en: "Player-facing text goes through i18n. Names the player typed do not." }, from: null, used: 28 },
+    { text: { ko: "사용자에게 보이는 글은 i18n을 거쳐요. 사용자가 입력한 이름은 예외예요.", en: "User-facing text goes through i18n. Names the user typed do not." }, from: null, used: 28 },
     { text: { ko: "문서와 코드가 어긋나면 코드가 아니라 문서를 고쳐요.", en: "When the docs and the code disagree, fix the docs." }, from: { ko: "스타일 가이드가 낡았던 주", en: "the week the style guide went stale" }, used: 12 },
   ];
 
@@ -390,7 +390,7 @@
   const ONGOING = 2;
 
   // A milestone keeps its kind and its facts, never a sentence: the words are
-  // the dictionary's, and a player name is whatever it is now.
+  // the dictionary's, and a user-written name is whatever it is now.
   const MILESTONES = [
     { on: "2026. 1. 12.", kind: "founded" },
     { on: "2026. 1. 12.", kind: "joined", who: "p5", nth: 1 },
@@ -634,7 +634,7 @@
     return { render };
   }
 
-  // A default area speaks both languages; one the player named or renamed is
+  // A default area speaks both languages; one the user named or renamed is
   // their text, shown as written in either.
   const areaLabel = (a) => a.label ?? t().areas[a.name];
   const teachAreas = () => AREAS.map((a) => ({ key: a.name, label: areaLabel(a) }));
@@ -747,7 +747,7 @@
   });
 
   /* ── tabs ────────────────────────────────────────────────────── */
-  // Each tab has an address, so teaching elsewhere can send the player to 분야·역할.
+  // Each tab has an address, so teaching elsewhere can send the user to 분야·역할.
   const VIEWS = ["overview", "history", "lists", "memory"];
   function show(view) {
     for (const tab of document.querySelectorAll(".tab")) tab.setAttribute("aria-selected", String(tab.dataset.view === view));

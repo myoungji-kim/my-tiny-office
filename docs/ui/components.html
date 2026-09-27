@@ -111,7 +111,7 @@
     <div class="spec">
       <code>secondary</code>
       <div class="row">
-        <button class="btn btn-secondary btn-md">업무 할당</button>
+        <button class="btn btn-secondary btn-md">업무 맡기기</button>
         <button class="btn btn-secondary btn-md">정렬<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6l4 4 4-4"/></svg></button>
         <span class="note" style="margin:0">흰 배경 + 헤어라인. 아이콘은 오른쪽</span>
       </div>
@@ -127,7 +127,7 @@
     <div class="spec">
       <code>danger</code>
       <div class="row">
-        <button class="btn btn-danger btn-md">해고하기</button>
+        <button class="btn btn-danger btn-md">내보내기</button>
         <span class="note" style="margin:0">되돌릴 수 없는 행동에만</span>
       </div>
     </div>
@@ -143,8 +143,8 @@
     <div class="spec">
       <code>disabled</code>
       <div class="row">
-        <button class="btn btn-primary btn-md" disabled>할당하는 중…</button>
-        <button class="btn btn-secondary btn-md" disabled>업무 할당</button>
+        <button class="btn btn-primary btn-md" disabled>맡기는 중…</button>
+        <button class="btn btn-secondary btn-md" disabled>업무 맡기기</button>
         <span class="note" style="margin:0">45% 불투명. 진행 중에는 라벨이 바뀌고 폭을 유지</span>
       </div>
     </div>
@@ -166,7 +166,7 @@
     <p class="note">
       책상이나 직원 카드를 누르면 그 자리에 팝오버가 열립니다. 팝오버 안은 카드 안이므로
       니어블랙 주 버튼을 쓸 수 없습니다. 대신 <strong>메뉴 행</strong>을 쓰고,
-      플레이어가 하러 온 행동 하나만 <strong>볼드</strong>로 올립니다.
+      사용자가 하러 온 행동 하나만 <strong>볼드</strong>로 올립니다.
     </p>
 
     <h3>Anatomy</h3>
@@ -188,8 +188,7 @@
         </div>
         <div class="p-rule"></div>
         <div class="p-acts">
-          <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>완료 처리</button>
-          <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
+          <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
           <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
         </div>
       </div>
@@ -207,15 +206,15 @@
     <div class="row" style="align-items:flex-start;gap:14px">
       <div class="pop" style="width:236px">
         <div class="p-acts" style="padding:0">
-          <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 할당</button>
-          <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>다른 업무로 교체</button>
-          <button class="mrow mrow-bad"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 3.8v3.4h3.4"/><path d="M4 7.2a4.6 4.6 0 1 1 .8 4.4"/></svg>할당 취소</button>
-          <button class="mrow" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 할당</button>
+          <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
+          <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
+          <button class="mrow mrow-bad"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3.5v10H6M10 5l3 3-3 3M13 8H6.5"/></svg>내보내기</button>
+          <button class="mrow" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
           <p class="p-why">휴가 중에는 업무를 맡길 수 없습니다.</p>
         </div>
       </div>
       <div style="flex:1;min-width:280px">
-        <div class="spec"><code>.mrow-key</code><span>그 상태에서 플레이어가 하러 온 행동. 한 팝오버에 <strong>하나</strong>.</span></div>
+        <div class="spec"><code>.mrow-key</code><span>그 상태에서 사용자가 하러 온 행동. 한 팝오버에 <strong>하나</strong>.</span></div>
         <div class="spec"><code>.mrow</code><span>보조 행동. 기본 굵기, 회색 아이콘.</span></div>
         <div class="spec"><code>.mrow-bad</code><span>되돌리는 행동. 호버 배경까지 빨강 계열.</span></div>
         <div class="spec"><code>:disabled</code><span>숨기지 말고 <strong>비활성 + 이유 한 줄</strong>. 규칙을 가르쳐 줍니다.</span></div>
@@ -229,8 +228,8 @@
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div class="pop" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
-            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>완료 처리</button>
-            <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
+            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
+            <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
           </div>
         </div>
         <div class="note" style="margin:10px 0 0">행 하나만 볼드. 위계가 색 없이도 읽힙니다.</div>
@@ -239,8 +238,8 @@
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
         <div class="pop" style="width:100%;box-shadow:none">
           <div class="row" style="padding:4px;gap:8px">
-            <button class="btn btn-primary btn-sm" style="flex:1">완료 처리</button>
-            <button class="btn btn-secondary btn-sm" style="flex:1">상세</button>
+            <button class="btn btn-primary btn-sm" style="flex:1">업무 상세</button>
+            <button class="btn btn-secondary btn-sm" style="flex:1">담당 변경</button>
           </div>
         </div>
         <div class="note" style="margin:10px 0 0">팝오버는 카드 안입니다. 니어블랙 주 버튼을 넣지 않습니다.</div>
@@ -249,7 +248,7 @@
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div class="pop" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
-            <button class="mrow" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 할당</button>
+            <button class="mrow" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
             <p class="p-why">휴가 중에는 업무를 맡길 수 없습니다.</p>
             <button class="mrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 3.8v3.4h3.4"/><path d="M4 7.2a4.6 4.6 0 1 1 .8 4.4"/></svg>복귀 처리</button>
           </div>
@@ -260,8 +259,8 @@
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON&rsquo;T</div>
         <div class="pop" style="width:100%;box-shadow:none">
           <div class="p-acts" style="padding:0">
-            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 할당</button>
-            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4l3.2 3.2L13 4.8"/></svg>완료 처리</button>
+            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>업무 맡기기</button>
+            <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>업무 상세</button>
             <button class="mrow mrow-key"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4"/></svg>담당 변경</button>
           </div>
         </div>
@@ -321,23 +320,23 @@
         <div class="row" style="margin-bottom:10px">
           <button class="btn btn-primary btn-lg">+ 직원 고용</button>
           <button class="btn btn-primary btn-lg">+ 업무 만들기</button>
-          <button class="btn btn-danger btn-lg">해고</button>
+          <button class="btn btn-danger btn-lg">내보내기</button>
         </div>
         <div class="note" style="margin:0">주 버튼이 여러 개면 어느 것도 주가 아닙니다.</div>
       </div>
       <div class="good-ex">
         <div class="exlabel" style="color:var(--ok-ink)">✓ DO</div>
         <div class="row" style="margin-bottom:10px">
-          <button class="btn btn-secondary btn-sm">완료 처리</button>
-          <button class="btn btn-ghost btn-sm">상세</button>
+          <button class="btn btn-secondary btn-sm">업무 상세</button>
+          <button class="btn btn-ghost btn-sm">담당 변경</button>
         </div>
         <div class="note" style="margin:0">카드·행 안에서는 sm. 니어블랙을 쓰지 않습니다.</div>
       </div>
       <div class="bad-ex">
         <div class="exlabel" style="color:var(--bad-ink)">✕ DON'T</div>
         <div class="row" style="margin-bottom:10px">
-          <button class="btn btn-primary btn-sm" style="border-radius:8px">완료 처리</button>
-          <button class="btn btn-secondary btn-sm" style="border-radius:8px">상세</button>
+          <button class="btn btn-primary btn-sm" style="border-radius:8px">업무 상세</button>
+          <button class="btn btn-secondary btn-sm" style="border-radius:8px">담당 변경</button>
         </div>
         <div class="note" style="margin:0">모서리를 깎지 않습니다. 버튼은 항상 pill입니다.</div>
       </div>
@@ -370,7 +369,7 @@
 
       <div class="notice notice-warn">
         <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
-        <span class="n-tx"><b>단풍이 30분째 같은 업무에 머물러 있어요</b><span>예상 20분짜리 업무예요. 막혔는지 한번 확인해 보세요.</span></span>
+        <span class="n-tx"><b>단풍이 30분째 같은 업무에 머물러 있어요</b><span>그동안 남긴 기록이 없어요. 막혔는지 한번 확인해 보세요.</span></span>
         <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button">업무 보기</button></span>
       </div>
 
@@ -496,13 +495,11 @@
             <span class="radio"></span>
             <span class="pick-t">결제 내역 페이지네이션</span>
             <span class="area-chip">데이터베이스</span>
-            <span class="pick-m">25분</span>
           </button>
           <button class="pick" type="button" role="radio" aria-checked="false">
             <span class="radio"></span>
             <span class="pick-t">주문 취소 API 추가</span>
             <span class="area-chip">아키텍처</span>
-            <span class="pick-m">30분</span>
           </button>
           <button class="pick pick-new" type="button" role="radio" aria-checked="false">
             <span class="radio"></span>
@@ -629,12 +626,15 @@
   // Matching whole text nodes keeps the markup untouched.
   const EXAMPLES = {
     "직원 고용": "Hire",
-    "업무 할당": "Assign work",
+    "+ 직원 고용": "+ Hire",
+    "+ 업무 만들기": "+ New task",
+    "보안": "Security",
+    "품질": "Quality",
+    "업무 맡기기": "Give work",
     "정렬": "Sort",
     "더보기": "More",
     "취소": "Cancel",
-    "해고하기": "Let them go",
-    "할당하는 중…": "Assigning…",
+    "맡기는 중…": "Giving…",
     "열기": "Open",
     "수정": "Edit",
     "방 추가": "Add a room",
@@ -647,11 +647,8 @@
     "진행 중": "In progress",
     "결제 API 에러 응답 구조 변경": "Change the payment API error shape",
     "22분째": "22 min so far",
-    "완료 처리": "Mark done",
     "업무 상세": "Task details",
     "담당 변경": "Reassign",
-    "다른 업무로 교체": "Swap the task",
-    "할당 취소": "Unassign",
     "복귀 처리": "Bring them back",
     "교육 보내기": "Send to training",
     "휴가 보내기": "Send on leave",
@@ -664,7 +661,7 @@
     "25분 걸렸어요 · PR이 리뷰를 기다리고 있어요": "Took 25 minutes · a PR is waiting for review",
     "PR 보기": "View the PR",
     "단풍이 30분째 같은 업무에 머물러 있어요": "Maple has been on the same task for 30 minutes",
-    "예상 20분짜리 업무예요. 막혔는지 한번 확인해 보세요.": "It was estimated at 20. Worth checking whether they are stuck.",
+    "그동안 남긴 기록이 없어요. 막혔는지 한번 확인해 보세요.": "Nothing new in that time. Worth checking whether they are stuck.",
     "업무 보기": "View the task",
     "모카의 에이전트 연결이 끊어졌어요": "Mocha's agent disconnected",
     "진행 중이던 업무는 그대로 있어요. 다시 연결하면 이어서 해요.": "The task in progress is untouched. Reconnect and they pick it up.",

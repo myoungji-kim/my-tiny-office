@@ -253,7 +253,7 @@
   })();
 
   /* ── i18n ────────────────────────────────────────────────────── */
-  // Every string the player reads. The samples carry both languages because a
+  // Every string the user reads. The samples carry both languages because a
   // layout that only survives one of them has not been designed yet.
   const TEXT = {
     ko: {
@@ -376,7 +376,7 @@
     grid.appendChild(b);
   }
 
-  // A nickname the player did not write is not their employee, so the button
+  // A nickname the user did not write is not their employee, so the button
   // waits for both.
   const roleInput = document.getElementById("rl");
   const sync = () => { hireBtn.disabled = !(chosen && nameInput.value.trim()); };

@@ -50,7 +50,7 @@
   .p-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* Menu rows replace buttons inside the popover: a card never carries a
-     near-black primary. The first row is the one the player came for. */
+     near-black primary. The first row is the one the user came for. */
 
   @media (max-width: 960px) {
     .app { grid-template-columns: 1fr; }
@@ -139,7 +139,7 @@
   }
 
   /* ── i18n ────────────────────────────────────────────────────── */
-  // Employee nicknames are absent on purpose: the player wrote them, so they
+  // Employee nicknames are absent on purpose: the user wrote them, so they
   // never go through a dictionary.
   const TEXT = {
     ko: {
@@ -166,7 +166,7 @@
       inProgress: "진행 중", lastDone: "최근 완료", vacationLabel: "휴가",
       actions: {
         detail: "업무 상세", reassign: "담당 변경",
-        assign: "업무 할당", teach: "기억 가르치기", leave: "휴가 보내기", comeBack: "복귀 처리",
+        assign: "업무 맡기기", teach: "기억 가르치기", leave: "휴가 보내기", comeBack: "복귀 처리",
       },
       cannotAssign: "휴가 중에는 업무를 맡길 수 없습니다.",
       actionOf: (n) => n + " 행동",
@@ -197,7 +197,7 @@
       inProgress: "In progress", lastDone: "Last finished", vacationLabel: "On leave",
       actions: {
         detail: "Task details", reassign: "Reassign",
-        assign: "Assign work", teach: "Teach", leave: "Send on leave", comeBack: "Bring back",
+        assign: "Give work", teach: "Teach", leave: "Send on leave", comeBack: "Bring back",
       },
       cannotAssign: "They cannot take work while on leave.",
       actionOf: (n) => "Actions for " + n,
@@ -513,7 +513,7 @@
   };
 
   // Only transitions the domain allows from this state. The first row is the
-  // one the player came here for. Teaching is not a transition, so it is
+  // one the user came here for. Teaching is not a transition, so it is
   // offered in every state.
   const TEACH = { icon: I.book, label: t().actions.teach, teach: true };
   const ACTIONS = {

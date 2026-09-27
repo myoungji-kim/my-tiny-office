@@ -839,7 +839,7 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
     $("[data-av]").replaceChildren(spriteCanvas(edit.species, 32));
   }
 
-  // A nickname the player did not write is not their employee, so the button
+  // A nickname the user did not write is not their employee, so the button
   // waits for both.
   function sync() {
     const n = name.value.trim();
@@ -960,7 +960,7 @@ function openMoveDialog({ title, sub, label, options, cancel, confirm, onConfirm
 /* ═══ teaching ═══ */
 // Every place that says "teach" opens this one dialog; where it was opened
 // from decides only what is already filled in. `to` is someone from STAFF,
-// "company", or null to let the player choose. `areas` is the company's list
+// "company", or null to let the user choose. `areas` is the company's list
 // as [{ key, label }] when the caller holds it. The dialog stores
 // nothing itself: it hands the memory to onSave.
 
@@ -1081,7 +1081,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
     box.innerHTML = list
       .map((a) => `<button class="opt" type="button" role="radio" data-area="${a.key}" aria-checked="${state.area === a.key}"></button>`)
       .join("");
-    // A label the player wrote is text, never markup.
+    // A label the user wrote is text, never markup.
     box.querySelectorAll("[data-area]").forEach((b, i) => { b.textContent = list[i].label; });
     for (const b of box.querySelectorAll("[data-area]")) {
       b.addEventListener("click", () => {

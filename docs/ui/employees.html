@@ -327,7 +327,7 @@
 
 <script>
   /* ── i18n ────────────────────────────────────────────────────── */
-  // Employee nicknames are absent: the player wrote them.
+  // Employee nicknames are absent: the user wrote them.
   const TEXT = {
     ko: {
       ...WORDS.ko,
@@ -367,7 +367,7 @@
       assignTitle: (n) => n + (hasBatchim(n) ? "이" : "가") + " 맡을 업무",
       backlog: "대기 중인 업무", fProject: "프로젝트", fTitle: "제목", fTitlePlaceholder: "결제 API 에러 응답 구조 변경",
       fDesc: "설명", fDescPlaceholder: "무엇을 바꾸는지 한두 줄", fArea: "분야", fPriority: "우선순위",
-      priority: { low: "낮음", normal: "보통", high: "높음" }, newTask: "새 업무 만들기", minutes: (m) => m + "분",
+      priority: { low: "낮음", normal: "보통", high: "높음" }, newTask: "새 업무 만들기",
       broughtAlong: "이 업무에 쓸 만한 기억", broughtWhy: "기억은 전부 들고 가요. 그중 이 업무 분야와 관련된 것만 보여줘요.",
       noAreaMemory: (a) => a + " 기억이 없어요",
       noAreaMemoryWhy: (n) => n + (hasBatchim(n) ? "은" : "는") + " 이 분야를 아직 몰라요. 지금 한 줄 알려주면 이번 업무부터 써요.",
@@ -415,7 +415,7 @@
       assignTitle: (n) => "Work for " + n,
       backlog: "Waiting", fProject: "Project", fTitle: "Title", fTitlePlaceholder: "Change the payment API error shape",
       fDesc: "Description", fDescPlaceholder: "A line or two on what changes", fArea: "Area", fPriority: "Priority",
-      priority: { low: "Low", normal: "Normal", high: "High" }, newTask: "Create a task", minutes: (m) => m + " min",
+      priority: { low: "Low", normal: "Normal", high: "High" }, newTask: "Create a task",
       broughtAlong: "What they know that helps here", broughtWhy: "They carry all of it. These are the ones in this task's area.",
       noAreaMemory: (a) => "No " + a.toLowerCase() + " memory",
       noAreaMemoryWhy: (n) => n + " does not know this area yet. Teach them a line now and they use it on this task.",
@@ -453,10 +453,10 @@
   const roleLine = (p) => p.role + (teamName(p.team) ? " · " + teamName(p.team) : "");
 
   const backlog = [
-    { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db", minutes: 25 },
-    { id: "t2", title: { ko: "주문 취소 API 추가", en: "Add an order cancellation API" }, area: "arch", minutes: 30 },
-    { id: "t3", title: { ko: "에러 메시지 영문 번역", en: "Translate the error messages" }, area: "l10n", minutes: 20 },
-    { id: "t4", title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, area: "security", minutes: 35 },
+    { id: "t1", title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" }, area: "db" },
+    { id: "t2", title: { ko: "주문 취소 API 추가", en: "Add an order cancellation API" }, area: "arch" },
+    { id: "t3", title: { ko: "에러 메시지 영문 번역", en: "Translate the error messages" }, area: "l10n" },
+    { id: "t4", title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" }, area: "security" },
   ];
 
   const people = STAFF;
@@ -791,7 +791,7 @@
     if (rule) openStyleMenu(rule);
   });
 
-  /* ── a memory or a rule, and what the player can do about it ── */
+  /* ── a memory or a rule, and what the user can do about it ── */
   const editOrRemove = (btn, onEdit, onRemove) =>
     openRowMenu(btn, [
       { label: t().edit, icon: ICON.pen, run: onEdit },
@@ -833,7 +833,7 @@
 
   /* ── org chart ───────────────────────────────────────────────── */
   // Teams are the only level. A default team speaks both languages; one the
-  // player names is shown as written.
+  // user names is shown as written.
   const org = document.getElementById("org");
   let editingTeam = null;
 
@@ -1026,7 +1026,7 @@
   /* ── memory tab ──────────────────────────────────────────────── */
   const notices = document.getElementById("memNotices");
 
-  // Memory nobody ever used is something this screen knows that the player
+  // Memory nobody ever used is something this screen knows that the user
   // cannot see anywhere else.
   const cold = people.flatMap((p) => p.memories.filter(isCold).map((m) => ({ p, m })));
   if (cold.length) {
@@ -1122,7 +1122,6 @@
                 <span class="radio"></span>
                 <span class="pick-t">${tx(task_.title)}</span>
                 <span class="area-chip">${t().areas[task_.area]}</span>
-                <span class="pick-m">${t().minutes(task_.minutes)}</span>
               </button>`,
           )
           .join("")}

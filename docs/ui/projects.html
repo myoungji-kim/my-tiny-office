@@ -243,7 +243,7 @@
       blocked: { ko: "에이전트 연결이 끊겼어요", en: "The agent disconnected" } },
   ];
 
-  // A column is a status a task rests in. Approval is the player's: work is
+  // A column is a status a task rests in. Approval is the user's: work is
   // finished locally and nothing has been applied anywhere yet.
   const COLUMNS = [
     { status: "backlog", color: "var(--faint)" },
@@ -253,7 +253,7 @@
     { status: "held", color: "var(--line-2)" },
   ];
   /* ── i18n ────────────────────────────────────────────────────── */
-  // Employee nicknames are absent on purpose: the player wrote them, so they
+  // Employee nicknames are absent on purpose: the user wrote them, so they
   // never go through a dictionary.
   const TEXT = {
     ko: {
@@ -570,7 +570,7 @@
       ]);
     });
   }
-  /* ── one task, and what the player can do about it ───────────── */
+  /* ── one task, and what the user can do about it ───────────── */
 
   function menu(label, kind, then) {
     const b = document.createElement("button");
@@ -758,7 +758,7 @@
         if (!picked) return t().backToBacklog;
         return picked.id === editing.who ? t().keepsGoing : t().handOver(picked.name);
       }
-      // A held task is not waiting its turn; it is waiting for the player.
+      // A held task is not waiting its turn; it is waiting for the user.
       if (editing?.status === "held") return picked ? t().whenResumed(picked.name) : t().whenResumedAnyone;
       if (!picked) return t().whoTakes;
       return free(picked) ? t().freeNow(picked.name) : t().busyNow(picked.name);
@@ -860,7 +860,7 @@
       const desc = dialog.querySelector(".textarea").value.trim();
       const task = editing ?? { id: "nt" + TASKS.length, status: "backlog" };
       const handedOver = running && task.who !== (picked?.id ?? null);
-      // The player's own words are not translated, so a new one reads the same
+      // The user's own words are not translated, so a new one reads the same
       // in both languages and a correction only touches the one being read.
       const wrote = (had, value) => (editing ? { ...had, [lang]: value } : { ko: value, en: value });
       Object.assign(task, {

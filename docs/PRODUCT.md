@@ -78,10 +78,9 @@ The direction, not yet a design:
 2. Team rooms
 3. Meeting room
 4. Server area
-5. Lounge
-6. More desks
-7. Specialized spaces
-8. Full software company
+5. More desks
+6. Specialized spaces
+7. Full software company
 
 ## Localization
 

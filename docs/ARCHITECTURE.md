@@ -40,7 +40,7 @@ SQLite
 ```
 
 Pages read through a server-side view model that shapes domain entities into
-display data, including task progress derived from the current time. Mutations
+display data, including a task's time taken derived from the current time. Mutations
 go through server actions that call a use case and revalidate the page; they
 carry no domain logic of their own. Nothing under `src/infrastructure` may be
 imported from a client component.
@@ -157,7 +157,6 @@ Company
 ├── id
 ├── name
 ├── description
-├── workspace(s)
 ├── teams
 ├── employees
 ├── projects
@@ -174,7 +173,7 @@ Employee
 ├── teamId?
 ├── workingStyle
 ├── availability
-└── agentId?
+└── agentId
 
 Agent
 ├── id
@@ -187,6 +186,7 @@ Agent
 AgentSession
 ├── id
 ├── agentId
+├── taskId
 ├── runtimeSessionId
 ├── workspace
 ├── status
@@ -198,8 +198,8 @@ The important relationship is:
 
 ```text
 Company 1 ─── N Employee
-Employee 1 ─── 0..1 Agent
-Agent 1 ─── N Session
+Employee 1 ─── 1 Agent
+Agent 1 ─── N Session      one per task
 ```
 
 An employee outlives a failed agent: when the runtime is unavailable the
@@ -255,21 +255,15 @@ The desired user experience is:
 ```text
 First launch
   ↓
-Detect Claude Code
-  ↓
-User chooses "Claude Code"
-  ↓
-Use existing Claude Code authentication
+Detect Claude Code — installed, logged in with its own authentication
   ↓
 Create company
   ↓
-Create/hire employee
+Hire employee — their agent runs on the company's Claude Code
   ↓
-Assign Claude Code runtime
+Give work
   ↓
-Start work
-  ↓
-Create/attach the employee's Claude Code session
+Launch a session for the task in its project's folder
   ↓
 Store session association
   ↓
@@ -358,8 +352,8 @@ Neither can be done for the user, and both need a screen that says so.
    dialog instead of satisfying it, which is why a print run succeeds where
    `--bg` does not.
 
-So connecting an employee needs one interactive `claude` run in their
-workspace, whatever we do about login. One honest instruction beats two partial
+So every project folder needs one interactive `claude` run, whatever we do
+about login. One honest instruction beats two partial
 automations.
 
 ### `--bare` is not available to us
@@ -432,7 +426,8 @@ Do not import arbitrary sessions.
 
 ## 11. Workspace Model
 
-A Company may have one or more workspaces.
+Each project has one workspace, its folder; a company has as many as it has
+projects.
 
 ```text
 Company
@@ -497,8 +492,8 @@ UI components should not manually mutate the activity feed.
 The app must distinguish:
 
 - employee unavailable
-- agent not configured
 - runtime unavailable
+- workspace not trusted
 - session disconnected
 - task blocked
 - AI request failed
@@ -508,7 +503,7 @@ A runtime failure must not corrupt company state.
 Example:
 
 ```text
-Employee: Min-su
+Employee: 모카
 Employee status: Working
 Agent status: Disconnected
 ```

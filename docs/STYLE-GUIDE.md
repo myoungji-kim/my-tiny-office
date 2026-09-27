@@ -169,7 +169,6 @@ and greyscale.
 | Status | Colour | Dot |
 | --- | --- | --- |
 | `working` | `--warn` | Filled, with a ring |
-| `ready` | `--info` | Hollow |
 | `available` | `--ok` | Filled |
 | `vacation` | `--faint` | Short dash |
 
