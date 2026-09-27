@@ -494,7 +494,15 @@
           <span class="n-tx"><b>${t().runtimeOff}</b><span>${t().runtimeOffWhy}</span></span>
           <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-recheck>${t().recheck}</button></span></div>`
       : "";
-    box.querySelector("[data-recheck]")?.addEventListener("click", () => { runtimeOff = false; renderRuntime(); });
+    box.querySelector("[data-recheck]")?.addEventListener("click", () => {
+      runtimeOff = false;
+      renderRuntime();
+      // the sample bar's switch follows
+      const u = new URL(location.href);
+      u.searchParams.delete("claude");
+      history.replaceState(null, "", u);
+      document.querySelector("#devbar [data-state]")?.setAttribute("aria-pressed", "false");
+    });
   }
   renderRuntime();
 

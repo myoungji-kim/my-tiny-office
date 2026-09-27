@@ -1247,6 +1247,26 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
       nav.append(sep());
     }
 
+    // A state the sample can be put in, where the page has one to show.
+    if (here === "office") {
+      const label = document.createElement("span");
+      label.className = "grouplabel";
+      label.textContent = lang === "en" ? "State" : "상태";
+      const off = new URLSearchParams(location.search).get("claude") === "off";
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.state = "claude";
+      b.textContent = lang === "en" ? "Claude Code stopped" : "Claude Code 멈춤";
+      b.setAttribute("aria-pressed", String(off));
+      b.addEventListener("click", () => {
+        const u = new URL(location.href);
+        if (u.searchParams.get("claude") === "off") u.searchParams.delete("claude");
+        else u.searchParams.set("claude", "off");
+        location.href = u.toString();
+      });
+      nav.append(label, b, sep());
+    }
+
     const box = document.createElement("span");
     box.className = "lang";
     box.id = "lang";
