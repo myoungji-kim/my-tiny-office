@@ -156,7 +156,10 @@ it does not re-implement them.
 | `available` | 업무 할당 · 기억 가르치기 · 휴가 보내기 |
 | `vacation` | 업무 할당 *(disabled, with the reason)* · 복귀 처리 · 기억 가르치기 |
 
-An action the domain forbids is shown **disabled with a one-line reason**, not
+Each action goes where the work already is: 업무 상세 to the task's page, 담당 변경
+to its assignee there, 업무 맡기기 to the person's page with its dialog open;
+leave, return and reconnect happen in place. An action the domain forbids is
+shown **disabled with a one-line reason**, not
 hidden; the rule is the thing worth teaching. 기억 가르치기 is offered in every
 state because it is not a transition: it changes what someone knows, not what
 they are doing.

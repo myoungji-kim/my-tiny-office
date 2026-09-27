@@ -217,7 +217,7 @@
       actionOf: (n) => n + " 행동",
       tasks: { paging: "결제 내역 페이지네이션", orderType: "주문 상태 타입 좁히기", webhook: "결제 웹훅 서명 검증" },
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
-      backIn: "3일 후 복귀",
+      backIn: "3일 후 복귀", backUnknown: "복귀 날짜 미정", justBack: "휴가에서 막 돌아왔어요",
     },
     en: {
       ...WORDS.en,
@@ -261,7 +261,7 @@
       actionOf: (n) => "Actions for " + n,
       tasks: { paging: "Paginate the payment history", orderType: "Narrow the order status type", webhook: "Verify the payment webhook signature" },
       reviewKey: "Review", reviewingNow: "Reviewing",
-      backIn: "Back in 3 days",
+      backIn: "Back in 3 days", backUnknown: "No return date yet", justBack: "Just back from leave",
     },
   };
 
@@ -640,25 +640,43 @@
   // Where each desk's work lives on the board.
   const TASK_AT = { paging: "pay/t1", orderType: "order/t3", webhook: "pay/t2" };
 
-  const TEACH = { icon: I.book, label: t().actions.teach, teach: true };
+  const suffix = lang === "en" ? "?lang=en" : "";
+  const go = (page, hash) => { location.href = page + suffix + "#" + hash; };
+  const taskOf = (p) => TASK_AT[(p.task ?? p.review).key];
+
+  // The office holds a copy of each person beside the company's own. The
+  // copy keeps its own wording keys, so only status and the agent reach the
+  // company's, which is what the sidebar draws.
+  const change = (p, fields) => {
+    Object.assign(p, fields);
+    Object.assign(fromCompany.get(p.id), { status: p.status, agentLost: p.agentLost });
+    render();
+    renderMembers();
+  };
+
+  const TEACH = {
+    icon: I.book, label: t().actions.teach,
+    run: (p) => openTeach({ to: fromCompany.get(p.id), onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }) }),
+  };
+  const RECONNECT = { icon: I.plug, label: t().actions.reconnect, key: true, run: (p) => change(p, { agentLost: false }) };
   const ACTIONS = {
     working: [
-      { icon: I.info, label: t().actions.detail, key: true, detail: true },
-      { icon: I.swap, label: t().actions.reassign },
+      { icon: I.info, label: t().actions.detail, key: true, run: (p) => go("projects.html", taskOf(p)) },
+      { icon: I.swap, label: t().actions.reassign, run: (p) => go("projects.html", taskOf(p) + "/assign") },
       TEACH,
     ],
     reviewing: [
-      { icon: I.info, label: t().actions.detail, key: true, detail: true },
+      { icon: I.info, label: t().actions.detail, key: true, run: (p) => go("projects.html", taskOf(p)) },
       TEACH,
     ],
     available: [
-      { icon: I.plus, label: t().actions.assign, key: true },
+      { icon: I.plus, label: t().actions.assign, key: true, run: (p) => go("employees.html", p.id + "/assign") },
       TEACH,
-      { icon: I.sun, label: t().actions.leave },
+      { icon: I.sun, label: t().actions.leave, run: (p) => change(p, { status: "vacation", back: "backUnknown" }) },
     ],
     vacation: [
       { icon: I.plus, label: t().actions.assign, key: true, off: t().cannotAssign },
-      { icon: I.undo, label: t().actions.comeBack },
+      { icon: I.undo, label: t().actions.comeBack, run: (p) => change(p, { status: "available", back: null, last: "justBack" }) },
       TEACH,
     ],
   };
@@ -690,12 +708,12 @@
     });
 
     const acts = p.agentLost
-      ? [{ icon: I.plug, label: t().actions.reconnect, key: true }, ...ACTIONS[p.status].map((a) => ({ ...a, key: false }))]
+      ? [RECONNECT, ...ACTIONS[p.status].map((a) => ({ ...a, key: false }))]
       : ACTIONS[p.status];
     const rows = acts
       .map((a) => {
         const cls = ["mrow", a.key ? "mrow-key" : "", a.bad ? "mrow-bad" : ""].filter(Boolean).join(" ");
-        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}${a.teach ? " data-teach" : ""}${a.detail ? " data-detail" : ""}>${a.icon}${a.label}</button>`;
+        const row = `<button class="${cls}" type="button"${a.off ? " disabled" : ""}>${a.icon}${a.label}</button>`;
         return a.off ? row + `<p class="p-why">${a.off}</p>` : row;
       })
       .join("");
@@ -718,12 +736,8 @@
       <div class="p-rule"></div>
       <div class="p-acts">${rows}</div>`;
     drawAvatar(pop.querySelector("canvas"), p.species);
-    pop.querySelector("[data-detail]")?.addEventListener("click", () => {
-      location.href = "projects.html" + (lang === "en" ? "?lang=en" : "") + "#" + TASK_AT[(p.task ?? p.review).key];
-    });
-    pop.querySelector("[data-teach]").addEventListener("click", () => {
-      close();
-      openTeach({ to: fromCompany.get(p.id), onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }) });
+    pop.querySelectorAll(".p-acts > .mrow").forEach((b, i) => {
+      b.addEventListener("click", () => { close(); acts[i].run(p); });
     });
 
     anchor = el;

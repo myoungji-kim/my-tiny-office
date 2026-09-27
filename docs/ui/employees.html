@@ -1250,6 +1250,11 @@
     });
     if (shown) renderPerson(shown);
     else document.title = "Tiny Office · People";
+    // another screen's 업무 맡기기 arrives here with the dialog open
+    if (shown && sub === "assign") {
+      history.replaceState(null, "", "#" + shown.id);
+      if (shown.status !== "vacation") openAssign(shown);
+    }
     show(view);
     window.scrollTo(0, 0);
   }

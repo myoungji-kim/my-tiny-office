@@ -1845,11 +1845,16 @@
   // The list is the page; a project's board has an address of its own.
   function route() {
     close();
-    const [pid, tid] = location.hash.slice(1).split("/");
+    const [pid, tid, then] = location.hash.slice(1).split("/");
     project = PROJECTS.some((p) => p.id === pid) ? pid : null;
     taskId = project && TASKS.some((k) => k.id === tid && k.project === pid) ? tid : null;
     if (project) filter = here().status;
     render();
+    // another screen's 담당 변경 arrives here with the assignee open
+    if (taskId && then === "assign") {
+      history.replaceState(null, "", "#" + project + "/" + taskId);
+      assignTask(TASKS.find((k) => k.id === taskId));
+    }
   }
   window.addEventListener("hashchange", route);
   route();
