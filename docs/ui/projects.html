@@ -376,6 +376,12 @@
       },
       whySeat: (a) => a + " 기억이 있어요",
       pickWho: (a) => a + " 검토를 누구에게 받을까요?",
+      changesAsked: (s) => "보완 요청 · " + s,
+      reworkTitle: "무엇을 보완할까요?", reworkLabel: "보완할 내용", reworkPlaceholder: "재시도할 수 있는 실패는 따로 나눠 주세요",
+      reworkNow: (n) => n + subjectParticle(n) + " 하던 세션을 이어서 바로 고쳐요. 아직 아무 데도 반영되지 않았어요.",
+      reworkLater: (n) => n + subjectParticle(n) + " 지금 하는 일을 마치고 이어서 고쳐요. 아직 아무 데도 반영되지 않았어요.",
+      holdTaskTitle: "이 업무를 보류할까요?", holdTaskWhy: "끝난 작업은 반영하지 않은 채로 남아요. 다시 진행하면 이어서 해요.",
+      holdTaskPlaceholder: "테스트 범위를 먼저 정하고 다시 하기로",
       noSeat: "이 분야를 아는 사람을 먼저 만들어야 해요",
       blocked: "막힘",
       newTaskTitle: "새 업무",
@@ -463,6 +469,12 @@
       },
       whySeat: (a) => "has " + a + " memories",
       pickWho: (a) => "Who should look at the " + a + " side?",
+      changesAsked: (s) => "Sent back · " + s,
+      reworkTitle: "What should change?", reworkLabel: "What to change", reworkPlaceholder: "Split out the retryable failures",
+      reworkNow: (n) => n + " picks the same session back up and fixes it now. Nothing has been applied anywhere.",
+      reworkLater: (n) => n + " fixes it after what they are on now. Nothing has been applied anywhere.",
+      holdTaskTitle: "Hold this task?", holdTaskWhy: "The finished work stays, unapplied. Resuming carries on from it.",
+      holdTaskPlaceholder: "Parked until we agree what to cover",
       noSeat: "Someone has to learn this area first",
       blocked: "Blocked",
       newTaskTitle: "New task",
@@ -577,10 +589,8 @@
   // a colleague looking at it, or a suggestion that one should.
   function noteFor(task) {
     if (task.blocked) return { cls: "blocked", svg: icon.none, text: tx(task.blocked) };
-    if (!task.peer) {
-      if (task.status !== "working") return null;
-      return null;
-    }
+    if (task.changes) return { cls: "changes", svg: icon.back, text: t().changesAsked(tx(task.changes)) };
+    if (!task.peer) return null;
     if (task.peer.state === "reviewing") {
       return { cls: "peer", svg: icon.eye, text: t().peerReviewing(byId.get(task.peer.by).name, areaLabel(task.area)) };
     }
@@ -592,9 +602,10 @@
       : null;
   }
 
+  // A queued task has not started this round, so it shows its priority instead.
   const timeLine = (task) =>
     task.status === "working" ? t().spent(task.spent)
-      : task.spent !== undefined ? t().took(task.spent)
+      : task.status !== "backlog" && task.spent !== undefined ? t().took(task.spent)
       : null;
 
   const away = (p) => p.status === "vacation";
@@ -860,7 +871,7 @@
     const draft = writable(here());
 
     if (task.status === "backlog" && live) {
-      acts.appendChild(menu(t().actions.assign));
+      acts.appendChild(menu(t().actions.assign, null, () => assignTask(task)));
     }
 
     if (task.status === "working" && live) {
@@ -883,15 +894,15 @@
     // This is the line the work does not cross on its own.
     if (task.status === "approval" && kept) {
       say("p-said", `<b>${t().approveTitle}</b>${t().approveWhy}`);
-      acts.appendChild(menu(t().actions.approve, "key"));
-      acts.appendChild(menu(t().actions.rework));
-      acts.appendChild(menu(t().actions.hold));
+      acts.appendChild(menu(t().actions.approve, "key", () => approveTask(task)));
+      acts.appendChild(menu(t().actions.rework, null, () => askRework(task)));
+      acts.appendChild(menu(t().actions.hold, null, () => askHoldTask(task)));
     }
 
     if (task.status === "held") {
       say("p-said", `<b>${t().heldBecause}</b>${tx(task.reason)}`);
-      if (live) acts.appendChild(menu(t().actions.resume, "key"));
-      acts.appendChild(menu(t().actions.teach));
+      if (live) acts.appendChild(menu(t().actions.resume, "key", () => resumeTask(task)));
+      acts.appendChild(menu(t().actions.teach, null, () => teachFrom(task)));
     }
 
     // A finished task is the record of what happened, so it is not edited or
@@ -1285,6 +1296,54 @@
       });
     });
     (dialog.querySelector("#stepText") ?? dialog.querySelector("[data-yes]")).focus({ preventScroll: true });
+  }
+
+  /* ── moving one task ─────────────────────────────────────────── */
+  // One task at a time: work handed back to someone busy queues behind what
+  // they are on instead of starting.
+  const backTo = (task) => (task.who && free(byId.get(task.who)) ? "working" : "backlog");
+
+  function assignTask(task) {
+    openEditTask(task);
+    dialog.querySelector("#ntWho").focus({ preventScroll: true });
+  }
+
+  function approveTask(task) {
+    Object.assign(task, { status: "done", changes: undefined });
+    render();
+  }
+
+  function askRework(task) {
+    const who = byId.get(task.who);
+    confirmStep({
+      heading: t().reworkTitle, yes: t().actions.rework,
+      why: backTo(task) === "working" ? t().reworkNow(who.name) : t().reworkLater(who.name),
+      field: { label: t().reworkLabel, placeholder: t().reworkPlaceholder },
+      onYes: (text) => Object.assign(task, { status: backTo(task), changes: { ko: text, en: text } }),
+    });
+  }
+
+  function askHoldTask(task) {
+    confirmStep({
+      heading: t().holdTaskTitle, why: t().holdTaskWhy, yes: t().holdYes,
+      field: { label: t().holdReason, placeholder: t().holdTaskPlaceholder },
+      onYes: (text) => Object.assign(task, { status: "held", reason: { ko: text, en: text } }),
+    });
+  }
+
+  function resumeTask(task) {
+    Object.assign(task, { status: backTo(task), reason: undefined });
+    render();
+  }
+
+  // Teaching from a task takes the task as where the memory came from.
+  function teachFrom(task) {
+    openTeach({
+      to: task.who ? byId.get(task.who) : null,
+      area: task.area,
+      from: task.title,
+      onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }),
+    });
   }
 
   // Starting is what lets the backlog be picked up, and when the project's span begins.

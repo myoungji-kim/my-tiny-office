@@ -190,7 +190,8 @@ start button: the user says what the work is and who should do it.
 
 - **The approval column is the user's gate**, and its popover says so in as
   many words: nothing has been applied anywhere yet; approving is what applies
-  it. Sending back asks for a reason; holding keeps it.
+  it. Sending back asks for a reason and says whether they fix it now or after
+  what they are on; the card then carries the reason. Holding keeps one too.
 - **A card shows time taken, never a share of an estimate.** In progress it says
   how long it has been running; finished, how long it took.
 - **Blocked rides on the card** as a mark and a reason, never as a column.

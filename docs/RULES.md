@@ -132,8 +132,10 @@ nobody has been taught the area, there is nobody to suggest, and the user
 sees that.
 
 What the user decides is the last step, not the verdict: whether the finished
-work may be applied. Sending it back takes a reason and returns it to `working`.
-Holding it parks it with the reason attached.
+work may be applied. Sending it back takes a reason, which the card carries, and returns it to
+whoever did it: `working` if they are free, queued behind their current task
+if not. Holding it parks it with the reason attached; resuming follows the
+same rule.
 
 ## PR Collaboration
 
