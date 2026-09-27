@@ -720,10 +720,10 @@
   window.addEventListener("resize", () => { if (anchor) place(anchor); });
 
   /* ── sidebar roster ──────────────────────────────────────────── */
-  // The board has no per-person view of its own, so a pick goes to the people
-  // screen, which does.
+  // The board has no per-person view of its own, so a pick opens that person
+  // on the people screen.
   mountRoster(document.getElementById("members"), (p) => {
-    location.href = "employees.html" + (lang === "en" ? "?lang=en" : "");
+    location.href = "employees.html" + (lang === "en" ? "?lang=en" : "") + "#" + p.id;
   });
   /* ── making a task ───────────────────────────────────────────── */
   // The one choice worth making carefully is the area, because it decides who

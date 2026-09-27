@@ -10,7 +10,7 @@ before building or changing a screen.
 | `ui/first-run.html` | The three first-run steps, fields, species picker |
 | `ui/office.html` | Layout, colour tokens, tile engine, status display, action popover |
 | `ui/projects.html` | The task board, the review queue, and choosing who reviews |
-| `ui/employees.html` | List and detail, org chart, memory, review areas |
+| `ui/employees.html` | The list, a person's page, org chart, memory, review areas |
 | `ui/connect.html` | Attaching an agent, readiness checks, blocked states, the agent mark |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -202,6 +202,11 @@ employee card opens an **action popover anchored to what was clicked**, and
 selection stays in sync across all three. The popover covers the neighbouring
 card while open; that is accepted.
 
+Reading an employee in full is a page, not a panel. The people list is only a
+list, and each row opens that person's page: summary on the left, memory on
+the right, growing downward with the page. The popover is for acting on
+someone; the page is for knowing them.
+
 ## The Office
 
 A pixel tile engine, not an SVG scene and not a sprite library.
@@ -290,8 +295,8 @@ thing to manage:
 
 | | |
 | --- | --- |
-| 분야별 묶기 | Two per area, **most-referenced first**, the rest behind 더 보기 |
-| 크기 | The detail panel shows how many characters go with every task |
+| 분야별 묶기 | Three per area, **most-referenced first**, the rest behind 더 보기 |
+| 크기 | A person's page shows how many characters go with every task |
 | 보관 | Kept, not carried. Excluded from counts, coverage and size |
 | 정리 | A memory referenced zero times is flagged where it sits and on the memory tab |
 
