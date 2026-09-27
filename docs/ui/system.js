@@ -1164,11 +1164,32 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
 
 /* ═══ the company's Claude Code, on every screen ═══ */
 // When it stops for the whole company, every screen says so in one line above
-// its content and nothing new starts. The sample puts it there with ?claude=off.
-const RUNTIME = { off: new URLSearchParams(location.search).get("claude") === "off" };
+// its content and nothing new starts. The sample keeps that state for the
+// browsing session, so moving between screens does not undo it; ?claude=off
+// turns it on from a link.
+const RUNTIME_KEY = "mto.claude";
+const RUNTIME = {
+  off: (() => {
+    const asked = new URLSearchParams(location.search).get("claude") === "off";
+    try {
+      if (asked) sessionStorage.setItem(RUNTIME_KEY, "off");
+      return sessionStorage.getItem(RUNTIME_KEY) === "off";
+    } catch {
+      return asked;
+    }
+  })(),
+};
+
+function setRuntimeOff(off) {
+  RUNTIME.off = off;
+  try {
+    if (off) sessionStorage.setItem(RUNTIME_KEY, "off");
+    else sessionStorage.removeItem(RUNTIME_KEY);
+  } catch {}
+}
 
 function runtimeBack() {
-  RUNTIME.off = false;
+  setRuntimeOff(false);
   document.getElementById("runtimeLine")?.remove();
   const u = new URL(location.href);
   u.searchParams.delete("claude");
@@ -1294,16 +1315,15 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
       const label = document.createElement("span");
       label.className = "grouplabel";
       label.textContent = lang === "en" ? "State" : "상태";
-      const off = new URLSearchParams(location.search).get("claude") === "off";
       const b = document.createElement("button");
       b.type = "button";
       b.dataset.state = "claude";
-      b.textContent = lang === "en" ? "Claude Code stopped" : "Claude Code 멈춤";
-      b.setAttribute("aria-pressed", String(off));
+      b.textContent = lang === "en" ? "Claude Code signed out" : "Claude Code 로그아웃";
+      b.setAttribute("aria-pressed", String(RUNTIME.off));
       b.addEventListener("click", () => {
+        setRuntimeOff(!RUNTIME.off);
         const u = new URL(location.href);
-        if (u.searchParams.get("claude") === "off") u.searchParams.delete("claude");
-        else u.searchParams.set("claude", "off");
+        u.searchParams.delete("claude");
         location.href = u.toString();
       });
       nav.append(label, b, sep());
