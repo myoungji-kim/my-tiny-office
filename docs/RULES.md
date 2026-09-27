@@ -1,22 +1,22 @@
-# My Tiny Office — Gameplay
+# My Tiny Office — Rules
 
 ## Employee
 
 Each employee has:
 
-- a nickname the player wrote, and a species that only decides their sprite
+- a nickname the user wrote, and a species that only decides their sprite
 - a role, from the company's list
 - a team, or none
 - memories, and the expertise that follows from them
 - a way of working (일하는 방식)
 - a status: working, ready, available or on leave
 - a current task
-- optionally, an Agent
+- an Agent — Claude Code — that does the work; without a working one they cannot take a task
 
 ## People and teams
 
-**Hiring needs a free desk.** A new hire starts simulated, with no memory and no
-way of working; the first hire is made in first-run, the rest from the office,
+**Hiring needs a free desk.** A new hire starts with no memory and no way of
+working, and works through the company's Claude Code from the start; the first hire is made in first-run, the rest from the office,
 the org chart or the people screen.
 
 **A role is a job title from the company's list.** Everyone has one, so the last
@@ -45,7 +45,10 @@ Future:
 - local models
 - API-based runtimes
 
-An employee does not require an Agent to exist.
+An employee outlives a failed agent: when the runtime is unavailable they stay,
+with their memory and their task, but cannot start work.
+
+One employee works on one task at a time.
 
 ## Company Ownership
 
@@ -79,9 +82,9 @@ Tasks have:
 Statuses:
 - backlog — nobody has picked it up; whoever is free takes it
 - working — an employee is on it, and a colleague may be reviewing alongside
-- approval — finished on their machine, waiting for the player to apply it
+- approval — finished on their machine, waiting for the user to apply it
 - done — applied
-- held — parked by the player, with the reason kept
+- held — parked by the user, with the reason kept
 
 A task is never started or completed by hand. Work is picked up by whoever is
 free, and it stops at `approval` because applying it — pushing, writing,
@@ -89,7 +92,7 @@ deploying — is the one step the office does not take on its own.
 
 **Time is what the work has taken, not a share of an estimate.** With a real
 agent doing the work nobody knows when it ends, so a task carries how long it
-has been running and, once finished, how long it took. The estimate the player
+has been running and, once finished, how long it took. The estimate the user
 wrote down stays a note.
 
 **Blocked is not a status.** A task is blocked *out of* whichever status it is
@@ -104,18 +107,18 @@ being worked on.
 When a task's area calls for another pair of eyes, the office suggests a
 colleague who has been taught that area — expertise comes from memory, not
 from a field — and the two of them settle it while the work is still open. If
-nobody has been taught the area, there is nobody to suggest, and the player
+nobody has been taught the area, there is nobody to suggest, and the user
 sees that.
 
-What the player decides is the last step, not the verdict: whether the finished
+What the user decides is the last step, not the verdict: whether the finished
 work may be applied. Sending it back takes a reason and returns it to `working`.
 Holding it parks it with the reason attached.
 
 ## PR Collaboration
 
 In the MVP a `PullRequest` is not a real GitHub or GitLab pull request. It is a
-game-world domain entity that exists to simulate review, collaboration, and work
-progress inside the company.
+domain entity that records review, collaboration, and progress inside the
+company.
 
 A PR is an activity card, not a place of its own. It belongs to a task that is
 still `working`, and it is where a colleague's comments and the back-and-forth
@@ -149,7 +152,7 @@ employee's agent actually carries into the work.
 ```
 
 Expertise is taught, not grown. An employee does not fill a skill bar; the
-player tells them something worth keeping, and it stays with them.
+user tells them something worth keeping, and it stays with them.
 
 A memory has an area of expertise, the text itself, and the work it came from:
 
@@ -194,7 +197,7 @@ archive.
 
 ## Activity Feed
 
-The player writes the nicknames, so the feed uses whatever they chose.
+The user writes the nicknames, so the feed uses whatever they chose.
 
 Examples:
 - "모카 picked up Paginate the payment history."
@@ -203,12 +206,10 @@ Examples:
 - "모카 referenced [index rules] while working."
 - "Change the payment API error shape is waiting on you."
 - "The Backend team finished Payments rework."
-- "Someone scheduled a meeting."
-- "Coffee is running low."
 
 The feed should consume domain events.
 
-## Runtime Failure Gameplay
+## When the runtime fails
 
 If a Claude Code session disconnects:
 
@@ -217,7 +218,7 @@ Employee:
 - remains assigned to the task
 - can display "Agent disconnected"
 
-The player can reconnect/retry.
+The user can reconnect/retry.
 
 A runtime failure should not delete the employee or task.
 
@@ -239,19 +240,19 @@ later, so a hire stays in it after the person leaves:
 
 There are no growth stages yet; the history is what shows the company growing.
 
-Early game:
+A small company:
 - one employee
 - one workspace
 - simple tasks
 
-Mid game:
+A growing company:
 - multiple employees
 - teams
 - projects
 - PR reviews
 - teaching memory
 
-Late game:
+A larger company:
 - multiple rooms
 - larger company
 - multiple projects/workspaces

@@ -2,13 +2,13 @@
 
 **Everyone's working. Probably.**
 
-A cozy local-first simulation game where you build, manage, and grow your own tiny software company.
+A local-first work tool that looks like a cozy office: a tiny software company whose employees are AI workers you give work to, teach, and watch get better.
 
 ## Concept
 
-Create a company, hire employees, assign work, watch projects progress, review pull requests, train your team, and expand your office.
+Create a company, hire employees, give them work, watch it happen, approve what gets applied, and teach them what to remember.
 
-The game can optionally connect employees to real AI coding agents.
+Every employee works through a real AI coding agent. Nothing is simulated.
 
 ## Agent Runtime
 
@@ -30,7 +30,7 @@ The architecture is runtime-agnostic so additional runtimes can be added later.
 My Tiny Office
 │
 ├── Office UI
-├── Simulation / Domain
+├── Domain
 ├── Persistence
 └── Agent Runtime
     └── Claude Code Adapter  ← MVP
@@ -38,7 +38,7 @@ My Tiny Office
 
 ## Core Loop
 
-Create company → Hire → Assign work → Work → Collaborate → Complete → Teach → Grow → Expand
+Create company → Hire → Give work → Work → Review → Approve → Teach → Grow
 
 ## Localization
 
@@ -68,7 +68,7 @@ my-tiny-office/
 ├── docs/
 │   ├── PRODUCT.md
 │   ├── DESIGN.md
-│   ├── GAMEPLAY.md
+│   ├── RULES.md
 │   ├── ARCHITECTURE.md
 │   ├── STYLE-GUIDE.md
 │   ├── ui/                  the UI standard: open index.html
@@ -106,7 +106,7 @@ npm run build
 npm run check:ui   # when docs/ui changed
 ```
 
-Keep the game playable without AI.
+Keep the office honest: show only work that is really happening.
 
 Keep agent runtimes behind an adapter boundary.
 

@@ -6,62 +6,69 @@
 
 > Everyone's working. Probably.
 
-A cozy local-first management simulation where the player builds, manages, and grows a tiny software company.
+A local-first work tool that looks like a cozy office. The user runs a tiny
+software company whose employees are AI workers: they give them work, teach
+them what to remember, and watch them get better at it.
 
 ## Fantasy
 
 "I have my own tiny software office, and I can watch my people actually work."
 
-The game is primarily a game. Real AI agents are an optional, high-value layer.
+It is a tool, not a game. The office is how the user sees who is doing what;
+every desk, card and status on screen stands for real work. Nothing is
+simulated for show.
+
+## What develops
+
+The user develops **employees**, not agents. An employee keeps what they have
+been taught — memory, expertise, a way of working — and a record of what they
+did. The agent is the engine each task runs on; if the engine improves or
+changes, the employee keeps everything they were taught.
 
 ## Core Loop
 
 Create company
 → Hire people
-→ Assign roles
 → Give work
 → People work
-→ Collaboration / PR / reviews
-→ Complete work
+→ Colleagues review
+→ The user approves what is applied
 → Teach what they should remember
 → Expertise deepens
 → Grow company
-→ Expand office
 → Repeat
 
-## AI Runtime Philosophy
+## AI Runtime
 
-The first real agent runtime is Claude Code.
+Nothing works without AI: an employee's decisions are the agent's. The runtime
+is Claude Code, and it has to be installed and logged in from the first run.
 
-The player does not need to purchase an Anthropic API key just to use the Claude Code runtime. The product should leverage the user's existing Claude Code setup through supported mechanisms.
-
-The game remains usable without AI.
+The user keeps their existing Claude Code login. The product never asks for an
+Anthropic API key for the Claude Code runtime and never handles authentication
+itself.
 
 ## Company-Scoped Agents
 
-The player controls which employees belong to a company.
+The user controls which employees belong to a company.
 
-Only registered employee agents are represented in that company's office.
+Only that company's employees' agents are represented in its office.
 
 The app is not intended to visualize every agent running on the local machine.
 
 ## First Run
 
-Create the company, hire the first employee, arrive at the office. No AI runtime
-is chosen here: an employee does not need one, and connecting one is an upgrade
-the player makes later, per employee. The screens are in DESIGN.md.
+Check Claude Code, create the company, hire the first employee, arrive at the
+office. The screens are in DESIGN.md.
 
-## Player Actions
+## User Actions
 
-- hire
-- fire
-- vacation
-- assign tasks
-- create project
-- create/review PR
+- hire, and let go
+- send on leave, and bring back
+- give work
+- create projects
+- review and approve
 - teach a memory
-- expand office
-- configure agent runtime
+- manage teams, roles and areas of expertise
 
 ## Office Progression
 
@@ -75,16 +82,6 @@ The direction, not yet a design:
 6. More desks
 7. Specialized spaces
 8. Full software company
-
-## AI and Simulation
-
-AI should enhance the simulation, not replace it.
-
-For example:
-- A task can exist before an Agent is connected.
-- A player can complete early gameplay without AI.
-- An employee can have memories and a way of working independent of model choice.
-- Runtime status can influence employee status without becoming the only source of truth.
 
 ## Localization
 

@@ -2,9 +2,9 @@
 
 ## Project
 
-My Tiny Office is a local-first cozy office-management simulation game.
+My Tiny Office is a local-first work tool whose interface is a cozy office. Its employees are AI workers the user gives work to, teaches, and watches improve.
 
-The game comes first. AI agents are a core gameplay capability, but the product should not become an AI dashboard with a game skin.
+The office comes first: it is how the user sees who is doing what. The product should not become an AI monitoring dashboard; the office carries the information.
 
 The core fantasy is:
 
@@ -17,7 +17,7 @@ Important documents:
 - `README.md` — project overview
 - `docs/PRODUCT.md` — product requirements
 - `docs/DESIGN.md` — visual and UX direction
-- `docs/GAMEPLAY.md` — gameplay systems and loops
+- `docs/RULES.md` — how work, review, memory, teams and hiring behave
 - `docs/ARCHITECTURE.md` — technical architecture
 - `CONTRIBUTING.md` — contribution and development rules
 
@@ -27,17 +27,17 @@ Follow those documents unless the user explicitly changes a requirement.
 
 ## Core Principles
 
-### 1. Game First
+### 1. The Office Is the Interface
 
-Build a game, not an AI monitoring dashboard.
+Build a work tool that reads as an office, not an AI monitoring dashboard.
 
 The office, employees, work, progression, teaching, collaboration, and company growth are the primary product experience.
 
-AI agent integration should support the game fantasy rather than replace it.
+Every element on screen stands for real work. Nothing is simulated for show: without an agent, nobody makes decisions, so nothing works without one.
 
 ### 2. Employee != Agent
 
-An Employee is a game/domain entity.
+An Employee is a domain entity — the one the user teaches and develops.
 
 An Agent is an execution capability attached to an Employee.
 
@@ -79,7 +79,7 @@ A workspace may be used as a scoping or recovery signal, but it is not sufficien
 
 The MVP uses Claude Code as the primary agent runtime.
 
-Claude Code authentication is managed by Claude Code itself.
+Claude Code authentication is managed by Claude Code itself. It must be installed and logged in from the first run.
 
 Do not ask the user to provide an Anthropic API key for the Claude Code runtime.
 
@@ -124,9 +124,9 @@ Avoid introducing unnecessary backend infrastructure, hosted services, or remote
 
 ### 7. Localization
 
-The game must support Korean and English from the beginning.
+The product must support Korean and English from the beginning.
 
-All user-facing game text must go through the i18n system.
+All user-facing text must go through the i18n system.
 
 Do not hard-code user-facing strings directly into components.
 
@@ -228,7 +228,7 @@ Repository conventions should remain:
 - Code comments: English
 - Technical documentation: English
 - Git commit messages: English
-- User-facing game text: Korean and English through i18n
+- User-facing text: Korean and English through i18n
 
 Do not translate source-code identifiers into Korean.
 
@@ -364,7 +364,7 @@ Keep `.env` files out of version control.
 
 ## UI and Visual Direction
 
-The office is the primary visual identity of the game.
+The office is the primary visual identity of the product.
 
 Target:
 
@@ -380,7 +380,7 @@ Avoid:
 - unnecessary 3D/CCTV presentation
 - decorative complexity that reduces readability
 
-The player should be able to glance at the office and understand:
+The user should be able to glance at the office and understand:
 
 - who is working
 - who is idle

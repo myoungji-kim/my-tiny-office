@@ -82,8 +82,8 @@ load-bearing:
 
 ### Terminal
 
-A command the player has to run is shown on a dark surface, because it belongs
-to their terminal rather than to the game.
+A command the user has to run is shown on a dark surface, because it belongs
+to their terminal rather than to the app.
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -177,7 +177,7 @@ A status is always accompanied by a text label somewhere in the same view.
 
 ### Numbers
 
-**Every number shown to the player is a count of something that happened** —
+**Every number shown to the user is a count of something that happened** —
 memories, references, tasks, reviews, minutes. A 0–100 bar whose value nobody
 can explain is worse than no number: it looks like information and is not.
 
@@ -201,7 +201,7 @@ Shapes are in `ui/components.html`. The rules:
 | `notice-bad` | Failed or disconnected | **Whether the data survived**, first |
 | `.locked` | An area is not usable yet | Why, and what *can* be done now |
 
-A failure notice that does not say what happened to the player's work is not
+A failure notice that does not say what happened to the user's work is not
 finished. "에이전트 연결이 끊어졌어요" is half of it; "진행 중이던 업무는
 그대로 있어요" is the half that matters.
 
@@ -234,7 +234,7 @@ reversible belongs in a popover.
 
 ## 8. Writing
 
-The interface talks about the player's office, not about itself.
+The interface talks about the user's office, not about itself.
 
 | Do | Don't |
 | --- | --- |
@@ -247,8 +247,8 @@ The interface talks about the player's office, not about itself.
 - Name the thing. `업무` and `직원` beat `항목` and `대상`.
 - Say the consequence before asking for the confirmation.
 - Never make a status name do the work of a sentence. `완료됨` tells the
-  player nothing they could not see.
-- Keep it plain. This is a cozy game, not a console.
+  user nothing they could not see.
+- Keep it plain. Cozy, not a console.
 
 ---
 
@@ -288,7 +288,7 @@ Rules for a new species:
 
 | Field | Rule |
 | --- | --- |
-| `name` | The player's nickname. **Never goes through i18n.** |
+| `name` | The user's nickname. **Never goes through i18n.** |
 | `species` | Picks a sprite. Display names are translated. |
 | `role` | A job title from the company's list. Written the same in both languages. |
 
@@ -300,7 +300,7 @@ Rules for a new species:
 
 ## 11. Localization
 
-- All game text goes through i18n. Player input does not.
+- All interface text goes through i18n. What the user types does not.
 - **The sample pages carry both languages**, switched with `?lang=en`. A layout
   proved in one language is not proved. Employee nicknames stay untranslated in
   both, which is the rule made visible.
@@ -313,7 +313,7 @@ Rules for a new species:
   DOM elements positioned over the canvas.
 - No fixed widths, no hard-coded line breaks.
 - Test both languages; English usually runs longer than Korean.
-- A label the player wrote — a nickname, a company name, an area, team or role
+- A label the user wrote — a nickname, a company name, an area, team or role
   they named — is shown as written in either language.
 
 ---

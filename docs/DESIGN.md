@@ -1,12 +1,12 @@
 # My Tiny Office — Design
 
 This document is where things are and how they look: the screens, what each one
-holds, and how the player moves between them. The rest lives elsewhere:
+holds, and how the user moves between them. The rest lives elsewhere:
 
 | | |
 | --- | --- |
-| [`PRODUCT.md`](PRODUCT.md) | What the game is and why |
-| [`GAMEPLAY.md`](GAMEPLAY.md) | The rules — tasks, review, memory, expertise, teams, hiring, history |
+| [`PRODUCT.md`](PRODUCT.md) | What the product is and why |
+| [`RULES.md`](RULES.md) | The rules — tasks, review, memory, expertise, teams, hiring, history |
 | [`STYLE-GUIDE.md`](STYLE-GUIDE.md) | Written visual rules — tokens, type, copy, i18n, accessibility |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How it is built |
 
@@ -54,7 +54,7 @@ Avoid:
 - texture or warmth applied to the chrome instead of to the office
 
 Density comes from status, progress and cards — not from decoration. What the
-player should see first: who is working, their current task, review status,
+user should see first: who is working, their current task, review status,
 blockers, recent activity, team workload.
 
 ## The app
@@ -156,10 +156,10 @@ they are doing.
 ```
 
 A column is a status a task rests in; the statuses and their rules are in
-GAMEPLAY.md. Whoever is free picks work out of the backlog, so the board has no
-start button: the player says what the work is and who should do it.
+RULES.md. Whoever is free picks work out of the backlog, so the board has no
+start button: the user says what the work is and who should do it.
 
-- **The approval column is the player's gate**, and its popover says so in as
+- **The approval column is the user's gate**, and its popover says so in as
   many words: nothing has been applied anywhere yet; approving is what applies
   it. Sending back asks for a reason; holding keeps it.
 - **A card shows time taken, never a share of an estimate.** In progress it says
@@ -231,7 +231,7 @@ its tasks with it.
 ## People
 
 Employees are animals, not people. At 16×16 a silhouette carries identity
-further than a face does, and the cast is the game's character. The species is
+further than a face does, and the cast is the product's character. The species is
 shown by the sprite, never spelled out next to the name.
 
 The people screen has three tabs — 목록, 조직도, 기억 — and the list is only a
@@ -281,29 +281,29 @@ not a choice — everything is carried anyway — so it reads *이 업무에 쓸
 기억*, with a line saying so.
 
 When they have none, the modal says so and offers 지금 알려주기, the moment the
-player actually has the context to teach. Teaching there comes back to the same
+user actually has the context to teach. Teaching there comes back to the same
 task, which now lists what was just taught.
 
 새 업무 만들기 opens the board's new-task fields in place — project, title,
 description, area, priority — without the assignee, who is already chosen.
-Changing the area redraws what they bring, so the player sees before creating
+Changing the area redraws what they bring, so the user sees before creating
 it whether this person has anything to draw on. A task made here goes straight
 to them; one picked from the backlog leaves it.
 
 ### Teaching
 
-Every "teach" in the game opens one dialog. Where it was opened from decides
+Every "teach" opens one dialog. Where it was opened from decides
 only what is already filled in:
 
 | Opened from | Already filled in |
 | --- | --- |
 | A person's page, or the office popover | Who |
 | 지금 알려주기 in the assign modal | Who, the task's area, and the task as source |
-| 알려줄 직원 고르기 on the 분야·역할 tab | The area; the player picks who |
+| 알려줄 직원 고르기 on the 분야·역할 tab | The area; the user picks who |
 | 회사 전체에 알려주기 | The whole company; company memory has no area |
 
 The dialog asks for an **area** and the **text**, a sentence or two. A source
-the entry point knows shows as one line (출처: 결제 내역 페이지네이션) the player
+the entry point knows shows as one line (출처: 결제 내역 페이지네이션) the user
 can uncheck; otherwise nothing is shown. Before anything is saved it says what
 the teaching does — *품질이 모카의 전문 분야가 돼요* when it is their first
 memory in an area, and always how much more they will carry (195자 → 215자).
@@ -320,15 +320,14 @@ people move to (팀 없음 included) when it has any; a person's `⋯` moves the
 another team or takes them off theirs. People without a team come first under
 팀 없음, which cannot be renamed or deleted.
 
-A default team speaks both languages; one the player names is shown as
+A default team speaks both languages; one the user names is shown as
 written. The office's 방 추가 offers the teams that have no room yet.
 
 ### Hiring
 
 First-run hires the first person in its own steps. Every hire after that opens
 one dialog: species, name, role and team. The button waits for a species and a
-name the player wrote, and says who it hires (*호두 고용하기*). The dialog says
-before it happens that they start simulated.
+name the user wrote, and says who it hires (*호두 고용하기*).
 
 | Opened from | Already filled in |
 | --- | --- |
@@ -351,13 +350,13 @@ and the company's name at the top of the sidebar leads there too.
 | 분야·역할 | The two lists the company keeps — expertise and roles |
 | 회사 기억 | What everyone knows, taught to the whole company |
 
-Each tab is named for what it holds, so a player looking for roles finds them
+Each tab is named for what it holds, so a user looking for roles finds them
 without opening a tab to see. The tabs have addresses (`#lists`, `#memory`) so
 teaching elsewhere can point straight at 분야·역할.
 
 **Totals, not a dashboard.** Four numbers and a weekly gain, no charts. A
 finished project is kept as its name, its span, its task count and the people
-who worked on it. Which milestones exist is in GAMEPLAY.md; each is stored as
+who worked on it. Which milestones exist is in RULES.md; each is stored as
 its kind and facts and worded by the dictionary when shown.
 
 ### The two lists
@@ -371,87 +370,67 @@ opens teaching for it.
 The areas table answers "who knows this one", and the tab leads with a notice
 for any area nobody knows. The roles table shows who holds each title; the last
 role cannot be deleted. A default area speaks both languages; a role, or
-anything the player named, is shown as written.
+anything the user named, is shown as written.
 
 ## First run
 
 ```text
-앱 실행
-  │
-  ├─ 회사 없음 → 회사 만들기 → 첫 직원 고용 → 사무실 도착 → 업무 맡기기
-  │                                                    ▲
-  │                          여기까지 Claude Code 없이 됩니다
-  │
-  └─ (언제든, 선택) 직원에게 에이전트 연결 → 그 직원만 실제로 일합니다
+앱 실행 → Claude Code 확인 (설치 · 로그인) → 회사 만들기 → 첫 직원 고용 → 사무실 도착 → 업무 맡기기
 ```
 
-**The runtime is an upgrade, not a gate.** An employee does not require an
-agent to exist, so first run must never stop at a login. A game that cannot be
-started without an AI tool is an AI tool.
+**Claude Code comes first.** Nothing in the office works without an agent to
+make the decisions, so first run checks it before anything else — installed,
+logged in — and does not go on until it is ready. It never logs in for the
+user: it detects, explains and waits (see Agent connection). Every employee
+hired afterwards works through it; there is no per-employee login.
 
-First run mentions Claude Code once, as a notice, and moves on. It does not ask
-the player to choose a runtime before they have an employee to judge the choice
-with — that question belongs to the moment of connecting. It does not ask for a
-team either.
+It does not ask for a team.
 
-It ends at the **first employee**, not at the company. A player dropped into an
+It ends at the **first employee**, not at the company. A user dropped into an
 empty office has nothing to look at, and the office is the product. Every field
 says it can be changed later, because a first decision should not feel heavy.
 
-## Simulated and connected employees
+## When the agent is unavailable
 
-Both are employees and both do work. The difference is whether the work is real.
-
-| | Work | Progress |
-| --- | --- | --- |
-| Simulated | Nothing happens outside the game | Derived from elapsed time |
-| Connected | An agent actually works in a folder | Reported by the runtime |
-
-**The office must show which is which.** Hiding it would make the game claim
-more than it does. It is a second axis, not a fifth status, so it takes its own
-corner: **status is the dot at bottom-right, the agent is the mark at
-top-left.** A connected employee whose session dropped reads as a red mark with
-an unchanged status — still working, no longer for real. Never fold connection
-into the status colour.
+Every employee works through Claude Code, so there is no fake work to fall
+back on. When the runtime stops — logged out, uninstalled, a session dropped —
+the office says so and keeps everything: the employee, their memory, their
+task. **Status is the dot at bottom-right; the agent is the mark at top-left.**
+A dropped session reads as a red mark with the status unchanged, and nothing
+new can start until it is back. Never fold the agent's state into the status
+colour.
 
 ## Agent connection
 
-The player sees the runtime as an employee configuration, never as an account
-setup:
+The user sees the runtime as part of the office, never as an account setup. It is
+checked once, for the whole company, at first run and whenever it stops:
 
 ```text
-모카 — Backend Engineer
+Claude Code
+✓ 설치됨      2.1.283
+✓ 로그인됨    pro
 
-Agent Runtime
-[ Claude Code ]
-
-Workspace
-~/Projects/tinysoft
-
-Connection
-● Ready
-
-[ 연결하기 ]
+[ 다시 확인 ]
 ```
 
 ### We do not handle authentication
 
-Claude Code owns its own login. The game detects and explains; it never
+Claude Code owns its own login. The app detects and explains; it never
 authenticates.
 
 | State | Detected by | What the screen says | Fixed |
 | --- | --- | --- | --- |
-| Not installed | `claude` is not on PATH | The office runs without it; installing it makes employees work for real | Install |
+| Not installed | `claude` is not on PATH | Nothing can work without it; install it, then **[다시 확인]** | Install |
 | **Not logged in** | Running the CLI returns an auth error | Run `claude` once in a terminal to log in, then **[다시 확인]** | **Outside this app** |
 | Ready | The CLI runs | Connection available | — |
 
-The second row is the one that matters. The fix happens somewhere the game
+The second row is the one that matters. The fix happens somewhere the app
 cannot reach, so the screen has to say so plainly. **Never add a token field.**
 Never read a credential store.
 
 Connecting also needs the workspace to be trusted, and **that has no
 non-interactive path** — one `claude` run in the folder, accepted by the
-player. The connection screen has to ask for it as plainly as it asks for
+user. The connection screen has to ask for it as plainly as it asks for
 login. ARCHITECTURE.md has the measured runtime surface.
 
 ## Open questions
@@ -460,13 +439,13 @@ login. ARCHITECTURE.md has the measured runtime surface.
   ARCHITECTURE.md §11 give each project a workspace; the connection screen above
   gives each employee one. A task names a project and an agent has to run
   somewhere; one of the two has to go.
-- **Estimate or elapsed time in the office?** The board shows time taken and
-  never a share of an estimate, but office cards still show a progress bar, and
-  ARCHITECTURE.md §3 derives progress from `estimatedDuration`. A simulated
-  employee can have an estimate; a connected one cannot.
-- **The domain's task statuses predate the board.** `src/domain/task.ts` needs
-  backlog, working, approval, done and held, plus the blocked mark.
+- **The office cards still show a share of an estimate.** Every employee is a
+  real agent, so nobody knows when work ends: the cards should show time taken,
+  as the board does.
+- **The domain predates the board.** `src/domain/task.ts` needs backlog,
+  working, approval, done and held, plus the blocked mark, and time taken rather
+  than progress derived from `estimatedDuration`.
 - **Growth.** PRODUCT.md lists office progression, but no stage is designed. Desks
   are the likeliest lever: hiring already needs a free one.
-- **A 내 차례 / Needs you inbox**, holding reviews waiting on the player, blocked
+- **A 내 차례 / Needs you inbox**, holding reviews waiting on the user, blocked
   employees and lost connections, if reviews on the floor turn out easy to miss.

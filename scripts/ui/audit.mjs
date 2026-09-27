@@ -323,7 +323,7 @@ for (const p of PAGES) {
 
   for (const block of outside.matchAll(/<script>[\s\S]*?<\/script>/g)) {
     for (const line of block[0].split("\n")) {
-      // a ko/en pair, a player-written nickname and a line that already
+      // a ko/en pair, a user-written nickname and a line that already
       // branches on the language are all doing the right thing
       const code = line
         .replace(/\/\/.*$/, "")

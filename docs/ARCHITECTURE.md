@@ -2,11 +2,9 @@
 
 ## 1. Architectural Goal
 
-My Tiny Office is a local-first software company simulation with optional real AI workers.
+My Tiny Office is a local-first work tool, shown as an office, whose employees are AI workers.
 
-The simulation must be able to run independently of AI providers.
-
-The AI layer is an execution system for selected in-game Employees. It is not the source of truth for the company simulation.
+Every employee works through an agent runtime; nothing is simulated. The runtime is an execution system, not the source of truth: the company, its employees and their memory live in the app and survive any runtime failure.
 
 ## 2. Execution Environment
 
@@ -51,33 +49,16 @@ Electron and Tauri are not used in the MVP.
 
 Desktop packaging remains a natural long-term fit for local SQLite, local agent runtimes, process management, and workspace access, but it is a separate decision to be revisited when the product actually requires it. Until then, the UI and domain layers must stay usable as a plain web application.
 
-## 3. Simulation Time
+## 3. Time
 
-The MVP uses a real-time simulation. Progress on Tasks and other timed
-activities is derived from elapsed wall-clock time. There is no game tick loop.
+A task records when it started and when it finished. Time taken is derived from
+those and the current time, never stored and never expressed as a share of an
+estimate: an agent's work ends when it ends. What the agent is doing is
+reported by the runtime.
 
-A timed activity stores:
-
-- `startedAt`
-- `estimatedDuration`
-
-Progress is computed from those values and the current time.
-
-```text
-startedAt         = 10:00
-estimatedDuration = 30 minutes
-current time      = 10:15
-
-→ progress ≈ 50%
-```
-
-Progress is a derived value, not stored mutable state. Persist timestamps and
-durations, and compute progress when it is read.
-
-Because elapsed time is measured against the real clock, time continues to pass
-while the application is closed. An activity started before shutdown may already
-be finished on the next launch, and the simulation must settle such activities on
-startup rather than assume it observed every moment of their progress.
+Time keeps passing while the application is closed, so on the next launch the
+app reconciles each running task with its session rather than assuming it
+observed every moment.
 
 ## 4. High-Level Architecture
 
@@ -92,7 +73,7 @@ startup rather than assume it observed every moment of their progress.
 │  ├── Company                                               │
 │  └── Settings                                              │
 │                                                            │
-│  Simulation / Domain                                       │
+│  Domain                                                    │
 │  ├── Company                                               │
 │  ├── Employee                                              │
 │  ├── Task / Project                                        │
@@ -110,7 +91,7 @@ startup rather than assume it observed every moment of their progress.
 
 ## 5. Employee vs Agent
 
-An Employee is a game entity.
+An Employee is a domain entity — the one the user teaches and develops.
 
 An Agent is an execution capability attached to an Employee.
 
@@ -156,7 +137,7 @@ Local machine
             └── Claude Code session C
 ```
 
-Only A/B/C are part of the TinySoft simulation.
+Only A/B/C are part of the TinySoft company.
 
 ### Why this matters
 
@@ -221,13 +202,12 @@ Employee 1 ─── 0..1 Agent
 Agent 1 ─── N Session
 ```
 
-A company can exist without any AI agents.
-
-An employee can exist without an Agent.
+An employee outlives a failed agent: when the runtime is unavailable the
+employee, their memory and their task remain, but nothing new starts.
 
 ### PullRequest
 
-In the MVP a `PullRequest` is a game-world domain entity, not a real GitHub or GitLab pull request.
+In the MVP a `PullRequest` is an in-app domain entity, not a real GitHub or GitLab pull request.
 
 ```text
 Company
@@ -241,9 +221,9 @@ PullRequest
 Review
 ```
 
-The simulation owns its own pull requests, reviews, and review statuses. Nothing is read from or written to a hosting provider.
+The app owns its own pull requests, reviews, and review statuses. Nothing is read from or written to a hosting provider.
 
-A GitHub or GitLab integration may be added later as a separate integration. It must not replace the in-game entity.
+A GitHub or GitLab integration may be added later as a separate integration. It must not replace the in-app entity.
 
 ## 8. Runtime Adapter
 
@@ -327,7 +307,7 @@ terminal output.
 
 ### Changing a task that is already running
 
-The player can correct a task while an agent is working on it, which the
+The user can correct a task while an agent is working on it, which the
 interface calls `sendTask`. There is no command that speaks into a run in
 progress, so the mapping is two of the commands above:
 
@@ -366,10 +346,10 @@ take the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
 
 ### Two things happen outside the app
 
-Neither can be done for the player, and both need a screen that says so.
+Neither can be done for the user, and both need a screen that says so.
 
 1. **Login.** `claude auth login` opens a browser; `--claudeai`, `--console`
-   and `--sso` skip the interactive choice. The game may spawn this command —
+   and `--sso` skip the interactive choice. The app may spawn this command —
    that is invoking the vendor's own flow, not implementing authentication —
    but it must never collect a token itself.
 2. **Workspace trust.** A background session in an untrusted folder refuses:
@@ -392,7 +372,7 @@ authenticates through a Claude subscription, so `--bare` is out.
 
 `claude agents --json` lists every background session on the machine — the test
 run saw nine across three unrelated folders. This is exactly why a session is
-owned through `Company → Employee → Agent`: the game stores the session ids it
+owned through `Company → Employee → Agent`: the app stores the session ids it
 launched and shows only those. `--cwd` is a recovery signal, never identity.
 
 ### Cost has a floor
@@ -476,7 +456,7 @@ Company → Employee → Agent → Session
 
 ## 12. Domain Events
 
-The simulation owns events such as:
+The domain owns events such as:
 
 - EmployeeHired
 - TaskAssigned
@@ -503,7 +483,7 @@ ClaudeCodeAdapter
   ↓
 AgentEvent
   ↓
-Simulation/Application service
+Application service
   ↓
 Domain Event
   ↓
@@ -514,7 +494,7 @@ UI components should not manually mutate the activity feed.
 
 ## 13. Failure Handling
 
-The game must distinguish:
+The app must distinguish:
 
 - employee unavailable
 - agent not configured
@@ -529,7 +509,7 @@ Example:
 
 ```text
 Employee: Min-su
-Game status: Working
+Employee status: Working
 Agent status: Disconnected
 ```
 
@@ -575,7 +555,7 @@ Store identifiers and configuration references, not secret credentials.
 
 Each user has their own database. The default location is the operating
 system's per-user data directory, not the project folder, so switching
-branches or deleting the checkout never destroys a player's company.
+branches or deleting the checkout never destroys a user's company.
 
 ```text
 Windows   %LOCALAPPDATA%\my-tiny-office\my-tiny-office.db
