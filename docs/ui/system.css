@@ -742,3 +742,44 @@ section > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .source { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 14px; color: var(--muted); cursor: pointer; }
 
 .source input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }
+
+/* ═══ readiness checklist ═══ */
+
+.check { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; }
+
+.c-ic { width: 18px; height: 18px; border-radius: 999px; flex: none; margin-top: 2px; display: grid; place-items: center; }
+
+.c-ic svg { width: 11px; height: 11px; }
+
+.c-ic.ok { background: var(--ok-soft); color: var(--ok-ink); }
+
+.c-ic.bad { background: var(--bad-soft); color: var(--bad-ink); }
+
+.c-ic.wait { background: var(--sunk); color: var(--muted); }
+
+.c-tx { flex: 1; min-width: 0; font-size: 14px; }
+
+.c-tx b { font-weight: 600; }
+
+.c-tx span { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+.c-val { font-size: 13px; color: var(--faint); font-family: var(--mono); flex: none; }
+
+.cmd {
+    margin-top: 9px; background: var(--term); border-radius: 10px; padding: 11px 12px;
+    display: flex; align-items: flex-start; gap: 10px;
+}
+
+.cmd pre { margin: 0; flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--term-fg); overflow-x: auto; }
+
+.cmd .p { color: var(--term-dim); }
+
+.copy {
+    flex: none; height: 26px; padding-inline: 10px; border-radius: 999px;
+    border: 1px solid var(--term-line); background: none; color: var(--faint);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+}
+
+.copy:hover { background: var(--term-hover); color: #fff; }
+
+.recheck { margin-top: 10px; display: flex; justify-content: flex-end; }

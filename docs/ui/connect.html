@@ -17,47 +17,6 @@
   .modal-inline { max-width: 100%; overflow: hidden; border: 1px solid var(--line);
     box-shadow: 0 2px 6px rgb(20 20 25 / .06), 0 14px 36px rgb(20 20 25 / .14); }
 
-  /* ═══ readiness checklist ═══ */
-
-  .check { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; }
-
-  .c-ic { width: 18px; height: 18px; border-radius: 999px; flex: none; margin-top: 2px; display: grid; place-items: center; }
-
-  .c-ic svg { width: 11px; height: 11px; }
-
-  .c-ic.ok { background: var(--ok-soft); color: var(--ok-ink); }
-
-  .c-ic.bad { background: var(--bad-soft); color: var(--bad-ink); }
-
-  .c-ic.wait { background: var(--sunk); color: var(--muted); }
-
-  .c-tx { flex: 1; min-width: 0; font-size: 14px; }
-
-  .c-tx b { font-weight: 600; }
-
-  .c-tx span { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; }
-
-  .c-val { font-size: 13px; color: var(--faint); font-family: var(--mono); flex: none; }
-
-  .cmd {
-    margin-top: 9px; background: var(--term); border-radius: 10px; padding: 11px 12px;
-    display: flex; align-items: flex-start; gap: 10px;
-  }
-
-  .cmd pre { margin: 0; flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--term-fg); overflow-x: auto; }
-
-  .cmd .p { color: var(--term-dim); }
-
-  .copy {
-    flex: none; height: 26px; padding-inline: 10px; border-radius: 999px;
-    border: 1px solid var(--term-line); background: none; color: var(--faint);
-    font-size: 13px; font-weight: 600; cursor: pointer;
-  }
-
-  .copy:hover { background: var(--term-hover); color: #fff; }
-
-  .recheck { margin-top: 10px; display: flex; justify-content: flex-end; }
-
   /* ═══ connected block ═══ */
 
   .rt { border: 1px solid var(--line); border-radius: var(--r-card); }
@@ -305,27 +264,6 @@
     waiting: (title) => ({ icon: "wait", title, detail: t().afterAbove }),
   };
 
-  function checkRow(c) {
-    const ic = { ok: I.check, bad: I.x, wait: I.dash }[c.icon];
-    return `
-      <div class="check">
-        <span class="c-ic ${c.icon}">${ic}</span>
-        <span class="c-tx">
-          <b>${c.title}</b>
-          ${c.detail ? `<span>${c.detail}</span>` : ""}
-        </span>
-        ${c.value ? `<span class="c-val">${c.value}</span>` : ""}
-      </div>
-      ${
-        c.cmd
-          ? `<div class="cmd">
-               <pre>${c.cmd.map((l) => `<span class="p">$</span> ${l}`).join("\n")}</pre>
-               <button class="copy" type="button">${t().copy}</button>
-             </div>`
-          : ""
-      }`;
-  }
-
   function modal({ dir, checks, ready, runtimeReady }) {
     const el = document.createElement("div");
     el.className = "modal modal-inline";
@@ -363,7 +301,7 @@
 
       <div class="m-sec">
         <span class="k">${t().checks}</span>
-        ${checks.map(checkRow).join("")}
+        ${checks.map((c) => checkRow(c, t().copy)).join("")}
         ${
           ready
             ? ""

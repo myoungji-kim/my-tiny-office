@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  body:has(> .wizard) { min-height: 100vh; padding: 40px 20px; display: grid; place-items: start center; }
+  body:has(> .wizard) { min-height: 100vh; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
 
   .wizard {
     width: 100%; max-width: 480px;
@@ -96,9 +96,9 @@
 </style>
 
 <div class="wizard">
-  <div class="steps" id="steps"><i class="on"></i><i></i><i></i></div>
+  <div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i></div>
 
-  <!-- ── 1. 회사 ─────────────────────────────────────────────── -->
+  <!-- ── 1. Claude Code ──────────────────────────────────────── -->
   <div class="pane" id="p1">
     <div class="brand">
       <span class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></span>
@@ -110,18 +110,36 @@
     <div class="peek"><canvas id="peek" width="408" height="216" aria-hidden="true"></canvas></div>
 
     <div class="field">
+      <span class="label" data-t="checkLabel">먼저 Claude Code를 확인해요</span>
+      <span class="hint" style="margin:0 0 4px" data-t="checkHint">직원들은 Claude Code로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.</span>
+      <div id="checks"></div>
+      <div class="recheck"><button class="btn btn-secondary btn-sm" id="recheck" type="button" data-t="recheck">다시 확인</button></div>
+    </div>
+
+    <div class="acts">
+      <button class="btn btn-primary btn-lg" id="toCompany" disabled data-t="next">다음</button>
+    </div>
+  </div>
+
+  <!-- ── 2. 회사 ─────────────────────────────────────────────── -->
+  <div class="pane" id="p2" hidden>
+    <h2 data-t="companyTitle">회사 이름을 정해요</h2>
+    <p class="sub" data-t="companySub">사이드바 맨 위에 보이는 이름이에요.</p>
+
+    <div class="field">
       <label class="label" for="co" data-t="companyLabel">회사 이름</label>
       <input class="input input-lg" id="co" value="My Tiny Office" autocomplete="off" />
       <span class="hint" data-t="companyHint">나중에 바꿀 수 있어요.</span>
     </div>
 
     <div class="acts">
+      <button class="btn btn-ghost btn-lg" id="back1" data-t="back">뒤로</button>
       <button class="btn btn-primary btn-lg" id="toHire" data-t="next">다음</button>
     </div>
   </div>
 
-  <!-- ── 2. 첫 직원 ──────────────────────────────────────────── -->
-  <div class="pane" id="p2" hidden>
+  <!-- ── 3. 첫 직원 ──────────────────────────────────────────── -->
+  <div class="pane" id="p3" hidden>
     <h2 data-t="hireTitle">첫 직원을 뽑아요</h2>
     <p class="sub" data-t="hireSub">한 명이면 충분해요. 나중에 더 뽑을 수 있어요.</p>
 
@@ -146,13 +164,13 @@
     </div>
 
     <div class="acts">
-      <button class="btn btn-ghost btn-lg" id="back1" data-t="back">뒤로</button>
+      <button class="btn btn-ghost btn-lg" id="back2" data-t="back">뒤로</button>
       <button class="btn btn-primary btn-lg" id="hire" disabled data-t="hire">고용하기</button>
     </div>
   </div>
 
-  <!-- ── 3. 도착 ─────────────────────────────────────────────── -->
-  <div class="pane" id="p3" hidden>
+  <!-- ── 4. 도착 ─────────────────────────────────────────────── -->
+  <div class="pane" id="p4" hidden>
     <h2 id="openLine" data-t="opened">사무실이 열렸어요</h2>
     <p class="sub" id="openSub"></p>
 
@@ -161,15 +179,14 @@
     <div class="notice">
       <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.4v4M8 5.2v.1"/></svg></span>
       <span class="n-tx">
-        <b data-t="noticeTitle">지금은 시뮬레이션으로 돌아가요</b>
-        <span data-t="noticeBody">업무를 맡기면 시간이 흐르면서 끝나요. 직원에게 Claude Code를 연결하면 그때부터 진짜로 일해요.</span>
+        <b data-t="noticeTitle">업무를 맡기면 바로 일을 시작해요</b>
+        <span data-t="noticeBody">Claude Code로 일해요. 처음 쓰는 폴더는 한 번 신뢰해 줘야 해요.</span>
       </span>
     </div>
 
     <div class="acts">
       <button class="btn btn-primary btn-lg" style="flex:1" data-t="toOffice">사무실로 가기</button>
     </div>
-    <p class="foot-note"><button class="link" type="button" data-t="whatIsAgent">에이전트 연결이 뭔가요?</button></p>
   </div>
 </div>
 
@@ -180,12 +197,13 @@
     <span lang="en">Examples come in both languages; the commentary explaining them is Korean only.</span>
   </p>
   <ul>
-    <li><strong>로그인으로 시작하지 않습니다.</strong> Claude Code 없이 3단계가 전부 끝납니다.</li>
-    <li>런타임은 <strong>알림 한 줄</strong>로만 언급합니다. 직원이 없는 시점에 런타임을 고르라고 묻지 않습니다.</li>
-    <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다.</li>
-    <li>이름은 플레이어가 짓습니다 — <strong>i18n을 거치지 않는 유일한 텍스트</strong>입니다.</li>
+    <li><strong>Claude Code 확인이 먼저입니다.</strong> 직원은 에이전트로 일하고, 에이전트 없이 할 수 있는 일은 없습니다. 준비될 때까지 다음으로 넘어가지 않습니다.</li>
+    <li><strong>로그인은 대신 해주지 않습니다.</strong> 확인하고, 터미널에서 할 일을 보여주고, 기다립니다. 토큰 입력칸은 없습니다.</li>
+    <li>확인은 <strong>회사 전체에 한 번</strong>입니다. 이후에 뽑는 직원은 따로 연결하지 않습니다.</li>
+    <li>빈 사무실로 떨어뜨리지 않습니다. <strong>첫 직원까지가 첫 실행</strong>입니다. 팀은 묻지 않습니다.</li>
+    <li>이름은 사용자가 짓습니다 — <strong>i18n을 거치지 않는 텍스트</strong>입니다.</li>
     <li>종족은 외형일 뿐이라 <strong>능력치에 영향이 없습니다.</strong> 그래서 고민 없이 고를 수 있습니다.</li>
-    <li>세 칸 모두 <strong>나중에 바꿀 수 있다</strong>고 적습니다. 첫 결정이 무겁지 않아야 합니다.</li>
+    <li>회사와 직원 칸은 모두 <strong>나중에 바꿀 수 있다</strong>고 적습니다. 첫 결정이 무겁지 않아야 합니다.</li>
   </ul>
   <button class="btn btn-secondary btn-sm restart" id="restart">처음부터 다시 보기</button>
 </div>
@@ -242,6 +260,11 @@
       wordmark: "MY TINY OFFICE",
       title: "작은 소프트웨어 회사를 만들어요",
       lede: "직원을 뽑고, 업무를 맡기고, 일하는 걸 지켜보세요.",
+      checkLabel: "먼저 Claude Code를 확인해요",
+      checkHint: "직원들은 Claude Code로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
+      installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요",
+      loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", recheck: "다시 확인", copy: "복사",
+      companyTitle: "회사 이름을 정해요", companySub: "사이드바 맨 위에 보이는 이름이에요.",
       companyLabel: "회사 이름",
       companyHint: "나중에 바꿀 수 있어요.",
       next: "다음",
@@ -255,18 +278,20 @@
       hire: "고용하기",
       opened: "사무실이 열렸어요",
       headcount: (n) => `직원 ${n}명`,
-      simulated: "시뮬레이션",
-      noticeTitle: "지금은 시뮬레이션으로 돌아가요",
-      noticeBody:
-        "업무를 맡기면 시간이 흐르면서 끝나요. 직원에게 Claude Code를 연결하면 그때부터 진짜로 일해요.",
+      noticeTitle: "업무를 맡기면 바로 일을 시작해요",
+      noticeBody: "Claude Code로 일해요. 처음 쓰는 폴더는 한 번 신뢰해 줘야 해요.",
       toOffice: "사무실로 가기",
-      whatIsAgent: "에이전트 연결이 뭔가요?",
       companyFallback: "내 회사",
     },
     en: {
       wordmark: "MY TINY OFFICE",
       title: "Start a tiny software company",
       lede: "Hire people, give them work, and watch them get it done.",
+      checkLabel: "First, Claude Code",
+      checkHint: "Your employees work through Claude Code. You sign in to Claude Code itself; this app only checks.",
+      installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed",
+      loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", copy: "Copy",
+      companyTitle: "Name your company", companySub: "It is the name at the top of the sidebar.",
       companyLabel: "Company name",
       companyHint: "You can change this later.",
       next: "Next",
@@ -280,12 +305,9 @@
       hire: "Hire",
       opened: "Your office is open",
       headcount: (n) => `${n} employee${n === 1 ? "" : "s"}`,
-      simulated: "Simulated",
-      noticeTitle: "Everything is simulated for now",
-      noticeBody:
-        "Assign work and it finishes as time passes. Connect Claude Code to an employee and they start doing it for real.",
+      noticeTitle: "Give them work and they start",
+      noticeBody: "They work through Claude Code. A folder used for the first time has to be trusted once.",
       toOffice: "Go to the office",
-      whatIsAgent: "What does connecting an agent do?",
       companyFallback: "My company",
     },
   };
@@ -302,18 +324,35 @@
   let chosen = null;
 
   const steps = document.getElementById("steps").children;
-  const panes = [null, document.getElementById("p1"), document.getElementById("p2"), document.getElementById("p3")];
+  const panes = [null, ...[1, 2, 3, 4].map((i) => document.getElementById("p" + i))];
 
   function go(n) {
     step = n;
-    for (let i = 1; i <= 3; i++) panes[i].toggleAttribute("hidden", i !== n);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 1; i <= 4; i++) panes[i].toggleAttribute("hidden", i !== n);
+    for (let i = 0; i < 4; i++) {
       steps[i].className = i + 1 === n ? "on" : i + 1 < n ? "done" : "";
     }
     scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /* ── 2. species picker ───────────────────────────────────────── */
+  /* ── 1. Claude Code ──────────────────────────────────────────── */
+  // The sample starts signed out, so the one state that is fixed outside the
+  // app is the one on show; 다시 확인 finds it signed in.
+  let signedIn = false;
+  function renderChecks() {
+    document.getElementById("checks").innerHTML =
+      checkRow({ icon: "ok", title: t().installed, value: "2.1.283" }, t().copy) +
+      (signedIn
+        ? checkRow({ icon: "ok", title: t().loggedIn, value: "pro" }, t().copy)
+        : checkRow({ icon: "bad", title: t().loggedOut, detail: t().loggedOutWhy, cmd: ["claude auth login"] }, t().copy));
+    document.getElementById("toCompany").disabled = !signedIn;
+    document.getElementById("recheck").hidden = signedIn;
+  }
+  document.getElementById("recheck").addEventListener("click", () => { signedIn = true; renderChecks(); });
+  document.getElementById("toCompany").addEventListener("click", () => go(2));
+  renderChecks();
+
+  /* ── 3. species picker ───────────────────────────────────────── */
   const grid = document.getElementById("species");
   const picked = document.getElementById("picked");
   const hireBtn = document.getElementById("hire");
@@ -343,9 +382,10 @@
   const sync = () => { hireBtn.disabled = !(chosen && nameInput.value.trim()); };
   nameInput.addEventListener("input", sync);
 
-  /* ── 3. arrival ──────────────────────────────────────────────── */
-  document.getElementById("toHire").addEventListener("click", () => go(2));
+  /* ── 4. arrival ──────────────────────────────────────────────── */
+  document.getElementById("toHire").addEventListener("click", () => go(3));
   document.getElementById("back1").addEventListener("click", () => go(1));
+  document.getElementById("back2").addEventListener("click", () => go(2));
 
   function rerenderArrival() {
     const name = nameInput.value.trim();
@@ -360,13 +400,13 @@
         <span class="h-name">${name}</span>
         <span class="h-role">${role}</span>
       </span>
-      <span class="chip sim">${t().simulated}</span>`;
+`;
     box.querySelector(".h-av").prepend(spriteCanvas(chosen.key, 52));
   }
 
   hireBtn.addEventListener("click", () => {
     rerenderArrival();
-    go(3);
+    go(4);
   });
 
   function applyLang() {
@@ -386,6 +426,8 @@
     picked.innerHTML = "";
     for (const x of grid.children) x.setAttribute("aria-pressed", "false");
     sync();
+    signedIn = false;
+    renderChecks();
     go(1);
   });
 </script>

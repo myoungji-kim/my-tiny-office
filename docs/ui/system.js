@@ -873,6 +873,29 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
   (edit ? name : cast.firstElementChild).focus({ preventScroll: true });
 }
 
+/* ═══ a readiness check ═══ */
+// One row of a checklist: ok, bad or waiting, and when it is bad, the command
+// the user runs outside the app to fix it.
+
+function checkRow(c, copyLabel) {
+  const ic = {
+    ok: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4l3.2 3.2L12.8 4.8"/></svg>',
+    bad: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+    wait: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h8"/></svg>',
+  }[c.icon];
+  return `
+    <div class="check">
+      <span class="c-ic ${c.icon}">${ic}</span>
+      <span class="c-tx"><b>${c.title}</b>${c.detail ? `<span>${c.detail}</span>` : ""}</span>
+      ${c.value ? `<span class="c-val">${c.value}</span>` : ""}
+    </div>
+    ${
+      c.cmd
+        ? `<div class="cmd"><pre>${c.cmd.map((l) => `<span class="p">$</span> ${l}`).join("\n")}</pre><button class="copy" type="button">${copyLabel}</button></div>`
+        : ""
+    }`;
+}
+
 /* ═══ confirming what cannot be undone ═══ */
 
 function openConfirm({ title, body, cancel, confirm, onConfirm }) {
