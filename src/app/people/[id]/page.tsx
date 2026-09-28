@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { isReady } from "../../../application/runtime-status";
+import { ActButton } from "../../../components/act-button";
+import { AgentMark } from "../../../components/agent-mark";
 import { dateText, sinceText } from "../../../components/dates";
 import { Icon } from "../../../components/icons";
 import { MemoryCard } from "../../../components/memory-card";
@@ -12,6 +14,7 @@ import { statusClass } from "../../../components/presence";
 import { Shell } from "../../../components/shell";
 import { Sprite } from "../../../components/sprite";
 import { getDictionary } from "../../../i18n";
+import { carryOnAction } from "../../project-actions";
 import { companyScreen, param, type SearchParams } from "../../screen-data";
 import { peopleData } from "../people-data";
 
@@ -22,6 +25,7 @@ const TABS = ["overview", "memory", "style"] as const;
 export default async function PersonPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   const { locale, office, status, company } = await companyScreen();
   const t = getDictionary(locale);
+  const ready = isReady(status);
   const w = t.people;
   const { id } = await params;
   const person = office.employees.find((e) => e.id === id);
@@ -79,6 +83,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
           <div className="head-row person-hd">
             <span className="d-av">
               <Sprite species={person.species} size={56} />
+              {person.agentLost && <AgentMark label={t.projects.agentLost} />}
             </span>
             <span style={{ minWidth: 0 }}>
               <span className="person-name">
@@ -125,7 +130,21 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
               <div className="panel-hd">
                 <h2>{w.now}</h2>
               </div>
-              <div className="panel-bd">{now}</div>
+              <div className="panel-bd">
+                {now}
+                {person.agentLost && person.task !== undefined && (
+                  <div className="notice notice-bad now-lost">
+                    <span className="n-ic">{Icon.plug}</span>
+                    <span className="n-tx">
+                      <b>{t.projects.agentLost}</b>
+                      <span>{t.projects.lostWhy}</span>
+                    </span>
+                    <span className="n-acts">
+                      <ActButton action={carryOnAction.bind(null, company.id, person.task.taskId)} label={t.projects.reconnect} disabled={!ready} errors={t.errors} />
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="panel">
               <div className="panel-hd">

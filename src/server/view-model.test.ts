@@ -109,6 +109,7 @@ describe("loadOffice", () => {
         finished: 0,
         reviewed: 0,
         status: "available",
+        agentLost: false,
         task: undefined,
         review: undefined,
         lastFinished: undefined,
@@ -230,6 +231,18 @@ describe("work through the office view", () => {
 
     expect(office.tasks[0]).toMatchObject({ status: "working", minutesTaken: 23 });
     expect(office.employees[0]).toMatchObject({ task: { title: "Implement payment API" } });
+  });
+
+  it("marks whoever's agent was lost mid-task, and only them", async () => {
+    const { company, project } = await seedWork();
+    assert((await startProject(ctx, project.id)).ok);
+    assert((await pickUpWork(ctx, company.id)).ok);
+    expect((await load(company.id)).employees[0]).toMatchObject({ agentLost: false });
+
+    const [task] = await ctx.tasks.findByCompany(company.id);
+    await ctx.tasks.save({ ...task, blocker: { kind: "disconnected" } });
+
+    expect((await load(company.id)).employees[0]).toMatchObject({ status: "working", agentLost: true });
   });
 
   it("never starts work by itself when the office is opened", async () => {

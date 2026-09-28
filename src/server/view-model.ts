@@ -18,6 +18,8 @@ export interface WorkOnDesk {
   readonly taskId: string;
   readonly title: string;
   readonly minutes: number;
+  // stopped, for whatever reason, until the user decides
+  readonly blocked: boolean;
 }
 
 export interface EmployeeView {
@@ -29,6 +31,8 @@ export interface EmployeeView {
   readonly teamId: string | undefined;
   readonly hiredAt: number;
   readonly status: EmployeeStatus;
+  // their agent stopped mid-task without saying how
+  readonly agentLost: boolean;
   // the task they are working on, or the one they are reviewing
   readonly task: WorkOnDesk | undefined;
   readonly review: WorkOnDesk | undefined;
@@ -220,8 +224,8 @@ export async function loadOffice(
       .filter((task) => task.assigneeId === employeeId && task.finishedAt !== undefined)
       .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))[0];
     return {
-      task: working && { taskId: working.id, title: working.title, minutes: minutes(timeTaken(working, now)) },
-      review: reviewing && reviewed && { taskId: reviewed.id, title: reviewed.title, minutes: minutes(now - (reviewing.startedAt ?? now)) },
+      task: working && { taskId: working.id, title: working.title, minutes: minutes(timeTaken(working, now)), blocked: working.blocker !== undefined },
+      review: reviewing && reviewed && { taskId: reviewed.id, title: reviewed.title, minutes: minutes(now - (reviewing.startedAt ?? now)), blocked: false },
       lastFinished: finished?.title,
     };
   };
@@ -247,6 +251,7 @@ export async function loadOffice(
       finished: tasks.filter((task) => task.assigneeId === employee.id && task.status === "done").length,
       reviewed: reviews.filter((review) => review.reviewerId === employee.id && review.state === "settled").length,
       status: statusOf(employee, tasks, reviews),
+      agentLost: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "disconnected"),
       leaveSince: employee.leaveSince,
       ...deskOf(employee.id),
     })),

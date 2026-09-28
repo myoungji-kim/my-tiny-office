@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AgentMark } from "../../components/agent-mark";
 import { Head } from "../../components/head";
 import { HireButton } from "../../components/hire-button";
 import { areaName } from "../../components/names";
@@ -65,6 +66,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
               <span className="r-av">
                 <Sprite species={e.species} size={40} />
                 <span className="r-live" style={{ background: statusColor[e.status] }} />
+                {e.agentLost && <AgentMark label={t.projects.agentLost} />}
               </span>
               <span>
                 <span className="r-name">{e.name}</span>

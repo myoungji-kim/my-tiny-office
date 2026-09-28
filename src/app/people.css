@@ -34,6 +34,8 @@
 
   .p-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
+  .now-lost { margin-top: 12px; }
+
   .now-task { display: block; font-size: 18px; font-weight: 600; line-height: 1.4; margin-top: 8px; }
 
   .now-note { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; }

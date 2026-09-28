@@ -25,13 +25,6 @@ export const dynamic = "force-dynamic";
 
 const timeText = (locale: string, at: number) => new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(at);
 
-const PLUG = (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z" />
-    <path d="M8 11.8V14" />
-  </svg>
-);
-
 const STEP_ICON: Readonly<Record<"read" | "edit" | "run", ReactNode>> = {
   read: (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -208,7 +201,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       <div>
         {blocker !== undefined && (
           <div className="notice notice-bad">
-            <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : PLUG}</span>
+            <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : Icon.plug}</span>
             <span className="n-tx">
               <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
               {blocker.kind === "commandNotAllowed" ? (

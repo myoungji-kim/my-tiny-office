@@ -5,6 +5,7 @@ import type { ClaudeCodeStatus } from "../application/runtime-status";
 import { getDictionary, type Locale } from "../i18n";
 import type { CompanyOption, EmployeeView } from "../server/view-model";
 
+import { AgentMark } from "./agent-mark";
 import { CompanyMenu } from "./company-menu";
 import { LiveRefresh } from "./live-refresh";
 import { statusClass } from "./presence";
@@ -122,6 +123,7 @@ export function Shell({
               </span>
               <span>{e.name}</span>
               <span className="m-state">
+                {e.agentLost && <AgentMark label={t.projects.agentLost} inline />}
                 <span className={`dot ${statusClass(e.status)}`} />
               </span>
             </Link>

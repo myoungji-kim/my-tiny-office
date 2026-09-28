@@ -9,6 +9,7 @@ import { MAX_NAME } from "../domain/organisation";
 import { getDictionary, type Locale } from "../i18n";
 import type { EmployeeView, TeamView } from "../server/view-model";
 
+import { AgentMark } from "./agent-mark";
 import { HireDialog, type Choice } from "./hire-dialog";
 import { Icon } from "./icons";
 import { MoveDialog } from "./move-dialog";
@@ -108,6 +109,7 @@ export function OrgChart({
         <span className="t-av">
           <Sprite species={p.species} size={36} />
           <span className="r-live" style={{ background: statusColor[p.status] }} />
+          {p.agentLost && <AgentMark label={t.projects.agentLost} />}
         </span>
         <span style={{ minWidth: 0 }}>
           <span className="t-name">{p.name}</span>

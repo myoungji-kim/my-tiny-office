@@ -35,6 +35,10 @@
 
 .p-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  .bub .agent-mark { margin-left: 2px; }
+
+  .p-lost { display: block; font-size: 14px; line-height: 1.45; color: var(--bad-ink); margin-top: 8px; }
+
 @media (max-width: 960px) {
   .app { grid-template-columns: 1fr; }
   .side { border-bottom: 1px solid var(--line-2); }

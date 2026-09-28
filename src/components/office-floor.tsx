@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
 import { bringBackAction, sendOnLeaveAction } from "../app/people-actions";
+import { carryOnAction } from "../app/project-actions";
 import { getDictionary, type Dictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, TeamView } from "../server/view-model";
 import { castMember, paint, PALETTE, skin, TILES, tokenResolver, type ColorResolver, type Rows } from "../ui/paint";
 
+import { AgentMark } from "./agent-mark";
 import { sinceText } from "./dates";
 import { HireDialog, type Choice } from "./hire-dialog";
 import { Icon } from "./icons";
@@ -176,6 +178,7 @@ function RoomView({
                 <span className="bub" style={{ left: x * T + T, top: y * T - T - 24 }}>
                   <span className={`dot ${dot}`} />
                   {label}
+                  {person.agentLost && <AgentMark label={words.projects.agentLost} inline />}
                 </span>
               </span>
             );
@@ -205,7 +208,7 @@ function Card({
   const o = words.office;
   const [line, nums, key]: [string, ReactNode, string] =
     p.status === "working" && p.task !== undefined
-      ? [p.task.title, <><span>{o.spent(p.task.minutes)}</span><b>{words.employeeStatus.working}</b></>, o.work]
+      ? [p.task.title, <><span>{o.spent(p.task.minutes)}</span><b>{p.task.blocked ? words.projects.blocked : words.employeeStatus.working}</b></>, o.work]
       : p.status === "reviewing" && p.review !== undefined
         ? [p.review.title, <><span>{o.spent(p.review.minutes)}</span><b>{words.employeeStatus.reviewing}</b></>, o.reviewKey]
         : p.status === "onLeave"
@@ -224,6 +227,7 @@ function Card({
       <span className="c-av">
         <Sprite species={p.species} size={34} />
         <span className="c-live" style={{ background: statusColor[p.status] }} />
+        {p.agentLost && <AgentMark label={words.projects.agentLost} />}
       </span>
       <span className="c-name">{p.name}</span>
       <span className="c-role">{p.role}</span>
@@ -274,7 +278,10 @@ function actsFor(p: EmployeeView, companyId: string, ready: boolean, words: Dict
               { icon: Icon.undo, label: a.comeBack, run: () => bringBackAction(companyId, p.id) },
               teach,
             ];
-  return acts.map((act) => (!ready && act.starts === true && act.off === undefined ? { ...act, off: words.claude.cannotStart } : act));
+  // A lost agent is the thing to deal with first; everything else steps back.
+  const reconnect: Act = { icon: Icon.plug, label: words.projects.reconnect, key: true, starts: true, run: () => carryOnAction(companyId, taskId) };
+  const offered = p.agentLost ? [reconnect, ...acts.map((act) => ({ ...act, key: false }))] : acts;
+  return offered.map((act) => (!ready && act.starts === true && act.off === undefined ? { ...act, off: words.claude.cannotStart } : act));
 }
 
 function StateBlock({ p, locale, words, now }: { readonly p: EmployeeView; readonly locale: Locale; readonly words: Dictionary; readonly now: number }) {
@@ -284,7 +291,12 @@ function StateBlock({ p, locale, words, now }: { readonly p: EmployeeView; reado
       <>
         <span className="c-k">{o.inProgress}</span>
         <span className="c-task">{p.task.title}</span>
-        <span className="p-nums"><span>{o.spent(p.task.minutes)}</span><b>{words.employeeStatus.working}</b></span>
+        <span className="p-nums"><span>{o.spent(p.task.minutes)}</span><b>{p.task.blocked ? words.projects.blocked : words.employeeStatus.working}</b></span>
+        {p.agentLost && (
+          <span className="p-lost">
+            <b>{words.projects.agentLost}</b> · {words.projects.lostWhy}
+          </span>
+        )}
       </>
     );
   if (p.status === "reviewing" && p.review !== undefined)
@@ -455,6 +467,7 @@ export function OfficeFloor({
               <span className="p-av">
                 <Sprite species={person.species} size={32} />
                 <span className="c-live" style={{ background: statusColor[person.status] }} />
+                {person.agentLost && <AgentMark label={words.projects.agentLost} />}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span className="p-name">{person.name}</span>
