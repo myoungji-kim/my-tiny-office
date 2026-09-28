@@ -1,10 +1,10 @@
 import * as companyDomain from "../domain/company";
-import type { CompanyCreated } from "../domain/events";
 import { toAreaId, toCompanyId, toEventId, toRoleId, type CompanyId } from "../domain/ids";
+import type { NameFailure } from "../domain/name";
 import { startingAreas, STARTING_AREAS } from "../domain/memory";
 import { startingRoles, STARTING_ROLES } from "../domain/organisation";
 
-import type { AppContext } from "./context";
+import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
 
 export interface CreateCompanyInput {
@@ -14,23 +14,23 @@ export interface CreateCompanyInput {
   readonly description?: string;
 }
 
-export interface CreateCompanyOutput {
-  readonly company: companyDomain.Company;
-  readonly events: readonly [CompanyCreated];
-}
+export type CreateCompanyResult = UseCaseResult<{ readonly company: companyDomain.Company }, NameFailure>;
 
-export function createCompany(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyOutput> {
+// A company is made whole — its areas, roles and first line of history — or not at all.
+export function createCompany(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyResult> {
   return ctx.withTransaction(() => create(ctx, input));
 }
 
-async function create(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyOutput> {
+async function create(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyResult> {
   const now = ctx.now();
 
-  const { company, events } = companyDomain.createCompany(
+  const created = companyDomain.createCompany(
     { id: input.id ?? toCompanyId(ctx.newId()), name: input.name, description: input.description },
     toEventId(ctx.newId()),
     now,
   );
+  if (!created.ok) return created;
+  const { company, events } = created;
 
   await ctx.companies.save(company);
   for (const area of startingAreas(company.id, STARTING_AREAS.map(() => toAreaId(ctx.newId())), now)) {
@@ -41,5 +41,5 @@ async function create(ctx: AppContext, input: CreateCompanyInput): Promise<Creat
   }
   await recordMilestones(ctx, company.id, events);
 
-  return { company, events };
+  return { ok: true, value: { company }, events };
 }

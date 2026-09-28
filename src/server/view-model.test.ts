@@ -48,8 +48,9 @@ async function seedCompany(name = "TinySoft") {
   ctx = { ...createAppContext(files.create(id)), now: () => current };
   // each company founded a moment after the last, so "oldest" is well defined
   const founded = current + seeded++;
-  const { company } = await createCompany({ ...ctx, now: () => founded }, { id, name, description: "A tiny office" });
-  return company;
+  const created = await createCompany({ ...ctx, now: () => founded }, { id, name, description: "A tiny office" });
+  assert(created.ok);
+  return created.value.company;
 }
 
 async function seedEmployee(companyId: CompanyId) {
@@ -232,7 +233,9 @@ describe("createAppContext", () => {
   it("wires repositories that share the database", async () => {
     const id = toCompanyId(randomUUID());
     const context = createAppContext(files.create(id));
-    const { company } = await createCompany(context, { id, name: "TinySoft" });
+    const created = await createCompany(context, { id, name: "TinySoft" });
+    assert(created.ok);
+    const { company } = created.value;
 
     await expect(context.companies.findById(company.id)).resolves.toMatchObject({
       name: "TinySoft",

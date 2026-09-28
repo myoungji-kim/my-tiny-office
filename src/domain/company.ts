@@ -1,5 +1,6 @@
 import type { CompanyCreated } from "./events";
 import type { CompanyId, EventId } from "./ids";
+import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
 
 export interface Company {
@@ -15,24 +16,29 @@ export interface CreateCompanyInput {
   readonly description?: string;
 }
 
-export interface CreateCompanyResult {
-  readonly company: Company;
-  readonly events: readonly [CompanyCreated];
-}
+export const MAX_COMPANY_NAME = 40;
+
+export type CreateCompanyResult =
+  | { readonly ok: true; readonly company: Company; readonly events: readonly [CompanyCreated] }
+  | { readonly ok: false; readonly reason: NameFailure };
 
 export function createCompany(
   input: CreateCompanyInput,
   eventId: EventId,
   now: Timestamp,
 ): CreateCompanyResult {
+  const checked = checkName(input.name, MAX_COMPANY_NAME);
+  if (!checked.ok) return checked;
+
   const company: Company = {
     id: input.id,
-    name: input.name,
-    description: input.description,
+    name: checked.name,
+    description: input.description?.trim() || undefined,
     foundedAt: now,
   };
 
   return {
+    ok: true,
     company,
     events: [
       {

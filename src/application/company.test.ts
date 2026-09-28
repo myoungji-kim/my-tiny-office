@@ -1,53 +1,32 @@
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { toCompanyId } from "../domain/ids";
 
 import { createCompany } from "./company";
-import type { AppContext } from "./context";
 import { createTestContext } from "./test-context";
 
 const foundedAt = 1_700_000_000_000;
 
-const createContext = (): AppContext => createTestContext(() => foundedAt);
-
 describe("createCompany", () => {
-  it("returns a company with a generated id", async () => {
-    const ctx = createContext();
+  it("saves the company with its areas, roles and first line of history", async () => {
+    const ctx = createTestContext(() => foundedAt);
 
-    const { company } = await createCompany(ctx, { name: "TinySoft" });
+    const created = await createCompany(ctx, { name: "TinySoft", description: "A tiny office" });
+    assert(created.ok);
 
-    expect(company).toEqual({
-      id: toCompanyId("id-1"),
-      name: "TinySoft",
-      description: undefined,
-      foundedAt,
-    });
-  });
-
-  it("saves the company", async () => {
-    const ctx = createContext();
-
-    const { company } = await createCompany(ctx, {
-      name: "TinySoft",
-      description: "A tiny office",
-    });
-
+    const { company } = created.value;
+    expect(company).toMatchObject({ id: toCompanyId("id-1"), name: "TinySoft", foundedAt });
     await expect(ctx.companies.findById(company.id)).resolves.toEqual(company);
+    await expect(ctx.areas.findByCompany(company.id)).resolves.toHaveLength(7);
+    await expect(ctx.roles.findByCompany(company.id)).resolves.toHaveLength(6);
+    await expect(ctx.milestones.findByCompany(company.id)).resolves.toMatchObject([{ kind: "founded" }]);
+    expect(created.events).toMatchObject([{ type: "CompanyCreated", name: "TinySoft" }]);
   });
 
-  it("emits CompanyCreated", async () => {
-    const ctx = createContext();
+  it("makes nothing when the name will not do", async () => {
+    const ctx = createTestContext();
 
-    const { events } = await createCompany(ctx, { name: "TinySoft" });
-
-    expect(events).toEqual([
-      {
-        eventId: "id-2",
-        type: "CompanyCreated",
-        occurredAt: foundedAt,
-        companyId: toCompanyId("id-1"),
-        name: "TinySoft",
-      },
-    ]);
+    await expect(createCompany(ctx, { id: toCompanyId("c"), name: "" })).resolves.toEqual({ ok: false, reason: "nameRequired" });
+    await expect(ctx.companies.findById(toCompanyId("c"))).resolves.toBeUndefined();
   });
 });

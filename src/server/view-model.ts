@@ -30,6 +30,8 @@ export interface ProjectView {
   readonly name: string;
   readonly status: ProjectStatus;
   readonly priority: Priority;
+  // work is written down only in a planned or active project
+  readonly takesWork: boolean;
 }
 
 export interface TaskView {
@@ -150,6 +152,7 @@ export async function loadOffice(
       name: project.name,
       status: project.status,
       priority: project.priority,
+      takesWork: project.status === "planned" || project.status === "active",
     })),
     tasks: tasks.map((task) => ({
       id: task.id,

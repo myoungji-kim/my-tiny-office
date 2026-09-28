@@ -15,11 +15,14 @@ export function resolveDataDirectory(
     return isAbsolute(configured) ? configured : resolve(configured);
   }
 
+  // An empty or relative value would put the companies under whatever folder
+  // the app started in, the project folder included, so it counts as unset.
+  const usable = (value: string | undefined) => (value !== undefined && isAbsolute(value) ? value : undefined);
   if (platform === "win32") {
-    return join(env.LOCALAPPDATA ?? join(home, "AppData", "Local"), APP_DIRECTORY);
+    return join(usable(env.LOCALAPPDATA) ?? join(home, "AppData", "Local"), APP_DIRECTORY);
   }
   if (platform === "darwin") {
     return join(home, "Library", "Application Support", APP_DIRECTORY);
   }
-  return join(env.XDG_DATA_HOME ?? join(home, ".local", "share"), APP_DIRECTORY);
+  return join(usable(env.XDG_DATA_HOME) ?? join(home, ".local", "share"), APP_DIRECTORY);
 }

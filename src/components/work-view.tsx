@@ -106,7 +106,7 @@ export function WorkView({
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }) {
-  const writable = projects.filter((project) => project.status === "planned" || project.status === "active");
+  const writable = projects.filter((project) => project.takesWork);
 
   return (
     <>

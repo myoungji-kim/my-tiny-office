@@ -10,8 +10,10 @@ import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
 import { createProject } from "../application/project";
 import { assignTask, createTask } from "../application/task";
+import { MAX_COMPANY_NAME } from "../domain/company";
 import { SPECIES, type Species } from "../domain/employee";
 import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, type CompanyId } from "../domain/ids";
+import { checkName } from "../domain/name";
 import type { Priority } from "../domain/project";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
@@ -38,7 +40,7 @@ function contextOf(formData: FormData): AppContext | undefined {
   return files.has(id) ? createAppContext(files.open(toCompanyId(id))) : undefined;
 }
 
-// Until the species picker is on this screen, a hire gets the first sprite nobody has.
+// A hire gets the first sprite nobody in the company has yet.
 async function nextSpecies(ctx: AppContext, companyId: CompanyId): Promise<Species> {
   const taken = new Set((await ctx.employees.findByCompany(companyId)).map((e) => e.species));
   return SPECIES.find((s) => !taken.has(s)) ?? SPECIES[0];
@@ -54,33 +56,32 @@ export async function createCompanyAction(
   formData: FormData,
 ): Promise<ActionState> {
   const name = text(formData, "name");
-  if (name === "") {
-    return { error: "companyNameRequired" };
+  // Checked before the company's file is made, so a bad name leaves no file behind.
+  const named = checkName(name, MAX_COMPANY_NAME);
+  if (!named.ok) {
+    return { error: named.reason };
   }
 
   const files = getCompanyFiles();
   const id = toCompanyId(randomUUID());
-  const { company } = await createCompany(createAppContext(files.create(id)), {
+  const created = await createCompany(createAppContext(files.create(id)), {
     id,
     name,
     description: optionalText(formData, "description"),
   });
-  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: company.id });
+  if (!created.ok) {
+    return { error: created.reason };
+  }
+  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: id });
 
   revalidatePath("/");
-  redirect(`/?company=${encodeURIComponent(company.id)}`);
+  redirect(`/?company=${encodeURIComponent(id)}`);
 }
 
 export async function hireEmployeeAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const name = text(formData, "name");
-  const roleId = text(formData, "roleId");
-  if (name === "" || roleId === "") {
-    return { error: "employeeFieldsRequired" };
-  }
-
   const ctx = contextOf(formData);
   if (ctx === undefined) {
     return { error: "companyNotFound" };
@@ -88,8 +89,8 @@ export async function hireEmployeeAction(
 
   const result = await hireEmployee(ctx, {
     companyId: toCompanyId(text(formData, "companyId")),
-    name,
-    roleId: toRoleId(roleId),
+    name: text(formData, "name"),
+    roleId: toRoleId(text(formData, "roleId")),
     species: await nextSpecies(ctx, toCompanyId(text(formData, "companyId"))),
   });
   if (!result.ok) {
@@ -104,11 +105,6 @@ export async function createTaskAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const title = text(formData, "title");
-  if (title === "") {
-    return { error: "taskTitleRequired" };
-  }
-
   const ctx = contextOf(formData);
   if (ctx === undefined) {
     return { error: "companyNotFound" };
@@ -116,7 +112,7 @@ export async function createTaskAction(
 
   const result = await createTask(ctx, {
     companyId: toCompanyId(text(formData, "companyId")),
-    title,
+    title: text(formData, "title"),
     description: optionalText(formData, "description"),
     projectId: toProjectId(text(formData, "projectId")),
     priority: priority(formData),

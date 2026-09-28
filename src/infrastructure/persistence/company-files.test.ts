@@ -75,6 +75,11 @@ describe("data directory", () => {
     expect(resolveDataDirectory({ MY_TINY_OFFICE_DATA_DIR: "/data/mto" }, "linux", "/home/u")).toBe("/data/mto");
   });
 
+  it("ignores an empty or relative system path, which would land in the project folder", () => {
+    expect(resolveDataDirectory({ LOCALAPPDATA: "" }, "win32", "C:/Users/u")).toBe(join("C:/Users/u", "AppData", "Local", "my-tiny-office"));
+    expect(resolveDataDirectory({ XDG_DATA_HOME: "data" }, "linux", "/home/u")).toBe(join("/home/u", ".local", "share", "my-tiny-office"));
+  });
+
   it("uses the platform's per-user data directory", () => {
     expect(resolveDataDirectory({ LOCALAPPDATA: "C:/Users/u/AppData/Local" }, "win32", "C:/Users/u")).toBe(join("C:/Users/u/AppData/Local", "my-tiny-office"));
     expect(resolveDataDirectory({}, "darwin", "/Users/u")).toBe(join("/Users/u", "Library", "Application Support", "my-tiny-office"));
