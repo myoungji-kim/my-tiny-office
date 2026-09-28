@@ -112,13 +112,31 @@
 
   .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
 
-  .said-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .said-card { margin-bottom: 16px; }
+
+  .said-hd { display: flex; align-items: center; gap: 10px; }
 
   .said-hd h2 { margin-right: auto; }
 
-  .said-bd { position: relative; padding-right: 50px; }
+  .said-av { width: 32px; height: 32px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .copy-ic { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
+  .view-sw { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--surface); }
+
+  .view-sw button { width: 30px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--muted); cursor: pointer; }
+
+  .view-sw button svg { width: 16px; height: 16px; }
+
+  .view-sw button:hover { color: var(--ink); background: var(--subtle); }
+
+  .view-sw button[aria-checked="true"] { color: var(--brand-ink); background: var(--brand-soft); }
+
+  .view-sw button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  .said-bd { position: relative; padding: 18px 58px 22px 22px; }
+
+  .said-text { max-width: 78ch; }
+
+  .copy-ic { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
 
   .copy-ic svg { width: 15px; height: 15px; }
 
@@ -132,33 +150,39 @@
 
   @media (hover: none) { .copy-ic { opacity: 1; } }
 
-  .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 
-  .md { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+  .md { font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
 
   .md > * { margin: 0; }
 
-  .md > * + * { margin-top: 10px; }
+  .md > * + * { margin-top: 12px; }
 
-  .md h3 { font-size: 16px; font-weight: 600; }
+  .md > * + h3, .md > * + h4 { margin-top: 22px; }
 
-  .md h4 { font-size: 15px; font-weight: 600; }
+  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; }
 
-  .md ul, .md ol { padding-left: 20px; }
+  .md h4 { font-size: 16px; font-weight: 600; line-height: 1.4; }
 
-  .md code { font-family: var(--mono); font-size: 14px; background: var(--sunk); padding: 1px 5px; border-radius: 5px; }
+  .md ul, .md ol { padding-left: 22px; }
 
-  .md pre { padding: 9px 11px; border-radius: 9px; background: var(--sunk); font-family: var(--mono); font-size: 13.5px; overflow-x: auto; }
+  .md li + li { margin-top: 4px; }
+
+  .md code { font-family: var(--mono); font-size: 14px; background: var(--sunk); padding: 2px 6px; border-radius: 6px; }
+
+  .md pre { padding: 12px 14px; border-radius: 10px; background: var(--sunk); font-family: var(--mono); font-size: 14px; line-height: 1.6; overflow-x: auto; }
 
   .md pre code { padding: 0; background: none; }
 
-  .md blockquote { padding-left: 10px; border-left: 3px solid var(--line-2); color: var(--muted); }
+  .md blockquote { padding-left: 12px; border-left: 3px solid var(--line-2); color: var(--muted); }
 
-  .md table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 14px; }
+  .md table { display: block; width: max-content; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; border-spacing: 0; font-size: 15px; line-height: 1.55; }
 
-  .md th, .md td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .md th, .md td { padding: 8px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 
-  .md th { color: var(--muted); font-weight: 600; }
+  .md tr:last-child td { border-bottom: none; }
+
+  .md th { background: var(--sunk); color: var(--muted); font-size: 14px; font-weight: 600; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 

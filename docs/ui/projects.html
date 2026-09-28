@@ -120,13 +120,31 @@
 
   .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
 
-  .said-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .said-card { margin-bottom: 16px; }
+
+  .said-hd { display: flex; align-items: center; gap: 10px; }
 
   .said-hd h2 { margin-right: auto; }
 
-  .said-bd { position: relative; padding-right: 50px; }
+  .said-av { width: 32px; height: 32px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .copy-ic { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
+  .view-sw { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--surface); }
+
+  .view-sw button { width: 30px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--muted); cursor: pointer; }
+
+  .view-sw button svg { width: 16px; height: 16px; }
+
+  .view-sw button:hover { color: var(--ink); background: var(--subtle); }
+
+  .view-sw button[aria-checked="true"] { color: var(--brand-ink); background: var(--brand-soft); }
+
+  .view-sw button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  .said-bd { position: relative; padding: 18px 58px 22px 22px; }
+
+  .said-text { max-width: 78ch; }
+
+  .copy-ic { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
 
   .copy-ic svg { width: 15px; height: 15px; }
 
@@ -140,33 +158,39 @@
 
   @media (hover: none) { .copy-ic { opacity: 1; } }
 
-  .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 
-  .md { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+  .md { font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
 
   .md > * { margin: 0; }
 
-  .md > * + * { margin-top: 10px; }
+  .md > * + * { margin-top: 12px; }
 
-  .md h3 { font-size: 16px; font-weight: 600; }
+  .md > * + h3, .md > * + h4 { margin-top: 22px; }
 
-  .md h4 { font-size: 15px; font-weight: 600; }
+  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; }
 
-  .md ul, .md ol { padding-left: 20px; }
+  .md h4 { font-size: 16px; font-weight: 600; line-height: 1.4; }
 
-  .md code { font-family: var(--mono); font-size: 14px; background: var(--sunk); padding: 1px 5px; border-radius: 5px; }
+  .md ul, .md ol { padding-left: 22px; }
 
-  .md pre { padding: 9px 11px; border-radius: 9px; background: var(--sunk); font-family: var(--mono); font-size: 13.5px; overflow-x: auto; }
+  .md li + li { margin-top: 4px; }
+
+  .md code { font-family: var(--mono); font-size: 14px; background: var(--sunk); padding: 2px 6px; border-radius: 6px; }
+
+  .md pre { padding: 12px 14px; border-radius: 10px; background: var(--sunk); font-family: var(--mono); font-size: 14px; line-height: 1.6; overflow-x: auto; }
 
   .md pre code { padding: 0; background: none; }
 
-  .md blockquote { padding-left: 10px; border-left: 3px solid var(--line-2); color: var(--muted); }
+  .md blockquote { padding-left: 12px; border-left: 3px solid var(--line-2); color: var(--muted); }
 
-  .md table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 14px; }
+  .md table { display: block; width: max-content; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; border-spacing: 0; font-size: 15px; line-height: 1.55; }
 
-  .md th, .md td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .md th, .md td { padding: 8px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 
-  .md th { color: var(--muted); font-weight: 600; }
+  .md tr:last-child td { border-bottom: none; }
+
+  .md th { background: var(--sunk); color: var(--muted); font-size: 14px; font-weight: 600; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 
@@ -1038,9 +1062,9 @@
       : "";
     const now = working && task.steps?.length ? panel(k.now, stepRow(task.steps[0], true)) : "";
     // What they said reads formatted; the plain text is one choice away, and copyable.
-    const said = task.said && who ? `<div class="panel"><div class="panel-hd said-hd"><h2>${k.said(who.name)}</h2>
-          <div class="opts" role="radiogroup" aria-label="${k.saidAs}"><button class="opt" type="button" role="radio" aria-checked="true" data-said="md">${k.formatted}</button><button class="opt" type="button" role="radio" aria-checked="false" data-said="raw">${k.plain}</button></div></div>
-        <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div>` : "";
+    const said = task.said && who ? `<div class="panel said-card"><div class="panel-hd said-hd"><span class="said-av" data-av="${who.id}" data-av-size="32"></span><h2>${k.said(who.name)}</h2>
+          <div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg></button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div></div>
+        <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="said-text"><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div></div>` : "";
 
     const changes = task.status === "backlog" ? "" : panel(k.changed,
       (task.files?.length
@@ -1054,7 +1078,7 @@
       (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}${note.text}</span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
       + (task.thread ?? []).map((m) => `<div class="msg"><span class="w-av" data-av="${m.by}"></span><span><b>${byId.get(m.by).name}</b>${tx(m.text)}</span></div>`).join(""));
 
-    const main = task.status === "approval" || task.status === "done" ? [changes, said, review, steps] : [now, said, changes, review, steps];
+    const main = task.status === "approval" || task.status === "done" ? [changes, review, steps] : [now, changes, review, steps];
 
     const mine = who ? who.memories : [];
     const memory = panel(who ? k.mem(mine.length) : k.memAhead,
@@ -1076,7 +1100,7 @@
     ];
 
     const view = document.getElementById("taskView");
-    view.innerHTML = `${blocked}<div class="tk-grid" style="${blocked ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    view.innerHTML = `${blocked}${said ? `<div style="${blocked ? "margin-top:16px" : ""}">${said}</div>` : ""}<div class="tk-grid" style="${blocked && !said ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
     view.querySelector("[data-allow-run]")?.addEventListener("click", () => {
       p.runs = [...(p.runs ?? []), task.blocked.run];
       task.blocked = undefined;
@@ -1100,7 +1124,7 @@
       render();
       renderMembers();
     });
-    for (const av of view.querySelectorAll("[data-av]")) av.appendChild(spriteCanvas(byId.get(av.dataset.av).species, 20));
+    for (const av of view.querySelectorAll("[data-av]")) av.appendChild(spriteCanvas(byId.get(av.dataset.av).species, Number(av.dataset.avSize ?? 20)));
     for (const b of view.querySelectorAll("[data-file]")) {
       b.addEventListener("click", () => {
         const c = task.files[b.dataset.file];

@@ -116,7 +116,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     );
   const saidPanel =
     said === undefined || who === undefined ? undefined : (
-      <SaidPanel key="said" locale={locale} name={who.name} text={said.detail} />
+      <SaidPanel locale={locale} name={who.name} species={who.species} text={said.detail} />
     );
   const changes =
     task.status === "backlog" || work === undefined ? undefined : (
@@ -137,7 +137,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         )}
       </Fragment>
     );
-  const main = (task.status === "approval" || task.status === "done" ? [changes, saidPanel, steps] : [now, saidPanel, changes, steps]).filter((x) => x !== undefined);
+  const main = (task.status === "approval" || task.status === "done" ? [changes, steps] : [now, changes, steps]).filter((x) => x !== undefined);
 
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
   const side: ReactNode[] = [
@@ -205,95 +205,98 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         </div>
       }
     >
-      {blocker !== undefined && (
-        <div className="notice notice-bad">
-          <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : PLUG}</span>
-          <span className="n-tx">
-            <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
-            {blocker.kind === "commandNotAllowed" ? (
-              who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
-            ) : (
-              <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
-            )}
-          </span>
-          <span className="n-acts">
-            {blocker.kind === "commandNotAllowed" ? (
-              <>
-                <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutRun} disabled={!ready} errors={t.errors} />
-                {allowable && (
-                  <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
-                )}
-              </>
-            ) : (
-              <ActButton
-                action={carryOnAction.bind(null, company.id, task.id)}
-                label={blocker.kind === "disconnected" ? w.reconnect : blocker.kind === "budgetReached" ? w.carryOn : w.retry}
-                disabled={!ready}
-                errors={t.errors}
-              />
-            )}
-          </span>
-        </div>
-      )}
-      <div className="tk-grid" style={{ ...(main.length === 0 ? { gridTemplateColumns: "minmax(0, 1fr)" } : {}), ...(blocker !== undefined ? { marginTop: 16 } : {}) }}>
-        {main.length > 0 && <div className="tk-col">{main}</div>}
-        <div className="tk-col">
-          {side}
-          {panel(
-            who === undefined ? w.tk.memAhead : w.tk.mem(carried.length),
-            who === undefined ? (
-              <p className="col-empty" style={{ margin: 0 }}>
-                {w.tk.memNobody}
-              </p>
-            ) : carried.length === 0 ? (
-              <p className="col-empty" style={{ margin: 0 }}>
-                {t.people.noMemory}
-              </p>
-            ) : (
-              carried.map((m) => (
-                <div key={m.id} className="tk-mem">
-                  <svg viewBox="0 0 16 16" />
-                  <span>{m.text}</span>
-                </div>
-              ))
-            ),
-          )}
-          {panel(
-            w.tk.record,
-            <>
-              <div className="kv">
-                <span>{w.tk.created}</span>
-                <b style={{ fontWeight: 500 }}>{dateText(locale, task.createdAt)}</b>
-              </div>
-              <div className="kv">
-                <span>{w.tk.assignee}</span>
-                <b style={{ fontWeight: 500 }}>{who?.name ?? w.unassigned}</b>
-              </div>
-            </>,
-          )}
-          {work?.sessionId !== undefined &&
-            panel(
-              w.tk.session,
-              <>
-                {work.worktree !== undefined && (
-                  <div className="kv">
-                    <span>{w.tk.folder}</span>
-                    <b className="mono">{work.worktree}</b>
+      <div>
+        {blocker !== undefined && (
+          <div className="notice notice-bad">
+            <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : PLUG}</span>
+            <span className="n-tx">
+              <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
+              {blocker.kind === "commandNotAllowed" ? (
+                who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
+              ) : (
+                <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
+              )}
+            </span>
+            <span className="n-acts">
+              {blocker.kind === "commandNotAllowed" ? (
+                <>
+                  <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutRun} disabled={!ready} errors={t.errors} />
+                  {allowable && (
+                    <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
+                  )}
+                </>
+              ) : (
+                <ActButton
+                  action={carryOnAction.bind(null, company.id, task.id)}
+                  label={blocker.kind === "disconnected" ? w.reconnect : blocker.kind === "budgetReached" ? w.carryOn : w.retry}
+                  disabled={!ready}
+                  errors={t.errors}
+                />
+              )}
+            </span>
+          </div>
+        )}
+        {saidPanel !== undefined && <div style={blocker !== undefined ? { marginTop: 16 } : undefined}>{saidPanel}</div>}
+        <div className="tk-grid" style={{ ...(main.length === 0 ? { gridTemplateColumns: "minmax(0, 1fr)" } : {}), ...(blocker !== undefined && saidPanel === undefined ? { marginTop: 16 } : {}) }}>
+          {main.length > 0 && <div className="tk-col">{main}</div>}
+          <div className="tk-col">
+            {side}
+            {panel(
+              who === undefined ? w.tk.memAhead : w.tk.mem(carried.length),
+              who === undefined ? (
+                <p className="col-empty" style={{ margin: 0 }}>
+                  {w.tk.memNobody}
+                </p>
+              ) : carried.length === 0 ? (
+                <p className="col-empty" style={{ margin: 0 }}>
+                  {t.people.noMemory}
+                </p>
+              ) : (
+                carried.map((m) => (
+                  <div key={m.id} className="tk-mem">
+                    <svg viewBox="0 0 16 16" />
+                    <span>{m.text}</span>
                   </div>
-                )}
+                ))
+              ),
+            )}
+            {panel(
+              w.tk.record,
+              <>
                 <div className="kv">
-                  <span>{w.tk.branch}</span>
-                  <b className="mono">{work.branch}</b>
+                  <span>{w.tk.created}</span>
+                  <b style={{ fontWeight: 500 }}>{dateText(locale, task.createdAt)}</b>
                 </div>
-                <span className="hint">{w.tk.resumeHint}</span>
-                <div className="cmd">
-                  <pre>
-                    <span className="p">$</span> claude --resume {work.sessionId}
-                  </pre>
-                  <CopyButton text={"claude --resume " + work.sessionId} copy={t.claude.copy} copied={t.claude.copied} />
+                <div className="kv">
+                  <span>{w.tk.assignee}</span>
+                  <b style={{ fontWeight: 500 }}>{who?.name ?? w.unassigned}</b>
                 </div>
               </>,
             )}
+            {work?.sessionId !== undefined &&
+              panel(
+                w.tk.session,
+                <>
+                  {work.worktree !== undefined && (
+                    <div className="kv">
+                      <span>{w.tk.folder}</span>
+                      <b className="mono">{work.worktree}</b>
+                    </div>
+                  )}
+                  <div className="kv">
+                    <span>{w.tk.branch}</span>
+                    <b className="mono">{work.branch}</b>
+                  </div>
+                  <span className="hint">{w.tk.resumeHint}</span>
+                  <div className="cmd">
+                    <pre>
+                      <span className="p">$</span> claude --resume {work.sessionId}
+                    </pre>
+                    <CopyButton text={"claude --resume " + work.sessionId} copy={t.claude.copy} copied={t.claude.copied} />
+                  </div>
+                </>,
+              )}
+          </div>
         </div>
       </div>
     </Shell>
