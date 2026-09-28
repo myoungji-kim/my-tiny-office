@@ -69,13 +69,20 @@ export async function forgetMemory(
   return { ok: true, value: { memory }, events: [event] };
 }
 
+// Two areas the user named the same would be one area on every screen.
+async function areaNameTaken(ctx: AppContext, area: memoryDomain.Area): Promise<boolean> {
+  const name = area.name?.toLowerCase();
+  return name !== undefined && (await ctx.areas.findByCompany(area.companyId)).some((a) => a.id !== area.id && a.name?.toLowerCase() === name);
+}
+
 export async function addArea(
   ctx: AppContext,
   companyId: CompanyId,
   name: string,
-): Promise<UseCaseResult<{ readonly area: memoryDomain.Area }, NameFailure>> {
+): Promise<UseCaseResult<{ readonly area: memoryDomain.Area }, NameFailure | "nameTaken">> {
   const added = memoryDomain.addArea({ id: toAreaId(ctx.newId()), companyId, name }, toEventId(ctx.newId()), ctx.now());
   if (!added.ok) return added;
+  if (await areaNameTaken(ctx, added.value)) return { ok: false, reason: "nameTaken" };
   await ctx.areas.save(added.value);
   return { ok: true, value: { area: added.value }, events: added.events };
 }
@@ -85,11 +92,12 @@ export async function renameArea(
   companyId: CompanyId,
   areaId: AreaId,
   name: string,
-): Promise<UseCaseResult<{ readonly area: memoryDomain.Area }, "areaNotFound" | NameFailure>> {
+): Promise<UseCaseResult<{ readonly area: memoryDomain.Area }, "areaNotFound" | NameFailure | "nameTaken">> {
   const area = (await ctx.areas.findByCompany(companyId)).find((a) => a.id === areaId);
   if (area === undefined) return { ok: false, reason: "areaNotFound" };
   const renamed = memoryDomain.renameArea(area, name, toEventId(ctx.newId()), ctx.now());
   if (!renamed.ok) return renamed;
+  if (await areaNameTaken(ctx, renamed.value)) return { ok: false, reason: "nameTaken" };
   await ctx.areas.save(renamed.value);
   return { ok: true, value: { area: renamed.value }, events: renamed.events };
 }

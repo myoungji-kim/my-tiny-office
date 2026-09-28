@@ -2,10 +2,21 @@ import { assert, describe, expect, it } from "vitest";
 
 import { toCompanyId } from "../domain/ids";
 
-import { createCompany } from "./company";
+import { createCompany, renameCompany } from "./company";
 import { createTestContext } from "./test-context";
 
 const foundedAt = 1_700_000_000_000;
+
+describe("renameCompany", () => {
+  it("renames the company with a name it can take", async () => {
+    const ctx = createTestContext(() => foundedAt);
+    const created = await createCompany(ctx, { name: "TinySoft" });
+    assert(created.ok);
+
+    await expect(renameCompany(ctx, created.value.company.id, " Tiny Lab ")).resolves.toMatchObject({ ok: true, value: { company: { name: "Tiny Lab", foundedAt } } });
+    await expect(renameCompany(ctx, created.value.company.id, " ")).resolves.toEqual({ ok: false, reason: "nameRequired" });
+  });
+});
 
 describe("createCompany", () => {
   it("saves the company with its areas, roles and first line of history", async () => {

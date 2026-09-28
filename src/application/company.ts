@@ -21,6 +21,19 @@ export function createCompany(ctx: AppContext, input: CreateCompanyInput): Promi
   return ctx.withTransaction(() => create(ctx, input));
 }
 
+export async function renameCompany(
+  ctx: AppContext,
+  companyId: CompanyId,
+  name: string,
+): Promise<UseCaseResult<{ readonly company: companyDomain.Company }, "companyNotFound" | NameFailure>> {
+  const company = await ctx.companies.findById(companyId);
+  if (company === undefined) return { ok: false, reason: "companyNotFound" };
+  const renamed = companyDomain.renameCompany(company, name);
+  if (!renamed.ok) return renamed;
+  await ctx.companies.save(renamed.company);
+  return { ok: true, value: { company: renamed.company }, events: [] };
+}
+
 async function create(ctx: AppContext, input: CreateCompanyInput): Promise<CreateCompanyResult> {
   const now = ctx.now();
 

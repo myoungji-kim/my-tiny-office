@@ -85,6 +85,15 @@ describe("the company's areas", () => {
     expect(renamed.value.area.name).toBe("게임 서버 · 매칭");
   });
 
+  it("never share a name the user gave", async () => {
+    const games = await addArea(ctx, companyId, "Game server");
+    const infra = await addArea(ctx, companyId, "Infra");
+    assert(games.ok && infra.ok);
+
+    await expect(addArea(ctx, companyId, "game SERVER")).resolves.toEqual({ ok: false, reason: "nameTaken" });
+    await expect(renameArea(ctx, companyId, infra.value.area.id, "Game server")).resolves.toEqual({ ok: false, reason: "nameTaken" });
+  });
+
   it("move their memory and tasks elsewhere before going", async () => {
     const mocha = await hire();
     const db = await areaByStart("database");

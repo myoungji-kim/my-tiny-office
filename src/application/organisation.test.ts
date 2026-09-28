@@ -57,6 +57,15 @@ describe("roles", () => {
   });
 });
 
+describe("names in the company's lists", () => {
+  it("are one each for roles, whatever the case", async () => {
+    await expect(addRole(ctx, companyId, "dba")).resolves.toEqual({ ok: false, reason: "nameTaken" });
+    const added = await addRole(ctx, companyId, "Game Server Engineer");
+    assert(added.ok);
+    await expect(renameRole(ctx, companyId, added.value.role.id, "QA ENGINEER")).resolves.toEqual({ ok: false, reason: "nameTaken" });
+  });
+});
+
 describe("teams", () => {
   it("are suggested in both languages or named by the user", async () => {
     const suggested = await addTeam(ctx, companyId, { suggested: "backend" });

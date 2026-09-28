@@ -22,6 +22,12 @@ export type CreateCompanyResult =
   | { readonly ok: true; readonly company: Company; readonly events: readonly [CompanyCreated] }
   | { readonly ok: false; readonly reason: NameFailure };
 
+export function renameCompany(company: Company, raw: string): { readonly ok: true; readonly company: Company } | { readonly ok: false; readonly reason: NameFailure } {
+  const checked = checkName(raw, MAX_COMPANY_NAME);
+  if (!checked.ok) return checked;
+  return { ok: true, company: { ...company, name: checked.name } };
+}
+
 export function createCompany(
   input: CreateCompanyInput,
   eventId: EventId,

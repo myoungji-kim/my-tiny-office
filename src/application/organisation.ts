@@ -8,9 +8,16 @@ import { recordMilestones } from "./history";
 
 type NameFailure = "nameRequired" | "nameTooLong";
 
-export async function addRole(ctx: AppContext, companyId: CompanyId, name: string): Promise<UseCaseResult<{ readonly role: org.Role }, NameFailure>> {
+// A title is shown as written, so two alike would be one role on every screen.
+async function roleNameTaken(ctx: AppContext, role: org.Role): Promise<boolean> {
+  const name = role.name.toLowerCase();
+  return (await ctx.roles.findByCompany(role.companyId)).some((r) => r.id !== role.id && r.name.toLowerCase() === name);
+}
+
+export async function addRole(ctx: AppContext, companyId: CompanyId, name: string): Promise<UseCaseResult<{ readonly role: org.Role }, NameFailure | "nameTaken">> {
   const made = org.createRole({ id: toRoleId(ctx.newId()), companyId, name }, ctx.now());
   if (!made.ok) return made;
+  if (await roleNameTaken(ctx, made.value)) return { ok: false, reason: "nameTaken" };
   await ctx.roles.save(made.value);
   return { ok: true, value: { role: made.value }, events: [] };
 }
@@ -20,11 +27,12 @@ export async function renameRole(
   companyId: CompanyId,
   roleId: RoleId,
   name: string,
-): Promise<UseCaseResult<{ readonly role: org.Role }, "roleNotFound" | NameFailure>> {
+): Promise<UseCaseResult<{ readonly role: org.Role }, "roleNotFound" | NameFailure | "nameTaken">> {
   const role = (await ctx.roles.findByCompany(companyId)).find((r) => r.id === roleId);
   if (role === undefined) return { ok: false, reason: "roleNotFound" };
   const renamed = org.renameRole(role, name);
   if (!renamed.ok) return renamed;
+  if (await roleNameTaken(ctx, renamed.value)) return { ok: false, reason: "nameTaken" };
   await ctx.roles.save(renamed.value);
   return { ok: true, value: { role: renamed.value }, events: [] };
 }
