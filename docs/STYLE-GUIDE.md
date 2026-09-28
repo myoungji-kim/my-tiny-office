@@ -374,7 +374,9 @@ never as a copy.
 - **cast** — `src/ui/cast.json`, which the app draws from, must be what
   `system.js` draws; `npm run ui:cast` writes it
 - **app-styles** — a CSS file in `src/app` that names a page on its first line
-  carries that page's own rules, and each must match the page's exactly
+  carries that page's own rules, and each must match the page's exactly. A rule
+  every screen would pick up is scoped to its own with `[data-screen="…"]`, the
+  attribute the app's shell carries, and still compared with the page's rule
 
 The app imports `system.css` itself, so the tokens and components have one
 source; only a screen's own rules are carried, and checked.

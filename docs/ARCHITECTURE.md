@@ -42,8 +42,16 @@ SQLite
 Pages read through a server-side view model that shapes domain entities into
 display data, including a task's time taken derived from the current time. Mutations
 go through server actions that call a use case and revalidate the page; they
-carry no domain logic of their own. Nothing under `src/infrastructure` may be
-imported from a client component.
+carry no domain logic of their own, and treat every argument from the browser as
+untrusted. Nothing under `src/infrastructure` may be imported from a client
+component.
+
+Each screen is a route — `/` the office, `/projects`, `/projects/<id>` and
+`/projects/<id>/<task>`, `/people` and `/people/<id>`, `/company`, `/settings`
+and `/new` for another company — and what a screen is showing (a room, a tab, a
+filter) is in its query string. The company open is the one `settings.json`
+names, so links never carry it. Two route handlers move files:
+`GET /settings/export` and `POST /settings/import`.
 
 Electron and Tauri are not used in the MVP.
 
@@ -189,6 +197,7 @@ Project
 ├── name
 ├── description?
 ├── folder?
+├── folderConfirmed chosen on this computer, not brought by an import
 ├── commands        the exact commands its employees may run
 ├── status          planned | active | held | done
 ├── priority        high | normal | low
@@ -608,8 +617,9 @@ Windows   %LOCALAPPDATA%\my-tiny-office\
 macOS     ~/Library/Application Support/my-tiny-office/
 Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/
 
-  settings.json        the company opened last
+  settings.json        the company opened last, and the language chosen here
   companies/<id>.db    one per company
+  exports/ imports/    a copy on its way out or in, removed once it has gone
 ```
 
 The list of companies is the `companies` folder; each file names its own
@@ -617,18 +627,21 @@ company. `MY_TINY_OFFICE_DATA_DIR` overrides the directory.
 
 ### Moving and deleting a company
 
-Not built yet. Export writes a consistent copy of the open company's database while the app
-runs (`VACUUM INTO`). Import runs the migrations on a copy of the chosen file
-and adds it to `companies/`; it never replaces or merges. A file whose
-company is already here asks whether to replace that one. The file carries
-the company and nothing of the machine: Claude Code stays signed in or out on
-its own, and a workspace path or a runtime session id from another computer is
-kept but reconciled on launch — a missing folder or session becomes a state
-the user resolves, never a deletion.
+Export writes a consistent copy of the open company's database while the app
+runs (`VACUUM INTO`) and hands it over as a download. Import always adds a
+company; it never replaces or merges. The file is checked as a copy
+(SECURITY.md §7), migrated up to this version, and given a company id of this
+computer's before it is moved into `companies/`. The file carries the company
+and nothing of the machine: Claude Code stays signed in or out on its own, and
+a project keeps its folder's path but not the consent to work in it
+(`folder_confirmed` is cleared), so nothing starts there until the folder is
+chosen again on this computer. A runtime session id from another computer is
+kept and reconciled on launch — a missing session becomes a state the user
+resolves, never a deletion.
 
-Deleting a company stops its running sessions, then removes its file. On
-launch the app opens the company named in `settings.json`, or any other when
-that one is gone; with no company file at all it shows first run.
+Deleting a company asks for its name typed out and removes its file. Once
+there is a runtime it stops the company's running sessions first. The app then
+opens another company, or first run when none is left.
 
 ### Initialization
 

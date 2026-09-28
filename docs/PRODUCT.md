@@ -75,8 +75,9 @@ office. The screens are in DESIGN.md.
 ## Office Progression
 
 The office grows with its people: every hire brings a desk, and there is no
-count to run out of. Rooms are not built: a team's room, the meeting room and
-the lounge follow from who is doing what.
+count to run out of. Its rooms follow from who is doing what: a room for each
+team that has people, the meeting room for whoever is reviewing, and the lounge
+for whoever has nothing to do.
 
 ## Localization
 

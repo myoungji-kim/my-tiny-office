@@ -586,13 +586,19 @@ measured flags behind it.
 
 ## Open questions
 
-- **What is not built yet.** In `src/domain` and `src/application`: letting
-  someone go, deleting a project or a task, the activity feed and the
-  memory-used report, and a company's export, import and delete — so first run
-  offers 새 회사 만들기 only, without 기존 회사 가져오기. What needs the
-  runtime: when a review is suggested, stopping a held task's agent, and a
-  task's worktree and branch. First run is built from `docs/ui/first-run.html`; the other screens in `src/components` are the
-  placeholder until they are rebuilt from `docs/ui`.
+- **What is not built yet.** Every screen is built from its page in
+  `docs/ui`. Left out until what they show exists: today's feed in the office
+  and the people screen's 기억 tab (the activity feed and the memory-used
+  report), how often a memory was used (the person's page lists the memories
+  taught lately instead of the most used), an agent that disconnected, and on
+  a task its steps, changes, review and session. Waiting on the runtime:
+  approving and sending back, asking for a review, rewriting or handing over
+  work that is running, stopping a held task's agent, and a task's worktree
+  and branch. Not in `src/domain` yet: letting someone go, and deleting a
+  project or a task.
+- **Choosing a folder.** A browser cannot hand over a folder's path, so the
+  project dialog takes a typed one and checks it before anything is shown
+  (SECURITY.md §4), where the page has a 고르기 button.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

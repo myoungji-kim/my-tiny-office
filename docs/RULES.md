@@ -89,8 +89,11 @@ planned → active → done
   Whoever is free takes from the backlog in that order: the project's priority
   first, then the task's, then the oldest.
 - **A new project is planned.** Its tasks can be written down, even given to
-  someone, but nothing is picked up. **Start** needs a folder; it is when the
-  backlog starts being picked up, and when the project's span begins.
+  someone, but nothing is picked up. **Start** needs a folder chosen on this
+  computer; it is when the backlog starts being picked up, and when the
+  project's span begins. A project that came with an imported company keeps
+  its folder's path, but nothing starts or is picked up in it until the folder
+  is chosen again here.
 - **Hold** takes a reason. Its tasks in progress are held with it, under the
   same reason, and nobody starts anything new; finished work waiting for
   approval can still be applied.

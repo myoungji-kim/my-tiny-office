@@ -91,12 +91,19 @@ like); the user adds and removes entries in the project dialog.
 - A project's folder is chosen in the project dialog, which shows the boundary
   in §1 and the command list beside it. Creating or saving the project is the
   consent.
+- The browser cannot hand over a path, so the folder is typed. The server
+  checks it — an absolute path (a leading `~` is the home folder) that resolves
+  to a folder on this computer — and keeps only the canonical path it resolves
+  to (`realpath`), checking it again when the project is saved. The allowed
+  commands start from that folder's `package.json` scripts, each one passing
+  §3 before it is offered.
 - Paths are resolved to an absolute, canonical path before use; a task's
   worktree and branch are named from the app's own task id only, never from
   user text.
 - `.worktrees/` is added to the repository's `.git/info/exclude`.
 - A folder is a property of this computer. An imported company keeps the
-  path, but nothing runs there until the user chooses the folder again on this
+  path, but its `folder_confirmed` is cleared: the project cannot start and
+  nothing is picked up in it until the user chooses the folder again on this
   computer, which asks again.
 
 ## 5. Prompt injection
@@ -161,12 +168,18 @@ agents, so it is a target in its own right.
 - **Every company file is opened with `PRAGMA trusted_schema = OFF`**, so its
   schema never runs a function with the app's rights, and a file that will not
   open is left as it was.
-- **Import will treat the file as untrusted** (not built yet). It is copied
-  first, checked with `PRAGMA integrity_check` and against the expected schema
-  before migrations run, and only then added to `companies/`. A file that fails
-  any of these is refused whole.
+- **Import treats the file as untrusted.** It arrives as the body of a
+  same-origin `POST` of at most 64 MB and is written to a copy in `imports/`.
+  The copy must pass `PRAGMA integrity_check`, hold only the tables this
+  version knows and their indexes — no triggers, no views — carry no more
+  migrations than this version has, and hold exactly one company. Only then are
+  migrations run, every `company_id` rewritten to a fresh id, and the file moved
+  into `companies/`. A file that fails any of these is refused whole and the
+  copy removed.
 - Nothing in an imported file starts anything: its folders need choosing again
   (§4) and its sessions belong to another computer.
+- Export is a `GET` that only this machine can reach (§6); it reads the one
+  company named, by an id that must be one of the app's own.
 
 ## 8. Outside tools
 

@@ -50,7 +50,6 @@ Create company → Hire → Give work → Work → Review → Approve → Teach 
 - TypeScript
 - React
 - Next.js
-- Tailwind CSS
 - SQLite
 - Drizzle ORM
 - npm
