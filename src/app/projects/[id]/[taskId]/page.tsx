@@ -14,6 +14,7 @@ import { CopyButton } from "../../../../components/settings-parts";
 import { TaskActions } from "../../../../components/task-actions";
 import { TaskChanges } from "../../../../components/task-changes";
 import { loadTaskWork } from "../../../../server/task-work";
+import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
 import { getDictionary } from "../../../../i18n";
 import { allowCommandAction, carryOnAction } from "../../../project-actions";
@@ -82,6 +83,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const carried = who === undefined ? [] : office.memories.filter((m) => m.employeeId === who.id);
   const blocker = task.status === "working" ? task.blocker : undefined;
   const running = task.status === "working" && blocker === undefined;
+  const allowable = blocker?.kind === "commandNotAllowed" && isAllowableCommand(blocker.command);
   const work = await loadTaskWork(company.id, task.id);
   const actions = (work?.steps ?? []).flatMap((s) => (s.kind === "say" ? [] : [{ ...s, kind: s.kind }]));
   const said = work?.steps.find((s) => s.kind === "say");
@@ -204,14 +206,19 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           <span className="n-tx">
             <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
             {blocker.kind === "commandNotAllowed" ? (
-              who !== undefined && <span>{w.runWhy(who.name)}</span>
+              who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
             ) : (
               <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
             )}
           </span>
           <span className="n-acts">
             {blocker.kind === "commandNotAllowed" ? (
-              <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
+              <>
+                <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutRun} disabled={!ready} errors={t.errors} />
+                {allowable && (
+                  <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
+                )}
+              </>
             ) : (
               <ActButton
                 action={carryOnAction.bind(null, company.id, task.id)}

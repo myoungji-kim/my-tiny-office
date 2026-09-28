@@ -359,6 +359,8 @@ export const en = {
     runStopped: "Stopped before running {code}",
     runWhy: (n: string) => "This project does not allow it. Allowing it lets every task here run it, and " + n + " carries on.",
     allowRun: "Allow and carry on",
+    withoutRun: "Carry on without it",
+    runNotAllowable: (n: string) => "It joins commands or uses special characters, so it cannot be allowed. " + n + " can carry on without it.",
     lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.",
     reconnect: "Reconnect",
     budgetWhy: "One task may spend up to $2 in one go. Carrying on continues in the same session.",

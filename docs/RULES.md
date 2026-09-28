@@ -154,7 +154,8 @@ has been running and, once finished, how long it took.
 **Blocked is not a status.** It is a mark on work in progress — an agent that
 stopped, a command the project does not allow, the spending cap reached — so it
 is a field on the task rather than a place in the flow, and the clock stops
-while it stands. Allowing the command carries on every task stopped on it.
+while it stands. Allowing the command carries on every task stopped on it;
+not allowing it carries this one on without it.
 
 ## Review
 

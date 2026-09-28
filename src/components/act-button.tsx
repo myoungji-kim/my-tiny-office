@@ -21,7 +21,7 @@ export function ActButton({
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   return (
-    <>
+    <span style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
       <button
         className={className}
         type="button"
@@ -36,10 +36,10 @@ export function ActButton({
         {label}
       </button>
       {error !== undefined && (
-        <span className="hint" role="alert" style={{ margin: 0 }}>
+        <span className="hint" role="alert" style={{ margin: 0, maxWidth: 280, textAlign: "right" }}>
           {error}
         </span>
       )}
-    </>
+    </span>
   );
 }

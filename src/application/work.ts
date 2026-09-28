@@ -9,12 +9,17 @@ import type { AppContext } from "./context";
 import { pickUpWork } from "./task";
 
 // Everything the employee has been taught, numbered, with what it is to them.
-export function memoryPrompt(employee: Employee, memories: readonly Memory[]): string {
+export function memoryPrompt(employee: Employee, memories: readonly Memory[], commands: readonly string[]): string {
   const own = memories.filter((m) => m.kind === "company" || m.employeeId === employee.id);
+  const allowed = commands.map((c) => "`" + c + "`").join(", ");
   const lines = [
     `You are ${employee.name}, working on one task in the current folder, which is your own copy of the project.`,
     "Work only in this folder. Do not commit, push or open pull requests: the user reviews your changes and applies them.",
-    "If you need a command you are not allowed to run, try it once; the user decides whether to allow it.",
+    "You are already in the folder: never cd. Look at files with Read, Glob and Grep, not with shell commands.",
+    commands.length === 0
+      ? "No shell command is allowed in this project."
+      : `The only shell commands allowed are these, each run on its own exactly as written, never joined with && ; | or redirected: ${allowed}.`,
+    "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
   ];
   if (own.length > 0) {
     lines.push("", "What you have been taught, which you follow:");
@@ -25,14 +30,18 @@ export function memoryPrompt(employee: Employee, memories: readonly Memory[]): s
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-export function taskPrompt(task: taskDomain.Task, continuing: boolean, lastEnd: RunEnd | undefined): string {
+export function taskPrompt(task: taskDomain.Task, continuing: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
   if (task.changesRequested !== undefined) {
     return continuing
       ? `The user sent your work back:\n\n${task.changesRequested}\n\nMake the changes.`
       : `${brief(task)}\n\nSomeone worked on this before, and the user sent it back:\n\n${task.changesRequested}`;
   }
   if (!continuing) return brief(task);
-  if (lastEnd?.kind === "denied") return `\`${lastEnd.command}\` is allowed now. Carry on with the task.`;
+  if (lastEnd?.kind === "denied") {
+    return commands.includes(lastEnd.command)
+      ? `\`${lastEnd.command}\` is allowed now. Carry on with the task.`
+      : `The user did not allow \`${lastEnd.command}\`. Carry on with the task without it.`;
+  }
   return "Carry on with the task where you left off.";
 }
 
@@ -137,11 +146,11 @@ export function createWorkSupervisor(deps: {
       denied: undefined,
       result: undefined,
     };
-    const memory = memoryPrompt(employee, await ctx.memories.findByCompany(task.companyId));
+    const memory = memoryPrompt(employee, await ctx.memories.findByCompany(task.companyId), project.commands);
     live.set(run.id, entry);
     try {
       entry.handle = deps.runtime.launch(
-        { cwd: prepared.path, prompt: taskPrompt(task, resume !== undefined, last?.end), memory, commands: project.commands, resume },
+        { cwd: prepared.path, prompt: taskPrompt(task, resume !== undefined, last?.end, project.commands), memory, commands: project.commands, resume },
         (event) => void serial(() => onEvent(entry, event)),
         () => void serial(() => onExit(entry)),
       );

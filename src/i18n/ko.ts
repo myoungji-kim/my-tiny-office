@@ -361,6 +361,8 @@ export const ko: Dictionary = {
     runStopped: "{code} 실행 전에 멈췄어요",
     runWhy: (n: string) => "이 프로젝트에서 허용한 명령이 아니에요. 허용하면 이 프로젝트의 업무는 앞으로 이 명령을 쓸 수 있고, " + withParticle(n, "이", "가") + " 이어서 해요.",
     allowRun: "허용하고 이어서",
+    withoutRun: "허용하지 않고 이어서",
+    runNotAllowable: (n: string) => "여러 명령을 이어 붙였거나 특수 문자가 든 명령이라 허용할 수 없어요. " + withParticle(n, "이", "가") + " 이 명령 없이 이어서 할 수 있어요.",
     lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.",
     reconnect: "다시 연결",
     budgetWhy: "업무 하나가 한 번에 $2까지 쓸 수 있어요. 이어서 하면 같은 세션에서 계속해요.",

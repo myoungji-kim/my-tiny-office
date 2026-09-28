@@ -115,7 +115,6 @@ describe("the work supervisor", () => {
 
     expect(launched[0].stopped).toBe(true);
     expect(await statusOf(id)).toMatchObject({ status: "working", blocker: { kind: "commandNotAllowed", command: "npm run e2e" } });
-    await expect(carryOn(ctx, id)).resolves.toMatchObject({ ok: false, reason: "commandNotAllowed" });
 
     const task = await statusOf(id);
     assert(task !== undefined);
@@ -123,6 +122,21 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "`npm run e2e` is allowed now. Carry on with the task.", commands: ["npm test", "npm run e2e"] });
+  });
+
+  it("carries on without a command the user does not allow, and tells the agent how commands run", async () => {
+    const id = await oneTask();
+    await settle();
+    expect(launched[0].input.memory).toContain("never cd");
+    expect(launched[0].input.memory).toContain("`npm test`");
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "denied", command: "cd x && git status" });
+    await settle();
+
+    assert((await carryOn(ctx, id)).ok);
+    await settle();
+
+    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The user did not allow `cd x && git status`. Carry on with the task without it." });
   });
 
   it("marks a run whose process is gone as disconnected, and reconnects to its session", async () => {

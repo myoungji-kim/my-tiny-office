@@ -86,7 +86,12 @@ like); the user adds and removes entries in the project dialog.
 - A task that needs a command not on the list is denied, and the run's
   `permission_denied` event becomes the task's blocked reason. The user can
   allow it from the task's page; it is added to the project, not to the one
-  task, and the run resumes.
+  task, and the run resumes. Or the run resumes without it, told it was not
+  allowed; that is the only way on for a command no entry could be, such as
+  one chained with `&&`.
+- Every session is told it is already in its folder, to run each allowed
+  command on its own as written, and which commands those are, so it does not
+  reach for `cd … && …` in the first place.
 
 ## 4. Folders
 

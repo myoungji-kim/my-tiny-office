@@ -150,12 +150,9 @@ export async function approveTask(
   return applied;
 }
 
-// A stopped agent carries on in its own session. A command it may not run is
-// the project's to allow, not the task's.
-export const carryOn = (ctx: AppContext, taskId: TaskId) =>
-  changeTask(ctx, taskId, (t) =>
-    t.blocker?.kind === "commandNotAllowed" ? { ok: false as const, reason: "commandNotAllowed" as const } : taskDomain.unblockTask(t, eventId(ctx), ctx.now()),
-  );
+// A stopped agent carries on in its own session; one stopped on a command
+// carries on without it, since allowing a command is the project's to do.
+export const carryOn = (ctx: AppContext, taskId: TaskId) => changeTask(ctx, taskId, (t) => taskDomain.unblockTask(t, eventId(ctx), ctx.now()));
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
   changeTask(ctx, taskId, (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()));
