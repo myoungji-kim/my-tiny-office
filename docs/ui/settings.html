@@ -114,6 +114,16 @@
 
         <div class="panel">
           <div class="panel-hd">
+            <h2 data-t="workTitle">업무 시작</h2>
+            <p data-t="workWhy">켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.</p>
+          </div>
+          <div class="panel-bd">
+            <div class="opts" role="radiogroup" id="work" data-a="workTitle" aria-label="업무 시작"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
             <h2 data-t="langTitle">언어</h2>
             <p data-t="langWhy">화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.</p>
           </div>
@@ -208,6 +218,8 @@
           "내보낸 회사 파일에는 업무 기록이 들어 있어요. 코드 조각도 담길 수 있으니 믿는 곳으로만 옮겨 주세요.",
         ] },
       ],
+      workTitle: "업무 시작", workWhy: "켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.",
+      workAuto: "자동으로", workPaused: "멈춤",
       langTitle: "언어", langWhy: "화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.",
       dataTitle: "이 회사의 데이터", dataWhy: "직원, 기억, 프로젝트, 업무가 모두 이 파일 하나에 있어요. 회사마다 파일이 따로라 서로 섞이지 않아요.",
       dataHint: "코드 폴더와 따로 있어서 브랜치를 바꾸거나 저장소를 지워도 회사는 남아요.",
@@ -264,6 +276,8 @@
           "An exported company file holds the history of its work, possibly with pieces of code. Move it only somewhere you trust.",
         ] },
       ],
+      workTitle: "Starting work", workWhy: "When on, whoever is free takes the next task from the backlog. When paused, new work only queues, and work in progress carries on.",
+      workAuto: "Automatically", workPaused: "Paused",
       langTitle: "Language", langWhy: "Changes the words on screen. What you wrote yourself, like names, stays as written.",
       dataTitle: "This company's data", dataWhy: "Its people, memory, projects and work all live in this one file. Each company has its own, so nothing mixes.",
       dataHint: "It lives apart from the code, so switching branches or deleting the checkout leaves the company alone.",
@@ -344,6 +358,25 @@
   };
   addEventListener("hashchange", showView);
   showView();
+
+  /* ── starting work ───────────────────────────────────────────── */
+  // Paused, nobody free takes new work; every screen then says so (DESIGN.md).
+  const work = document.getElementById("work");
+  let paused = false;
+  const renderWork = () => {
+    work.replaceChildren();
+    for (const [on, label] of [[false, t().workAuto], [true, t().workPaused]]) {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", String(on === paused));
+      b.textContent = label;
+      b.addEventListener("click", () => { paused = on; renderWork(); });
+      work.appendChild(b);
+    }
+  };
+  renderWork();
 
   /* ── language ────────────────────────────────────────────────── */
   const langs = document.getElementById("langs");

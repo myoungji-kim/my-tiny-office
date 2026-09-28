@@ -8,6 +8,8 @@ export interface AppSettings {
   readonly lastCompanyId?: string;
   // the language chosen here; without it, the browser's
   readonly locale?: "ko" | "en";
+  // nobody free takes new work while this is set; work in progress carries on
+  readonly workPaused?: boolean;
 }
 
 const FILE = "settings.json";
@@ -25,10 +27,11 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { lastCompanyId, locale } = raw as Record<string, unknown>;
+  const { lastCompanyId, locale, workPaused } = raw as Record<string, unknown>;
   return {
     ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
     ...(locale === "ko" || locale === "en" ? { locale } : {}),
+    ...(workPaused === true ? { workPaused } : {}),
   };
 }
 

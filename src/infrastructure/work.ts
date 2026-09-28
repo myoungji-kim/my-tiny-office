@@ -3,6 +3,7 @@ import { createWorkSupervisor, type WorkSupervisor } from "../application/work";
 
 import { createAppContext } from "./app-context";
 import { getCompanyFiles } from "./persistence/company-files";
+import { readSettings } from "./persistence/settings";
 import { claudeCodeStatus } from "./runtime/claude-code-status";
 import { claudeCodeRuntime } from "./runtime/claude-code-run";
 import { gitWorkspace } from "./workspace/git";
@@ -22,6 +23,7 @@ export function getWork(): WorkSupervisor {
       return files.ids().map((companyId) => ({ companyId, ctx: createAppContext(files.open(companyId)) }));
     },
     ready: async () => isReady(await claudeCodeStatus()),
+    picksUp: () => readSettings(getCompanyFiles().directory).workPaused !== true,
     onError: (error) => console.error("[work]", error),
   });
   return cache.myTinyOfficeWork;

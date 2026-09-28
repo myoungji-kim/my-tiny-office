@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { setLocaleAction, switchCompanyAction } from "../app/actions";
+import { setLocaleAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
 import { deleteCompanyAction } from "../app/company-actions";
 import { getDictionary, type Locale } from "../i18n";
 
@@ -27,6 +27,20 @@ export function LanguagePicker({
           {names[code]}
         </button>
       ))}
+    </div>
+  );
+}
+
+export function WorkPicker({ paused, label, auto, pause }: { readonly paused: boolean; readonly label: string; readonly auto: string; readonly pause: string }) {
+  const [, start] = useTransition();
+  return (
+    <div className="opts" role="radiogroup" aria-label={label}>
+      <button className="opt" type="button" role="radio" aria-checked={!paused} onClick={() => start(() => setWorkPausedAction(false))}>
+        {auto}
+      </button>
+      <button className="opt" type="button" role="radio" aria-checked={paused} onClick={() => start(() => setWorkPausedAction(true))}>
+        {pause}
+      </button>
     </div>
   );
 }

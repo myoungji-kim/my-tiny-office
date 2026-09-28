@@ -27,6 +27,7 @@ let launched: Launched[];
 let workspaceWorks: boolean;
 let committed: string[];
 let ready: boolean;
+let picksUp: boolean;
 let supervisor: WorkSupervisor;
 
 const runtime: AgentRuntime = {
@@ -62,7 +63,8 @@ beforeEach(async () => {
   committed = [];
   workspaceWorks = true;
   ready = true;
-  supervisor = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => ready });
+  picksUp = true;
+  supervisor = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => ready, picksUp: () => picksUp });
   await createCompany(ctx, { id: companyId, name: "TinySoft" });
 });
 
@@ -144,7 +146,7 @@ describe("the work supervisor", () => {
     await settle();
     launched[0].emit({ kind: "session", sessionId: SESSION });
     // what the app finds after a restart: the run recorded, its process gone
-    const other = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => true });
+    const other = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => true, picksUp: () => true });
     await other.kick();
 
     expect(await statusOf(id)).toMatchObject({ blocker: { kind: "disconnected" } });
@@ -198,6 +200,26 @@ describe("the work supervisor", () => {
     await settle();
     expect(launched).toEqual([]);
     expect(await statusOf(id)).toMatchObject({ status: "working", blocker: { kind: "workspaceUnavailable" } });
+  });
+
+  it("takes no new work while paused, and carries on what was stopped", async () => {
+    const id = await oneTask();
+    picksUp = false;
+    await settle();
+    expect(launched).toEqual([]);
+    expect(await statusOf(id)).toMatchObject({ status: "backlog" });
+
+    picksUp = true;
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2 });
+    launched[0].exit();
+    await settle();
+    picksUp = false;
+    assert((await carryOn(ctx, id)).ok);
+    await settle();
+
+    expect(launched[1].input).toMatchObject({ resume: SESSION });
   });
 
   it("ends a run that the budget stopped as blocked until the user carries on", async () => {

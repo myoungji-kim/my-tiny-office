@@ -5,13 +5,13 @@ import { ClaudeChecks } from "../../components/claude-checks";
 import { Head } from "../../components/head";
 import { Icon } from "../../components/icons";
 import { RecheckButton } from "../../components/recheck-button";
-import { CopyButton, DataActions, DeleteCompany, LanguagePicker } from "../../components/settings-parts";
+import { CopyButton, DataActions, DeleteCompany, LanguagePicker, WorkPicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
 import { toCompanyId } from "../../domain/ids";
 import { getDictionary } from "../../i18n";
 import { getCompanyFiles } from "../../infrastructure/persistence/company-files";
 import pkg from "../../../package.json";
-import { companyScreen, param, type SearchParams } from "../screen-data";
+import { companyScreen, param, workPaused, type SearchParams } from "../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +112,16 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
               {w.guideOpen}
             </Link>
           </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-hd">
+          <h2>{w.workTitle}</h2>
+          <p>{w.workWhy}</p>
+        </div>
+        <div className="panel-bd">
+          <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />
         </div>
       </div>
 

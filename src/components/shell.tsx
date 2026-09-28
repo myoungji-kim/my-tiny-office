@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { ClaudeCodeStatus } from "../application/runtime-status";
+import { workPaused } from "../app/screen-data";
 import { getDictionary, type Locale } from "../i18n";
 import type { CompanyOption, EmployeeView } from "../server/view-model";
 
@@ -9,6 +10,7 @@ import { AgentMark } from "./agent-mark";
 import { CompanyMenu } from "./company-menu";
 import { LiveRefresh } from "./live-refresh";
 import { statusClass } from "./presence";
+import { PausedNotice } from "./paused-notice";
 import { RuntimeNotice } from "./runtime-notice";
 import { Sprite } from "./sprite";
 
@@ -142,6 +144,7 @@ export function Shell({
         {head}
         <div className="body">
           <RuntimeNotice status={status} words={t.claude} />
+          {workPaused() && <PausedNotice title={t.settings.pausedTitle} why={t.settings.pausedWhy} resume={t.settings.resumeWork} />}
           {children}
         </div>
       </div>

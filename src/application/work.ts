@@ -84,6 +84,8 @@ export function createWorkSupervisor(deps: {
   readonly workspace: Workspace;
   readonly companies: () => readonly CompanyWork[];
   readonly ready: () => Promise<boolean>;
+  // whether whoever is free takes new work; a run already under way is not new work
+  readonly picksUp: () => boolean;
   readonly onError?: (error: unknown) => void;
 }) {
   const live = new Map<RunId, LiveRun>();
@@ -213,7 +215,7 @@ export function createWorkSupervisor(deps: {
     for (const company of companies) {
       await reconcile(company);
       if (!ready) continue;
-      await pickUpWork(company.ctx, company.companyId);
+      if (deps.picksUp()) await pickUpWork(company.ctx, company.companyId);
       const running = new Set([...live.values()].map((e) => e.taskId));
       for (const task of await company.ctx.tasks.findByCompany(company.companyId)) {
         if (wantsRun(task, undefined) && !running.has(task.id)) await launch(company.ctx, task);

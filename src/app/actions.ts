@@ -15,6 +15,7 @@ import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
+import { getWork } from "../infrastructure/work";
 
 // The company the screens open next; it stays until another is chosen.
 export async function switchCompanyAction(companyId: string): Promise<void> {
@@ -65,6 +66,14 @@ export async function setLocaleAction(locale: string): Promise<void> {
   if (locale !== "ko" && locale !== "en") return;
   const files = getCompanyFiles();
   writeSettings(files.directory, { ...readSettings(files.directory), locale });
+  revalidatePath("/", "layout");
+}
+
+// Pausing stops anyone taking new work on this computer; resuming lets them again at once.
+export async function setWorkPausedAction(paused: boolean): Promise<void> {
+  const files = getCompanyFiles();
+  writeSettings(files.directory, { ...readSettings(files.directory), workPaused: paused === true || undefined });
+  void getWork().kick();
   revalidatePath("/", "layout");
 }
 

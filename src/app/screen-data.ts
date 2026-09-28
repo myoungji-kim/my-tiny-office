@@ -12,6 +12,8 @@ export async function currentLocale(): Promise<Locale> {
   return readSettings(getCompanyFiles().directory).locale ?? resolveLocale((await headers()).get("accept-language"));
 }
 
+export const workPaused = (): boolean => readSettings(getCompanyFiles().directory).workPaused === true;
+
 export async function screenData() {
   const locale = await currentLocale();
   const [office, status] = await Promise.all([loadOffice(), claudeCodeStatus()]);
