@@ -124,6 +124,22 @@
 
   .said-hd h2 { margin-right: auto; }
 
+  .said-bd { position: relative; padding-right: 50px; }
+
+  .copy-ic { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
+
+  .copy-ic svg { width: 15px; height: 15px; }
+
+  .copy-ic:hover { color: var(--ink); background: var(--subtle); }
+
+  .copy-ic.done { color: var(--ok); opacity: 1; }
+
+  .said-bd:hover .copy-ic, .copy-ic:focus-visible { opacity: 1; }
+
+  .copy-ic:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  @media (hover: none) { .copy-ic { opacity: 1; } }
+
   .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 
   .md { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
@@ -1023,9 +1039,8 @@
     const now = working && task.steps?.length ? panel(k.now, stepRow(task.steps[0], true)) : "";
     // What they said reads formatted; the plain text is one choice away, and copyable.
     const said = task.said && who ? `<div class="panel"><div class="panel-hd said-hd"><h2>${k.said(who.name)}</h2>
-          <div class="opts" role="radiogroup" aria-label="${k.saidAs}"><button class="opt" type="button" role="radio" aria-checked="true" data-said="md">${k.formatted}</button><button class="opt" type="button" role="radio" aria-checked="false" data-said="raw">${k.plain}</button></div>
-          <button class="btn btn-secondary btn-sm" type="button" data-copy-said>${t().copy}</button></div>
-        <div class="panel-bd"><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div>` : "";
+          <div class="opts" role="radiogroup" aria-label="${k.saidAs}"><button class="opt" type="button" role="radio" aria-checked="true" data-said="md">${k.formatted}</button><button class="opt" type="button" role="radio" aria-checked="false" data-said="raw">${k.plain}</button></div></div>
+        <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div>` : "";
 
     const changes = task.status === "backlog" ? "" : panel(k.changed,
       (task.files?.length
@@ -1074,7 +1089,11 @@
         view.querySelector(".said-raw").hidden = b.dataset.said !== "raw";
       });
     }
-    view.querySelector("[data-copy-said]")?.addEventListener("click", () => navigator.clipboard?.writeText(tx(task.said)));
+    view.querySelector("[data-copy-said]")?.addEventListener("click", (e) => {
+      navigator.clipboard?.writeText(tx(task.said));
+      e.currentTarget.classList.add("done");
+      e.currentTarget.innerHTML = TASK_ICON.used;
+    });
     view.querySelector("[data-reconnect]")?.addEventListener("click", () => {
       task.blocked = undefined;
       if (who) who.agentLost = false;

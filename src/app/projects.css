@@ -116,6 +116,22 @@
 
   .said-hd h2 { margin-right: auto; }
 
+  .said-bd { position: relative; padding-right: 50px; }
+
+  .copy-ic { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
+
+  .copy-ic svg { width: 15px; height: 15px; }
+
+  .copy-ic:hover { color: var(--ink); background: var(--subtle); }
+
+  .copy-ic.done { color: var(--ok); opacity: 1; }
+
+  .said-bd:hover .copy-ic, .copy-ic:focus-visible { opacity: 1; }
+
+  .copy-ic:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  @media (hover: none) { .copy-ic { opacity: 1; } }
+
   .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 
   .md { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
