@@ -82,14 +82,25 @@ like); the user adds and removes entries in the project dialog.
   imported file cannot widen it.
 - Allowing a command allows everything it does. `npm test` runs the project's
   own scripts, so the list is only as safe as the repository — **and the agent
-  can edit that repository**: it may change what `test` runs in
-  `package.json` and then run `npm test`. An allowed script is therefore a way
-  out of the boundary for an agent that has been turned, by the prompt
-  injection of §5, against the user: it runs with the user's rights and can
-  reach the network. The dialog and the guide say so. Closing it needs
-  Claude Code's own sandbox for those commands (network and filesystem limits
-  on what Bash runs); that is to be measured before it is relied on, and until
-  then this is the boundary's known gap.
+  writes that repository**: the tests `npm test` runs, the configs it reads,
+  the `test` script in `package.json` itself. An allowed command therefore
+  runs code the agent wrote, with the user's rights and the network, which is
+  a way out of the boundary for an agent turned against the user by the prompt
+  injection of §5. Forbidding edits to `package.json` would not close it; the
+  tests are code too. The dialog and the guide say so.
+- **Closing it is the OS sandbox's job, and native Windows has none.** Claude
+  Code's sandbox confines every Bash, PowerShell and Monitor command and its
+  children — writes to the working directory, no network — on macOS, Linux and
+  WSL2; the documentation states native Windows is not supported. Where it
+  exists the launch would add, once measured:
+  `{"sandbox":{"enabled":true,"failIfUnavailable":true,"allowUnsandboxedCommands":false,"network":{"allowedDomains":[],"strictAllowlist":true}}}`
+  — `failIfUnavailable` so a missing sandbox fails the run rather than
+  silently running without one, and `allowUnsandboxedCommands: false` so the
+  model cannot retry a blocked command outside it. It also reads the whole
+  machine by default, so credentials need `sandbox.credentials` or
+  `filesystem.denyRead`. Until it is measured on one of those platforms, and
+  on native Windows for good, this is the boundary's known gap: allow only the
+  commands a task needs, in repositories you trust.
 - A task that needs a command not on the list is denied, and the run's
   `permission_denied` event becomes the task's blocked reason. The user can
   allow it from the task's page; it is added to the project, not to the one
