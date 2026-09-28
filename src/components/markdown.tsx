@@ -29,7 +29,7 @@ const cells = (line: string) =>
 const startsBlock = (line: string, next: string | undefined) =>
   HEADING.test(line) || ITEM.test(line) || FENCE.test(line) || line.startsWith(">") || (ROW.test(line) && next !== undefined && RULE.test(next));
 
-export function parseMarkdown(text: string): Block[] {
+function parseMarkdown(text: string): Block[] {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const blocks: Block[] = [];
   let i = 0;

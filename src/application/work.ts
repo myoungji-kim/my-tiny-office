@@ -9,7 +9,7 @@ import type { AppContext } from "./context";
 import { pickUpWork } from "./task";
 
 // Everything the employee has been taught, numbered, with what it is to them.
-export function memoryPrompt(employee: Employee, memories: readonly Memory[], commands: readonly string[]): string {
+function memoryPrompt(employee: Employee, memories: readonly Memory[], commands: readonly string[]): string {
   const own = memories.filter((m) => m.kind === "company" || m.employeeId === employee.id);
   const allowed = commands.map((c) => "`" + c + "`").join(", ");
   const lines = [
@@ -30,7 +30,7 @@ export function memoryPrompt(employee: Employee, memories: readonly Memory[], co
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-export function taskPrompt(task: taskDomain.Task, continuing: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
+function taskPrompt(task: taskDomain.Task, continuing: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
   if (task.changesRequested !== undefined) {
     return continuing
       ? `The user sent your work back:\n\n${task.changesRequested}\n\nMake the changes.`

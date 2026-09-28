@@ -10,7 +10,7 @@ import { findExecutable, startProcess } from "../process/run";
 const MAX_BUDGET_USD = "2";
 
 const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-export const isSessionId = (value: unknown): value is string => typeof value === "string" && SESSION_ID.test(value);
+const isSessionId = (value: unknown): value is string => typeof value === "string" && SESSION_ID.test(value);
 
 // Exactly the launch SECURITY.md measured; anything added here is measured first.
 export function launchArgs(input: { readonly commands: readonly string[]; readonly memoryFile: string; readonly resume: string | undefined }): string[] {
