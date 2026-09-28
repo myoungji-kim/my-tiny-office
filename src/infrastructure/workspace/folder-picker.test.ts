@@ -38,7 +38,8 @@ describe("pickFolder", () => {
     const windows = deps("win32", ["powershell"], answer("C:\\Users\\me\\코드"));
 
     await expect(pickFolder(windows)).resolves.toEqual({ ok: true, path: "C:\\Users\\me\\코드" });
-    expect(windows.calls[0].slice(1, 5)).toEqual(["-NoProfile", "-NonInteractive", "-STA", "-Command"]);
+    expect(windows.calls[0].slice(1, 5)).toEqual(["-NoProfile", "-NonInteractive", "-STA", "-EncodedCommand"]);
+    expect(Buffer.from(windows.calls[0][5], "base64").toString("utf16le")).toContain("IFileDialog");
   });
 
   it("tells a cancel from a computer with no dialog", async () => {

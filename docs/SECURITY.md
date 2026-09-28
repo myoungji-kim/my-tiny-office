@@ -92,8 +92,8 @@ like); the user adds and removes entries in the project dialog.
   in §1 and the command list beside it. Creating or saving the project is the
   consent.
 - The browser cannot hand over a path, so 고르기 asks the server to open the
-  operating system's own folder dialog on this computer (PowerShell's
-  `FolderBrowserDialog` on Windows, `osascript` on macOS, `zenity` or `kdialog`
+  operating system's own folder dialog on this computer (the Explorer dialog,
+  `IFileOpenDialog` in folder mode, through PowerShell on Windows; `osascript` on macOS, `zenity` or `kdialog`
   on Linux) — a fixed script run without a shell, one dialog at a time — and a
   path can be typed instead. Either way the server checks it: an absolute path
   (a leading `~` is the home folder) to a folder, not a file, that the app can
