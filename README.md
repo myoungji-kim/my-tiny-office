@@ -86,6 +86,7 @@ my-tiny-office/
     ├── i18n/
     ├── infrastructure/
     ├── server/
+    ├── ui/                  the cast and tiles, drawn from docs/ui/system.js
     └── proxy.ts             refuses requests not addressed to this machine
 ```
 
@@ -103,7 +104,7 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
-npm run check:ui   # when docs/ui changed
+npm run check:ui   # when docs/ui or the app's screen styles changed
 ```
 
 Keep the office honest: show only work that is really happening.

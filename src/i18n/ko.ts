@@ -2,10 +2,6 @@ import type { Dictionary } from "./dictionary";
 import { hasBatchim, withParticle } from "./korean";
 
 export const ko: Dictionary = {
-  app: {
-    title: "마이 타이니 오피스",
-    tagline: "다들 일하고 있어요. 아마도요.",
-  },
   nav: {
     office: "사무실",
     projects: "프로젝트",
@@ -244,29 +240,6 @@ export const ko: Dictionary = {
     localization: "로컬라이제이션",
     product: "기획",
     quality: "품질",
-  },
-  work: {
-    heading: "업무",
-    newTask: "새 업무",
-    creating: "만드는 중...",
-    title: "제목",
-    titlePlaceholder: "결제 API 구현",
-    description: "설명",
-    descriptionPlaceholder: "결제 엔드포인트와 검증 추가",
-    optional: "선택",
-    priority: "우선순위",
-    project: "프로젝트",
-    newProject: "새 프로젝트",
-    projectName: "이름",
-    projectNamePlaceholder: "결제 개편",
-    noProjects: "먼저 프로젝트를 만들어 주세요. 업무는 프로젝트 안에 적어요.",
-    empty: "아직 업무가 없어요.",
-    minutes: (n: number) => n + "분",
-    unassigned: "담당자 없음",
-    assignTo: "담당자 지정",
-    assign: "지정",
-    assigning: "지정하는 중...",
-    noEmployeesToAssign: "업무를 맡기려면 먼저 직원을 채용하세요.",
   },
   company: {
     title: "회사",
@@ -555,13 +528,6 @@ export const ko: Dictionary = {
     reviewing: "검토 중",
     onLeave: "휴가 중",
   },
-  taskStatus: {
-    backlog: "대기열",
-    working: "진행 중",
-    approval: "승인 대기",
-    done: "완료",
-    held: "보류",
-  },
   priority: {
     low: "낮음",
     normal: "보통",
@@ -593,7 +559,6 @@ export const ko: Dictionary = {
     reasonRequired: "이유를 적어 주세요.",
     taskNotEditable: "진행 중이거나 끝난 업무는 여기서 고칠 수 없어요.",
     taskNotHeld: "보류한 업무가 아니에요.",
-    commandAlreadyAllowed: "이미 허용한 명령이에요.",
     taskNotHoldable: "지금은 이 업무를 보류할 수 없어요.",
     taskNotBlocked: "이미 다시 진행 중이에요.",
     claudeCodeNotReady: "먼저 Claude Code가 준비돼야 해요.",
