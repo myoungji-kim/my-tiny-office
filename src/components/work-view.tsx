@@ -142,7 +142,7 @@ export function WorkView({
             <Field label={t.work.title}>
               <TextInput name="title" required placeholder={t.work.titlePlaceholder} />
             </Field>
-            <Field label={t.work.description} hint={t.onboarding.optional}>
+            <Field label={t.work.description} hint={t.work.optional}>
               <TextArea name="description" placeholder={t.work.descriptionPlaceholder} />
             </Field>
             <PrioritySelect t={t} />

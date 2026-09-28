@@ -588,9 +588,10 @@ measured flags behind it.
 
 - **What is not built yet.** In `src/domain` and `src/application`: letting
   someone go, deleting a project or a task, the activity feed and the
-  memory-used report, and a company's export, import and delete. What needs the
+  memory-used report, and a company's export, import and delete — so first run
+  offers 새 회사 만들기 only, without 기존 회사 가져오기. What needs the
   runtime: when a review is suggested, stopping a held task's agent, and a
-  task's worktree and branch. The screens in `src/components` are the
+  task's worktree and branch. First run is built from `docs/ui/first-run.html`; the other screens in `src/components` are the
   placeholder until they are rebuilt from `docs/ui`.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,

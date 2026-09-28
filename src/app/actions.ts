@@ -3,21 +3,22 @@
 import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
 import { hireEmployee } from "../application/employee";
 import { createProject } from "../application/project";
+import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
 import { assignTask, createTask } from "../application/task";
 import { MAX_COMPANY_NAME } from "../domain/company";
-import { SPECIES, type Species } from "../domain/employee";
+import { MAX_EMPLOYEE_NAME, SPECIES, type Species } from "../domain/employee";
 import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, type CompanyId } from "../domain/ids";
 import { checkName } from "../domain/name";
 import type { Priority } from "../domain/project";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
+import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 
 export interface ActionState {
   readonly error?: string;
@@ -51,31 +52,48 @@ function priority(formData: FormData): Priority {
   return value === "low" || value === "high" ? value : "normal";
 }
 
-export async function createCompanyAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const name = text(formData, "name");
-  // Checked before the company's file is made, so a bad name leaves no file behind.
-  const named = checkName(name, MAX_COMPANY_NAME);
-  if (!named.ok) {
-    return { error: named.reason };
-  }
+export interface StartCompanyInput {
+  readonly companyName: string;
+  readonly employeeName: string;
+  readonly species: string;
+  readonly role: string;
+}
+
+export type StartCompanyResult = { readonly error: string } | { readonly companyId: string };
+
+// First run: the company and its first hire, made only once Claude Code is
+// ready. Everything is checked before the company's file is made, so a
+// refused start leaves nothing behind.
+export async function startCompanyAction(input: StartCompanyInput): Promise<StartCompanyResult> {
+  if (!isReady(await claudeCodeStatus())) return { error: "claudeCodeNotReady" };
+  const company = checkName(String(input.companyName), MAX_COMPANY_NAME);
+  if (!company.ok) return { error: company.reason };
+  const employee = checkName(String(input.employeeName), MAX_EMPLOYEE_NAME);
+  if (!employee.ok) return { error: employee.reason };
+  const species = SPECIES.find((s) => s === input.species);
+  if (species === undefined) return { error: "speciesUnknown" };
 
   const files = getCompanyFiles();
   const id = toCompanyId(randomUUID());
-  const created = await createCompany(createAppContext(files.create(id)), {
-    id,
-    name,
-    description: optionalText(formData, "description"),
-  });
-  if (!created.ok) {
-    return { error: created.reason };
-  }
-  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: id });
+  const ctx = createAppContext(files.create(id));
+  const created = await createCompany(ctx, { id, name: company.name });
+  if (!created.ok) return { error: created.reason };
+  const roles = await ctx.roles.findByCompany(id);
+  const role = roles.find((r) => r.name === input.role) ?? roles[0];
+  const hired = await hireEmployee(ctx, { companyId: id, name: employee.name, species, roleId: role.id });
+  if (!hired.ok) return { error: hired.reason };
 
+  // No revalidation here: the wizard still has its arrival to show, and the
+  // office loads fresh when the user goes there.
+  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: id });
+  return { companyId: id };
+}
+
+// 다시 확인: asks Claude Code again rather than trusting the last answer.
+export async function recheckClaudeCodeAction(): Promise<ClaudeCodeStatus> {
+  const status = await claudeCodeStatus({ refresh: true });
   revalidatePath("/");
-  redirect(`/?company=${encodeURIComponent(id)}`);
+  return status;
 }
 
 export async function hireEmployeeAction(

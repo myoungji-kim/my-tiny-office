@@ -147,7 +147,7 @@ agents, so it is a target in its own right.
     Output is capped at 8 MB.
 - **Output.** Agent output, file names, diffs and anything else from a run is
   rendered as text. Never through `dangerouslySetInnerHTML`.
-- **Claude Code's sign-in** (step 3). Read from `claude auth status --json`, and only
+- **Claude Code's sign-in.** Read from `claude auth status --json`, and only
   `loggedIn`, `authMethod` and `subscriptionType`. The email and organisation
   it also returns are not read, stored or logged.
 - **Secrets.** No token field, no API key, no credential store is read. Nothing

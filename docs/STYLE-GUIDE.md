@@ -357,7 +357,7 @@ A page keeps only what is its own. Both are plain, relative `<link>` and
 Anything two pages need — a dialog, a menu, a helper — lives in these files,
 never as a copy.
 
-`npm run check:ui` runs four checks over what is left:
+`npm run check:ui` runs six checks over what is left:
 
 - **parse** — every inline script and `system.js` must still parse
 - **parity** — a selector two product screens still both define must agree in
@@ -371,6 +371,13 @@ never as a copy.
   redefining a selector, redeclaring a name, or declaring a token of its own
 - **verify-docs** — the token table here must match `system.css`, and the cast
   claims must match `system.js`
+- **cast** — `src/ui/cast.json`, which the app draws from, must be what
+  `system.js` draws; `npm run ui:cast` writes it
+- **app-styles** — a CSS file in `src/app` that names a page on its first line
+  carries that page's own rules, and each must match the page's exactly
+
+The app imports `system.css` itself, so the tokens and components have one
+source; only a screen's own rules are carried, and checked.
 
 A check reports drift; it does not prevent it. When something is shared, move it
 into `system.css` or `system.js` rather than adding a check that the copies

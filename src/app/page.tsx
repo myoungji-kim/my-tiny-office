@@ -2,11 +2,13 @@ import { headers } from "next/headers";
 
 import { CompanyView } from "../components/company-view";
 import { OfficeView } from "../components/office-view";
-import { Onboarding } from "../components/onboarding";
+import { FirstRun } from "../components/first-run";
 import { PeopleView } from "../components/people-view";
 import { Shell, views, type View } from "../components/shell";
 import { WorkView } from "../components/work-view";
+import { STARTING_ROLES } from "../domain/organisation";
 import { getDictionary, resolveLocale } from "../i18n";
+import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 import { loadOffice } from "../server/view-model";
 
 export const dynamic = "force-dynamic";
@@ -31,9 +33,11 @@ export default async function HomePage({
   const locale = resolveLocale((await headers()).get("accept-language"));
   const t = getDictionary(locale);
 
-  const office = await loadOffice(single(params, "company"));
+  const [office, status] = await Promise.all([loadOffice(single(params, "company")), claudeCodeStatus()]);
   if (office.company === undefined) {
-    return <Onboarding t={t} />;
+    return (
+      <FirstRun locale={locale} status={status} roles={STARTING_ROLES} words={t.firstRun} claude={t.claude} errors={t.errors} />
+    );
   }
 
   const { company, companies, employees, roles, projects, tasks } = office;
@@ -42,6 +46,7 @@ export default async function HomePage({
   return (
     <Shell
       t={t}
+      status={status}
       companies={companies}
       companyId={company.id}
       companyName={company.name}

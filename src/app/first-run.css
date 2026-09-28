@@ -1,0 +1,64 @@
+/* from docs/ui/first-run.html — check:ui fails if a rule here differs from that page's */
+
+body:has(> .wizard) { min-height: 100vh; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+
+.wizard {
+    width: 100%; max-width: 480px;
+    background: var(--surface); border-radius: 18px;
+    box-shadow: 0 1px 2px rgb(20 20 25 / .05), 0 12px 40px rgb(20 20 25 / .08);
+    overflow: hidden;
+  }
+
+.steps { display: flex; gap: 5px; padding: 16px 24px 0; }
+
+.steps i { flex: 1; height: 3px; border-radius: 999px; background: var(--sunk); }
+
+.steps i.on { background: var(--ink); }
+
+.steps i.done { background: var(--line-2); }
+
+.pane { padding: 22px 24px 24px; }
+
+.brand { display: flex; flex-direction: column; align-items: center; gap: 11px; padding: 6px 0 4px; }
+
+.peek {
+    margin: 16px 0 0; border-radius: var(--r-card); overflow: hidden;
+    background: var(--subtle); border: 1px solid var(--line);
+    display: grid; place-items: center; padding: 10px;
+  }
+
+.peek canvas { display: block; image-rendering: pixelated; border-radius: 6px; }
+
+.brand .logo { width: 44px; height: 44px; border-radius: 13px; background: var(--ink); display: grid; place-items: center; }
+
+.brand .logo svg { width: 22px; height: 22px; color: #fff; }
+
+.wordmark { font-size: 14px; font-weight: 700; letter-spacing: .12em; }
+
+.lede { margin: 7px 0 0; color: var(--muted); font-size: 15px; text-align: center; }
+
+.sub { display: block; margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+
+.acts { display: flex; gap: 8px; margin-top: 22px; }
+
+.acts .btn-primary { flex: 1; }
+
+.sub + .notice { margin-top: 18px; }
+
+.hired {
+    display: flex; align-items: center; gap: 13px; margin: 18px 0 14px;
+    border: 1px solid var(--line); border-radius: var(--r-card); padding: 14px;
+  }
+
+.h-av { position: relative; width: 52px; height: 52px; border-radius: 14px; background: var(--subtle); display: grid; place-items: center; flex: none; }
+
+.h-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); background: var(--ok); }
+
+.h-name { display: block; font-size: 17px; font-weight: 600; line-height: 1.35; }
+
+.h-role { display: block; font-size: 14px; color: var(--muted); }
+
+/* the page's bare h1 and h2, scoped here to the wizard */
+.wizard h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.01em; text-align: center; }
+
+.wizard h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }

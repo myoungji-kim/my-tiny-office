@@ -1,15 +1,5 @@
+import type { ClaudeCodeStatus } from "../../application/runtime-status";
 import { findExecutable, runProcess, type Executable, type RunResult } from "../process/run";
-
-// Whether the company can work at all: Claude Code is found, runs, and is
-// signed in on its own. The app only looks; signing in happens in a terminal.
-export type ClaudeCodeStatus =
-  | { readonly state: "notInstalled" }
-  // installed through npm as a .cmd, which cannot be run without a shell
-  | { readonly state: "shimOnly"; readonly path: string }
-  // found but would not run
-  | { readonly state: "broken"; readonly path: string }
-  | { readonly state: "signedOut"; readonly version: string }
-  | { readonly state: "ready"; readonly version: string; readonly plan: string | undefined };
 
 export interface StatusDeps {
   readonly find: () => Executable;
@@ -60,8 +50,6 @@ export async function checkClaudeCode(deps: StatusDeps = realDeps): Promise<Clau
     return { state: "signedOut", version };
   }
 }
-
-export const isReady = (status: ClaudeCodeStatus): boolean => status.state === "ready";
 
 // Checking runs two processes, so a page load reuses a recent answer; 다시 확인
 // asks again.

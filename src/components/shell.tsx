@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import type { ClaudeCodeStatus } from "../application/runtime-status";
 import type { Dictionary } from "../i18n";
 import type { CompanyOption } from "../server/view-model";
 
 import { CompanySwitcher } from "./company-switcher";
+import { RuntimeNotice } from "./runtime-notice";
 
 export type View = "office" | "people" | "work" | "company";
 
@@ -16,6 +18,7 @@ export function viewHref(view: View, companyId: string): string {
 
 export function Shell({
   t,
+  status,
   companies,
   companyId,
   companyName,
@@ -23,6 +26,7 @@ export function Shell({
   children,
 }: {
   readonly t: Dictionary;
+  readonly status: ClaudeCodeStatus;
   readonly companies: readonly CompanyOption[];
   readonly companyId: string;
   readonly companyName: string;
@@ -50,10 +54,6 @@ export function Shell({
             ) : (
               <span className="text-sm font-medium text-ink">{companyName}</span>
             )}
-            <span className="flex items-center gap-1.5 font-mono text-xs text-muted">
-              <span className="size-1.5 rounded-full bg-sage" />
-              {t.app.systemOk}
-            </span>
           </div>
         </div>
       </header>
@@ -75,7 +75,10 @@ export function Shell({
           ))}
         </nav>
 
-        <main className="flex min-w-0 flex-col gap-6">{children}</main>
+        <main className="flex min-w-0 flex-col gap-6">
+          <RuntimeNotice status={status} words={t.claude} />
+          {children}
+        </main>
       </div>
     </div>
   );

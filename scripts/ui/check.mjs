@@ -8,6 +8,7 @@ const STEPS = [
   ["parity", "Do the product screens agree where they share a selector?"],
   ["verify-docs", "Do the written docs still match the pages?"],
   ["cast", "Does the app draw the cast the pages draw?"],
+  ["app-styles", "Does the app style a screen the way its page does?"],
 ];
 
 let failed = [];
