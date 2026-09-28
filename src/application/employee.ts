@@ -40,6 +40,41 @@ export function hireEmployee(ctx: AppContext, input: HireEmployeeInput): Promise
   });
 }
 
+export interface EditEmployeeInput {
+  readonly name: string;
+  readonly species: employeeDomain.Species;
+  readonly roleId: RoleId;
+  readonly teamId: TeamId | undefined;
+}
+
+export function editEmployee(
+  ctx: AppContext,
+  employeeId: EmployeeId,
+  input: EditEmployeeInput,
+): Promise<EmployeeResult<"employeeNotFound" | "roleNotFound" | "teamNotFound" | NameFailure>> {
+  return ctx.withTransaction(async () => {
+    const employee = await ctx.employees.findById(employeeId);
+    if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
+    if (!(await ctx.roles.findByCompany(employee.companyId)).some((r) => r.id === input.roleId)) return { ok: false, reason: "roleNotFound" };
+    if (input.teamId !== undefined && !(await ctx.teams.findByCompany(employee.companyId)).some((t) => t.id === input.teamId)) {
+      return { ok: false, reason: "teamNotFound" };
+    }
+    const edited = employeeDomain.editEmployee(employee, input);
+    if (!edited.ok) return edited;
+
+    const events: DomainEvent[] = [];
+    let saved = edited.employee;
+    if (input.teamId !== employee.teamId) {
+      const moved = employeeDomain.moveToTeam(saved, input.teamId, toEventId(ctx.newId()), ctx.now());
+      saved = moved.employee;
+      events.push(...moved.events);
+    }
+    await ctx.employees.save(saved);
+    await recordMilestones(ctx, employee.companyId, events);
+    return { ok: true, value: { employee: saved }, events };
+  });
+}
+
 export type LeaveFailure = "employeeNotFound" | "employeeOnLeave" | "employeeNotOnLeave";
 
 // Going on leave returns their work in progress to the backlog for whoever is

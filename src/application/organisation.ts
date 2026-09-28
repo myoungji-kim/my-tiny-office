@@ -54,13 +54,22 @@ export function removeRole(
   });
 }
 
+// Two teams the user named the same would be one team on every screen.
+async function teamNameTaken(ctx: AppContext, team: org.Team): Promise<boolean> {
+  return (
+    team.name !== undefined &&
+    (await ctx.teams.findByCompany(team.companyId)).some((t) => t.id !== team.id && t.name?.toLowerCase() === team.name?.toLowerCase())
+  );
+}
+
 export async function addTeam(
   ctx: AppContext,
   companyId: CompanyId,
   team: { readonly suggested: org.SuggestedTeam } | { readonly name: string },
-): Promise<UseCaseResult<{ readonly team: org.Team }, NameFailure>> {
+): Promise<UseCaseResult<{ readonly team: org.Team }, NameFailure | "nameTaken">> {
   const made = org.createTeam({ id: toTeamId(ctx.newId()), companyId, ...team }, ctx.now());
   if (!made.ok) return made;
+  if (await teamNameTaken(ctx, made.value)) return { ok: false, reason: "nameTaken" };
   await ctx.teams.save(made.value);
   return { ok: true, value: { team: made.value }, events: [] };
 }
@@ -70,11 +79,12 @@ export async function renameTeam(
   companyId: CompanyId,
   teamId: TeamId,
   name: string,
-): Promise<UseCaseResult<{ readonly team: org.Team }, "teamNotFound" | NameFailure>> {
+): Promise<UseCaseResult<{ readonly team: org.Team }, "teamNotFound" | NameFailure | "nameTaken">> {
   const team = (await ctx.teams.findByCompany(companyId)).find((t) => t.id === teamId);
   if (team === undefined) return { ok: false, reason: "teamNotFound" };
   const renamed = org.renameTeam(team, name);
   if (!renamed.ok) return renamed;
+  if (await teamNameTaken(ctx, renamed.value)) return { ok: false, reason: "nameTaken" };
   await ctx.teams.save(renamed.value);
   return { ok: true, value: { team: renamed.value }, events: [] };
 }

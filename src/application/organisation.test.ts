@@ -69,6 +69,16 @@ describe("teams", () => {
     expect(renamed.value.team).toMatchObject({ suggested: "backend", name: "서버팀" });
   });
 
+  it("never share a name the user gave", async () => {
+    const payments = await addTeam(ctx, companyId, { name: "Payments" });
+    const games = await addTeam(ctx, companyId, { name: "Games" });
+    assert(payments.ok && games.ok);
+
+    await expect(addTeam(ctx, companyId, { name: "payments" })).resolves.toEqual({ ok: false, reason: "nameTaken" });
+    await expect(renameTeam(ctx, companyId, games.value.team.id, "PAYMENTS")).resolves.toEqual({ ok: false, reason: "nameTaken" });
+    await expect(renameTeam(ctx, companyId, payments.value.team.id, "Payments")).resolves.toMatchObject({ ok: true });
+  });
+
   it("move their people to another team or to none when removed", async () => {
     const backend = await addTeam(ctx, companyId, { suggested: "backend" });
     const frontend = await addTeam(ctx, companyId, { suggested: "frontend" });

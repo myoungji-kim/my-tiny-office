@@ -39,6 +39,23 @@ export function teachMemory(
   });
 }
 
+export async function reviseMemory(
+  ctx: AppContext,
+  companyId: CompanyId,
+  memoryId: MemoryId,
+  changes: { readonly text: string; readonly areaId: AreaId | undefined },
+): Promise<UseCaseResult<{ readonly memory: memoryDomain.Memory }, "memoryNotFound" | "areaNotFound" | Exclude<memoryDomain.TeachFailure, "employeeRequired" | "employeeNotAllowed">>> {
+  const memory = (await ctx.memories.findByCompany(companyId)).find((m) => m.id === memoryId);
+  if (memory === undefined) return { ok: false, reason: "memoryNotFound" };
+  if (changes.areaId !== undefined && !(await ctx.areas.findByCompany(companyId)).some((a) => a.id === changes.areaId)) {
+    return { ok: false, reason: "areaNotFound" };
+  }
+  const revised = memoryDomain.revise(memory, changes);
+  if (!revised.ok) return revised;
+  await ctx.memories.save(revised.value);
+  return { ok: true, value: { memory: revised.value }, events: [] };
+}
+
 // A memory that stops being used is corrected or deleted; there is no archive.
 export async function forgetMemory(
   ctx: AppContext,

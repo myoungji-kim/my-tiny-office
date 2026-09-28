@@ -79,6 +79,16 @@ export function hireEmployee(
   };
 }
 
+// Who someone is can be corrected; nothing they have done changes with it.
+export function editEmployee(
+  employee: Employee,
+  changes: { readonly name: string; readonly species: Species; readonly roleId: RoleId },
+): { readonly ok: true; readonly employee: Employee } | { readonly ok: false; readonly reason: NameFailure } {
+  const checked = checkName(changes.name, MAX_EMPLOYEE_NAME);
+  if (!checked.ok) return checked;
+  return { ok: true, employee: { ...employee, name: checked.name, species: changes.species, roleId: changes.roleId } };
+}
+
 export function moveToTeam(employee: Employee, teamId: TeamId | undefined, eventId: EventId, now: Timestamp): { readonly employee: Employee; readonly events: readonly [EmployeeMoved] } {
   return {
     employee: { ...employee, teamId },

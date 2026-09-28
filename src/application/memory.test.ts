@@ -5,7 +5,7 @@ import { toAreaId, toCompanyId } from "../domain/ids";
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { hireEmployee, sendOnLeave } from "./employee";
-import { addArea, forgetMemory, removeArea, renameArea, teachMemory } from "./memory";
+import { addArea, forgetMemory, removeArea, renameArea, reviseMemory, teachMemory } from "./memory";
 import { createProject } from "./project";
 import { createTask } from "./task";
 import { createTestContext, firstRole } from "./test-context";
@@ -51,6 +51,19 @@ describe("teachMemory", () => {
     await expect(teachMemory(ctx, { companyId, kind: "expertise", employeeId: mocha.id, areaId: toAreaId("nope"), text: "x" })).resolves.toMatchObject({
       reason: "areaNotFound",
     });
+  });
+
+  it("is corrected in place, keeping where it came from, and an expertise keeps an area", async () => {
+    const mocha = await hire();
+    const db = await areaByStart("database");
+    const types = await areaByStart("typeSafety");
+    const taught = await teachMemory(ctx, { companyId, kind: "expertise", employeeId: mocha.id, areaId: db.id, text: "인덱스" });
+    assert(taught.ok);
+
+    const revised = await reviseMemory(ctx, companyId, taught.value.memory.id, { text: " any 금지 ", areaId: types.id });
+
+    expect(revised).toMatchObject({ ok: true, value: { memory: { text: "any 금지", areaId: types.id, employeeId: mocha.id } } });
+    await expect(reviseMemory(ctx, companyId, taught.value.memory.id, { text: "x", areaId: undefined })).resolves.toMatchObject({ reason: "areaRequired" });
   });
 
   it("forgets without keeping an archive", async () => {

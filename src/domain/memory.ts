@@ -115,6 +115,19 @@ export function teach(input: TeachInput, eventId: EventId, now: Timestamp): Resu
   };
 }
 
+// Correcting a memory keeps where it came from; only an expertise has an area.
+export function revise(
+  memory: Memory,
+  changes: { readonly text: string; readonly areaId: AreaId | undefined },
+): { readonly ok: true; readonly value: Memory } | { readonly ok: false; readonly reason: Exclude<TeachFailure, "employeeRequired" | "employeeNotAllowed"> } {
+  const text = changes.text.trim();
+  if (text === "") return { ok: false, reason: "memoryTextRequired" };
+  if (text.length > MAX_MEMORY_TEXT) return { ok: false, reason: "memoryTextTooLong" };
+  if (memory.kind === "expertise" && changes.areaId === undefined) return { ok: false, reason: "areaRequired" };
+  if (memory.kind !== "expertise" && changes.areaId !== undefined) return { ok: false, reason: "areaNotAllowed" };
+  return { ok: true, value: { ...memory, text, areaId: changes.areaId } };
+}
+
 export function forget(memory: Memory, eventId: EventId, now: Timestamp): MemoryRemoved {
   return { eventId, type: "MemoryRemoved", occurredAt: now, companyId: memory.companyId, memoryId: memory.id, employeeId: memory.employeeId };
 }
