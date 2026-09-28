@@ -345,8 +345,9 @@ each tool call and result, a `permission_denied` event, and a final
 `result` with `session_id`, `subtype`, `num_turns`, `permission_denials`,
 `usage` and `total_cost_usd` — and only `-p` takes `--max-budget-usd`.
 `--bg` is managed by `claude agents`/`logs`/`stop`, whose logs are terminal
-output. The cost is that a run is the app's child: closing the app ends it,
-and the next launch finds the task disconnected and resumes it on reconnect.
+output. The cost is that a run is the app's child: closing the app ends it
+(the server stops every run as it exits), and the next start finds the task
+disconnected; reconnecting resumes it.
 The exact flags, and why each is there, are in SECURITY.md.
 
 ### How work runs
@@ -423,9 +424,9 @@ This is what the employees screen assumes: **everything an employee has been
 taught is carried into every task**, whatever its area. Company memory can take
 the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
 
-The prompt numbers each memory and asks the agent to end by listing the
-numbers it drew on. That list is what the office reports as referenced: the
-agent's own account, not a trace.
+The prompt numbers each memory. Asking the agent to end by listing the
+numbers it drew on, and reporting that list as what was referenced — the
+agent's own account, not a trace — is the next step, not yet built.
 
 ### Every task works in its own worktree
 

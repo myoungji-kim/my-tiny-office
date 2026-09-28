@@ -15,7 +15,7 @@ end of this document) before trusting it again.
 | --- | --- |
 | Reads and edits files | Only inside the task's own worktree, `<folder>/.worktrees/<task>` |
 | Runs commands | Only the ones the project allows, plus read-only commands inside the worktree that Claude Code allows on its own (`git log`, `ls`, `echo`) |
-| Reaches the network | Never |
+| Reaches the network | Never through its own tools. A command the project allows runs whatever it runs, and the agent can edit the scripts it calls (§3) |
 | Pushes, merges, deploys | Never. Approval commits to `mto/<task>`; the rest is the user's |
 | Uses outside tools (Jira, Slack, any MCP server) | Never, in the MVP |
 | Carries the user's personal Claude Code setup (hooks, skills, plugins, auto-memory, `~/.claude/CLAUDE.md`) | Never |
@@ -81,8 +81,15 @@ like); the user adds and removes entries in the project dialog.
   project. A stored list is checked again when read, so a hand-edited or
   imported file cannot widen it.
 - Allowing a command allows everything it does. `npm test` runs the project's
-  own scripts, so the list is only as safe as the repository. The dialog and
-  the guide say so.
+  own scripts, so the list is only as safe as the repository — **and the agent
+  can edit that repository**: it may change what `test` runs in
+  `package.json` and then run `npm test`. An allowed script is therefore a way
+  out of the boundary for an agent that has been turned, by the prompt
+  injection of §5, against the user: it runs with the user's rights and can
+  reach the network. The dialog and the guide say so. Closing it needs
+  Claude Code's own sandbox for those commands (network and filesystem limits
+  on what Bash runs); that is to be measured before it is relied on, and until
+  then this is the boundary's known gap.
 - A task that needs a command not on the list is denied, and the run's
   `permission_denied` event becomes the task's blocked reason. The user can
   allow it from the task's page; it is added to the project, not to the one
@@ -165,9 +172,16 @@ agents, so it is a target in its own right.
     process group elsewhere) and returns even if a grandchild holds the pipes.
     Output is capped at 8 MB.
 - **Git.** Every `git` the app runs carries `-c core.hooksPath=<an empty
-  folder>`, and diffs add `--no-ext-diff --no-textconv`: an agent can edit the
-  files a repository's hooks or diff drivers point at, and those would run with
-  the user's rights, outside the session's boundary. Commits add `--no-verify`.
+  folder>` and `-c core.fsmonitor=false`, and diffs add `--no-ext-diff
+  --no-textconv --no-renames`: an agent can edit the files a repository's
+  hooks, monitor or diff drivers point at, and those would run with the user's
+  rights, outside the session's boundary. Commits add `--no-verify`. In a
+  task's worktree git is given `--git-dir` — the directory the repository
+  keeps for that worktree — and `--work-tree` explicitly, never left to find
+  them through the worktree's `.git` file, which the agent can rewrite to
+  point at a git directory, and a config, of its own. Looking at what changed
+  only reads: new files are listed with `ls-files --others` and read by the
+  app, so opening a task's page stages nothing.
   A worktree and its branch are named only from the task's own UUID
   (`.worktrees/<task>`, `mto/<task>`), never from text anyone wrote.
 - **Sessions.** A session id is checked to be a UUID before it becomes

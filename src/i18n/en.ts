@@ -524,7 +524,7 @@ export const en = {
         title: "Worth knowing",
         kind: "ask",
         rows: [
-          "An allowed command does everything that command does. The scripts `npm test` runs are the project's own code, so choose folders from repositories you trust.",
+          "An allowed command does everything that command does. The scripts `npm test` runs are the project's own code, which an employee can edit too, so choose folders from repositories you trust and allow only the commands you need.",
           "Employees can be swayed by what is written in the code or documents they read. Look at what changed before you approve it.",
           "An exported company file holds the history of its work, possibly with pieces of code. Move it only somewhere you trust.",
         ],
