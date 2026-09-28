@@ -127,7 +127,7 @@ export function Shell({
         </div>
 
         <div className="side-foot">
-          <div className="rule" style={{ margin: "0 4px 8px" }} />
+          <div className="rule" style={{ margin: "0 4px 10px" }} />
           <div className="nav">
             <NavLink screen="settings" current={screen} label={t.nav.settings} />
           </div>
