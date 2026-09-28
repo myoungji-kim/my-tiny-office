@@ -5,6 +5,7 @@ import { toCompanyId, type CompanyId } from "../domain/ids";
 import type { Priority } from "../domain/project";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
+import { getWork } from "../infrastructure/work";
 
 export interface Outcome {
   readonly error?: string;
@@ -25,6 +26,8 @@ export async function inCompany(
   if (ctx === undefined) return { error: "companyNotFound" };
   const result = await work(ctx, toCompanyId(String(companyId)));
   if (!result.ok) return { error: result.reason };
+  // what changed may start, stop or resume someone's work
+  void getWork().kick();
   revalidatePath("/", "layout");
   return {};
 }
