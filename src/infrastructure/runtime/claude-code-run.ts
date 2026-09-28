@@ -27,6 +27,7 @@ export function launchArgs(input: { readonly commands: readonly string[]; readon
     "--settings",
     JSON.stringify({ autoMemoryEnabled: false, disableAllHooks: true }),
     "--disable-slash-commands",
+    "--strict-mcp-config",
     "--tools",
     "Read,Edit,Write,Glob,Grep,Bash,PowerShell",
     "--allowedTools",

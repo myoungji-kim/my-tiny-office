@@ -34,6 +34,7 @@ claude -p
   --setting-sources project
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
   --disable-slash-commands
+  --strict-mcp-config
   --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands>"
   --append-system-prompt-file <memory file>
@@ -51,6 +52,7 @@ Each flag earns its place:
 | `--permission-mode dontAsk` | Anything not allowed is denied without a prompt nobody would answer, and a `permission_denied` event is emitted | ✓ |
 | `--setting-sources project` | Drops the user's hooks, skills, plugins and MCP servers | ✓ 0 MCP tools, 0 skills, built-in plugins only |
 | `--settings …` | Auto-memory and hooks off even if a project setting turns them on | ✓ hooks gone |
+| `--strict-mcp-config` | No MCP server but those passed with `--mcp-config`, and none is. Without it the account's claude.ai connectors (Gmail, Drive, Calendar, Atlassian) join the session **after its first turn**, so the init event shows none | ✓ 0 connectors through a four-step run; without it 92 connector tools arrived after step 1, and the run cost $0.59 instead of $0.04 |
 | `--tools …` | Only these built-in tools exist in the session; no WebFetch, WebSearch, Task, Cron | ✓ 7 tools |
 | `Read(./**)` and friends | File tools confined to the worktree. The `Read` rule also governs Grep and Glob | ✓ outside read, write, grep and glob denied |
 | `<project commands>` | Each allowed command as `Bash(<cmd>)` **and** `PowerShell(<cmd>)`: on Windows the agent runs commands through PowerShell | ✓ |
@@ -188,8 +190,9 @@ agents, so it is a target in its own right.
 
 ## 8. Outside tools
 
-Out of the MVP. Isolating the user's setup (`--setting-sources project`) also
-removes the account's claude.ai connectors, and not isolating it brings every
+Out of the MVP. `--strict-mcp-config` keeps the account's claude.ai connectors
+out, which `--setting-sources project` alone does not: they arrive after the
+first turn. Not isolating the user's setup brings every
 personal plugin and 350–400 tool definitions into each task, inconsistently
 (the Jira read tool appeared in one run and not the next) and at roughly $0.16
 per trivial call.
@@ -211,4 +214,5 @@ worktree and a file outside it, launch §2 with a prompt that attempts each of:
 5. `cat` of an outside path — denied
 
 and check that the init event lists no MCP servers, no skills, no hooks and
-only the listed tools. Record the version at the top of this document.
+only the listed tools, and that after several turns the agent is still told of
+no connector: they arrive late, so the init event alone does not show them. Record the version at the top of this document.

@@ -19,6 +19,7 @@ describe("launchArgs", () => {
       "--settings",
       '{"autoMemoryEnabled":false,"disableAllHooks":true}',
       "--disable-slash-commands",
+      "--strict-mcp-config",
       "--tools",
       "Read,Edit,Write,Glob,Grep,Bash,PowerShell",
       "--allowedTools",

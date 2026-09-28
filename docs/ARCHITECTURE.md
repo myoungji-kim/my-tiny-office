@@ -391,9 +391,10 @@ confined to the worktree (SECURITY.md §2).
 
 `--setting-sources project` keeps the user's hooks, skills, plugins, MCP
 servers and auto-memory out of every session, so an employee carries only
-what they were taught. It also removes the account's outside tools, which is
-why those are out of the MVP; SECURITY.md §8 has the measurement and the way
-back in.
+what they were taught. `--strict-mcp-config` keeps the account's claude.ai
+connectors out too; they join a session after its first turn otherwise, and
+multiply its cost. That is why outside tools are out of the MVP; SECURITY.md §8
+has the measurement and the way back in.
 
 ### What may run is the project's
 
@@ -432,6 +433,10 @@ A one-sentence Haiku answer cost **$0.029**, because the request carried ~13k
 cache-creation and ~16k cache-read tokens of system prompt and tool definitions
 before the 10-token question. Per-task cost is therefore dominated by a fixed
 overhead, not by the prompt.
+
+The same four-step edit cost $0.04 with the account's connectors kept out and
+$0.59 with them in, because their tool definitions are written to the cache on
+every run.
 
 Two consequences: memory length matters less than the number of tasks, and
 `--max-budget-usd` belongs on every launch. It is checked after a turn, so a
