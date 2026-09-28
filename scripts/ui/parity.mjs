@@ -10,8 +10,10 @@ import { readFileSync } from "node:fs";
 // Only the product screens: they are one application in one shell, so a
 // selector they share is the same component in the same context. A landing
 // page and an onboarding step legitimately size a logo differently, and
-// comparing across them would report the system working as a fault.
-const PAGES = ["office", "projects", "employees"];
+// comparing across them would report the system working as a fault. With the
+// shared rules in system.css it usually finds nothing to compare; it is the
+// guard for the day a page defines a component of its own again.
+const PAGES = ["office", "projects", "employees", "company", "settings"];
 
 const styleOf = (p) =>
   (readFileSync(`docs/ui/${p}.html`, "utf8").match(/<style>([\s\S]*?)<\/style>/) ?? [, ""])[1];

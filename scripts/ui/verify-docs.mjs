@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 const PAGES = ["index", "first-run", "office", "projects", "employees", "company", "settings", "connect", "components", "characters"];
 const src = Object.fromEntries(PAGES.map((p) => [p, readFileSync(`docs/ui/${p}.html`, "utf8")]));
 const guide = readFileSync("docs/STYLE-GUIDE.md", "utf8");
-// The token block moved out of the pages, so that is where to read it.
 // The tokens and the cast moved out of the pages, so that is where to read them.
 src["system.css"] = readFileSync("docs/ui/system.css", "utf8");
 src["system.js"] = readFileSync("docs/ui/system.js", "utf8");

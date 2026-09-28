@@ -99,7 +99,7 @@ pushing, because a pull request with no second reader buys nothing but delay.
 
 A branch is still worth it when the change is one of these:
 
-- a database migration, or anything else awkward to undo
+- a migration that changes data people already have, or anything else awkward to undo
 - an experiment that might be abandoned
 - something worth reading as one diff later
 

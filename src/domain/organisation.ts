@@ -13,8 +13,9 @@ export interface Role {
   readonly createdAt: Timestamp;
 }
 
-// A team is optional and there is nothing above it. The ones the product
-// suggests are named by the dictionary; one the user names is shown as written.
+// A team is optional and there is nothing above it. One the product suggests
+// stores a key, so the screen can show it in either language; one the user
+// names is shown as written.
 export const SUGGESTED_TEAMS = ["backend", "frontend", "planning", "design"] as const;
 export type SuggestedTeam = (typeof SUGGESTED_TEAMS)[number];
 

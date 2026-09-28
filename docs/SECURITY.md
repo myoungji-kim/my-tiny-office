@@ -72,7 +72,12 @@ A project carries its list of allowed commands. When a folder is chosen the
 list starts from the scripts in its `package.json` (test, lint, build and the
 like); the user adds and removes entries in the project dialog.
 
-- An entry is an exact command, never a pattern with a wildcard.
+- An entry is one plain command: no `*` (a wildcard in a rule), no
+  parentheses (which end one), nothing that chains or redirects another
+  command (`; & | \` $ < >`), and no control, invisible or reordering
+  characters, so what the user approves is what runs. Twenty at most per
+  project. A stored list is checked again when read, so a hand-edited or
+  imported file cannot widen it.
 - Allowing a command allows everything it does. `npm test` runs the project's
   own scripts, so the list is only as safe as the repository. The dialog and
   the guide say so.
@@ -118,20 +123,31 @@ agents, so it is a target in its own right.
 - **DNS rebinding.** Every request's `Host`, and `X-Forwarded-Host` when
   present, must name this machine (`127.0.0.1`, `localhost`, `[::1]`); anything
   else is refused with 421 before routing, static files included
-  (`src/proxy.ts`).
+  (`src/proxy.ts`). That holds for `next start`. Under `next dev` the
+  development server answers `/_next/*` and its own endpoints before the proxy
+  runs, so a rebinding page can read development bundles; run the app with
+  `next start` for real use.
 - **Cross-site requests.** Anything but `GET`, `HEAD` and `OPTIONS` needs an
   `Origin` equal to the host, and a `Sec-Fetch-Site` that is not `cross-site`;
   otherwise 403. Next.js checks the origin of a server action too, but lets one
   without an `Origin` through, which this does not. No state changes on `GET`.
-- **Processes.** `claude` and `git` are started with `spawn(file, args)` and
-  `shell: false` (`src/infrastructure/process/run.ts`), found on `PATH` by the
-  app rather than by a shell. A `claude` installed as a `.cmd` shim (the npm install on
-  Windows) cannot be run that way; the app says so and asks for the native
-  install rather than falling back to a shell. A native program anywhere on
-  `PATH` is preferred over a shim that comes earlier.
+- **Processes.** `claude` and `git` are started only through
+  `src/infrastructure/process/run.ts`: `spawn(file, args)` with `shell: false`,
+  found on `PATH` by the app rather than by a shell.
+  - Relative `PATH` entries are skipped, since they would resolve inside a
+    task's worktree.
+  - On Windows only a `.exe` or `.com` counts. A `claude` installed as a
+    `.cmd` shim (the npm install) is refused rather than run through a shell,
+    and the app will ask for the native install. A native program anywhere on
+    `PATH` wins over a shim that comes earlier.
+  - `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` are removed from a child's
+    environment, so a key in the server's shell never bills silently.
+  - A timeout stops the whole process tree (`taskkill /T` on Windows, the
+    process group elsewhere) and returns even if a grandchild holds the pipes.
+    Output is capped at 8 MB.
 - **Output.** Agent output, file names, diffs and anything else from a run is
   rendered as text. Never through `dangerouslySetInnerHTML`.
-- **Claude Code's sign-in.** Read from `claude auth status --json`, and only
+- **Claude Code's sign-in** (step 3). Read from `claude auth status --json`, and only
   `loggedIn`, `authMethod` and `subscriptionType`. The email and organisation
   it also returns are not read, stored or logged.
 - **Secrets.** No token field, no API key, no credential store is read. Nothing
@@ -142,10 +158,13 @@ agents, so it is a target in its own right.
 - A company file holds the history of its work: task text, the agent's steps,
   file names and diffs. It may contain pieces of code. Export says where it
   was saved; the guide says to move it only somewhere trusted.
-- **Import treats the file as untrusted.** It is copied first, opened with
-  `PRAGMA trusted_schema = OFF`, checked with `PRAGMA integrity_check` and
-  against the expected schema before migrations run, and only then added to
-  `companies/`. A file that fails any of these is refused whole.
+- **Every company file is opened with `PRAGMA trusted_schema = OFF`**, so its
+  schema never runs a function with the app's rights, and a file that will not
+  open is left as it was.
+- **Import will treat the file as untrusted** (not built yet). It is copied
+  first, checked with `PRAGMA integrity_check` and against the expected schema
+  before migrations run, and only then added to `companies/`. A file that fails
+  any of these is refused whole.
 - Nothing in an imported file starts anything: its folders need choosing again
   (§4) and its sessions belong to another computer.
 

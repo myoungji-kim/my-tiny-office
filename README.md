@@ -53,7 +53,6 @@ Create company → Hire → Give work → Work → Review → Approve → Teach 
 - Tailwind CSS
 - SQLite
 - Drizzle ORM
-- Zod
 - npm
 
 The MVP runs as a local web application. Desktop packaging is not in scope yet.
@@ -73,6 +72,7 @@ my-tiny-office/
 │   ├── STYLE-GUIDE.md
 │   ├── SECURITY.md          what an agent may do, and how it is enforced
 │   └── ui/                  the UI standard: open index.html
+├── drizzle/                 the migrations, generated from the schema
 ├── .github/
 │   ├── pull_request_template.md
 │   ├── ISSUE_TEMPLATE/
@@ -86,7 +86,8 @@ my-tiny-office/
     ├── domain/
     ├── i18n/
     ├── infrastructure/
-    └── server/
+    ├── server/
+    └── proxy.ts             refuses requests not addressed to this machine
 ```
 
 ## Development

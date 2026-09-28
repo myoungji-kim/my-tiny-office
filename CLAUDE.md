@@ -278,14 +278,15 @@ Examples:
 - `EmployeeHired`
 - `TaskAssigned`
 - `TaskStarted`
-- `TaskCompleted`
+- `TaskFinished`
+- `TaskApplied`
+- `TaskSentBack`
 - `MemoryTaught`
-- `MemoryUsed`
-- `PRCreated`
 - `ReviewStarted`
-- `ReviewApproved`
-- `ChangesRequested`
+- `ReviewSettled`
 - `EmployeeWentOnLeave`
+
+The full list is the `DomainEvent` union in `src/domain/events.ts`.
 
 Do not create a full event-sourcing architecture unless explicitly required.
 

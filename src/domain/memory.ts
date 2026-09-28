@@ -3,8 +3,9 @@ import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, TaskId } from ".
 import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
 
-// The company owns its areas. The seven it starts with are named by the
-// dictionary, so they read in either language until the user renames one.
+// The company owns its areas. The seven it starts with store a key rather than
+// a name, so the screen can show them in the reader's language until the user
+// renames one.
 export const STARTING_AREAS = ["architecture", "typeSafety", "database", "security", "localization", "product", "quality"] as const;
 export type StartingArea = (typeof STARTING_AREAS)[number];
 

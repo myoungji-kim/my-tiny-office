@@ -51,10 +51,10 @@ Desktop packaging remains a natural long-term fit for local SQLite, local agent 
 
 ## 3. Time
 
-A task records when it started and when it finished. Time taken is derived from
-those and the current time, never stored and never expressed as a share of an
-estimate: an agent's work ends when it ends. What the agent is doing is
-reported by the runtime.
+A task stores how long its runs have taken so far and when the current run
+began; time taken is that plus the running span, never a share of an
+estimate: an agent's work ends when it ends. A pause — held, blocked, handed
+back — adds nothing. What the agent is doing is reported by the runtime.
 
 Time keeps passing while the application is closed, so on the next launch the
 app reconciles each running task with its session rather than assuming it
@@ -169,11 +169,11 @@ Employee
 ├── id
 ├── companyId
 ├── name
-├── role
+├── species        picks the sprite
+├── roleId
 ├── teamId?
-├── workingStyle
-├── availability
-└── agentId
+├── availability   available | onLeave, and since when
+└── agentId        once the runtime is built
 
 Agent
 ├── id
@@ -188,7 +188,8 @@ Project
 ├── companyId
 ├── name
 ├── description?
-├── workspace?
+├── folder?
+├── commands        the exact commands its employees may run
 ├── status          planned | active | held | done
 ├── priority        high | normal | low
 ├── heldReason?
@@ -503,26 +504,19 @@ Company → Employee → Agent → Session
 
 The domain owns events such as:
 
-- EmployeeHired
-- ProjectStarted
-- ProjectHeld
-- ProjectResumed
-- ProjectFinished
-- TaskAssigned
-- TaskStarted
-- TaskCompleted
-- TaskApplied
-- AgentDisconnected
-- MemoryTaught
-- MemoryUsed
-- MemoryRemoved
-- PRCreated
-- ReviewStarted
-- ReviewApproved
-- ChangesRequested
-- EmployeeWentOnLeave
-- EmployeeReturned
-- EmployeeLetGo
+- the company: `CompanyCreated`
+- people: `EmployeeHired`, `EmployeeMoved`, `EmployeeWentOnLeave`, `EmployeeReturned`
+- projects: `ProjectCreated`, `ProjectStarted`, `ProjectHeld`, `ProjectResumed`,
+  `ProjectFinished`, `ProjectReopened`, `ProjectCommandAllowed`
+- tasks: `TaskCreated`, `TaskAssigned`, `TaskStarted`, `TaskFinished`, `TaskApplied`,
+  `TaskSentBack`, `TaskHeld`, `TaskResumed`, `TaskBlocked`, `TaskUnblocked`, `TaskReturned`
+- areas and memory: `AreaAdded`, `AreaRenamed`, `AreaRemoved`, `MemoryTaught`, `MemoryRemoved`
+- review: `ReviewSuggested`, `ReviewQueued`, `ReviewStarted`, `ReviewSettled`,
+  `ReviewWithdrawn`, `ReviewReleased`
+
+The union is `src/domain/events.ts`. Today the events feed the company's
+history (`src/application/history.ts`); the activity feed and the memory-used
+report will read the same events.
 
 Runtime events can be translated into domain events:
 
@@ -614,7 +608,7 @@ Windows   %LOCALAPPDATA%\my-tiny-office\
 macOS     ~/Library/Application Support/my-tiny-office/
 Linux     ${XDG_DATA_HOME:-~/.local/share}/my-tiny-office/
 
-  settings.json        language, the company opened last
+  settings.json        the company opened last
   companies/<id>.db    one per company
 ```
 
@@ -623,7 +617,7 @@ company. `MY_TINY_OFFICE_DATA_DIR` overrides the directory.
 
 ### Moving and deleting a company
 
-Export writes a consistent copy of the open company's database while the app
+Not built yet. Export writes a consistent copy of the open company's database while the app
 runs (`VACUUM INTO`). Import runs the migrations on a copy of the chosen file
 and adds it to `companies/`; it never replaces or merges. A file whose
 company is already here asks whether to replace that one. The file carries
@@ -657,12 +651,18 @@ accepted as one.
 Schema changes are generated with `npm run db:generate` and the resulting SQL
 is committed under `drizzle/`. It is the only reproducible record of the
 schema, so a fresh clone can build the same database. `drizzle-kit push` is not
-used.
+used. Until the first release every change was folded into one migration,
+`0000_initial`, because no company file existed outside development; from the
+first release on, migrations only add.
 
 Migrations run with foreign keys off, because one that rebuilds a table other
 tables point at would otherwise fail, and SQLite ignores that pragma inside the
 migrator's transaction. `PRAGMA foreign_key_check` must come back empty before
-they are switched on again, or the file is not opened. A migration that changes
+they are switched on again. That check can only run once the migrator has
+committed, so a file with a company in it is copied first (`VACUUM INTO`) and
+put back if the check fails; the file is then left as it was and not opened.
+One company file that cannot be opened is counted and skipped, never keeping
+the others from opening. A migration that changes
 what a row means rewrites the rows it changes, so nothing made before it is
 dropped.
 
@@ -685,8 +685,11 @@ invalid entity later.
 
 A use case is the transaction boundary. `AppContext` carries a
 `withTransaction` runner: a no-op for in-memory repositories, and explicit
-`BEGIN`/`COMMIT`/`ROLLBACK` for SQLite. `settleDueTasks` wraps its settlement
-and writes in it, so a failed write leaves no task completed.
+`BEGIN`/`COMMIT`/`ROLLBACK` for SQLite. Every use case that writes more than
+once runs in it, reads included — making a company with its areas and roles,
+hiring, the pick-up, leave, holding or resuming a project, and the removals that
+move what they held — so a failed write leaves nothing half-done. A
+transaction is never opened inside another: the runner would wait on itself.
 
 The runner issues the statements itself rather than using the driver's
 synchronous transaction helper, which would commit without awaiting async work.

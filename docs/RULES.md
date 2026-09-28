@@ -21,6 +21,11 @@ working, and works through the company's Claude Code from the start. The first
 hire is made in first run, the rest from the office, the org chart or the
 people screen.
 
+**A company starts with six roles** — Backend Engineer, Frontend Engineer,
+Product Manager, DBA, DevOps Engineer, QA Engineer — **and no teams.** The
+product suggests four teams (백엔드팀, 프론트엔드팀, 기획팀, 디자인팀), named in both
+languages until renamed.
+
 **A role is a job title from the company's list.** Everyone has one, so the last
 role cannot be removed, and removing one that people hold changes them to
 another first. No rule hangs on a role: expertise and review come from memory.
@@ -32,7 +37,8 @@ A team is organisation first: its room in the office appears with its first
 person, and no room is built by hand.
 
 **Leave and letting go.** Sending someone on leave returns their task to the
-backlog, and nobody on leave can be given work. Leave has no return date: it
+backlog, with any work that was waiting for them, and gives back any review
+they were asked for; nobody on leave can be given work. Leave has no return date: it
 shows since when, and ends when the user brings them back. Letting someone go returns
 their task too and takes what they were taught with them; the company's
 history keeps their hire.
@@ -85,10 +91,12 @@ planned → active → done
 - **A new project is planned.** Its tasks can be written down, even given to
   someone, but nothing is picked up. **Start** needs a folder; it is when the
   backlog starts being picked up, and when the project's span begins.
-- **Hold** takes a reason. Its tasks in progress are held with it, and nobody
-  starts anything new; finished work waiting for approval can still be applied.
-- **Resume** gives held work back to whoever had it, or queues it behind what
-  they took on meanwhile.
+- **Hold** takes a reason. Its tasks in progress are held with it, under the
+  same reason, and nobody starts anything new; finished work waiting for
+  approval can still be applied.
+- **Resume** gives the work held with the project back to whoever had it, or
+  queues it behind what they took on meanwhile. A task held on its own stays
+  held.
 - **Finish** is possible once nothing is in progress or waiting for approval.
   What is left unstarted closes as it is. The project is kept as its record —
   its span and how many tasks were done — and can be reopened.
@@ -140,9 +148,10 @@ so the same command does not stop the next task.
 agent doing the work nobody knows when it ends, so a task carries how long it
 has been running and, once finished, how long it took.
 
-**Blocked is not a status.** A task is blocked *out of* whichever status it is
-in — an agent that stopped, a command the project does not allow, the spending
-cap reached — so it is a field on the task rather than a place in the flow.
+**Blocked is not a status.** It is a mark on work in progress — an agent that
+stopped, a command the project does not allow, the spending cap reached — so it
+is a field on the task rather than a place in the flow, and the clock stops
+while it stands. Allowing the command carries on every task stopped on it.
 
 ## Review
 

@@ -301,7 +301,7 @@ Rules for a new species:
 | `species` | Picks a sprite. Display names are translated. |
 | `role` | A job title from the company's list. Written the same in both languages. |
 
-- Nicknames stay short — 2–3 Hangul characters, ≤6 Latin — so cards do not shift.
+- Nicknames stay short — 2–3 Hangul characters, ≤6 Latin — so cards do not shift. That is the advice; the limit the app enforces is 20 characters.
 - No emoji and no species description in a name. The sprite already says it.
 - Technical titles stay English: `Backend Engineer`, `PR`, `API`, `DBA`.
 

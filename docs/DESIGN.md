@@ -146,8 +146,8 @@ Status mirrors the domain rather than inventing its own vocabulary:
 | --- | --- | --- |
 | `working` | A task is in progress | Amber dot with ring, time taken |
 | `reviewing` | Looking at a colleague's task | Hollow blue ring, time taken |
-| `available` | No task assigned | Solid green dot |
-| `leave` | Employee is away | Grey dash |
+| `available` | Not on a task or a review | Solid green dot |
+| `onLeave` | Employee is away | Grey dash |
 
 Colour never carries status alone — **the dot shape differs too**. An agent
 that stops is not a status but a mark beside it (see When the agent is
@@ -586,11 +586,12 @@ measured flags behind it.
 
 ## Open questions
 
-- **What the domain does not do yet.** Everything in RULES.md is in
-  `src/domain` except what needs the runtime: when a review is suggested, a
-  project's hold stopping its running tasks, and a task's worktree and branch.
-  The screens in `src/components` are the placeholder until they are rebuilt
-  from `docs/ui`.
+- **What is not built yet.** In `src/domain` and `src/application`: letting
+  someone go, deleting a project or a task, the activity feed and the
+  memory-used report, and a company's export, import and delete. What needs the
+  runtime: when a review is suggested, stopping a held task's agent, and a
+  task's worktree and branch. The screens in `src/components` are the
+  placeholder until they are rebuilt from `docs/ui`.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

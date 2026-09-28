@@ -87,6 +87,6 @@ First-class locales:
 Example:
 
 EN: "Everyone's working. Probably."
-KO: "다들 일하고 있습니다. 아마도요."
+KO: "다들 일하고 있어요. 아마도요."
 
 Technical terms such as PR, API, TypeScript, PostgreSQL, and Architecture may remain English where natural.
