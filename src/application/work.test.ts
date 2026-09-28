@@ -8,7 +8,7 @@ import type { AppContext } from "./context";
 import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
 import { allowCommand, createProject, startProject } from "./project";
-import { approveTask, carryOn, createTask, holdTask, sendBack } from "./task";
+import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 import { createWorkSupervisor, type WorkSupervisor } from "./work";
 
@@ -129,6 +129,23 @@ describe("the work supervisor", () => {
     const memories = await ctx.memories.findByCompany(companyId);
     expect(run.memoriesUsed).toEqual([memories[1].id]);
     expect(await ctx.runSteps.findByTask(companyId, id, 10)).toMatchObject([{ kind: "say", detail: "Paginated." }]);
+  });
+
+  it("keeps what the agent thought worth remembering until the user settles it", async () => {
+    const id = await oneTask();
+    await settle();
+    expect(launched[0].input.memory).toContain("Worth remembering:");
+
+    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "Done.\nWorth remembering: 테스트는 npm test로 돌려요" });
+    launched[0].exit();
+    await settle();
+
+    const [run] = await ctx.runs.findByCompany(companyId);
+    expect(run.suggestions).toEqual(["테스트는 npm test로 돌려요"]);
+    expect(await ctx.runSteps.findByTask(companyId, id, 10)).toMatchObject([{ kind: "say", detail: "Done." }]);
+
+    assert((await settleSuggestion(ctx, run.id, "테스트는 npm test로 돌려요")).ok);
+    expect((await ctx.runs.findById(run.id))?.suggestions).toEqual([]);
   });
 
   it("stops on a command the project does not allow, and carries on in the same session once it is allowed", async () => {

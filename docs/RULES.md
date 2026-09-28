@@ -218,6 +218,12 @@ employee's agent actually carries into the work.
 Expertise is taught, not grown. An employee does not fill a skill bar; the
 user tells them something worth keeping, and it stays with them.
 
+An agent may point at something worth keeping — at most two lines at the end
+of a task, "기억해 둘 만한 것" on its page — but nothing becomes a memory until
+the user teaches it, in their own words if they like, or passes on it. Claude
+Code's own auto-memory is off for every session, so nothing is learned behind
+the user's back.
+
 A memory has an area of expertise, the text itself, and the work it came from:
 
 - Database — "복합 인덱스는 컬럼 순서가 중요해요" — from the slow payment lookup

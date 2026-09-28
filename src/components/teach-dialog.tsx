@@ -38,6 +38,8 @@ export function TeachDialog({
   edit,
   area,
   source,
+  text: startWith,
+  onTaught,
   onClose,
 }: {
   readonly locale: Locale;
@@ -48,6 +50,10 @@ export function TeachDialog({
   readonly edit?: MemoryView;
   readonly area?: string;
   readonly source?: { readonly taskId: string; readonly title: string };
+  // what to start from, such as something an agent thought worth remembering
+  readonly text?: string;
+  // after the memory is kept, before the dialog closes
+  readonly onTaught?: () => Promise<unknown>;
   readonly onClose: () => void;
 }) {
   const t = getDictionary(locale);
@@ -55,7 +61,7 @@ export function TeachDialog({
   const company = target.kind === "company";
   const [picked, setPicked] = useState<Person | undefined>(target.kind === "person" ? target.person : undefined);
   const [areaId, setAreaId] = useState(company ? undefined : (edit?.areaId ?? area));
-  const [text, setText] = useState(edit?.text ?? "");
+  const [text, setText] = useState(edit?.text ?? startWith ?? "");
   const [keepSource, setKeepSource] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
@@ -113,6 +119,7 @@ export function TeachDialog({
         setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
         return;
       }
+      await onTaught?.();
       onClose();
     });
 

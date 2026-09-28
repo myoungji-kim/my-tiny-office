@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { toAgentId, toCompanyId, toEmployeeId, toRunId, toTaskId } from "./ids";
 import { toMemoryId } from "./ids";
-import { endRun, memoriesInReport, reportDetail, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
+import { endRun, readReport, reportDetail, settleSuggestion, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
 
 const agent = (id: string): Agent => ({ id: toAgentId(id), companyId: toCompanyId("c"), employeeId: toEmployeeId("e-" + id), runtime: "claudeCode", createdAt: 0 });
 const task = toTaskId("t");
@@ -45,9 +45,31 @@ describe("a run", () => {
   it("reads which numbered memories a report drew on, and leaves the line out of it", () => {
     const carried = [toMemoryId("m1"), toMemoryId("m2"), toMemoryId("m3")];
 
-    expect(memoriesInReport("Paginated.\n\n**Memories used:** 3, 1, 9", carried)).toEqual({ report: "Paginated.", used: ["m3", "m1"] });
-    expect(memoriesInReport("Done.\nMemories used: none", carried)).toEqual({ report: "Done.", used: [] });
-    expect(memoriesInReport("Done, using 2 of them.", carried)).toEqual({ report: "Done, using 2 of them.", used: [] });
+    expect(readReport("Paginated.\n\n**Memories used:** 3, 1, 9", carried)).toEqual({ report: "Paginated.", used: ["m3", "m1"], suggestions: [] });
+    expect(readReport("Done.\nMemories used: none", carried)).toEqual({ report: "Done.", used: [], suggestions: [] });
+    expect(readReport("Done, using 2 of them.", carried)).toEqual({ report: "Done, using 2 of them.", used: [], suggestions: [] });
+  });
+
+  it("keeps up to two things worth remembering, each short enough to teach", () => {
+    const report = readReport(
+      [
+        "Done.",
+        "",
+        "Worth remembering: 테스트는 `npm run test:unit`으로 돌려요",
+        "**Worth remembering:** Dates are stored as epoch ms",
+        "Worth remembering: " + "x".repeat(300),
+        "Worth remembering: a third one",
+        "Memories used: 1",
+      ].join("\n"),
+      [toMemoryId("m1")],
+    );
+
+    expect(report).toEqual({ report: "Done.", used: ["m1"], suggestions: ["테스트는 `npm run test:unit`으로 돌려요", "Dates are stored as epoch ms"] });
+  });
+
+  it("forgets a suggestion once taught or passed on", () => {
+    const run = startRun({ id: toRunId("r"), agent: agent("a"), taskId: task, sessionId: undefined }, 1);
+    expect(settleSuggestion({ ...run, suggestions: ["a", "b"] }, "a").suggestions).toEqual(["b"]);
   });
 
   it("keeps a step to one short line", () => {

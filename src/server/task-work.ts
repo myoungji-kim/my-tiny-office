@@ -12,6 +12,8 @@ export interface TaskWork {
   readonly sessionId: string | undefined;
   // every memory a run of this task said it drew on
   readonly memoriesUsed: readonly string[];
+  // what its runs thought worth remembering, still waiting on the user
+  readonly suggestions: readonly { readonly runId: string; readonly text: string }[];
   readonly worktree: string | undefined;
   readonly branch: string;
 }
@@ -46,6 +48,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
     changes: present && folder !== undefined ? await changesIn(folder, task.id) : [],
     sessionId,
     memoriesUsed: [...new Set(runs.filter((r) => r.taskId === task.id).flatMap((r) => r.memoriesUsed))],
+    suggestions: runs.filter((r) => r.taskId === task.id).flatMap((r) => r.suggestions.map((text) => ({ runId: r.id, text }))),
     worktree: present ? worktree : undefined,
     branch: branchOf(task.id),
   };

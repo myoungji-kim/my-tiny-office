@@ -1,0 +1,1 @@
+ALTER TABLE `runs` ADD `suggestions` text DEFAULT '[]' NOT NULL;

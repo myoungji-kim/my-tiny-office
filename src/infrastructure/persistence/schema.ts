@@ -305,6 +305,8 @@ export const runs = sqliteTable(
     costUsd: real("cost_usd").notNull().default(0),
     // the memories the agent said it drew on, as a JSON list of ids
     memoriesUsed: text("memories_used").notNull().default("[]"),
+    // what the agent thought worth remembering, until the user teaches or passes on it
+    suggestions: text("suggestions").notNull().default("[]"),
     startedAt: integer("started_at").notNull(),
     endedAt: integer("ended_at"),
   },

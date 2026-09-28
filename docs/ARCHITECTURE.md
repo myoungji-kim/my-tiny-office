@@ -429,7 +429,12 @@ person was taught (`carriedBy` in `src/domain/memory.ts`) — and asks the
 agent to end with `Memories used: 2, 5`. The supervisor reads that line off
 the closing report (`memoriesInReport`), keeps the ids on the run, and shows
 the report without it; the task's page marks those memories ✓. It is the
-agent's own account, not a trace. Measured: taught that notes lines end with
+agent's own account, not a trace.
+
+The same closing lines may hold up to two `Worth remembering: …`, in the
+task's language. They are kept on the run as suggestions, shown on the task's
+page, and become a memory only when the user teaches one; teaching or passing
+settles it (`settleSuggestion`). Measured: taught that notes lines end with
 "!", it wrote `hello!` and named that memory and its style, and left out an
 unrelated one.
 

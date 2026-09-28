@@ -1,8 +1,9 @@
 import type { DomainEvent } from "../domain/events";
-import { toEventId, toTaskId, type AreaId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
+import { toEventId, toTaskId, type AreaId, type RunId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
 import { pickUps, reviewsToStart } from "../domain/pick-up";
 import type { Priority } from "../domain/project";
 import { startQueuedReview, type Review } from "../domain/review";
+import { settleSuggestion as settleRun } from "../domain/run";
 import * as taskDomain from "../domain/task";
 
 import type { Workspace } from "./agent-runtime";
@@ -153,6 +154,14 @@ export async function approveTask(
 // A stopped agent carries on in its own session; one stopped on a command
 // carries on without it, since allowing a command is the project's to do.
 export const carryOn = (ctx: AppContext, taskId: TaskId) => changeTask(ctx, taskId, (t) => taskDomain.unblockTask(t, eventId(ctx), ctx.now()));
+
+// A suggestion the user taught or passed on leaves the run it came from.
+export async function settleSuggestion(ctx: AppContext, runId: RunId, text: string): Promise<UseCaseResult<Record<string, never>, "runNotFound">> {
+  const run = await ctx.runs.findById(runId);
+  if (run === undefined) return { ok: false, reason: "runNotFound" };
+  await ctx.runs.save(settleRun(run, text));
+  return { ok: true, value: {}, events: [] };
+}
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
   changeTask(ctx, taskId, (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()));

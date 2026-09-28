@@ -158,6 +158,16 @@
 
   @media (hover: none) { .copy-ic { opacity: 1; } }
 
+  .sug-card { margin-bottom: 16px; }
+
+  .sug { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+
+  .sug:first-child { padding-top: 0; }
+
+  .sug:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .sug-tx { flex: 1; min-width: 0; font-size: 15px; line-height: 1.5; }
+
   .said-raw { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 
   .md { font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
@@ -527,6 +537,8 @@
       peer: { by: "p4", state: "done" },
       desc: { ko: "에러 응답을 { code, message, retryable } 하나로 맞춰요.", en: "Give every error response one shape: { code, message, retryable }." },
       session: "5d02aa91-3f7c-4e28-a6b0-91d4c2e8f735", usedMem: [2],
+      said: { ko: "에러 응답을 { code, message, retryable } 하나로 맞췄어요. 문서도 같이 고쳤어요.", en: "Every error response now has one shape, { code, message, retryable }, and the docs say so." },
+      suggest: [{ ko: "API 에러 응답은 항상 { code, message, retryable } 모양이에요.", en: "API error responses always take the shape { code, message, retryable }." }],
       files: [
         { file: "src/api/errors.ts", add: 42, del: 17, diff: [
           "-export function toResponse(err) { return { error: err.message }; }",
@@ -677,6 +689,7 @@
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
         resumeHint: "멈춘 뒤에는 터미널에서 이 세션을 이어 볼 수 있어요.", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
+        suggestTitle: "기억해 둘 만한 것", suggestWhy: (n) => n + subjectParticle(n) + " 이번 업무에서 알게 된 거예요. 기억시키면 다음 업무부터 들고 가요.", teachIt: "기억시키기", passIt: "넘기기",
         said: (n) => n + "의 말", saidAs: "보는 방식", formatted: "서식", plain: "텍스트", notStarted: "아직 아무도 시작하지 않았어요.",
         applyWhat: (b) => "승인하면 <code>" + b + "</code> 브랜치에 커밋해요. push는 하지 않아요.",
         applied: (b, c) => "<code>" + b + "</code> 브랜치에 커밋했어요 · <code>" + c + "</code>",
@@ -802,6 +815,7 @@
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
         resumeHint: "Once it stops, you can open this session in a terminal.", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
+        suggestTitle: "Worth remembering", suggestWhy: (n) => n + " noticed this on the task. Teach it and they carry it from the next task on.", teachIt: "Teach this", passIt: "Pass",
         said: (n) => n + " says", saidAs: "How to show it", formatted: "Formatted", plain: "Plain text", notStarted: "Nobody has started it yet.",
         applyWhat: (b) => "Approving commits to the <code>" + b + "</code> branch. Nothing is pushed.",
         applied: (b, c) => "Committed to <code>" + b + "</code> · <code>" + c + "</code>",
@@ -1066,6 +1080,10 @@
           <div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg></button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div></div>
         <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="said-text"><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div></div>` : "";
 
+    // What the agent thought worth remembering waits on the user: taught, or passed on.
+    const suggest = task.suggest?.length && who ? `<div class="panel sug-card"><div class="panel-hd"><h2>${k.suggestTitle}</h2><p>${k.suggestWhy(who.name)}</p></div>
+        <div class="panel-bd">${task.suggest.map((x, i) => `<div class="sug"><span class="sug-tx">${tx(x)}</span><button class="btn btn-secondary btn-sm" type="button" data-pass="${i}">${k.passIt}</button><button class="btn btn-primary btn-sm" type="button" data-teach-sug="${i}">${k.teachIt}</button></div>`).join("")}</div></div>` : "";
+
     const changes = task.status === "backlog" ? "" : panel(k.changed,
       (task.files?.length
         ? task.files.map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
@@ -1100,7 +1118,7 @@
     ];
 
     const view = document.getElementById("taskView");
-    view.innerHTML = `${blocked}${said ? `<div style="${blocked ? "margin-top:16px" : ""}">${said}</div>` : ""}<div class="tk-grid" style="${blocked && !said ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    view.innerHTML = `${blocked}${said ? `<div style="${blocked ? "margin-top:16px" : ""}">${said}</div>` : ""}${suggest}<div class="tk-grid" style="${blocked && !said ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
     view.querySelector("[data-allow-run]")?.addEventListener("click", () => {
       p.runs = [...(p.runs ?? []), task.blocked.run];
       task.blocked = undefined;
@@ -1113,6 +1131,8 @@
         view.querySelector(".said-raw").hidden = b.dataset.said !== "raw";
       });
     }
+    for (const b of view.querySelectorAll("[data-pass]")) b.addEventListener("click", () => { task.suggest.splice(Number(b.dataset.pass), 1); render(); });
+    for (const b of view.querySelectorAll("[data-teach-sug]")) b.addEventListener("click", () => teachFrom(task, task.suggest[b.dataset.teachSug], () => { task.suggest.splice(Number(b.dataset.teachSug), 1); render(); }));
     view.querySelector("[data-copy-said]")?.addEventListener("click", (e) => {
       navigator.clipboard?.writeText(tx(task.said));
       e.currentTarget.classList.add("done");
@@ -1948,12 +1968,14 @@
   }
 
   // Teaching from a task takes the task as where the memory came from.
-  function teachFrom(task) {
+  // `suggested` starts the memory from what the agent thought worth remembering.
+  function teachFrom(task, suggested = null, onTaught = () => {}) {
     openTeach({
       to: task.who ? byId.get(task.who) : null,
       area: task.area,
       from: task.title,
-      onSave: ({ to, memory }) => to.memories.unshift({ ...memory, used: 0 }),
+      text: suggested,
+      onSave: ({ to, memory }) => { to.memories.unshift({ ...memory, used: 0 }); onTaught(); },
     });
   }
 

@@ -1,4 +1,5 @@
 import type { AgentId, CompanyId, EmployeeId, MemoryId, RunId, TaskId } from "./ids";
+import { MAX_MEMORY_TEXT } from "./memory";
 import type { Timestamp } from "./time";
 
 // The execution capability attached to an employee. The employee is who the
@@ -40,6 +41,8 @@ export interface Run {
   readonly costUsd: number;
   // what the agent said it drew on of what it carried; its own account, not a trace
   readonly memoriesUsed: readonly MemoryId[];
+  // what it thought worth remembering, until the user teaches it or passes
+  readonly suggestions: readonly string[];
   readonly startedAt: Timestamp;
   readonly endedAt: Timestamp | undefined;
 }
@@ -71,6 +74,7 @@ export function startRun(input: { readonly id: RunId; readonly agent: Agent; rea
     end: undefined,
     costUsd: 0,
     memoriesUsed: [],
+    suggestions: [],
     startedAt: now,
     endedAt: undefined,
   };
@@ -88,21 +92,41 @@ export function endRun(run: Run, end: RunEnd, costUsd: number, now: Timestamp): 
 
 export const isLive = (run: Run): boolean => run.state !== "ended";
 
-export const drewOn = (run: Run, memories: readonly MemoryId[]): Run => ({ ...run, memoriesUsed: [...new Set(memories)] });
+export interface Reported {
+  // what the agent said, without the closing lines below
+  readonly report: string;
+  readonly used: readonly MemoryId[];
+  readonly suggestions: readonly string[];
+}
 
-// The line a report ends with to say which numbered memories it drew on:
-// "Memories used: 2, 5", or "none". Anything else is not an answer.
+export const MAX_SUGGESTIONS = 2;
+
+export const reported = (run: Run, { used, suggestions }: Pick<Reported, "used" | "suggestions">): Run => ({ ...run, memoriesUsed: [...new Set(used)], suggestions });
+
+// Taught or passed on, a suggestion is done with.
+export const settleSuggestion = (run: Run, text: string): Run => ({ ...run, suggestions: run.suggestions.filter((s) => s !== text) });
+
+// The lines a report ends with: "Worth remembering: …" for something the next
+// task should know, and "Memories used: 2, 5" (or "none") for the numbered
+// memories it drew on. Anything else is part of what it said.
 const USED_LINE = /^\W*memories used\W*:?\W*(.*?)\W*$/i;
+// \W would take Korean too, so only markdown's marks are stripped around the words
+const SUGGEST_LINE = /^[\s*_>-]*worth remembering[\s*_]*:[\s*_]*(.+?)\s*$/i;
 
-// Splits the agent's closing report into what it said and the memories,
-// by their number in the prompt, it said it drew on.
-export function memoriesInReport(report: string, carried: readonly MemoryId[]): { readonly report: string; readonly used: readonly MemoryId[] } {
-  const lines = report.trimEnd().split("\n");
-  const last = lines.at(-1) ?? "";
-  const match = USED_LINE.exec(last);
-  if (match === null) return { report, used: [] };
-  const used = [...match[1].matchAll(/\d+/g)].map((m) => carried[Number(m[0]) - 1]).filter((id): id is MemoryId => id !== undefined);
-  return { report: lines.slice(0, -1).join("\n").trimEnd(), used: [...new Set(used)] };
+export function readReport(text: string, carried: readonly MemoryId[]): Reported {
+  const lines = text.trimEnd().split("\n");
+  let used: MemoryId[] = [];
+  const suggested: string[] = [];
+  for (let last = lines.at(-1); last !== undefined; last = lines.at(-1)) {
+    const usedLine = USED_LINE.exec(last.trim());
+    const suggestLine = SUGGEST_LINE.exec(last.trim());
+    if (usedLine !== null) used = [...usedLine[1].matchAll(/\d+/g)].map((m) => carried[Number(m[0]) - 1]).filter((id): id is MemoryId => id !== undefined);
+    else if (suggestLine !== null) suggested.unshift(suggestLine[1].replace(/\*+$/, "").trim());
+    else if (last.trim() !== "") break;
+    lines.pop();
+  }
+  const suggestions = [...new Set(suggested)].filter((s) => s !== "" && s.length <= MAX_MEMORY_TEXT).slice(0, MAX_SUGGESTIONS);
+  return { report: lines.join("\n").trimEnd(), used: [...new Set(used)], suggestions };
 }
 
 // The session a new run of this agent on this task continues, if any: a

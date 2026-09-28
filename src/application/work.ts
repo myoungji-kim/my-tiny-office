@@ -1,7 +1,7 @@
 import type { Employee } from "../domain/employee";
 import { toAgentId, toEventId, toRunId, type CompanyId, type EmployeeId, type MemoryId, type RunId, type TaskId } from "../domain/ids";
 import { carriedBy, type Memory } from "../domain/memory";
-import { drewOn, endRun, isLive, memoriesInReport, reportDetail, sessionStarted, sessionToContinue, startRun, type Agent, type RunEnd } from "../domain/run";
+import { endRun, isLive, readReport, reported, reportDetail, sessionStarted, sessionToContinue, startRun, type Agent, type RunEnd } from "../domain/run";
 import * as taskDomain from "../domain/task";
 
 import type { AgentEvent, AgentRuntime, RunningAgent, Workspace } from "./agent-runtime";
@@ -19,13 +19,15 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], commands: read
       ? "No shell command is allowed in this project."
       : `The only shell commands allowed are these, each run on its own exactly as written, never joined with && ; | or redirected: ${allowed}.`,
     "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
+    "",
+    "If this task showed you something about this project that later tasks should know — a convention, a command, a pitfall — end your final message with at most two lines, each `Worth remembering: <one sentence>`, written in the language the task is written in. Leave them out when nothing stands out.",
   ];
   if (own.length > 0) {
     lines.push("", "What you have been taught, which you follow:");
     own.forEach((m, i) => lines.push(`${i + 1}. ${m.text}`));
     lines.push(
       "",
-      "End your final message with one line of its own naming the numbers above that you actually drew on, such as `Memories used: 2, 5`, or `Memories used: none`.",
+      "End your final message with one last line naming the numbers above that you actually drew on, such as `Memories used: 2, 5`, or `Memories used: none`.",
     );
   }
   return lines.join("\n") + "\n";
@@ -76,6 +78,7 @@ interface LiveRun {
   // what it carries, in the order the prompt numbered it
   readonly carried: readonly MemoryId[];
   used: readonly MemoryId[];
+  suggestions: readonly string[];
 }
 
 // A task wants a run while it is being worked on, unblocked, by this person.
@@ -162,6 +165,7 @@ export function createWorkSupervisor(deps: {
       result: undefined,
       carried: carried.map((m) => m.id),
       used: [],
+      suggestions: [],
     };
     live.set(run.id, entry);
     try {
@@ -193,8 +197,9 @@ export function createWorkSupervisor(deps: {
     } else {
       entry.result = event;
       if (event.report === undefined) return;
-      const { report, used } = memoriesInReport(event.report, entry.carried);
+      const { report, used, suggestions } = readReport(event.report, entry.carried);
       entry.used = used;
+      entry.suggestions = suggestions;
       if (report !== "") await ctx.runSteps.add({ companyId: entry.companyId, taskId: entry.taskId, runId: entry.runId, at: ctx.now(), kind: "say", detail: reportDetail(report) });
     }
   }
@@ -211,7 +216,7 @@ export function createWorkSupervisor(deps: {
     const { ctx } = entry;
     const end = endOf(entry);
     const run = await ctx.runs.findById(entry.runId);
-    if (run !== undefined) await ctx.runs.save(endRun(drewOn(run, entry.used), end, entry.result?.costUsd ?? 0, ctx.now()));
+    if (run !== undefined) await ctx.runs.save(endRun(reported(run, { used: entry.used, suggestions: entry.suggestions }), end, entry.result?.costUsd ?? 0, ctx.now()));
 
     kick();
     const task = await ctx.tasks.findById(entry.taskId);

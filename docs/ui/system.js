@@ -1013,7 +1013,7 @@ function withParticle(word, afterFinal, afterVowel) {
 
 // `from` is the task it was opened from, if any; that is where the memory came
 // from. Anywhere else it was told directly.
-function openTeach({ to = null, area = null, from = null, edit = null, carried = null, areas = null, onSave }) {
+function openTeach({ to = null, area = null, from = null, edit = null, carried = null, areas = null, text: startWith = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].teach;
   const list = areas ?? Object.entries(WORDS[lang].areas).map(([key, label]) => ({ key, label }));
@@ -1059,7 +1059,7 @@ function openTeach({ to = null, area = null, from = null, edit = null, carried =
     $("[data-source] span").textContent = w.source(local(source));
   }
   const returnTo = document.activeElement;
-  text.value = edit ? local(edit.text) : "";
+  text.value = edit ? local(edit.text) : local(startWith);
 
   const isCompany = () => state.to === "company";
   const person = () => (state.to && !isCompany() ? state.to : null);

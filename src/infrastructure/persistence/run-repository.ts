@@ -1,7 +1,7 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 
 import type { AgentRepository, RunRepository, RunStepRepository } from "../../application/repositories";
-import { toAgentId, toCompanyId, toEmployeeId, toMemoryId, toRunId, toTaskId, type MemoryId } from "../../domain/ids";
+import { toAgentId, toCompanyId, toEmployeeId, toMemoryId, toRunId, toTaskId } from "../../domain/ids";
 import type { Agent, Run, RunEnd, RunStep } from "../../domain/run";
 
 import type { AppDatabase } from "./database";
@@ -39,11 +39,11 @@ function endOf(row: typeof runs.$inferSelect): RunEnd | undefined {
   return { kind: row.end };
 }
 
-// Anything unreadable in the column is no memory drawn on, rather than an error.
-function memoriesOf(raw: string): MemoryId[] {
+// A JSON list of strings; anything unreadable in the column is an empty list, rather than an error.
+function stringsOf(raw: string): string[] {
   try {
     const value: unknown = JSON.parse(raw);
-    return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string").map(toMemoryId) : [];
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
   } catch {
     return [];
   }
@@ -59,7 +59,8 @@ function toRun(row: typeof runs.$inferSelect): Run {
     state: row.state,
     end: endOf(row),
     costUsd: row.costUsd,
-    memoriesUsed: memoriesOf(row.memoriesUsed),
+    memoriesUsed: stringsOf(row.memoriesUsed).map(toMemoryId),
+    suggestions: stringsOf(row.suggestions),
     startedAt: row.startedAt,
     endedAt: row.endedAt ?? undefined,
   };
@@ -85,6 +86,7 @@ export function createSqliteRunRepository(db: AppDatabase): RunRepository {
         deniedCommand: run.end?.kind === "denied" ? run.end.command : null,
         costUsd: run.costUsd,
         memoriesUsed: JSON.stringify(run.memoriesUsed),
+        suggestions: JSON.stringify(run.suggestions),
         startedAt: run.startedAt,
         endedAt: run.endedAt ?? null,
       };

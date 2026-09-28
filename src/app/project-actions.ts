@@ -1,8 +1,8 @@
 "use server";
 
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand } from "../application/project";
-import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack } from "../application/task";
-import { toAreaId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
+import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
+import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
 import { checkFolder } from "../infrastructure/workspace/folder";
 import { pickFolder } from "../infrastructure/workspace/folder-picker";
 import { gitWorkspace } from "../infrastructure/workspace/git";
@@ -140,6 +140,10 @@ export async function holdTaskAction(companyId: string, taskId: string, reason: 
 
 export async function carryOnAction(companyId: string, taskId: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => carryOn(ctx, toTaskId(str(taskId))));
+}
+
+export async function settleSuggestionAction(companyId: string, runId: string, text: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => settleSuggestion(ctx, toRunId(str(runId)), str(text)));
 }
 
 export async function diffAction(companyId: string, taskId: string, file: string): Promise<string> {

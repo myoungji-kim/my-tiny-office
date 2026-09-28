@@ -11,6 +11,7 @@ import { blockerText, timeLine, withCode } from "../../../../components/task-lin
 import { Prio } from "../../../../components/project-marks";
 import { Shell } from "../../../../components/shell";
 import { CopyButton } from "../../../../components/settings-parts";
+import { Suggestions } from "../../../../components/suggestions";
 import { TaskActions } from "../../../../components/task-actions";
 import { SaidPanel } from "../../../../components/said-panel";
 import { TaskChanges } from "../../../../components/task-changes";
@@ -232,6 +233,17 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           </div>
         )}
         {saidPanel !== undefined && <div style={blocker !== undefined ? { marginTop: 16 } : undefined}>{saidPanel}</div>}
+      {who !== undefined && work !== undefined && work.suggestions.length > 0 && (
+        <Suggestions
+          locale={locale}
+          companyId={company.id}
+          person={who}
+          task={{ id: task.id, title: task.title }}
+          suggestions={work.suggestions}
+          memories={office.memories}
+          areas={office.areas}
+        />
+      )}
         <div className="tk-grid" style={{ ...(main.length === 0 ? { gridTemplateColumns: "minmax(0, 1fr)" } : {}), ...(blocker !== undefined && saidPanel === undefined ? { marginTop: 16 } : {}) }}>
           {main.length > 0 && <div className="tk-col">{main}</div>}
           <div className="tk-col">
