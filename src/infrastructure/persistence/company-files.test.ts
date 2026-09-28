@@ -1,11 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { createCompany } from "../../application/company";
 import { toCompanyId } from "../../domain/ids";
+import { createAppContext } from "../app-context";
 
 import { createCompanyFiles, type CompanyFiles } from "./company-files";
 import { resolveDataDirectory } from "./data-directory";
@@ -48,6 +50,22 @@ describe("company files", () => {
     files.create(id);
     expect(() => files.open(id)).not.toThrow();
     expect(() => files.create(id)).toThrow();
+  });
+});
+
+describe("a company's file", () => {
+  it("is copied whole while open, and removed with nothing left behind", async () => {
+    const id = toCompanyId(randomUUID());
+    const handle = files.create(id);
+    await createCompany(createAppContext(handle), { id, name: "TinySoft" });
+    const copy = join(directory, "copy.db");
+
+    handle.copyTo(copy);
+    files.remove(id);
+
+    expect(files.has(id)).toBe(false);
+    expect(readdirSync(join(directory, "companies"))).toEqual([]);
+    expect(existsSync(copy)).toBe(true);
   });
 });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
 import { finishProjectAction, holdProjectAction, reopenProjectAction, resumeProjectAction, startProjectAction } from "../app/project-actions";
@@ -25,6 +26,7 @@ export function ProjectControls({
   areas,
   memories,
   ready,
+  editFirst,
 }: {
   readonly locale: Locale;
   readonly companyId: string;
@@ -35,13 +37,19 @@ export function ProjectControls({
   readonly areas: readonly AreaView[];
   readonly memories: readonly MemoryView[];
   readonly ready: boolean;
+  // the notice's 폴더 고르기 arrives with the dialog open
+  readonly editFirst: boolean;
 }) {
   const t = getDictionary(locale);
   const w = t.projects;
   const a = w.actions;
-  const [open, setOpen] = useState<Open>(undefined);
+  const [open, setOpen] = useState<Open>(editFirst ? "edit" : undefined);
   const [, start] = useTransition();
-  const close = useCallback(() => setOpen(undefined), []);
+  const router = useRouter();
+  const close = useCallback(() => {
+    setOpen(undefined);
+    if (editFirst) router.replace(`/projects/${project.id}`, { scroll: false });
+  }, [editFirst, router, project.id]);
   const act = (action: () => Promise<unknown>) => start(async () => void (await action()));
 
   const mine = tasks.filter((x) => x.projectId === project.id);
@@ -57,7 +65,7 @@ export function ProjectControls({
           {
             label: a.startProject,
             key: true,
-            off: project.folder === undefined ? w.needsFolder : stopped,
+            off: project.folder === undefined ? w.needsFolder : !project.folderConfirmed ? w.folderToChoose : stopped,
             run: () => act(() => startProjectAction(companyId, project.id)),
           },
           edit,

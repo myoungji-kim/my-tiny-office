@@ -41,6 +41,7 @@ describe("a project's life", () => {
 
   it("starts only with a folder, and that is when its span begins", () => {
     expect(startProject(planned(), eventId, t0)).toMatchObject({ reason: "projectHasNoFolder" });
+    expect(startProject({ ...planned(), folder: "/code/pay", folderConfirmed: false }, eventId, t0)).toMatchObject({ reason: "folderNotChosenHere" });
     expect(active()).toMatchObject({ status: "active", startedAt: t0 + 1 });
   });
 

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
 
-import { setLocaleAction } from "../app/actions";
-import type { Locale } from "../i18n";
+import { setLocaleAction, switchCompanyAction } from "../app/actions";
+import { deleteCompanyAction } from "../app/company-actions";
+import { getDictionary, type Locale } from "../i18n";
 
 export function LanguagePicker({
   locale,
@@ -33,5 +35,174 @@ export function CopyButton({ text, copy, copied }: { readonly text: string; read
     <button className="btn btn-secondary btn-sm" type="button" onClick={() => void navigator.clipboard.writeText(text).then(() => setDone(true))}>
       {done ? copied : copy}
     </button>
+  );
+}
+
+export function DeleteCompany({
+  companyId,
+  name,
+  words,
+  errors,
+}: {
+  readonly companyId: string;
+  readonly name: string;
+  readonly words: {
+    readonly deleteButton: string;
+    readonly deleteAsk: string;
+    readonly deleteLoses: string;
+    readonly deleteKeep: string;
+    readonly deleteType: string;
+    readonly cancel: string;
+  };
+  readonly errors: Readonly<Record<string, string>>;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [pending, start] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const remove = () =>
+    start(async () => {
+      const result = await deleteCompanyAction(companyId, typed);
+      if (result.error !== undefined) return setError(errors[result.error] ?? errors.unknown);
+      setOpen(false);
+      router.push("/");
+    });
+
+  return (
+    <>
+      <button className="btn btn-danger btn-sm" type="button" onClick={() => setOpen(true)}>
+        {words.deleteButton}
+      </button>
+      {open && (
+        <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && setOpen(false)}>
+          <div className="modal" role="alertdialog" aria-modal="true" aria-label={words.deleteAsk}>
+            <div className="m-hd">
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="m-t">{words.deleteAsk}</span>
+              </span>
+            </div>
+            <div className="m-sec">
+              <span className="m-s">{words.deleteLoses}</span>
+              <span className="hint">{words.deleteKeep}</span>
+              <div className="field">
+                <label className="label" htmlFor="typed-name">
+                  {words.deleteType}
+                </label>
+                <input className="input" id="typed-name" placeholder={name} autoComplete="off" autoFocus value={typed} onChange={(e) => setTyped(e.target.value)} />
+              </div>
+              {error !== undefined && (
+                <p className="hint" role="alert">
+                  {error}
+                </p>
+              )}
+            </div>
+            <div className="m-foot">
+              <button className="btn btn-secondary btn-md" type="button" onClick={() => setOpen(false)}>
+                {words.cancel}
+              </button>
+              <button className="btn btn-danger btn-md" type="button" disabled={pending || typed.trim() !== name} onClick={remove}>
+                {words.deleteButton}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+type Imported = { readonly companyId: string; readonly name: string; readonly foldersToChoose: number };
+
+// Moving is a copy of one company's file each way.
+export function DataActions({ locale, companyId }: { readonly locale: Locale; readonly companyId: string }) {
+  const t = getDictionary(locale);
+  const words = t.settings;
+  const errors: Readonly<Record<string, string>> = t.errors;
+  const router = useRouter();
+  const input = useRef<HTMLInputElement>(null);
+  const [imported, setImported] = useState<Imported | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [pending, start] = useTransition();
+
+  const upload = (file: File) =>
+    start(async () => {
+      const response = await fetch("/settings/import", { method: "POST", body: file, headers: { "Content-Type": "application/octet-stream" } });
+      const answer = (await response.json()) as Imported | { readonly error: string };
+      if ("error" in answer) {
+        setImported(undefined);
+        setError(errors[answer.error] ?? errors.unknown);
+        return;
+      }
+      setError(undefined);
+      setImported(answer);
+      router.refresh();
+    });
+
+  return (
+    <>
+      <div className="data-acts">
+        <a className="btn btn-secondary btn-sm" href={`/settings/export?company=${companyId}`} download>
+          {words.exportDb}
+        </a>
+        <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={() => input.current?.click()}>
+          {words.importDb}
+        </button>
+        <input
+          ref={input}
+          type="file"
+          accept=".db"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file !== undefined) upload(file);
+          }}
+        />
+      </div>
+      {error !== undefined && (
+        <p className="hint" role="alert">
+          {error}
+        </p>
+      )}
+      {imported !== undefined && (
+        <div id="moved">
+          <div className="notice notice-warn">
+            <span className="n-ic">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 2.2l6 11H2z" />
+                <path d="M8 6.6v3M8 11.4v.1" />
+              </svg>
+            </span>
+            <span className="n-tx">
+              <b>{words.importedTitle(imported.name)}</b>
+              <span>{words.importedBody(imported.foldersToChoose)}</span>
+            </span>
+            <span className="n-acts">
+              <button
+                className="btn btn-secondary btn-sm"
+                type="button"
+                onClick={() =>
+                  start(async () => {
+                    await switchCompanyAction(imported.companyId);
+                    router.push("/");
+                  })
+                }
+              >
+                {words.openIt(imported.name)}
+              </button>
+            </span>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

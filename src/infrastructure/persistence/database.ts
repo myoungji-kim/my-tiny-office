@@ -14,6 +14,8 @@ export type AppDatabase = BetterSQLite3Database<typeof schema>;
 export interface DatabaseHandle {
   readonly db: AppDatabase;
   readonly withTransaction: <T>(work: () => Promise<T>) => Promise<T>;
+  // a consistent copy of the whole file, taken while it stays open
+  readonly copyTo: (path: string) => void;
   readonly close: () => void;
 }
 
@@ -121,6 +123,7 @@ export function openDatabase(
   return {
     db,
     withTransaction: createTransactionRunner(connection),
+    copyTo: (path) => void connection.prepare("VACUUM INTO ?").run(path),
     close: () => connection.close(),
   };
 }

@@ -26,6 +26,7 @@ const project = (id: string, priority: Priority, status: ProjectStatus = "active
   name: id,
   description: undefined,
   folder: "/code/" + id,
+  folderConfirmed: true,
   commands: [],
   status,
   priority,
@@ -79,6 +80,12 @@ describe("pickUps", () => {
     const tasks = [task("admin-1", "admin", "high", 1), task("settle-1", "settle", "high", 1)];
 
     expect(pickUps(projects, tasks, [person("a")], [])).toEqual([]);
+  });
+
+  it("picks nothing from a folder not chosen on this computer", () => {
+    const imported = projects.map((p) => ({ ...p, folderConfirmed: false }));
+
+    expect(pickUps(imported, [task("pay-1", "pay", "high", 1)], [person("a")], [])).toEqual([]);
   });
 
   it("gives one thing at a time, and nothing to someone busy or on leave", () => {

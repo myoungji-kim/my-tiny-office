@@ -12,7 +12,7 @@ import { CHECK, PAUSE, Prio, PROJECT_CHIP, ProjectMark } from "../../../componen
 import { Shell } from "../../../components/shell";
 import { getDictionary } from "../../../i18n";
 import { reopenProjectAction, resumeProjectAction, startProjectAction } from "../../project-actions";
-import { companyScreen } from "../../screen-data";
+import { companyScreen, param, type SearchParams } from "../../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ const FLAG = (
   </svg>
 );
 
-export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   const { locale, office, status, company } = await companyScreen();
   const t = getDictionary(locale);
   const w = t.projects;
@@ -30,6 +30,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const project = office.projects.find((p) => p.id === id);
   if (project === undefined) notFound();
   const ready = isReady(status);
+  const chooseFolder = (await param(searchParams, "do")) === "folder";
   const open = office.projects.filter((p) => p.takesWork);
 
   // A project with no folder cannot be worked in; a planned one says so in its notice instead.
@@ -90,6 +91,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             </span>
             <div className="head-right">
               <ProjectControls
+                key={chooseFolder ? "folder" : "board"}
                 locale={locale}
                 companyId={company.id}
                 project={project}
@@ -99,12 +101,24 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 areas={office.areas}
                 memories={office.memories}
                 ready={ready}
+                editFirst={chooseFolder}
               />
             </div>
           </div>
         </div>
       }
     >
+      {project.folder !== undefined &&
+        !project.folderConfirmed &&
+        notice(
+          FLAG,
+          "notice-warn",
+          w.folderToChoose,
+          w.folderToChooseWhy,
+          <Link className="btn btn-secondary btn-sm" href={`/projects/${project.id}?do=folder`}>
+            {w.chooseFolder}
+          </Link>,
+        )}
       {project.status === "planned" &&
         notice(
           FLAG,
@@ -114,7 +128,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <ActButton
             action={startProjectAction.bind(null, company.id, project.id)}
             label={w.actions.startProject}
-            disabled={project.folder === undefined || !ready}
+            disabled={project.folder === undefined || !project.folderConfirmed || !ready}
             errors={t.errors}
           />,
         )}

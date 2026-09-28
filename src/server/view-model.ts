@@ -71,6 +71,7 @@ export interface ProjectView {
   readonly name: string;
   readonly description: string | undefined;
   readonly folder: string | undefined;
+  readonly folderConfirmed: boolean;
   readonly commands: readonly string[];
   readonly status: ProjectStatus;
   readonly priority: Priority;
@@ -275,6 +276,7 @@ export async function loadOffice(
       name: project.name,
       description: project.description,
       folder: project.folder,
+      folderConfirmed: project.folderConfirmed,
       commands: project.commands,
       status: project.status,
       priority: project.priority,

@@ -21,6 +21,9 @@ export interface Project {
   readonly name: string;
   readonly description: string | undefined;
   readonly folder: string | undefined;
+  // Choosing a folder on this computer is the consent to work in it; one
+  // that came with an imported company is not, until it is chosen again.
+  readonly folderConfirmed: boolean;
   // Exact commands its employees may run; nothing else runs.
   readonly commands: readonly string[];
   readonly status: ProjectStatus;
@@ -84,6 +87,7 @@ export function createProject(
     name,
     description: input.description?.trim() || undefined,
     folder: input.folder,
+    folderConfirmed: true,
     commands,
     status: "planned",
     priority: input.priority,
@@ -124,7 +128,8 @@ export function editProject(
   if (details.folder !== project.folder && running > 0) return { ok: false, reason: "folderInUse" };
   return {
     ok: true,
-    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, commands, priority: details.priority },
+    // the dialog shows the folder and its boundary, so saving it is choosing it
+    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, folderConfirmed: true, commands, priority: details.priority },
   };
 }
 
@@ -137,9 +142,14 @@ const event = <T extends string>(type: T, project: Project, eventId: EventId, no
   projectName: project.name,
 });
 
-export function startProject(project: Project, eventId: EventId, now: Timestamp): Transition<ProjectStarted, "projectNotPlanned" | "projectHasNoFolder"> {
+export function startProject(
+  project: Project,
+  eventId: EventId,
+  now: Timestamp,
+): Transition<ProjectStarted, "projectNotPlanned" | "projectHasNoFolder" | "folderNotChosenHere"> {
   if (project.status !== "planned") return { ok: false, reason: "projectNotPlanned" };
   if (project.folder === undefined) return { ok: false, reason: "projectHasNoFolder" };
+  if (!project.folderConfirmed) return { ok: false, reason: "folderNotChosenHere" };
   return {
     ok: true,
     project: { ...project, status: "active", startedAt: now },

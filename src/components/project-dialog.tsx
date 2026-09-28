@@ -40,7 +40,8 @@ export function ProjectDialog({
   const [about, setAbout] = useState(edit?.description ?? "");
   const [priority, setPriority] = useState<Priority>(edit?.priority ?? "normal");
   const [folder, setFolder] = useState<string | undefined>(edit?.folder);
-  const [typing, setTyping] = useState(edit?.folder === undefined);
+  // a folder from another computer is typed and checked again before it is saved
+  const [typing, setTyping] = useState(edit?.folder === undefined || !edit.folderConfirmed);
   const [typed, setTyped] = useState(edit?.folder ?? "");
   const [runs, setRuns] = useState<readonly string[]>(edit?.commands ?? []);
   const [run, setRun] = useState("");

@@ -5,7 +5,7 @@ import { ClaudeChecks } from "../../components/claude-checks";
 import { Head } from "../../components/head";
 import { Icon } from "../../components/icons";
 import { RecheckButton } from "../../components/recheck-button";
-import { CopyButton, LanguagePicker } from "../../components/settings-parts";
+import { CopyButton, DataActions, DeleteCompany, LanguagePicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
 import { toCompanyId } from "../../domain/ids";
 import { getDictionary } from "../../i18n";
@@ -140,6 +140,32 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
             <CopyButton text={path} copy={w.copy} copied={w.copied} />
           </div>
           <span className="hint">{w.dataHint}</span>
+          <DataActions locale={locale} companyId={company.id} />
+          <span className="hint">{w.moveHint}</span>
+        </div>
+      </div>
+
+      <div className="panel panel-danger">
+        <div className="panel-hd">
+          <h2>{w.deleteTitle}</h2>
+        </div>
+        <div className="panel-bd">
+          <div className="danger-row">
+            <p>{w.deleteWhy}</p>
+            <DeleteCompany
+              companyId={company.id}
+              name={company.name}
+              errors={t.errors}
+              words={{
+                deleteButton: w.deleteButton,
+                deleteAsk: w.deleteAsk(company.name),
+                deleteLoses: w.deleteLoses(office.employees.length, office.memories.length),
+                deleteKeep: w.deleteKeep,
+                deleteType: w.deleteType,
+                cancel: w.cancel,
+              }}
+            />
+          </div>
         </div>
       </div>
 

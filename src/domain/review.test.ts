@@ -31,6 +31,7 @@ const pay: Project = {
   name: "pay",
   description: undefined,
   folder: "/code",
+  folderConfirmed: true,
   commands: [],
   status: "active",
   priority: "normal",

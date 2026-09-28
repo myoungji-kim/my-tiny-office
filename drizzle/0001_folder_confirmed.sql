@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `folder_confirmed` integer DEFAULT true NOT NULL;

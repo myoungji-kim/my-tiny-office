@@ -34,6 +34,7 @@ const pay: Project = {
   name: "결제 개편",
   description: undefined,
   folder: "/code/pay",
+  folderConfirmed: true,
   commands: ["npm test", "npm run lint"],
   status: "active",
   priority: "high",

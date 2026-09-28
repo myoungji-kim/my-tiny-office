@@ -45,7 +45,10 @@ export function pickUps(
   employees: readonly Employee[],
   reviews: readonly Review[],
 ): PickUp[] {
-  const projectRank = new Map<ProjectId, number>(projects.filter((p) => p.status === "active").map((p) => [p.id, PRIORITY_RANK[p.priority]]));
+  // nothing runs in a folder that has not been chosen on this computer
+  const projectRank = new Map<ProjectId, number>(
+    projects.filter((p) => p.status === "active" && p.folderConfirmed).map((p) => [p.id, PRIORITY_RANK[p.priority]]),
+  );
   const busy = occupied(tasks, reviews);
   const waiting = tasks
     .filter((t) => t.status === "backlog" && projectRank.has(t.projectId))

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 import { toCompanyId, type CompanyId } from "../../domain/ids";
@@ -20,6 +20,8 @@ export interface CompanyFiles {
   // Opens an existing company's file; never creates one.
   open(id: CompanyId): DatabaseHandle;
   create(id: CompanyId): DatabaseHandle;
+  // Deletes the company's file for good; nothing else of the company is kept.
+  remove(id: CompanyId): void;
   close(): void;
 }
 
@@ -62,6 +64,12 @@ export function createCompanyFiles(directory: string): CompanyFiles {
         throw new Error("Company already exists");
       }
       return connect(id, true);
+    },
+    remove(id) {
+      const path = pathOf(id);
+      handles.get(id)?.close();
+      handles.delete(id);
+      for (const suffix of ["", "-wal", "-shm"]) rmSync(path + suffix, { force: true });
     },
     close() {
       for (const handle of handles.values()) handle.close();

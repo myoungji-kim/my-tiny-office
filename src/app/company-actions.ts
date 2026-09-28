@@ -1,11 +1,15 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { renameCompany } from "../application/company";
 import { addArea, removeArea, renameArea } from "../application/memory";
 import { addRole, removeRole, renameRole } from "../application/organisation";
-import { toAreaId, toRoleId } from "../domain/ids";
+import { toAreaId, toCompanyId, toRoleId } from "../domain/ids";
+import { getCompanyFiles } from "../infrastructure/persistence/company-files";
+import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 
-import { inCompany, optional, str, type Outcome } from "./action-context";
+import { contextFor, inCompany, optional, str, type Outcome } from "./action-context";
 
 export async function renameCompanyAction(companyId: string, name: string): Promise<Outcome> {
   return inCompany(companyId, (ctx, id) => renameCompany(ctx, id, str(name)));
@@ -35,4 +39,21 @@ export async function renameRoleAction(companyId: string, roleId: string, name: 
 export async function removeRoleAction(companyId: string, roleId: string, moveTo: string | undefined): Promise<Outcome> {
   const into = optional(moveTo);
   return inCompany(companyId, (ctx, id) => removeRole(ctx, id, toRoleId(str(roleId)), into === undefined ? undefined : toRoleId(into)));
+}
+
+// Deleting is for good, so the company's name typed out is the confirmation,
+// checked here as well as on screen.
+export async function deleteCompanyAction(companyId: string, typedName: string): Promise<Outcome> {
+  const ctx = contextFor(companyId);
+  if (ctx === undefined) return { error: "companyNotFound" };
+  const company = await ctx.companies.findById(toCompanyId(companyId));
+  if (company === undefined) return { error: "companyNotFound" };
+  if (str(typedName).trim() !== company.name) return { error: "nameMismatch" };
+
+  const files = getCompanyFiles();
+  files.remove(company.id);
+  const next = files.ids()[0];
+  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: next });
+  revalidatePath("/", "layout");
+  return {};
 }

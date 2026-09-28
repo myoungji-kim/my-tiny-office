@@ -106,6 +106,8 @@ export const projects = sqliteTable(
     name: text("name").notNull(),
     description: text("description"),
     folder: text("folder"),
+    // 0 for a folder chosen on another computer, until it is chosen again here
+    folderConfirmed: integer("folder_confirmed", { mode: "boolean" }).notNull().default(true),
     // a JSON array of exact commands
     commands: text("commands").notNull().default("[]"),
     status: text("status", { enum: projectStatuses }).notNull(),
