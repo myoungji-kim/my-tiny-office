@@ -1,0 +1,41 @@
+/* from docs/ui/office.html */
+
+.room { display: block; border-radius: 6px; image-rendering: pixelated; }
+
+.desk { position: absolute; padding: 0; background: none; border: 2px solid transparent; border-radius: 7px; cursor: pointer; }
+
+.desk:hover { border-color: rgb(255 255 255 / .9); }
+
+.desk[aria-expanded="true"] { border-color: #fff; background: rgb(255 255 255 / .18); }
+
+.grp { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+.grp h2 { margin: 0; font-size: 17px; font-weight: 600; }
+
+.card:hover { box-shadow: 0 2px 10px rgb(20 20 25 / .07); }
+
+.card:has([aria-expanded="true"]) { border-color: var(--line-2); box-shadow: 0 4px 18px rgb(20 20 25 / .11); }
+
+.c-av canvas { border-radius: 10px; }
+
+.c-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.c-menu {
+  position: absolute; top: 11px; right: 9px;
+  width: 26px; height: 26px; border: none; border-radius: 7px;
+  background: none; color: var(--faint); cursor: pointer;
+  display: grid; place-items: center;
+}
+
+.c-menu:hover, .c-menu[aria-expanded="true"] { background: var(--subtle); color: var(--ink); }
+
+.c-menu svg { width: 15px; height: 15px; }
+
+.p-av canvas { border-radius: 9px; }
+
+.p-nums span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 960px) {
+  .app { grid-template-columns: 1fr; }
+  .side { border-bottom: 1px solid var(--line-2); }
+}

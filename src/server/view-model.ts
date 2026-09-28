@@ -1,7 +1,7 @@
 import type { Company } from "../domain/company";
 import { toCompanyId } from "../domain/ids";
 import type { Priority, ProjectStatus } from "../domain/project";
-import { statusOf, type EmployeeStatus } from "../domain/review";
+import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
 import { timeTaken, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
@@ -12,12 +12,30 @@ export interface CompanyOption {
   readonly name: string;
 }
 
+export interface WorkOnDesk {
+  readonly taskId: string;
+  readonly title: string;
+  readonly minutes: number;
+}
+
 export interface EmployeeView {
   readonly id: string;
   readonly name: string;
+  readonly species: string;
   readonly role: string;
+  readonly teamId: string | undefined;
   readonly status: EmployeeStatus;
-  readonly workingOn: string | undefined;
+  // the task they are working on, or the one they are reviewing
+  readonly task: WorkOnDesk | undefined;
+  readonly review: WorkOnDesk | undefined;
+  readonly lastFinished: string | undefined;
+  readonly leaveSince: number | undefined;
+}
+
+export interface TeamView {
+  readonly id: string;
+  readonly suggested: string | undefined;
+  readonly name: string | undefined;
 }
 
 export interface RoleView {
@@ -48,6 +66,8 @@ export interface TaskView {
 }
 
 export interface OfficeView {
+  // when it was read, so every duration on screen is measured to the same moment
+  readonly now: number;
   readonly companies: readonly CompanyOption[];
   // company files that could not be opened, left untouched
   readonly unreadable: number;
@@ -61,16 +81,18 @@ export interface OfficeView {
     | undefined;
   readonly employees: readonly EmployeeView[];
   readonly roles: readonly RoleView[];
+  readonly teams: readonly TeamView[];
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }
 
-const empty: OfficeView = {
+const empty: Omit<OfficeView, "now"> = {
   companies: [],
   unreadable: 0,
   company: undefined,
   employees: [],
   roles: [],
+  teams: [],
   projects: [],
   tasks: [],
 };
@@ -103,7 +125,7 @@ export async function loadOffice(
 ): Promise<OfficeView> {
   const { companies, unreadable } = await listCompanies(files);
   if (companies.length === 0) {
-    return { ...empty, unreadable };
+    return { ...empty, now: Date.now(), unreadable };
   }
 
   const byId = (id: string | undefined) =>
@@ -120,17 +142,30 @@ export async function loadOffice(
   const projects = await ctx.projects.findByCompany(company.id);
   const roles = await ctx.roles.findByCompany(company.id);
   const reviews = await ctx.reviews.findByCompany(company.id);
+  const teams = await ctx.teams.findByCompany(company.id);
   const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
   const nameById = new Map(employees.map((employee) => [employee.id, employee.name]));
-  const workingTitleById = new Map(
-    tasks
-      .filter((task) => task.status === "working" && task.assigneeId !== undefined)
-      .map((task) => [task.assigneeId, task.title]),
-  );
+  const taskById = new Map(tasks.map((task) => [task.id, task]));
+  const minutes = (ms: number) => Math.floor(ms / 60_000);
+
+  const deskOf = (employeeId: string) => {
+    const working = tasks.find((task) => task.status === "working" && task.assigneeId === employeeId);
+    const reviewing = liveReviews(tasks, reviews).find((r) => r.state === "reviewing" && r.reviewerId === employeeId);
+    const reviewed = reviewing === undefined ? undefined : taskById.get(reviewing.taskId);
+    const finished = tasks
+      .filter((task) => task.assigneeId === employeeId && task.finishedAt !== undefined)
+      .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))[0];
+    return {
+      task: working && { taskId: working.id, title: working.title, minutes: minutes(timeTaken(working, now)) },
+      review: reviewing && reviewed && { taskId: reviewed.id, title: reviewed.title, minutes: minutes(now - (reviewing.startedAt ?? now)) },
+      lastFinished: finished?.title,
+    };
+  };
 
   return {
+    now,
     companies: companies.map((candidate) => ({ id: candidate.id, name: candidate.name })),
     unreadable,
     company: {
@@ -142,11 +177,15 @@ export async function loadOffice(
     employees: employees.map((employee) => ({
       id: employee.id,
       name: employee.name,
+      species: employee.species,
       role: roleName.get(employee.roleId) ?? "",
+      teamId: employee.teamId,
       status: statusOf(employee, tasks, reviews),
-      workingOn: workingTitleById.get(employee.id),
+      leaveSince: employee.leaveSince,
+      ...deskOf(employee.id),
     })),
     roles: roles.map((role) => ({ id: role.id, name: role.name })),
+    teams: teams.map((team) => ({ id: team.id, suggested: team.suggested, name: team.name })),
     projects: projects.map((project) => ({
       id: project.id,
       name: project.name,

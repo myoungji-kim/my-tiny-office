@@ -6,13 +6,13 @@ import { revalidatePath } from "next/cache";
 
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
-import { hireEmployee } from "../application/employee";
+import { bringBack, hireEmployee, sendOnLeave } from "../application/employee";
 import { createProject } from "../application/project";
 import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
 import { assignTask, createTask } from "../application/task";
 import { MAX_COMPANY_NAME } from "../domain/company";
 import { MAX_EMPLOYEE_NAME, SPECIES, type Species } from "../domain/employee";
-import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, type CompanyId } from "../domain/ids";
+import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, toTeamId, type CompanyId } from "../domain/ids";
 import { checkName } from "../domain/name";
 import type { Priority } from "../domain/project";
 import { createAppContext } from "../infrastructure/app-context";
@@ -35,10 +35,69 @@ function optionalText(formData: FormData, field: string): string | undefined {
 }
 
 // Every action names its company, and only a company that has a file here is opened.
-function contextOf(formData: FormData): AppContext | undefined {
-  const id = text(formData, "companyId");
+function contextFor(id: unknown): AppContext | undefined {
   const files = getCompanyFiles();
-  return files.has(id) ? createAppContext(files.open(toCompanyId(id))) : undefined;
+  return typeof id === "string" && files.has(id) ? createAppContext(files.open(toCompanyId(id))) : undefined;
+}
+
+const contextOf = (formData: FormData) => contextFor(text(formData, "companyId"));
+
+const optionalId = (value: unknown) => (typeof value === "string" && value !== "" ? value : undefined);
+
+export interface Outcome {
+  readonly error?: string;
+}
+
+// The company the screens open next; it stays until another is chosen.
+export async function switchCompanyAction(companyId: string): Promise<void> {
+  const files = getCompanyFiles();
+  if (typeof companyId !== "string" || !files.has(companyId)) return;
+  writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: companyId });
+  revalidatePath("/", "layout");
+}
+
+export interface HireInput {
+  readonly companyId: string;
+  readonly name: string;
+  readonly species: string;
+  readonly roleId: string;
+  readonly teamId: string | undefined;
+}
+
+export async function hireAction(input: HireInput): Promise<Outcome> {
+  const ctx = contextFor(input.companyId);
+  if (ctx === undefined) return { error: "companyNotFound" };
+  const species = SPECIES.find((s) => s === input.species);
+  if (species === undefined) return { error: "speciesUnknown" };
+  const teamId = optionalId(input.teamId);
+  const result = await hireEmployee(ctx, {
+    companyId: toCompanyId(input.companyId),
+    name: String(input.name),
+    species,
+    roleId: toRoleId(String(input.roleId)),
+    teamId: teamId === undefined ? undefined : toTeamId(teamId),
+  });
+  if (!result.ok) return { error: result.reason };
+  revalidatePath("/", "layout");
+  return {};
+}
+
+export async function sendOnLeaveAction(companyId: string, employeeId: string): Promise<Outcome> {
+  const ctx = contextFor(companyId);
+  if (ctx === undefined) return { error: "companyNotFound" };
+  const result = await sendOnLeave(ctx, toEmployeeId(String(employeeId)));
+  if (!result.ok) return { error: result.reason };
+  revalidatePath("/", "layout");
+  return {};
+}
+
+export async function bringBackAction(companyId: string, employeeId: string): Promise<Outcome> {
+  const ctx = contextFor(companyId);
+  if (ctx === undefined) return { error: "companyNotFound" };
+  const result = await bringBack(ctx, toEmployeeId(String(employeeId)));
+  if (!result.ok) return { error: result.reason };
+  revalidatePath("/", "layout");
+  return {};
 }
 
 // A hire gets the first sprite nobody in the company has yet.

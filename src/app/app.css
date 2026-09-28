@@ -8,3 +8,8 @@
   display: block;
   image-rendering: pixelated;
 }
+
+a.member,
+a.mrow {
+  text-decoration: none;
+}

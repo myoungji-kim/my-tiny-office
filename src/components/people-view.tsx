@@ -39,9 +39,9 @@ export function PeopleView({
                   <div className="flex min-w-0 flex-col">
                     <span className="text-sm font-medium text-ink">{employee.name}</span>
                     <span className="text-xs text-muted">{employee.role}</span>
-                    {employee.workingOn !== undefined && (
+                    {employee.task !== undefined && (
                       <span className="mt-0.5 truncate text-xs text-muted">
-                        {t.people.workingOn}: {employee.workingOn}
+                        {t.people.workingOn}: {employee.task.title}
                       </span>
                     )}
                   </div>

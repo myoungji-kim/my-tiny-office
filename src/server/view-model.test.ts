@@ -101,9 +101,14 @@ describe("loadOffice", () => {
       {
         id: expect.any(String),
         name: "Min-su",
+        species: expect.any(String),
         role: "Backend Engineer",
+        teamId: undefined,
         status: "available",
-        workingOn: undefined,
+        task: undefined,
+        review: undefined,
+        lastFinished: undefined,
+        leaveSince: undefined,
       },
     ]);
   });
@@ -215,7 +220,7 @@ describe("work through the office view", () => {
     const office = await load(company.id);
 
     expect(office.tasks[0]).toMatchObject({ status: "working", minutesTaken: 23 });
-    expect(office.employees[0]).toMatchObject({ workingOn: "Implement payment API" });
+    expect(office.employees[0]).toMatchObject({ task: { title: "Implement payment API" } });
   });
 
   it("never starts work by itself when the office is opened", async () => {

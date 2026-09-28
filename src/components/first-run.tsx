@@ -53,6 +53,7 @@ export function FirstRun({
   words,
   claude,
   errors,
+  another = false,
 }: {
   readonly locale: Locale;
   readonly status: ClaudeCodeStatus;
@@ -60,16 +61,16 @@ export function FirstRun({
   readonly words: FirstRunWords;
   readonly claude: ClaudeWords;
   readonly errors: Readonly<Record<string, string>>;
+  readonly another?: boolean;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(initialStatus);
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(another && isReady(initialStatus) ? 2 : 1);
   const [companyName, setCompanyName] = useState(words.companyDefault);
   const [chosen, setChosen] = useState<CastMember | undefined>(undefined);
   const [name, setName] = useState("");
   const [role, setRole] = useState(roles[0] ?? "");
   const [error, setError] = useState<string | undefined>(undefined);
-  const [companyId, setCompanyId] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const ready = isReady(status);
 
@@ -82,7 +83,6 @@ export function FirstRun({
         return;
       }
       setError(undefined);
-      setCompanyId(result.companyId);
       setStep(4);
     });
 
@@ -263,7 +263,10 @@ export function FirstRun({
               className="btn btn-primary btn-lg"
               style={{ flex: 1 }}
               type="button"
-              onClick={() => router.push(`/?company=${encodeURIComponent(companyId ?? "")}`)}
+              onClick={() => {
+                router.push("/");
+                router.refresh();
+              }}
             >
               {words.toOffice}
             </button>

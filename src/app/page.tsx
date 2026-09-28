@@ -1,76 +1,64 @@
-import { headers } from "next/headers";
+import Link from "next/link";
 
-import { CompanyView } from "../components/company-view";
-import { OfficeView } from "../components/office-view";
+import { isReady } from "../application/runtime-status";
 import { FirstRun } from "../components/first-run";
-import { PeopleView } from "../components/people-view";
-import { Shell, views, type View } from "../components/shell";
-import { WorkView } from "../components/work-view";
+import { Head } from "../components/head";
+import { OfficeFloor } from "../components/office-floor";
+import { peopleIn, roomsOf, teamName, type Room } from "../components/office-rooms";
+import { Shell } from "../components/shell";
 import { STARTING_ROLES } from "../domain/organisation";
-import { getDictionary, resolveLocale } from "../i18n";
-import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
-import { loadOffice } from "../server/view-model";
+import { getDictionary } from "../i18n";
+
+import { param, screenData, type SearchParams } from "./screen-data";
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = Record<string, string | string[] | undefined>;
-
-function single(params: SearchParams, key: string): string | undefined {
-  const value = params[key];
-  return typeof value === "string" ? value : undefined;
-}
-
-function resolveView(value: string | undefined): View {
-  return views.find((candidate) => candidate === value) ?? "office";
-}
-
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const params = await searchParams;
-  const locale = resolveLocale((await headers()).get("accept-language"));
+export default async function OfficePage({ searchParams }: { searchParams: SearchParams }) {
+  const { locale, office, status } = await screenData();
   const t = getDictionary(locale);
-
-  const [office, status] = await Promise.all([loadOffice(single(params, "company")), claudeCodeStatus()]);
-  if (office.company === undefined) {
-    return (
-      <FirstRun locale={locale} status={status} roles={STARTING_ROLES} words={t.firstRun} claude={t.claude} errors={t.errors} />
-    );
+  const { company, companies, employees, teams, roles } = office;
+  if (company === undefined) {
+    return <FirstRun locale={locale} status={status} roles={STARTING_ROLES} words={t.firstRun} claude={t.claude} errors={t.errors} />;
   }
 
-  const { company, companies, employees, roles, projects, tasks } = office;
-  const view = resolveView(single(params, "view"));
+  const rooms = roomsOf(employees, teams);
+  const asked = await param(searchParams, "room");
+  const room = rooms.find((r) => r.key === asked) ?? rooms[0];
+  const nameOf = (r: Room) => (r.kind === "team" ? teamName(r.team, t.teams) : t.office.rooms[r.kind]);
+  const sub =
+    room.kind === "lounge" ? t.office.loungeSub : room.kind === "meeting" ? t.office.meetingSub : t.office.peopleSub(peopleIn(room, employees).length);
 
   return (
     <Shell
-      t={t}
+      locale={locale}
       status={status}
       companies={companies}
-      companyId={company.id}
-      companyName={company.name}
-      view={view}
-    >
-      {view === "office" && (
-        <OfficeView t={t} companyId={company.id} employees={employees} tasks={tasks} />
-      )}
-      {view === "people" && <PeopleView t={t} companyId={company.id} employees={employees} roles={roles} />}
-      {view === "work" && (
-        <WorkView t={t} companyId={company.id} employees={employees} projects={projects} tasks={tasks} />
-      )}
-      {view === "company" && (
-        <CompanyView
-          t={t}
-          name={company.name}
-          description={company.description}
-          founded={new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-            new Date(company.foundedAt),
-          )}
-          employeeCount={employees.length}
-          taskCount={tasks.length}
+      company={company}
+      employees={employees}
+      screen="office"
+      head={
+        <Head
+          title={t.office.title}
+          sub={sub}
+          tabs={rooms.map((r) => (
+            <Link key={r.key} className="tab" role="tab" aria-selected={r.key === room.key} href={r.kind === "all" ? "/" : `/?room=${encodeURIComponent(r.key)}`}>
+              <span>{nameOf(r)}</span>
+              <span className="n">{peopleIn(r, employees).length}</span>
+            </Link>
+          ))}
         />
-      )}
+      }
+    >
+      <OfficeFloor
+        locale={locale}
+        companyId={company.id}
+        room={room}
+        employees={employees}
+        teams={teams}
+        roles={roles.map((r) => ({ id: r.id, label: r.name }))}
+        ready={isReady(status)}
+        now={office.now}
+      />
     </Shell>
   );
 }
