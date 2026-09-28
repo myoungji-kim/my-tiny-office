@@ -58,9 +58,11 @@ describe("importCompany", () => {
   });
 
   it("brings a file from an older version up to this one", async () => {
+    // what the first version wrote: none of the later tables or columns
     const bytes = await exported((file) => {
+      file.exec("drop table run_steps; drop table runs; drop table agents");
       file.exec("alter table projects drop column folder_confirmed");
-      file.exec("delete from __drizzle_migrations where created_at = (select max(created_at) from __drizzle_migrations)");
+      file.exec("delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)");
     });
 
     const imported = importCompany(files, bytes);

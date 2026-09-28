@@ -9,6 +9,7 @@ import { createSqliteMilestoneRepository, createSqliteReviewRepository } from ".
 import { createSqliteAreaRepository, createSqliteMemoryRepository } from "./persistence/memory-repository";
 import { createSqliteRoleRepository, createSqliteTeamRepository } from "./persistence/organisation-repository";
 import { createSqliteProjectRepository } from "./persistence/project-repository";
+import { createSqliteAgentRepository, createSqliteRunRepository, createSqliteRunStepRepository } from "./persistence/run-repository";
 import { createSqliteTaskRepository } from "./persistence/task-repository";
 
 export function createAppContext(handle: DatabaseHandle): AppContext {
@@ -23,6 +24,9 @@ export function createAppContext(handle: DatabaseHandle): AppContext {
     teams: createSqliteTeamRepository(handle.db),
     reviews: createSqliteReviewRepository(handle.db),
     milestones: createSqliteMilestoneRepository(handle.db),
+    agents: createSqliteAgentRepository(handle.db),
+    runs: createSqliteRunRepository(handle.db),
+    runSteps: createSqliteRunStepRepository(handle.db, randomUUID),
     now: () => Date.now(),
     newId: () => randomUUID(),
     withTransaction: handle.withTransaction,

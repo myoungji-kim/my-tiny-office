@@ -1,11 +1,12 @@
 import type { Company } from "../domain/company";
 import type { Employee } from "../domain/employee";
-import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, ReviewId, RoleId, TaskId, TeamId } from "../domain/ids";
+import type { AreaId, CompanyId, EmployeeId, MemoryId, ProjectId, ReviewId, RoleId, RunId, TaskId, TeamId } from "../domain/ids";
 import type { Area, Memory } from "../domain/memory";
 import type { RecordedMilestone } from "../domain/milestone";
 import type { Role, Team } from "../domain/organisation";
 import type { Review } from "../domain/review";
 import type { Project } from "../domain/project";
+import type { Agent, Run, RunStep } from "../domain/run";
 import type { Task } from "../domain/task";
 
 export interface CompanyRepository {
@@ -65,4 +66,21 @@ export interface MemoryRepository {
   findByCompany(companyId: CompanyId): Promise<readonly Memory[]>;
   save(memory: Memory): Promise<void>;
   remove(id: MemoryId): Promise<void>;
+}
+
+export interface AgentRepository {
+  findByCompany(companyId: CompanyId): Promise<readonly Agent[]>;
+  save(agent: Agent): Promise<void>;
+}
+
+export interface RunRepository {
+  findById(id: RunId): Promise<Run | undefined>;
+  findByCompany(companyId: CompanyId): Promise<readonly Run[]>;
+  save(run: Run): Promise<void>;
+}
+
+// What a run reported is only ever added to; a task's page reads the newest.
+export interface RunStepRepository {
+  add(step: RunStep): Promise<void>;
+  findByTask(companyId: CompanyId, taskId: TaskId, limit: number): Promise<readonly RunStep[]>;
 }

@@ -1,5 +1,5 @@
 import { sql, type SQL } from "drizzle-orm";
-import { check, index, integer, sqliteTable, text, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
+import { check, index, integer, real, sqliteTable, text, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 
 import { SPECIES, type Availability } from "../../domain/employee";
 import { STARTING_AREAS, type MemoryKind } from "../../domain/memory";
@@ -7,6 +7,7 @@ import type { MilestoneKind } from "../../domain/milestone";
 import { SUGGESTED_TEAMS } from "../../domain/organisation";
 import type { Priority, ProjectStatus } from "../../domain/project";
 import type { ReviewState } from "../../domain/review";
+import { RUNTIMES, type RunEnd, type RunState, type StepKind } from "../../domain/run";
 import type { TaskStatus } from "../../domain/task";
 
 // Each list is checked against its domain union, and each CHECK is built from
@@ -28,6 +29,10 @@ const milestoneKinds = [
   "memories",
   "projectFinished",
 ] as const satisfies readonly MilestoneKind[];
+
+const runStates = ["starting", "running", "ended"] as const satisfies readonly RunState[];
+const runEnds = ["finished", "denied", "budgetReached", "failed", "stopped", "disconnected"] as const satisfies readonly RunEnd["kind"][];
+const stepKinds = ["read", "edit", "run", "say"] as const satisfies readonly StepKind[];
 
 // The values are the constant lists above, never user input.
 const oneOf = (column: AnySQLiteColumn, values: readonly string[]): SQL =>
@@ -259,4 +264,73 @@ export const milestones = sqliteTable(
     index("idx_milestones_company").on(table.companyId, table.at),
     check("milestones_kind", oneOf(table.kind, milestoneKinds)),
   ],
+);
+
+// An agent belongs to one employee, and is what the company's runs are launched as.
+export const agents = sqliteTable(
+  "agents",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    employeeId: text("employee_id")
+      .notNull()
+      .unique()
+      .references(() => employees.id),
+    runtime: text("runtime", { enum: RUNTIMES }).notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [index("idx_agents_company").on(table.companyId), check("agents_runtime", oneOf(table.runtime, RUNTIMES))],
+);
+
+export const runs = sqliteTable(
+  "runs",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id),
+    agentId: text("agent_id")
+      .notNull()
+      .references(() => agents.id),
+    sessionId: text("session_id"),
+    state: text("state", { enum: runStates }).notNull(),
+    end: text("end", { enum: runEnds }),
+    // the command it was denied, when that is how it ended
+    deniedCommand: text("denied_command"),
+    costUsd: real("cost_usd").notNull().default(0),
+    startedAt: integer("started_at").notNull(),
+    endedAt: integer("ended_at"),
+  },
+  (table) => [
+    index("idx_runs_company").on(table.companyId, table.startedAt),
+    check("runs_state", oneOf(table.state, runStates)),
+    check("runs_end", sql`${table.end} is null or ${oneOf(table.end, runEnds)}`),
+    check("runs_ended", sql`(${table.state} = 'ended') = (${table.end} is not null and ${table.endedAt} is not null)`),
+    check("runs_denied", sql`(${table.end} = 'denied') = (${table.deniedCommand} is not null)`),
+  ],
+);
+
+export const runSteps = sqliteTable(
+  "run_steps",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id),
+    runId: text("run_id")
+      .notNull()
+      .references(() => runs.id),
+    at: integer("at").notNull(),
+    kind: text("kind", { enum: stepKinds }).notNull(),
+    detail: text("detail").notNull(),
+  },
+  (table) => [index("idx_run_steps_task").on(table.taskId, table.at), check("run_steps_kind", oneOf(table.kind, stepKinds))],
 );

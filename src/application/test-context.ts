@@ -2,6 +2,7 @@ import type { CompanyId, RoleId } from "../domain/ids";
 
 import type { AppContext } from "./context";
 import {
+  createInMemoryAgentRepository,
   createInMemoryAreaRepository,
   createInMemoryCompanyRepository,
   createInMemoryEmployeeRepository,
@@ -10,6 +11,8 @@ import {
   createInMemoryProjectRepository,
   createInMemoryReviewRepository,
   createInMemoryRoleRepository,
+  createInMemoryRunRepository,
+  createInMemoryRunStepRepository,
   createInMemoryTaskRepository,
   createInMemoryTeamRepository,
   withoutTransaction,
@@ -30,6 +33,9 @@ export function createTestContext(clock: () => number = () => 1_700_000_000_000)
     teams: createInMemoryTeamRepository(),
     reviews: createInMemoryReviewRepository(),
     milestones: createInMemoryMilestoneRepository(),
+    agents: createInMemoryAgentRepository(),
+    runs: createInMemoryRunRepository(),
+    runSteps: createInMemoryRunStepRepository(),
     now: clock,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,

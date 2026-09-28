@@ -6,10 +6,13 @@ import type {
   CompanyRepository,
   EmployeeRepository,
   MemoryRepository,
+  AgentRepository,
   MilestoneRepository,
   ProjectRepository,
   ReviewRepository,
   RoleRepository,
+  RunRepository,
+  RunStepRepository,
   TaskRepository,
   TeamRepository,
 } from "./repositories";
@@ -27,6 +30,9 @@ export interface AppContext {
   readonly teams: TeamRepository;
   readonly reviews: ReviewRepository;
   readonly milestones: MilestoneRepository;
+  readonly agents: AgentRepository;
+  readonly runs: RunRepository;
+  readonly runSteps: RunStepRepository;
   readonly now: () => Timestamp;
   readonly newId: () => string;
   readonly withTransaction: TransactionRunner;
