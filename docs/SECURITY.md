@@ -91,10 +91,15 @@ like); the user adds and removes entries in the project dialog.
 - A project's folder is chosen in the project dialog, which shows the boundary
   in §1 and the command list beside it. Creating or saving the project is the
   consent.
-- The browser cannot hand over a path, so the folder is typed. The server
-  checks it — an absolute path (a leading `~` is the home folder) that resolves
-  to a folder on this computer — and keeps only the canonical path it resolves
-  to (`realpath`), checking it again when the project is saved. The allowed
+- The browser cannot hand over a path, so 고르기 asks the server to open the
+  operating system's own folder dialog on this computer (PowerShell's
+  `FolderBrowserDialog` on Windows, `osascript` on macOS, `zenity` or `kdialog`
+  on Linux) — a fixed script run without a shell, one dialog at a time — and a
+  path can be typed instead. Either way the server checks it: an absolute path
+  (a leading `~` is the home folder) to a folder, not a file, that the app can
+  read and write. It keeps only the canonical path it resolves to
+  (`realpath`), checks it again when the project is saved, and says when the
+  folder is not a git repository, which a task's worktree needs. The allowed
   commands start from that folder's `package.json` scripts, each one passing
   §3 before it is offered.
 - Paths are resolved to an absolute, canonical path before use; a task's

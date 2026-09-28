@@ -596,9 +596,10 @@ measured flags behind it.
   work that is running, stopping a held task's agent, and a task's worktree
   and branch. Not in `src/domain` yet: letting someone go, and deleting a
   project or a task.
-- **Choosing a folder.** A browser cannot hand over a folder's path, so the
-  project dialog takes a typed one and checks it before anything is shown
-  (SECURITY.md §4), where the page has a 고르기 button.
+- **Choosing a folder.** A browser cannot hand over a folder's path, so
+  고르기 opens the operating system's folder dialog from the app's own server,
+  with 경로 직접 입력 beside it; either is checked before anything is shown
+  (SECURITY.md §4), and a folder that is not a git repository says so.
 - **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
   removes them too. Bringing them back is a per-company list of MCP servers,
   reads allowed and writes made on approval — SECURITY.md §8.

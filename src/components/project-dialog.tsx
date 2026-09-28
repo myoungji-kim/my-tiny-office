@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { checkFolderAction, editProjectAction, newProjectAction } from "../app/project-actions";
+import { checkFolderAction, editProjectAction, newProjectAction, pickFolderAction, type FolderOutcome } from "../app/project-actions";
 import { isAllowableCommand, MAX_COMMANDS, type Priority } from "../domain/project";
 import { getDictionary, type Locale } from "../i18n";
 import type { ProjectView } from "../server/view-model";
@@ -40,9 +40,11 @@ export function ProjectDialog({
   const [about, setAbout] = useState(edit?.description ?? "");
   const [priority, setPriority] = useState<Priority>(edit?.priority ?? "normal");
   const [folder, setFolder] = useState<string | undefined>(edit?.folder);
-  // a folder from another computer is typed and checked again before it is saved
-  const [typing, setTyping] = useState(edit?.folder === undefined || !edit.folderConfirmed);
-  const [typed, setTyped] = useState(edit?.folder ?? "");
+  // a folder from another computer has to be chosen again before it is saved
+  const [chosen, setChosen] = useState(edit === undefined || edit.folder === undefined || edit.folderConfirmed);
+  const [repository, setRepository] = useState<boolean | undefined>(undefined);
+  const [typing, setTyping] = useState(false);
+  const [typed, setTyped] = useState("");
   const [runs, setRuns] = useState<readonly string[]>(edit?.commands ?? []);
   const [run, setRun] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -58,20 +60,26 @@ export function ProjectDialog({
 
   const say = (reason: string) => setError(t.errors[reason as keyof typeof t.errors] ?? t.errors.unknown);
 
+  // What the server found at the path, whichever way it was given.
+  const accept = (result: FolderOutcome) => {
+    if ("error" in result) {
+      if (result.error !== "pickCancelled") say(result.error);
+      return;
+    }
+    setError(undefined);
+    setFolder(result.folder);
+    setChosen(true);
+    setRepository(result.repository);
+    setTyping(false);
+    if (result.folder !== edit?.folder) setRuns(result.scripts);
+  };
+
+  const pick = () => start(async () => accept(await pickFolderAction()));
+
   const check = () =>
     start(async () => {
-      if (typed.trim() === "") {
-        setFolder(undefined);
-        setRuns([]);
-        return;
-      }
-      const result = await checkFolderAction(typed);
-      if ("error" in result) return say(result.error);
-      setError(undefined);
-      setFolder(result.folder);
-      setTyped(result.folder);
-      setTyping(false);
-      if (result.folder !== edit?.folder) setRuns(result.scripts);
+      if (typed.trim() === "") return setTyping(false);
+      accept(await checkFolderAction(typed));
     });
 
   const addRun = () => {
@@ -142,17 +150,25 @@ export function ProjectDialog({
           </div>
 
           <div className="field">
-            <label className="label" htmlFor="np-folder">
-              {w.workspace}
-            </label>
+            <span className="label">{w.workspace}</span>
+            <div className="folder">
+              {FOLDER}
+              <span className={folder === undefined ? "path empty" : "path"} title={folder}>
+                {folder ?? w.noFolder}
+              </span>
+              <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={pick}>
+                {pending ? w.choosing : folder === undefined || !chosen ? w.choose : w.change}
+              </button>
+            </div>
             {typing ? (
-              <div className="run-add" style={{ marginTop: 0 }}>
+              <div className="run-add">
                 <input
                   className="input"
-                  id="np-folder"
+                  aria-label={w.workspace}
                   placeholder={w.folderPlaceholder}
                   autoComplete="off"
                   spellCheck={false}
+                  autoFocus
                   value={typed}
                   onChange={(e) => setTyped(e.target.value)}
                   onKeyDown={(e) => {
@@ -166,15 +182,29 @@ export function ProjectDialog({
                 </button>
               </div>
             ) : (
-              <div className="folder">
-                {FOLDER}
-                <span className="path">{folder}</span>
-                <button className="btn btn-secondary btn-sm" type="button" onClick={() => setTyping(true)}>
-                  {w.change}
-                </button>
+              <button className="btn btn-ghost btn-sm" type="button" style={{ marginTop: 6, paddingInline: 4 }} onClick={() => setTyping(true)}>
+                {w.typeInstead}
+              </button>
+            )}
+            {folder !== undefined && !chosen && (
+              <div className="notice notice-warn" style={{ marginTop: 10 }}>
+                <span className="n-ic">{Icon.alert}</span>
+                <span className="n-tx">
+                  <b>{w.folderToChoose}</b>
+                  <span>{w.folderToChooseWhy}</span>
+                </span>
               </div>
             )}
-            {folder !== undefined && !typing && (
+            {chosen && repository === false && (
+              <div className="notice notice-warn" style={{ marginTop: 10 }}>
+                <span className="n-ic">{Icon.alert}</span>
+                <span className="n-tx">
+                  <b>{w.notRepository}</b>
+                  <span>{w.notRepositoryWhy}</span>
+                </span>
+              </div>
+            )}
+            {folder !== undefined && chosen && (
               <div className="scope">
                 <div className="scope-row yes">
                   {Icon.yes}
@@ -190,10 +220,10 @@ export function ProjectDialog({
                 </div>
               </div>
             )}
-            <span className="hint">{typing ? w.typedFolderHint + " " + w.noFolderHint : folder === undefined ? w.noFolderHint : w.folderHint}</span>
+            <span className="hint">{folder === undefined ? w.noFolderHint : w.folderHint}</span>
           </div>
 
-          {folder !== undefined && !typing && (
+          {folder !== undefined && chosen && (
             <div className="field">
               <span className="label">{w.fRuns}</span>
               {runs.length > 0 ? (
@@ -246,7 +276,7 @@ export function ProjectDialog({
           <button className="btn btn-secondary btn-md" type="button" onClick={onClose}>
             {w.cancel}
           </button>
-          <button className="btn btn-primary btn-md" type="button" disabled={pending || name.trim() === "" || (typing && typed.trim() !== "" && typed !== folder)} onClick={save}>
+          <button className="btn btn-primary btn-md" type="button" disabled={pending || name.trim() === "" || (folder !== undefined && !chosen)} onClick={save}>
             {edit === undefined ? w.createProject : w.save}
           </button>
         </div>

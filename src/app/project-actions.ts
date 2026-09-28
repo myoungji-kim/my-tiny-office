@@ -4,15 +4,26 @@ import { createProject, editProject, finishProject, holdProject, reopenProject, 
 import { createTask, editTask, resumeTask } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
 import { checkFolder } from "../infrastructure/workspace/folder";
+import { pickFolder } from "../infrastructure/workspace/folder-picker";
 
 import { inCompany, optional, priorityOf, str, type Outcome } from "./action-context";
 
-export type FolderOutcome = { readonly error: string } | { readonly folder: string; readonly scripts: readonly string[] };
+export type FolderOutcome =
+  | { readonly error: string }
+  | { readonly folder: string; readonly scripts: readonly string[]; readonly repository: boolean };
+
+const outcomeOf = (checked: ReturnType<typeof checkFolder>): FolderOutcome =>
+  checked.ok ? { folder: checked.folder, scripts: checked.scripts, repository: checked.repository } : { error: checked.reason };
 
 // What the dialog shows before the user consents to a folder.
 export async function checkFolderAction(path: string): Promise<FolderOutcome> {
-  const checked = checkFolder(str(path));
-  return checked.ok ? { folder: checked.folder, scripts: checked.scripts } : { error: checked.reason };
+  return outcomeOf(checkFolder(str(path)));
+}
+
+// The system's own folder dialog, opened on this computer; what it returns is checked like a typed path.
+export async function pickFolderAction(): Promise<FolderOutcome> {
+  const picked = await pickFolder();
+  return picked.ok ? outcomeOf(checkFolder(picked.path)) : { error: picked.reason };
 }
 
 export interface ProjectInput {
