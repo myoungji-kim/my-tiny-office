@@ -129,7 +129,8 @@ Statuses:
 
 A task is never started or completed by hand. Work is picked up by whoever is
 free, and it stops at `approval` because applying it is the one step the
-office does not take on its own.
+office does not take on its own. Starting work can be paused on this computer:
+then nobody free takes anything new, and what is running carries on.
 
 **Every task works apart and lands on its own branch.** A task runs in a
 worktree of its project's repository, so two people in one project never write

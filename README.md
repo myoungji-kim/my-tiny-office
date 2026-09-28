@@ -87,6 +87,7 @@ my-tiny-office/
     ├── infrastructure/
     ├── server/
     ├── ui/                  the cast and tiles, drawn from docs/ui/system.js
+    ├── instrumentation.ts   starts the work supervisor with the server
     └── proxy.ts             refuses requests not addressed to this machine
 ```
 

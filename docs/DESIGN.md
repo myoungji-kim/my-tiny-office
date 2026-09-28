@@ -245,7 +245,9 @@ so above everything.
 
 | Panel | Holds | From |
 | --- | --- | --- |
-| 지금 하는 일 | The agent's latest steps — reading, editing, running — and its last words | The runtime's event stream |
+| {이름}의 말 | What the employee said at the end, across the page like a reply: formatted markdown or its plain text (👁 · `<>`), copied from the icon that appears over it | The run's closing report |
+| 지금 하는 일 | While they work, the one step they are on | The runtime's event stream |
+| 한 일 | Every step — read, edited, ran — folded to one row with its count | The runtime's event stream |
 | 바뀐 것 | Every file with lines added and removed, a file opening to its diff | The task's worktree |
 | 검토 | Where the review stands and what was said | The task's PullRequest |
 | 업무 설명 | What the task is for | The task |
@@ -256,7 +258,14 @@ so above everything.
 The page follows the status: a queued task shows only what it is and who will
 take it; one waiting for approval leads with what changed and says what
 approving does — it commits to the task's branch, nothing is pushed; a done
-one is its record, with the commit.
+one is its record, with the branch it went to. What the employee said sits
+above everything but a stop, because it is what the user reads first; the
+steps are there to look into, not to read through.
+
+A stop leads the page with its reason and the way on: 다시 연결 for a lost
+agent, 이어서 하기 at the spending cap, 다시 시도 when the worktree could not be
+made, and for a command 허용하고 이어서 and 허용하지 않고 이어서 — only the
+second when the command could never be allowed, such as one chained with `&&`.
 
 ### The two dialogs
 
@@ -477,6 +486,7 @@ to earn their place.
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
 | 직원이 할 수 있는 일 | The boundary in three lines, with 안내 보기 to 안전 범위, the guide in full. The commands are not here: they are per project |
+| 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 이 회사 삭제 | Set apart in red, last before the version |
@@ -484,6 +494,10 @@ to earn their place.
 
 What the company decides — its name, areas, roles, memory — is on the company
 screen, not here.
+
+**Paused is said everywhere.** While starting work is paused, every screen
+opens with one amber line saying so, with 다시 켜기, so an idle office is never
+a mystery.
 
 **A company moves as its file.** 내보내기 saves the open company's; 가져오기
 adds the file's company as one more, chosen in the system's file dialog — it
@@ -589,13 +603,12 @@ measured flags behind it.
 - **What is not built yet.** Every screen is built from its page in
   `docs/ui`. Left out until what they show exists: today's feed in the office
   and the people screen's 기억 tab (the activity feed and the memory-used
-  report), how often a memory was used (the person's page lists the memories
-  taught lately instead of the most used), an agent that disconnected, and on
-  a task its steps, changes, review and session. Waiting on the runtime:
-  approving and sending back, asking for a review, rewriting or handing over
-  work that is running, stopping a held task's agent, and a task's worktree
-  and branch. Not in `src/domain` yet: letting someone go, and deleting a
-  project or a task.
+  report), how often a memory was used and the ✓ on what a task drew on (the
+  person's page lists the memories taught lately instead of the most used), a
+  task's review panel and its history of events. Waiting on the runtime:
+  asking for a review, and rewriting or handing over work that is running.
+  Not in `src/domain` yet: letting someone go, and deleting a project or a
+  task.
 - **Choosing a folder.** A browser cannot hand over a folder's path, so
   고르기 opens the operating system's folder dialog from the app's own server,
   with 경로 직접 입력 beside it; either is checked before anything is shown

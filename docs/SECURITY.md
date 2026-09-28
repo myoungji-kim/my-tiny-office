@@ -164,8 +164,19 @@ agents, so it is a target in its own right.
   - A timeout stops the whole process tree (`taskkill /T` on Windows, the
     process group elsewhere) and returns even if a grandchild holds the pipes.
     Output is capped at 8 MB.
+- **Git.** Every `git` the app runs carries `-c core.hooksPath=<an empty
+  folder>`, and diffs add `--no-ext-diff --no-textconv`: an agent can edit the
+  files a repository's hooks or diff drivers point at, and those would run with
+  the user's rights, outside the session's boundary. Commits add `--no-verify`.
+  A worktree and its branch are named only from the task's own UUID
+  (`.worktrees/<task>`, `mto/<task>`), never from text anyone wrote.
+- **Sessions.** A session id is checked to be a UUID before it becomes
+  `--resume <id>`, so nothing stored can turn into a flag.
 - **Output.** Agent output, file names, diffs and anything else from a run is
-  rendered as text. Never through `dangerouslySetInnerHTML`.
+  rendered as text. Never through `dangerouslySetInnerHTML`. The agent's
+  closing report is drawn as markdown by the app's own renderer
+  (`src/components/markdown.tsx`), which builds elements only: no HTML in it
+  becomes markup, and a link keeps its words but not its target.
 - **Claude Code's sign-in.** Read from `claude auth status --json`, and only
   `loggedIn`, `authMethod` and `subscriptionType`. The email and organisation
   it also returns are not read, stored or logged.

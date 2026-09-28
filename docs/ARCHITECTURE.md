@@ -114,8 +114,7 @@ Employee
 ├── tasks
 └── Agent
     ├── runtime
-    ├── registration
-    └── session
+    └── runs, each in a session it keeps
 ```
 
 Do not make the Employee itself a Claude Code session.
@@ -180,16 +179,14 @@ Employee
 ├── species        picks the sprite
 ├── roleId
 ├── teamId?
-├── availability   available | onLeave, and since when
-└── agentId        once the runtime is built
+└── availability   available | onLeave, and since when
 
-Agent
+Agent              made the first time its employee is given work
 ├── id
 ├── companyId
-├── employeeId
-├── runtimeType
-├── registration
-└── session?
+├── employeeId     one agent per employee
+├── runtime        claudeCode
+└── createdAt
 
 Project
 ├── id
@@ -205,15 +202,20 @@ Project
 ├── startedAt?
 └── finishedAt?
 
-AgentSession
+Run                one launch of an agent on a task
 ├── id
-├── agentId
+├── companyId
 ├── taskId
-├── runtimeSessionId
-├── workspace
-├── status
+├── agentId
+├── sessionId?     the runtime's, once it names it
+├── state          starting | running | ended
+├── end?           finished | denied (the command) | budgetReached | failed
+│                  | stopped | disconnected
+├── costUsd
 ├── startedAt
-└── lastActivityAt
+└── endedAt?
+
+RunStep            what a run reported doing: read · edit · run · say
 
 Area          the company's own list; seven to start, named by the dictionary
 Memory        expertise (an area) · style · company (no employee)
@@ -232,8 +234,13 @@ The important relationship is:
 ```text
 Company 1 ─── N Employee
 Employee 1 ─── 1 Agent
-Agent 1 ─── N Session      one per task
+Agent 1 ─── N Run           every launch, on any task
 ```
+
+A session belongs to the agent that started it. A later run of the same agent
+on the same task continues that session (`sessionToContinue` in
+`src/domain/run.ts`); a task handed to someone else starts a new one, with
+only the worktree carried over.
 
 An employee outlives a failed agent: when the runtime is unavailable the
 employee, their memory and their task remain, but nothing new starts.
@@ -260,24 +267,31 @@ A GitHub or GitLab integration may be added later as a separate integration. It 
 
 ## 8. Runtime Adapter
 
-Use a provider-neutral interface.
+The application sees a runtime through two small ports in
+`src/application/agent-runtime.ts`:
 
 ```ts
 interface AgentRuntime {
-  launch(input: LaunchInput): Promise<AgentSession>;
-  attach(input: AttachInput): Promise<AgentSession>;
-  sendTask(sessionId: string, task: AgentTask): Promise<void>;
-  getStatus(sessionId: string): Promise<AgentStatus>;
-  subscribeToEvents(
-    sessionId: string,
-    handler: (event: AgentEvent) => void
-  ): Unsubscribe;
-  detach(sessionId: string): Promise<void>;
-  dispose(sessionId: string): Promise<void>;
+  launch(input: LaunchInput, onEvent: (event: AgentEvent) => void, onExit: () => void): RunningAgent;
+}
+
+interface Workspace {
+  prepare(folder: string, taskId: string): Promise<{ ok: true; path: string } | { ok: false }>;
+  commit(folder: string, taskId: string, message: string): Promise<boolean>;
+  remove(folder: string, taskId: string): Promise<void>;
 }
 ```
 
-The exact API may evolve. Keep the domain layer unaware of Claude-specific details.
+`LaunchInput` is the worktree, the prompt, what the employee was taught, the
+project's commands and the session to resume. An `AgentEvent` is the app's
+own vocabulary — a session named, a step, a command refused, a result — so
+nothing Claude-specific reaches the domain. Attaching is launching with a
+session to resume; changing a running task is ending the run and resuming it
+with the change; detaching is `stop()`. Status is not asked for: the
+supervisor (§9) holds every running agent and hears each exit.
+
+The Claude Code implementations are `src/infrastructure/runtime/claude-code-run.ts`
+and `src/infrastructure/workspace/git.ts`.
 
 ## 9. Claude Code Adapter — MVP
 
@@ -316,15 +330,15 @@ My Tiny Office should integrate through supported Claude Code mechanisms rather 
 Measured against `claude 2.1.283`. Every mapping below is a supported command,
 not a guess.
 
-| `AgentRuntime` | Claude Code |
+| What the app needs | Claude Code |
 | --- | --- |
 | availability | `claude --version` and `claude auth status --json` |
-| `launch` | `claude -p --output-format stream-json …`, a child process of the app, prompt on stdin |
-| `attach` | `claude -p --resume <session-id> …` with the same flags |
-| `getStatus` | The child process and its last event |
-| events / output | The process's `stream-json` lines |
-| `detach` | End the process; the conversation is kept |
-| `dispose` | `git worktree remove` once the task is settled |
+| a run | `claude -p --output-format stream-json …`, a child process of the app, prompt on stdin |
+| a run that continues | the same, with `--resume <session-id>` |
+| its events | the process's `stream-json` lines |
+| its end | the process's exit, after its `result` line if it had one |
+| stopping it | ending the process; the conversation is kept |
+| its workspace gone | `git worktree remove` once the task is approved |
 
 **A task runs as `-p`, not `--bg`.** Only `-p` gives structured events —
 each tool call and result, a `permission_denied` event, and a final
@@ -335,10 +349,45 @@ output. The cost is that a run is the app's child: closing the app ends it,
 and the next launch finds the task disconnected and resumes it on reconnect.
 The exact flags, and why each is there, are in SECURITY.md.
 
+### How work runs
+
+One supervisor (`createWorkSupervisor` in `src/application/work.ts`) keeps
+the running agents in step with every company's tasks. It starts with the
+server (`src/instrumentation.ts`), ticks every five seconds and after every
+action, and treats the tasks as the truth. Each tick:
+
+1. ends as disconnected any run the database thinks is going with no process
+   behind it — what a restart leaves — and blocks its task;
+2. stops the run of any task that no longer wants one: held, handed over,
+   finished, or its company removed;
+3. lets whoever is free pick up work, unless starting work is paused on this
+   computer (`settings.json`) or Claude Code is not ready;
+4. launches a run for every task being worked on, unblocked, without one:
+   the worktree is prepared, the session to continue is found, and the prompt
+   says why this run exists — the task, the change the user asked for, a
+   command now allowed or not allowed, or simply to carry on.
+
+A run's events are written as they come, one at a time: the session, each
+step (one short line; the closing report whole, up to 4000 characters). The
+first refused command stops the run. When the process exits, the run ends as
+denied, stopped, finished, budgetReached, failed or disconnected, and the task
+moves on: to approval when finished, blocked otherwise, untouched when it was
+stopped on purpose.
+
+What the agent is told before any task, as its appended system prompt: who it
+is, that it works only in this folder and never commits, that it is already in
+the folder and uses Read, Glob and Grep to look at files, which commands the
+project allows and that each runs on its own as written, and everything it has
+been taught, numbered.
+
+Approving commits the worktree to the task's branch and removes the worktree
+(`approveTask`); sending back queues the task for the same person, whose next
+run resumes the session with the request.
+
 ### Changing a task that is already running
 
-The user can correct a task while an agent is working on it, which the
-interface calls `sendTask`. There is no way to speak into a run in progress,
+The user can correct a task while an agent is working on it. There is no way
+to speak into a run in progress,
 so the run is ended and resumed with the change:
 
 ```text
@@ -561,6 +610,13 @@ The app must distinguish:
 - command not allowed
 - spending cap reached
 - AI request failed
+
+Each reaches the user as the thing it is. A run that stops mid-task blocks the
+task with the reason — `disconnected` (the process went away, or the request
+failed), `commandNotAllowed` with the command, `budgetReached`, or
+`workspaceUnavailable` when the task's worktree could not be made — and the
+task keeps its assignee, its session and its worktree. Reconnecting, carrying
+on or trying again unblocks it, and the next tick resumes the session.
 
 A runtime failure must not corrupt company state.
 
