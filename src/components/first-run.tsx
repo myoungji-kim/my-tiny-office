@@ -1,48 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
-import { startCompanyAction } from "../app/actions";
+import { startCompanyAction, switchCompanyAction } from "../app/actions";
 import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
-import type { Locale } from "../i18n";
+import { getDictionary, type Locale } from "../i18n";
 import { CAST, type CastMember } from "../ui/paint";
 
-import { ClaudeChecks, type ClaudeWords } from "./claude-checks";
+import { ClaudeChecks } from "./claude-checks";
 import { OfficePeek } from "./office-peek";
 import { RecheckButton } from "./recheck-button";
 import { Sprite } from "./sprite";
+import { uploadCompany, type Imported } from "./upload-company";
 
-export interface FirstRunWords {
-  readonly wordmark: string;
-  readonly title: string;
-  readonly lede: string;
-  readonly checkLabel: string;
-  readonly checkHint: string;
-  readonly startNew: string;
-  readonly companyTitle: string;
-  readonly companySub: string;
-  readonly companyLabel: string;
-  readonly companyDefault: string;
-  readonly companyHint: string;
-  readonly next: string;
-  readonly back: string;
-  readonly hireTitle: string;
-  readonly hireSub: string;
-  readonly speciesLabel: string;
-  readonly nameLabel: string;
-  readonly nameHint: string;
-  readonly roleLabel: string;
-  readonly hire: string;
-  readonly hiring: string;
-  readonly opened: string;
-  readonly oneEmployee: string;
-  readonly noticeTitle: string;
-  readonly noticeBody: string;
-  readonly toOffice: string;
-}
-
-type Step = 1 | 2 | 3 | 4;
+// 5 is arrival for an imported company: the last step, reached past the two it skips.
+type Step = 1 | 2 | 3 | 4 | 5;
 
 // Claude Code first, then the company, then its first hire: the office is
 // never reached empty. Nothing is saved until the hire, which makes both.
@@ -50,22 +23,23 @@ export function FirstRun({
   locale,
   status: initialStatus,
   roles,
-  words,
-  claude,
-  errors,
-  another = false,
+  entry,
 }: {
   readonly locale: Locale;
   readonly status: ClaudeCodeStatus;
   readonly roles: readonly string[];
-  readonly words: FirstRunWords;
-  readonly claude: ClaudeWords;
-  readonly errors: Readonly<Record<string, string>>;
-  readonly another?: boolean;
+  // From the sidebar, Claude Code is already checked: a new company starts at its name.
+  readonly entry?: "new" | "import";
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(initialStatus);
-  const [step, setStep] = useState<Step>(another && isReady(initialStatus) ? 2 : 1);
+  const [step, setStep] = useState<Step>(entry === "new" && isReady(initialStatus) ? 2 : 1);
+  const [imported, setImported] = useState<Imported | undefined>(undefined);
+  const file = useRef<HTMLInputElement>(null);
+  const t = getDictionary(locale);
+  const words = t.firstRun;
+  const claude = t.claude;
+  const errors: Readonly<Record<string, string>> = t.errors;
   const [companyName, setCompanyName] = useState(words.companyDefault);
   const [chosen, setChosen] = useState<CastMember | undefined>(undefined);
   const [name, setName] = useState("");
@@ -73,6 +47,18 @@ export function FirstRun({
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const ready = isReady(status);
+
+  const upload = (chosenFile: File) =>
+    start(async () => {
+      const answer = await uploadCompany(chosenFile);
+      if ("error" in answer) {
+        setError(errors[answer.error] ?? errors.unknown);
+        return;
+      }
+      setError(undefined);
+      setImported(answer);
+      setStep(5);
+    });
 
   const hire = () =>
     start(async () => {
@@ -89,9 +75,10 @@ export function FirstRun({
   return (
     <div className="wizard">
       <div className="steps">
-        {[1, 2, 3, 4].map((n) => (
-          <i key={n} className={n === step ? "on" : n < step ? "done" : ""} />
-        ))}
+        {[1, 2, 3, 4].map((n) => {
+          const at = step === 5 ? 4 : step;
+          return <i key={n} className={n === at ? "on" : n < at ? "done" : ""} />;
+        })}
       </div>
 
       {step === 1 && (
@@ -119,9 +106,65 @@ export function FirstRun({
               </div>
             )}
           </div>
+          {error !== undefined && (
+            <p className="hint" role="alert">
+              {error}
+            </p>
+          )}
           <div className="acts">
+            <button className="btn btn-secondary btn-lg" type="button" disabled={!ready || pending} autoFocus={entry === "import"} onClick={() => file.current?.click()}>
+              {words.startImport}
+            </button>
+            <input
+              ref={file}
+              type="file"
+              accept=".db"
+              hidden
+              onChange={(e) => {
+                const picked = e.target.files?.[0];
+                e.target.value = "";
+                if (picked !== undefined) upload(picked);
+              }}
+            />
             <button className="btn btn-primary btn-lg" type="button" disabled={!ready} onClick={() => setStep(2)}>
               {words.startNew}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 5 && imported !== undefined && (
+        <div className="pane">
+          <h2>{words.importedTitle(imported.name)}</h2>
+          <p className="sub">{words.importedSub(imported.people, imported.projects)}</p>
+          {imported.foldersToChoose > 0 && (
+            <div className="notice notice-warn">
+              <span className="n-ic">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 2.2l6 11H2z" />
+                  <path d="M8 6.6v3M8 11.4v.1" />
+                </svg>
+              </span>
+              <span className="n-tx">
+                <b>{words.againTitle}</b>
+                <span>{words.againBody(imported.foldersToChoose)}</span>
+              </span>
+            </div>
+          )}
+          <div className="acts">
+            <button
+              className="btn btn-primary btn-lg"
+              style={{ flex: 1 }}
+              type="button"
+              onClick={() =>
+                start(async () => {
+                  await switchCompanyAction(imported.companyId);
+                  router.push("/");
+                  router.refresh();
+                })
+              }
+            >
+              {words.toOffice}
             </button>
           </div>
         </div>

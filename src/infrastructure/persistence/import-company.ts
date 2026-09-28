@@ -12,7 +12,14 @@ import { migrateDatabase } from "./database";
 import * as schema from "./schema";
 
 export type ImportResult =
-  | { readonly ok: true; readonly companyId: CompanyId; readonly name: string; readonly foldersToChoose: number }
+  | {
+      readonly ok: true;
+      readonly companyId: CompanyId;
+      readonly name: string;
+      readonly people: number;
+      readonly projects: number;
+      readonly foldersToChoose: number;
+    }
   | { readonly ok: false; readonly reason: "notACompany" | "fromNewerVersion" };
 
 // A 64 MB company is far past anything the app writes; more is not a company file.
@@ -75,7 +82,8 @@ function prepare(copy: string, id: CompanyId): ImportResult {
       foldersToChoose = file.prepare("update projects set folder_confirmed = 0 where folder is not null").run().changes;
     })();
     if ((file.pragma("foreign_key_check") as unknown[]).length > 0) return { ok: false, reason: "notACompany" };
-    return { ok: true, companyId: id, name: companies[0].name, foldersToChoose };
+    const count = (table: string) => (file.prepare(`select count(*) as n from ${table}`).get() as { n: number }).n;
+    return { ok: true, companyId: id, name: companies[0].name, people: count("employees"), projects: count("projects"), foldersToChoose };
   } finally {
     file.close();
   }

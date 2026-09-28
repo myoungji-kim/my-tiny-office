@@ -16,6 +16,7 @@ export const ko: Dictionary = {
   companies: {
     switch: "회사 바꾸기",
     create: "새 회사 만들기",
+    import: "기존 회사 가져오기",
   },
   teams: {
     backend: "백엔드팀",
@@ -84,6 +85,11 @@ export const ko: Dictionary = {
     noticeTitle: "업무를 맡기면 바로 일을 시작해요",
     noticeBody: "Claude Code로 일해요. 직원은 프로젝트 폴더 안에서, 허용한 명령만 실행해요.",
     toOffice: "사무실로 가기",
+    startImport: "기존 회사 가져오기",
+    importedTitle: (name: string) => withParticle(name, "을", "를") + " 가져왔어요",
+    importedSub: (people: number, projects: number) => "직원 " + people + "명 · 프로젝트 " + projects + "개",
+    againTitle: "이 컴퓨터에서 다시 할 것",
+    againBody: (n: number) => "프로젝트 " + n + "개의 폴더를 이 컴퓨터에서 다시 골라야 해요. 다시 고르기 전까지 그 폴더에서는 아무도 일하지 않아요.",
   },
   office: {
     title: "사무실",

@@ -7,6 +7,8 @@ import { setLocaleAction, switchCompanyAction } from "../app/actions";
 import { deleteCompanyAction } from "../app/company-actions";
 import { getDictionary, type Locale } from "../i18n";
 
+import { uploadCompany, type Imported } from "./upload-company";
+
 export function LanguagePicker({
   locale,
   label,
@@ -120,7 +122,6 @@ export function DeleteCompany({
   );
 }
 
-type Imported = { readonly companyId: string; readonly name: string; readonly foldersToChoose: number };
 
 // Moving is a copy of one company's file each way.
 export function DataActions({ locale, companyId }: { readonly locale: Locale; readonly companyId: string }) {
@@ -135,8 +136,7 @@ export function DataActions({ locale, companyId }: { readonly locale: Locale; re
 
   const upload = (file: File) =>
     start(async () => {
-      const response = await fetch("/settings/import", { method: "POST", body: file, headers: { "Content-Type": "application/octet-stream" } });
-      const answer = (await response.json()) as Imported | { readonly error: string };
+      const answer = await uploadCompany(file);
       if ("error" in answer) {
         setImported(undefined);
         setError(errors[answer.error] ?? errors.unknown);

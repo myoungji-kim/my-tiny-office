@@ -19,7 +19,7 @@ export function CompanyMenu({
 }: {
   readonly companies: readonly CompanyOption[];
   readonly currentId: string;
-  readonly words: { readonly switch: string; readonly create: string };
+  readonly words: { readonly switch: string; readonly create: string; readonly import: string };
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -81,6 +81,20 @@ export function CompanyMenu({
               <path d="M8 3.5v9M3.5 8h9" />
             </svg>
             {words.create}
+          </button>
+          <button
+            className="mrow"
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              close();
+              router.push("/new?from=import");
+            }}
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2.5v8M4.6 7.4L8 10.8l3.4-3.4M3 13.5h10" />
+            </svg>
+            {words.import}
           </button>
         </div>
       </div>

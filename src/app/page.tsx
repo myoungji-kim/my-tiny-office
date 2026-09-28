@@ -19,7 +19,7 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
   const t = getDictionary(locale);
   const { company, companies, employees, teams, roles } = office;
   if (company === undefined) {
-    return <FirstRun locale={locale} status={status} roles={STARTING_ROLES} words={t.firstRun} claude={t.claude} errors={t.errors} />;
+    return <FirstRun locale={locale} status={status} roles={STARTING_ROLES} />;
   }
 
   const rooms = roomsOf(employees, teams);

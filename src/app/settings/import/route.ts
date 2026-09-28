@@ -14,5 +14,6 @@ export async function POST(request: Request): Promise<Response> {
   const imported = importCompany(getCompanyFiles(), bytes);
   if (!imported.ok) return Response.json({ error: imported.reason }, { status: 422 });
   revalidatePath("/", "layout");
-  return Response.json({ companyId: imported.companyId, name: imported.name, foldersToChoose: imported.foldersToChoose });
+  const { companyId, name, people, projects, foldersToChoose } = imported;
+  return Response.json({ companyId, name, people, projects, foldersToChoose });
 }

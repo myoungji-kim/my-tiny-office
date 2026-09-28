@@ -13,6 +13,7 @@ export const en = {
   companies: {
     switch: "Switch company",
     create: "Start a new company",
+    import: "Import an existing company",
   },
   teams: {
     backend: "Backend",
@@ -81,6 +82,11 @@ export const en = {
     noticeTitle: "Give them work and they start",
     noticeBody: "They work through Claude Code, inside the project's folder, running only the commands it allows.",
     toOffice: "Go to the office",
+    startImport: "Import an existing company",
+    importedTitle: (name: string) => "Imported " + name,
+    importedSub: (people: number, projects: number) => people + (people === 1 ? " person · " : " people · ") + projects + (projects === 1 ? " project" : " projects"),
+    againTitle: "To do again on this computer",
+    againBody: (n: number) => n + (n === 1 ? " project needs its" : " projects need their") + " folder chosen on this computer. Nobody works in a folder until it is chosen again here.",
   },
   office: {
     title: "Office",
