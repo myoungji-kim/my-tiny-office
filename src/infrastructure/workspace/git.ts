@@ -3,6 +3,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 
+import type { Workspace } from "../../application/agent-runtime";
 import { findExecutable, runProcess, type RunResult } from "../process/run";
 
 export type WorktreeFailure = "gitMissing" | "notARepository" | "repositoryEmpty" | "worktreeFailed";
@@ -104,3 +105,13 @@ export async function commitAll(path: string, message: string): Promise<{ readon
 export async function removeWorktree(folder: string, taskId: string): Promise<void> {
   await git(["-C", folder, "worktree", "remove", "--force", worktreePath(folder, taskId)]);
 }
+
+// A task's work as the application sees it; a worktree already gone has nothing left to commit.
+export const gitWorkspace: Workspace = {
+  prepare: prepareWorktree,
+  async commit(folder, taskId, message) {
+    const path = worktreePath(folder, taskId);
+    return !existsSync(path) || (await commitAll(path, message)).ok;
+  },
+  remove: removeWorktree,
+};

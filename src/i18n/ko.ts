@@ -356,6 +356,7 @@ export const ko: Dictionary = {
     blocked: "막힘",
     agentLost: "에이전트 연결이 끊겼어요",
     budgetReached: "업무 하나에 쓸 수 있는 한도에 닿았어요",
+    workspaceUnavailable: "프로젝트 폴더에 이 업무의 작업 공간을 만들지 못했어요",
     commandBlocked: "허용되지 않은 명령 · {command}",
     runStopped: "{command} 실행 전에 멈췄어요",
     runWhy: (n: string) => "이 프로젝트에서 허용한 명령이 아니에요. 허용하면 이 프로젝트의 업무는 앞으로 이 명령을 쓸 수 있고, " + withParticle(n, "이", "가") + " 이어서 해요.",

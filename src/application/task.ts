@@ -5,6 +5,7 @@ import type { Priority } from "../domain/project";
 import { startQueuedReview, type Review } from "../domain/review";
 import * as taskDomain from "../domain/task";
 
+import type { Workspace } from "./agent-runtime";
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
 import { withdrawReviewsOn } from "./review";
@@ -130,6 +131,30 @@ export const applyTask = (ctx: AppContext, taskId: TaskId) =>
       await recordMilestones(ctx, task.companyId, events);
       return [];
     },
+  );
+
+// Applying commits the work to the task's own branch first; nothing is pushed.
+export async function approveTask(
+  ctx: AppContext,
+  workspace: Workspace,
+  taskId: TaskId,
+): Promise<TaskResult<"taskNotFound" | "taskNotAwaitingApproval" | "commitFailed">> {
+  const task = await ctx.tasks.findById(taskId);
+  if (task === undefined) return { ok: false, reason: "taskNotFound" };
+  if (task.status !== "approval") return { ok: false, reason: "taskNotAwaitingApproval" };
+  const folder = (await ctx.projects.findById(task.projectId))?.folder;
+  if (folder !== undefined && !(await workspace.commit(folder, task.id, task.title))) return { ok: false, reason: "commitFailed" };
+
+  const applied = await applyTask(ctx, taskId);
+  if (applied.ok && folder !== undefined) await workspace.remove(folder, task.id);
+  return applied;
+}
+
+// A stopped agent carries on in its own session. A command it may not run is
+// the project's to allow, not the task's.
+export const carryOn = (ctx: AppContext, taskId: TaskId) =>
+  changeTask(ctx, taskId, (t) =>
+    t.blocker?.kind === "commandNotAllowed" ? { ok: false as const, reason: "commandNotAllowed" as const } : taskDomain.unblockTask(t, eventId(ctx), ctx.now()),
   );
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>

@@ -28,3 +28,11 @@ export interface RunningAgent {
 export interface AgentRuntime {
   launch(input: LaunchInput, onEvent: (event: AgentEvent) => void, onExit: () => void): RunningAgent;
 }
+
+// Where a task's work happens: its own copy of the project's folder.
+export interface Workspace {
+  prepare(folder: string, taskId: string): Promise<{ readonly ok: true; readonly path: string } | { readonly ok: false }>;
+  // Commits the task's work to its own branch. Nothing is pushed.
+  commit(folder: string, taskId: string, message: string): Promise<boolean>;
+  remove(folder: string, taskId: string): Promise<void>;
+}

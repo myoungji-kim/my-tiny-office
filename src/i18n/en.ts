@@ -354,6 +354,7 @@ export const en = {
     blocked: "Blocked",
     agentLost: "The agent disconnected",
     budgetReached: "It reached what one task may spend",
+    workspaceUnavailable: "Its own copy of the project folder could not be made",
     commandBlocked: "Command not allowed · {command}",
     runStopped: "Stopped before running {command}",
     runWhy: (n: string) => "This project does not allow it. Allowing it lets every task here run it, and " + n + " carries on.",

@@ -19,6 +19,7 @@ function toBlocker(raw: string | null): Blocker | undefined {
       return { kind: "commandNotAllowed", command: value.command };
     }
     if (value.kind === "budgetReached") return { kind: "budgetReached" };
+    if (value.kind === "workspaceUnavailable") return { kind: "workspaceUnavailable" };
   } catch {
     // fall through
   }

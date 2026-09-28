@@ -25,7 +25,9 @@ export type TaskStatus = "backlog" | "working" | "approval" | "done" | "held";
 export type Blocker =
   | { readonly kind: "disconnected" }
   | { readonly kind: "commandNotAllowed"; readonly command: string }
-  | { readonly kind: "budgetReached" };
+  | { readonly kind: "budgetReached" }
+  // the task's worktree could not be made in its project's folder
+  | { readonly kind: "workspaceUnavailable" };
 
 export interface Task {
   readonly id: TaskId;

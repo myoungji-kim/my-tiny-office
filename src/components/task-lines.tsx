@@ -18,7 +18,8 @@ export function withCommand(template: string, command: string): ReactNode {
 export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNode {
   const b = task.blocker;
   if (b === undefined) return undefined;
-  return b.kind === "commandNotAllowed" ? withCommand(w.commandBlocked, b.command) : b.kind === "disconnected" ? w.agentLost : w.budgetReached;
+  if (b.kind === "commandNotAllowed") return withCommand(w.commandBlocked, b.command);
+  return b.kind === "disconnected" ? w.agentLost : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
 }
 
 // A queued task has not started this round, so it shows its priority instead.
