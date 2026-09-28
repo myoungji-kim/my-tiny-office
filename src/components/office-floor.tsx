@@ -504,7 +504,7 @@ export function OfficeFloor({
         <TeachDialog
           locale={locale}
           companyId={companyId}
-          person={teaching}
+          target={{ kind: "person", person: teaching }}
           memories={memories.filter((m) => m.employeeId === teaching.id)}
           areas={areas}
           onClose={closeTeach}

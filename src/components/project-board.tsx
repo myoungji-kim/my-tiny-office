@@ -308,7 +308,7 @@ export function ProjectBoard({
         <TeachDialog
           locale={locale}
           companyId={companyId}
-          person={teachTo}
+          target={{ kind: "person", person: teachTo }}
           memories={memories.filter((m) => m.employeeId === teachTo.id)}
           areas={areas}
           area={dialog.task.area}

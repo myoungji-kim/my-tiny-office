@@ -16,6 +16,8 @@ a.mrow {
 
 a.rail-item,
 a.tcard,
-.panel-hd a.link {
+a.tab,
+.panel-hd a.link,
+.sec-hd a.more {
   text-decoration: none;
 }

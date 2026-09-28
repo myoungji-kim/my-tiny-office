@@ -3,6 +3,7 @@ import { toCompanyId } from "../domain/ids";
 import type { Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
+import type { RecordedMilestone } from "../domain/milestone";
 import { timeTaken, type Blocker, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
@@ -98,6 +99,18 @@ export interface TaskView {
   readonly createdAt: number;
 }
 
+export type MilestoneView = RecordedMilestone;
+
+// What the company has done, and how much of it in the last seven days.
+export interface CompanyStats {
+  readonly tasksDone: number;
+  readonly tasksDoneThisWeek: number;
+  readonly reviews: number;
+  readonly reviewsThisWeek: number;
+  readonly memories: number;
+  readonly memoriesThisWeek: number;
+}
+
 export interface OfficeView {
   // when it was read, so every duration on screen is measured to the same moment
   readonly now: number;
@@ -117,6 +130,8 @@ export interface OfficeView {
   readonly teams: readonly TeamView[];
   readonly areas: readonly AreaView[];
   readonly memories: readonly MemoryView[];
+  readonly milestones: readonly MilestoneView[];
+  readonly stats: CompanyStats;
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }
@@ -130,6 +145,8 @@ const empty: Omit<OfficeView, "now"> = {
   teams: [],
   areas: [],
   memories: [],
+  milestones: [],
+  stats: { tasksDone: 0, tasksDoneThisWeek: 0, reviews: 0, reviewsThisWeek: 0, memories: 0, memoriesThisWeek: 0 },
   projects: [],
   tasks: [],
 };
@@ -182,6 +199,11 @@ export async function loadOffice(
   const teams = await ctx.teams.findByCompany(company.id);
   const areas = await ctx.areas.findByCompany(company.id);
   const memories = await ctx.memories.findByCompany(company.id);
+  const milestones = await ctx.milestones.findByCompany(company.id);
+  const weekAgo = now - 7 * 24 * 60 * 60_000;
+  const within = (at: number | undefined) => at !== undefined && at > weekAgo;
+  const applied = tasks.filter((task) => task.status === "done");
+  const settled = reviews.filter((review) => review.state === "settled");
   const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
@@ -230,6 +252,15 @@ export async function loadOffice(
     roles: roles.map((role) => ({ id: role.id, name: role.name })),
     teams: teams.map((team) => ({ id: team.id, suggested: team.suggested, name: team.name })),
     areas: areas.map((area) => ({ id: area.id, starting: area.starting, name: area.name })),
+    milestones,
+    stats: {
+      tasksDone: applied.length,
+      tasksDoneThisWeek: applied.filter((task) => within(task.appliedAt)).length,
+      reviews: settled.length,
+      reviewsThisWeek: settled.filter((review) => within(review.settledAt)).length,
+      memories: memories.length,
+      memoriesThisWeek: memories.filter((memory) => within(memory.createdAt)).length,
+    },
     memories: memories.map((memory) => ({
       id: memory.id,
       kind: memory.kind,

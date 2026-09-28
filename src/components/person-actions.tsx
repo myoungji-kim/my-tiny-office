@@ -87,7 +87,7 @@ export function PersonActions({
         ]}
       />
 
-      {open === "teach" && <TeachDialog locale={locale} companyId={companyId} person={person} memories={memories} areas={areas} onClose={close} />}
+      {open === "teach" && <TeachDialog locale={locale} companyId={companyId} target={{ kind: "person", person }} memories={memories} areas={areas} onClose={close} />}
       {open === "assign" && (
         <AssignDialog
           locale={locale}

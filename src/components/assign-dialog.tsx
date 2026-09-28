@@ -86,7 +86,7 @@ export function AssignDialog({
       <TeachDialog
         locale={locale}
         companyId={companyId}
-        person={person}
+        target={{ kind: "person", person }}
         memories={memories}
         areas={areas}
         area={areaId}

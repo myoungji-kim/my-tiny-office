@@ -67,21 +67,22 @@ export async function removeTeamAction(companyId: string, teamId: string, moveTo
 }
 
 export interface TeachInput {
-  readonly kind: "expertise" | "style";
-  readonly employeeId: string;
+  readonly kind: "expertise" | "style" | "company";
+  readonly employeeId: string | undefined;
   readonly areaId: string | undefined;
   readonly text: string;
   readonly sourceTaskId: string | undefined;
 }
 
 export async function teachAction(companyId: string, input: TeachInput): Promise<Outcome> {
-  const kind = input.kind === "style" ? "style" : "expertise";
+  const kind = input.kind === "style" || input.kind === "company" ? input.kind : "expertise";
   const source = optional(input.sourceTaskId);
+  const employee = optional(input.employeeId);
   return inCompany(companyId, (ctx, id) =>
     teachMemory(ctx, {
       companyId: id,
       kind,
-      employeeId: toEmployeeId(str(input.employeeId)),
+      employeeId: kind === "company" || employee === undefined ? undefined : toEmployeeId(employee),
       areaId: kind === "expertise" ? areaOf(input.areaId) : undefined,
       text: str(input.text),
       sourceTaskId: source === undefined ? undefined : toTaskId(source),

@@ -95,7 +95,7 @@ export function MemoryPanel({
         <TeachDialog
           locale={locale}
           companyId={companyId}
-          person={person}
+          target={{ kind: "person", person }}
           memories={memories}
           areas={areas}
           area={filter}
