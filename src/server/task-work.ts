@@ -10,6 +10,8 @@ export interface TaskWork {
   readonly steps: readonly { readonly at: number; readonly kind: StepKind; readonly detail: string }[];
   readonly changes: readonly FileChange[];
   readonly sessionId: string | undefined;
+  // every memory a run of this task said it drew on
+  readonly memoriesUsed: readonly string[];
   readonly worktree: string | undefined;
   readonly branch: string;
 }
@@ -43,6 +45,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
     steps: steps.map((s) => ({ at: s.at, kind: s.kind, detail: s.detail })),
     changes: present && folder !== undefined ? await changesIn(folder, task.id) : [],
     sessionId,
+    memoriesUsed: [...new Set(runs.filter((r) => r.taskId === task.id).flatMap((r) => r.memoriesUsed))],
     worktree: present ? worktree : undefined,
     branch: branchOf(task.id),
   };

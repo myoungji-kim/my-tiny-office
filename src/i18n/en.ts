@@ -455,6 +455,7 @@ export const en = {
       mem: (n: number) => n + " memories carried",
       memAhead: "What they will carry",
       memNobody: "Whoever takes it carries everything they have been taught.",
+      memHow: "✓ marks what was drawn on this time, as the agent reports it.",
       record: "Record",
       created: "Written down",
       assignee: "On it",

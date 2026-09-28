@@ -15,6 +15,7 @@ import { TaskActions } from "../../../../components/task-actions";
 import { SaidPanel } from "../../../../components/said-panel";
 import { TaskChanges } from "../../../../components/task-changes";
 import { loadTaskWork } from "../../../../server/task-work";
+import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
 import { getDictionary } from "../../../../i18n";
@@ -74,7 +75,8 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const who = office.employees.find((e) => e.id === task.assigneeId);
   const area = office.areas.find((a) => a.id === task.area);
   const time = timeLine(task, w);
-  const carried = who === undefined ? [] : office.memories.filter((m) => m.employeeId === who.id);
+  // what the company follows is carried too, and in the order the task's prompt numbers it
+  const carried = who === undefined ? [] : carriedBy(who.id, office.memories);
   const blocker = task.status === "working" ? task.blocker : undefined;
   const running = task.status === "working" && blocker === undefined;
   const allowable = blocker?.kind === "commandNotAllowed" && isAllowableCommand(blocker.command);
@@ -245,12 +247,18 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
                   {t.people.noMemory}
                 </p>
               ) : (
-                carried.map((m) => (
-                  <div key={m.id} className="tk-mem">
-                    <svg viewBox="0 0 16 16" />
-                    <span>{m.text}</span>
-                  </div>
-                ))
+                <>
+                  {carried.map((m) => {
+                    const used = work?.memoriesUsed.includes(m.id) === true;
+                    return (
+                      <div key={m.id} className={used ? "tk-mem used" : "tk-mem"}>
+                        {used ? Icon.yes : <svg viewBox="0 0 16 16" />}
+                        <span>{m.text}</span>
+                      </div>
+                    );
+                  })}
+                  {work !== undefined && work.steps.length > 0 && <span className="hint">{w.tk.memHow}</span>}
+                </>
               ),
             )}
             {panel(

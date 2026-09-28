@@ -1,16 +1,15 @@
 import type { Employee } from "../domain/employee";
-import { toAgentId, toEventId, toRunId, type CompanyId, type EmployeeId, type RunId, type TaskId } from "../domain/ids";
-import type { Memory } from "../domain/memory";
-import { endRun, isLive, sessionStarted, sessionToContinue, startRun, type Agent, type RunEnd } from "../domain/run";
+import { toAgentId, toEventId, toRunId, type CompanyId, type EmployeeId, type MemoryId, type RunId, type TaskId } from "../domain/ids";
+import { carriedBy, type Memory } from "../domain/memory";
+import { drewOn, endRun, isLive, memoriesInReport, reportDetail, sessionStarted, sessionToContinue, startRun, type Agent, type RunEnd } from "../domain/run";
 import * as taskDomain from "../domain/task";
 
 import type { AgentEvent, AgentRuntime, RunningAgent, Workspace } from "./agent-runtime";
 import type { AppContext } from "./context";
 import { pickUpWork } from "./task";
 
-// Everything the employee has been taught, numbered, with what it is to them.
-function memoryPrompt(employee: Employee, memories: readonly Memory[], commands: readonly string[]): string {
-  const own = memories.filter((m) => m.kind === "company" || m.employeeId === employee.id);
+// Who the agent is, the boundary it works in, and everything it carries, numbered.
+function memoryPrompt(employee: Employee, own: readonly Memory[], commands: readonly string[]): string {
   const allowed = commands.map((c) => "`" + c + "`").join(", ");
   const lines = [
     `You are ${employee.name}, working on one task in the current folder, which is your own copy of the project.`,
@@ -24,6 +23,10 @@ function memoryPrompt(employee: Employee, memories: readonly Memory[], commands:
   if (own.length > 0) {
     lines.push("", "What you have been taught, which you follow:");
     own.forEach((m, i) => lines.push(`${i + 1}. ${m.text}`));
+    lines.push(
+      "",
+      "End your final message with one line of its own naming the numbers above that you actually drew on, such as `Memories used: 2, 5`, or `Memories used: none`.",
+    );
   }
   return lines.join("\n") + "\n";
 }
@@ -70,6 +73,9 @@ interface LiveRun {
   stopping: boolean;
   denied: string | undefined;
   result: Extract<AgentEvent, { kind: "result" }> | undefined;
+  // what it carries, in the order the prompt numbered it
+  readonly carried: readonly MemoryId[];
+  used: readonly MemoryId[];
 }
 
 // A task wants a run while it is being worked on, unblocked, by this person.
@@ -142,6 +148,8 @@ export function createWorkSupervisor(deps: {
     const run = startRun({ id: toRunId(ctx.newId()), agent, taskId: task.id, sessionId: undefined }, ctx.now());
     await ctx.runs.save(run);
 
+    const carried = carriedBy(employee.id, await ctx.memories.findByCompany(task.companyId));
+    const memory = memoryPrompt(employee, carried, project.commands);
     const entry: LiveRun = {
       runId: run.id,
       companyId: task.companyId,
@@ -152,8 +160,9 @@ export function createWorkSupervisor(deps: {
       stopping: false,
       denied: undefined,
       result: undefined,
+      carried: carried.map((m) => m.id),
+      used: [],
     };
-    const memory = memoryPrompt(employee, await ctx.memories.findByCompany(task.companyId), project.commands);
     live.set(run.id, entry);
     try {
       entry.handle = deps.runtime.launch(
@@ -183,6 +192,10 @@ export function createWorkSupervisor(deps: {
       }
     } else {
       entry.result = event;
+      if (event.report === undefined) return;
+      const { report, used } = memoriesInReport(event.report, entry.carried);
+      entry.used = used;
+      if (report !== "") await ctx.runSteps.add({ companyId: entry.companyId, taskId: entry.taskId, runId: entry.runId, at: ctx.now(), kind: "say", detail: reportDetail(report) });
     }
   }
 
@@ -198,7 +211,7 @@ export function createWorkSupervisor(deps: {
     const { ctx } = entry;
     const end = endOf(entry);
     const run = await ctx.runs.findById(entry.runId);
-    if (run !== undefined) await ctx.runs.save(endRun(run, end, entry.result?.costUsd ?? 0, ctx.now()));
+    if (run !== undefined) await ctx.runs.save(endRun(drewOn(run, entry.used), end, entry.result?.costUsd ?? 0, ctx.now()));
 
     kick();
     const task = await ctx.tasks.findById(entry.taskId);

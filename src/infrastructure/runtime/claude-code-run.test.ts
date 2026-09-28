@@ -60,8 +60,7 @@ describe("readLine", () => {
       { kind: "step", step: "read", detail: "src/pay.ts" },
       { kind: "step", step: "edit", detail: "src/pay.ts" },
       { kind: "step", step: "run", detail: "npm test" },
-      { kind: "step", step: "say", detail: "Paginated.\n\n- 20 a page" },
-      { kind: "result", outcome: "finished", costUsd: 0.05 },
+      { kind: "result", outcome: "finished", costUsd: 0.05, report: "Paginated.\n\n- 20 a page" },
     ]);
   });
 
@@ -79,8 +78,8 @@ describe("readLine", () => {
   it("tells a spent budget from a failure", () => {
     const calls = new Map();
     expect(readLine(line({ type: "result", subtype: "error_max_budget_usd", total_cost_usd: 2.01 }), calls, CWD)).toEqual([
-      { kind: "result", outcome: "budgetReached", costUsd: 2.01 },
+      { kind: "result", outcome: "budgetReached", costUsd: 2.01, report: undefined },
     ]);
-    expect(readLine(line({ type: "result", subtype: "error_during_execution" }), calls, CWD)).toEqual([{ kind: "result", outcome: "failed", costUsd: 0 }]);
+    expect(readLine(line({ type: "result", subtype: "error_during_execution" }), calls, CWD)).toEqual([{ kind: "result", outcome: "failed", costUsd: 0, report: undefined }]);
   });
 });

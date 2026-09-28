@@ -104,7 +104,7 @@ describe("the work supervisor", () => {
 
     run.emit({ kind: "session", sessionId: SESSION });
     run.emit({ kind: "step", step: "edit", detail: "src/pay.ts" });
-    run.emit({ kind: "result", outcome: "finished", costUsd: 0.05 });
+    run.emit({ kind: "result", outcome: "finished", costUsd: 0.05, report: undefined });
     run.exit();
     await settle();
 
@@ -112,6 +112,23 @@ describe("the work supervisor", () => {
     expect(await ctx.runs.findByCompany(companyId)).toMatchObject([{ state: "ended", end: { kind: "finished" }, sessionId: SESSION, costUsd: 0.05 }]);
     expect(await ctx.runSteps.findByTask(companyId, id, 10)).toMatchObject([{ kind: "edit", detail: "src/pay.ts" }]);
     expect(launched).toHaveLength(1);
+  });
+
+  it("records which memories the agent said it drew on, and shows the report without that line", async () => {
+    const id = await oneTask();
+    assert((await teachMemory(ctx, { companyId, kind: "company", text: "커밋은 conventional prefix로" })).ok);
+    assert((await teachMemory(ctx, { companyId, kind: "company", text: "테스트를 먼저 써요" })).ok);
+    await settle();
+    expect(launched[0].input.memory).toContain("Memories used: 2, 5");
+
+    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "Paginated.\nMemories used: 2" });
+    launched[0].exit();
+    await settle();
+
+    const [run] = await ctx.runs.findByCompany(companyId);
+    const memories = await ctx.memories.findByCompany(companyId);
+    expect(run.memoriesUsed).toEqual([memories[1].id]);
+    expect(await ctx.runSteps.findByTask(companyId, id, 10)).toMatchObject([{ kind: "say", detail: "Paginated." }]);
   });
 
   it("stops on a command the project does not allow, and carries on in the same session once it is allowed", async () => {
@@ -179,14 +196,14 @@ describe("the work supervisor", () => {
     const first = await oneTask();
     await settle();
     launched[0].emit({ kind: "session", sessionId: SESSION });
-    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0 });
+    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: undefined });
     launched[0].exit();
     await settle();
 
     assert((await sendBack(ctx, first, "페이지 크기는 50")).ok);
     await settle();
     expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The user sent your work back:\n\n페이지 크기는 50\n\nMake the changes." });
-    launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0 });
+    launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0, report: undefined });
     launched[1].exit();
     await settle();
 
@@ -218,7 +235,7 @@ describe("the work supervisor", () => {
     picksUp = true;
     await settle();
     launched[0].emit({ kind: "session", sessionId: SESSION });
-    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2 });
+    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2, report: undefined });
     launched[0].exit();
     await settle();
     picksUp = false;
@@ -232,7 +249,7 @@ describe("the work supervisor", () => {
     const id = await oneTask();
     await settle();
     launched[0].emit({ kind: "session", sessionId: SESSION });
-    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2 });
+    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2, report: undefined });
     launched[0].exit();
     await settle();
     assert((await carryOn(ctx, id)).ok);
@@ -280,7 +297,7 @@ describe("the work supervisor", () => {
   it("ends a run that the budget stopped as blocked until the user carries on", async () => {
     const id = await oneTask();
     await settle();
-    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2.1 });
+    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2.1, report: undefined });
     launched[0].exit();
     await settle();
 

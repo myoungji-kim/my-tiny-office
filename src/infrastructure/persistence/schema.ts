@@ -303,6 +303,8 @@ export const runs = sqliteTable(
     // the command it was denied, when that is how it ended
     deniedCommand: text("denied_command"),
     costUsd: real("cost_usd").notNull().default(0),
+    // the memories the agent said it drew on, as a JSON list of ids
+    memoriesUsed: text("memories_used").notNull().default("[]"),
     startedAt: integer("started_at").notNull(),
     endedAt: integer("ended_at"),
   },

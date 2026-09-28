@@ -6,7 +6,8 @@ export type AgentEvent =
   | { readonly kind: "step"; readonly step: StepKind; readonly detail: string }
   // a command the project does not allow, which the runtime refused
   | { readonly kind: "denied"; readonly command: string }
-  | { readonly kind: "result"; readonly outcome: "finished" | "budgetReached" | "failed"; readonly costUsd: number };
+  // how the run ended, with what the agent said last, as it wrote it
+  | { readonly kind: "result"; readonly outcome: "finished" | "budgetReached" | "failed"; readonly costUsd: number; readonly report: string | undefined };
 
 export interface LaunchInput {
   // the task's own worktree, the only place the agent may read and write

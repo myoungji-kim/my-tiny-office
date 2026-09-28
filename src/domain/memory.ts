@@ -134,6 +134,11 @@ export function forget(memory: Memory, eventId: EventId, now: Timestamp): Memory
 
 // Expertise is taught, never assigned: an area is someone's once they have
 // been taught something in it, and that is what lets them review it.
+// Everything an employee carries into a task: what the company follows and
+// what they were taught, in the order a task's prompt numbers them.
+export const carriedBy = <M extends { readonly kind: MemoryKind; readonly employeeId: string | undefined }>(employeeId: string, memories: readonly M[]): M[] =>
+  memories.filter((m) => m.kind === "company" || m.employeeId === employeeId);
+
 export function expertiseOf(employeeId: EmployeeId, memories: readonly Memory[]): Set<AreaId> {
   return new Set(
     memories.flatMap((m) => (m.kind === "expertise" && m.employeeId === employeeId && m.areaId !== undefined ? [m.areaId] : [])),

@@ -424,9 +424,14 @@ This is what the employees screen assumes: **everything an employee has been
 taught is carried into every task**, whatever its area. Company memory can take
 the same route, or a `CLAUDE.md` in the workspace via `--add-dir`.
 
-The prompt numbers each memory. Asking the agent to end by listing the
-numbers it drew on, and reporting that list as what was referenced — the
-agent's own account, not a trace — is the next step, not yet built.
+The prompt numbers each memory — what the company follows, then what the
+person was taught (`carriedBy` in `src/domain/memory.ts`) — and asks the
+agent to end with `Memories used: 2, 5`. The supervisor reads that line off
+the closing report (`memoriesInReport`), keeps the ids on the run, and shows
+the report without it; the task's page marks those memories ✓. It is the
+agent's own account, not a trace. Measured: taught that notes lines end with
+"!", it wrote `hello!` and named that memory and its style, and left out an
+unrelated one.
 
 ### Every task works in its own worktree
 

@@ -457,6 +457,7 @@ export const ko: Dictionary = {
       mem: (n: number) => "들고 갈 기억 " + n + "개",
       memAhead: "들고 갈 기억",
       memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.",
+      memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
       record: "기록",
       created: "적어 둔 날",
       assignee: "맡은 사람",

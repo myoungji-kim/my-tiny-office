@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { toAgentId, toCompanyId, toEmployeeId, toRunId, toTaskId } from "./ids";
-import { endRun, reportDetail, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
+import { toMemoryId } from "./ids";
+import { endRun, memoriesInReport, reportDetail, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
 
 const agent = (id: string): Agent => ({ id: toAgentId(id), companyId: toCompanyId("c"), employeeId: toEmployeeId("e-" + id), runtime: "claudeCode", createdAt: 0 });
 const task = toTaskId("t");
@@ -39,6 +40,14 @@ describe("a run", () => {
 
     expect(sessionToContinue([named, stopped], task, a.id)).toBe("kept");
     expect(sessionToContinue([named, stopped, lost], task, a.id)).toBeUndefined();
+  });
+
+  it("reads which numbered memories a report drew on, and leaves the line out of it", () => {
+    const carried = [toMemoryId("m1"), toMemoryId("m2"), toMemoryId("m3")];
+
+    expect(memoriesInReport("Paginated.\n\n**Memories used:** 3, 1, 9", carried)).toEqual({ report: "Paginated.", used: ["m3", "m1"] });
+    expect(memoriesInReport("Done.\nMemories used: none", carried)).toEqual({ report: "Done.", used: [] });
+    expect(memoriesInReport("Done, using 2 of them.", carried)).toEqual({ report: "Done, using 2 of them.", used: [] });
   });
 
   it("keeps a step to one short line", () => {

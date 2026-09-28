@@ -603,8 +603,8 @@ measured flags behind it.
 - **What is not built yet.** Every screen is built from its page in
   `docs/ui`. Left out until what they show exists: today's feed in the office
   and the people screen's 기억 tab (the activity feed and the memory-used
-  report), how often a memory was used and the ✓ on what a task drew on (the
-  person's page lists the memories taught lately instead of the most used), a
+  report), how often a memory was used (the person's page lists the memories taught
+  lately instead of the most used), a
   task's review panel and its history of events. Waiting on the runtime:
   asking for a review, and rewriting or handing over work that is running.
   Not in `src/domain` yet: letting someone go, and deleting a project or a

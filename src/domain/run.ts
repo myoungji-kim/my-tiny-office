@@ -1,4 +1,4 @@
-import type { AgentId, CompanyId, EmployeeId, RunId, TaskId } from "./ids";
+import type { AgentId, CompanyId, EmployeeId, MemoryId, RunId, TaskId } from "./ids";
 import type { Timestamp } from "./time";
 
 // The execution capability attached to an employee. The employee is who the
@@ -38,6 +38,8 @@ export interface Run {
   readonly state: RunState;
   readonly end: RunEnd | undefined;
   readonly costUsd: number;
+  // what the agent said it drew on of what it carried; its own account, not a trace
+  readonly memoriesUsed: readonly MemoryId[];
   readonly startedAt: Timestamp;
   readonly endedAt: Timestamp | undefined;
 }
@@ -68,6 +70,7 @@ export function startRun(input: { readonly id: RunId; readonly agent: Agent; rea
     state: "starting",
     end: undefined,
     costUsd: 0,
+    memoriesUsed: [],
     startedAt: now,
     endedAt: undefined,
   };
@@ -84,6 +87,23 @@ export function endRun(run: Run, end: RunEnd, costUsd: number, now: Timestamp): 
 }
 
 export const isLive = (run: Run): boolean => run.state !== "ended";
+
+export const drewOn = (run: Run, memories: readonly MemoryId[]): Run => ({ ...run, memoriesUsed: [...new Set(memories)] });
+
+// The line a report ends with to say which numbered memories it drew on:
+// "Memories used: 2, 5", or "none". Anything else is not an answer.
+const USED_LINE = /^\W*memories used\W*:?\W*(.*?)\W*$/i;
+
+// Splits the agent's closing report into what it said and the memories,
+// by their number in the prompt, it said it drew on.
+export function memoriesInReport(report: string, carried: readonly MemoryId[]): { readonly report: string; readonly used: readonly MemoryId[] } {
+  const lines = report.trimEnd().split("\n");
+  const last = lines.at(-1) ?? "";
+  const match = USED_LINE.exec(last);
+  if (match === null) return { report, used: [] };
+  const used = [...match[1].matchAll(/\d+/g)].map((m) => carried[Number(m[0]) - 1]).filter((id): id is MemoryId => id !== undefined);
+  return { report: lines.slice(0, -1).join("\n").trimEnd(), used: [...new Set(used)] };
+}
 
 // The session a new run of this agent on this task continues, if any: a
 // session belongs to one agent, so another employee starts afresh. A run that

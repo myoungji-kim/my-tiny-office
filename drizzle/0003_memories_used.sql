@@ -1,0 +1,1 @@
+ALTER TABLE `runs` ADD `memories_used` text DEFAULT '[]' NOT NULL;
