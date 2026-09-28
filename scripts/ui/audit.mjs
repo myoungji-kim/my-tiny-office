@@ -78,7 +78,7 @@ console.log("");
 
 /* ── 3. button sizes must match the standard ── */
 console.log("button sizes");
-const SIZES = { "btn-lg": "42px", "btn-md": "36px", "btn-sm": "30px" };
+const SIZES = { "btn-lg": "44px", "btn-md": "38px", "btn-sm": "32px" };
 for (const [cls, h] of Object.entries(SIZES)) {
   for (const [sel, byPage] of Object.entries(rules)) {
     if (sel !== "." + cls) continue;

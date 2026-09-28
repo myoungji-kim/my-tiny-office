@@ -16,13 +16,13 @@
 
   .r-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 999px; border: 3px solid var(--surface); }
 
-  .r-name { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .r-role { display: block; font-size: 14px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-role { display: block; font-size: 15px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .r-team { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-team { font-size: 15px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .r-mem { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+  .r-mem { font-size: 15px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
 
   .r-mem b { color: var(--ink); font-weight: 600; }
 
@@ -45,17 +45,17 @@
 
   .p-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
-  .now-task { display: block; font-size: 17px; font-weight: 600; line-height: 1.4; margin-top: 8px; }
+  .now-task { display: block; font-size: 18px; font-weight: 600; line-height: 1.4; margin-top: 8px; }
 
-  .now-note { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .now-note { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; }
 
   .panel-hd.with-link { display: flex; align-items: baseline; gap: 10px; }
 
-  .panel-hd .link { margin-left: auto; font-size: 14px; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; }
+  .panel-hd .link { margin-left: auto; font-size: 15px; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; }
 
   .panel-hd .link:hover { color: var(--ink); }
 
-  .why { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+  .why { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
 
   /* ═══ a person's memory ═══ */
 
@@ -66,8 +66,8 @@
   .rail { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 6px; }
 
   .rail-item {
-    display: flex; align-items: center; gap: 8px; height: 34px; padding-inline: 10px;
-    border: none; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px; height: 36px; padding-inline: 10px;
+    border: none; border-radius: 8px; background: none; font: inherit; font-size: 15px; color: var(--muted);
     text-align: left; cursor: pointer;
   }
 
@@ -75,11 +75,11 @@
 
   .rail-item[aria-current="true"] { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
 
-  .rail-item .n { margin-left: auto; font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .rail-item .n { margin-left: auto; font-size: 14px; color: var(--faint); font-variant-numeric: tabular-nums; }
 
   .rail-item[aria-current="true"] .n { color: var(--brand-ink); }
 
-  .empty-line { margin: 0; font-size: 14px; color: var(--faint); padding: 6px 0; }
+  .empty-line { margin: 0; font-size: 15px; color: var(--faint); padding: 6px 0; }
 
   .style-form { display: flex; gap: 8px; margin-top: 10px; }
 
@@ -94,7 +94,7 @@
   .mem-line { flex: 1; height: 1px; background: var(--line); }
 
   .style-line {
-    display: flex; align-items: flex-start; gap: 8px; font-size: 14px;
+    display: flex; align-items: flex-start; gap: 8px; font-size: 15px;
     padding: 6px 0; border-bottom: 1px solid var(--line);
   }
 
@@ -120,7 +120,7 @@
 
   .team-box-hd { display: flex; align-items: center; gap: 9px; min-height: 50px; padding: 8px 10px 8px 15px; background: var(--subtle); border-bottom: 1px solid var(--line); }
 
-  .team-box-hd h2 { margin: 0; font-size: 17px; font-weight: 600; }
+  .team-box-hd h2 { margin: 0; font-size: 18px; font-weight: 600; }
 
   .team-box-hd h2.muted { color: var(--muted); }
 
@@ -134,7 +134,7 @@
 
   .team-form .hint { flex-basis: 100%; margin: 0; color: var(--bad-ink); }
 
-  .cnt { font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+  .cnt { font-size: 14px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
 
   .tgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); }
 
@@ -156,14 +156,14 @@
 
   .t-av { position: relative; width: 36px; height: 36px; border-radius: 10px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .t-name { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; }
+  .t-name { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
 
-  .t-role { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .t-role { display: block; font-size: 14px; color: var(--muted); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .vacant {
     display: grid; place-items: center; align-content: center; gap: 7px; min-height: 60px;
     border: 1px dashed var(--line-2); border-radius: var(--r-card); background: var(--subtle);
-    color: var(--faint); font-size: 14px; cursor: pointer;
+    color: var(--faint); font-size: 15px; cursor: pointer;
   }
 
   .vacant svg { width: 16px; height: 16px; }
@@ -178,15 +178,15 @@
 
   .f-av { width: 28px; height: 28px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
 
-  .f-tx { min-width: 0; flex: 1; font-size: 14px; line-height: 1.5; }
+  .f-tx { min-width: 0; flex: 1; font-size: 15px; line-height: 1.5; }
 
   .f-tx q { font-style: normal; background: var(--brand-soft); color: var(--brand-ink); border-radius: 5px; padding: 1px 5px; }
 
   .f-tx q::before, .f-tx q::after { content: ""; }
 
-  .f-meta { display: block; font-size: 13px; color: var(--faint); margin-top: 1px; }
+  .f-meta { display: block; font-size: 14px; color: var(--faint); margin-top: 1px; }
 
-  .f-time { font-size: 13px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
+  .f-time { font-size: 14px; color: var(--faint); flex: none; white-space: nowrap; padding-top: 2px; }
 
   .stack { display: flex; flex-direction: column; gap: 10px; }
 

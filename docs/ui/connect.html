@@ -29,9 +29,9 @@
 
   .demo-cell { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 12px 14px; }
 
-  .demo-cell .nm { display: block; font-size: 15px; font-weight: 600; }
+  .demo-cell .nm { display: block; font-size: 16px; font-weight: 600; }
 
-  .demo-cell .rl { display: block; font-size: 14px; color: var(--muted); }
+  .demo-cell .rl { display: block; font-size: 15px; color: var(--muted); }
 </style>
 
 <div class="wrap">
@@ -321,7 +321,7 @@
         ${dir
           ? `<div class="scope">${scopeRow("yes", t().scopeFiles)}${scopeRow("yes", t().scopeRuns)}${scopeRow("no", t().scopeNot)}</div>
              <span class="k" style="margin-top:12px">${t().runsLabel}</span>
-             <span class="mono" style="font-size:13px">npm test · npm run lint · npm run build</span>`
+             <span class="mono" style="font-size:14px">npm test · npm run lint · npm run build</span>`
           : `<span class="hint">${t().noFolderWhy}</span>`}
       </div>`;
     return el;

@@ -53,9 +53,9 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
 
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
   const main: ReactNode[] = [
-    about === undefined ? undefined : <Fragment key="desc">{panel(w.tk.desc, <span style={{ fontSize: 14 }}>{about}</span>)}</Fragment>,
+    about === undefined ? undefined : <Fragment key="desc">{panel(w.tk.desc, <span style={{ fontSize: 15 }}>{about}</span>)}</Fragment>,
     task.status === "held" && task.heldReason !== undefined ? (
-      <Fragment key="held">{panel(w.heldBecause, <span style={{ fontSize: 14 }}>{task.heldReason}</span>)}</Fragment>
+      <Fragment key="held">{panel(w.heldBecause, <span style={{ fontSize: 15 }}>{task.heldReason}</span>)}</Fragment>
     ) : undefined,
   ].filter((x) => x !== undefined);
 

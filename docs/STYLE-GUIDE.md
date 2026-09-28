@@ -115,15 +115,15 @@ Noto Sans KR, weights 400 / 500 / 600 / 700. **All four must load** — a missin
 
 | Role | Size | Weight |
 | --- | --- | --- |
-| Screen title | 24px | 600 |
-| Section heading, card name, dialog title | 17px | 600 |
-| Body, row name, task title | 15px | 400–600 |
-| Detail, role, secondary text | 14px | 400–500 |
-| Label, metadata, chip | 13px | 400–600 |
-| Smallest label | 12px | 600 |
+| Screen title | 26px | 600 |
+| Section heading, card name, dialog title | 18px | 600 |
+| Body, row name, task title | 16px | 400–600 |
+| Detail, role, secondary text | 15px | 400–500 |
+| Label, metadata, chip | 14px | 400–600 |
+| Smallest label | 13px | 600 |
 
 These six sizes are the whole scale; a size between two steps is drift, not a
-choice. Nothing is smaller than 12px: below that, a Korean syllable stops being
+choice. Nothing is smaller than 13px: below that, a Korean syllable stops being
 legible.
 
 Numbers that change in place use `font-variant-numeric: tabular-nums` so the
@@ -362,7 +362,7 @@ never as a copy.
 - **parse** — every inline script and `system.js` must still parse
 - **parity** — a selector two product screens still both define must agree in
   full, spacing included, which audit waives on purpose
-- **audit** — no raw colour outside `:root`, button heights 42/36/30, radii from
+- **audit** — no raw colour outside `:root`, button heights 44/38/32, radii from
   the documented set, `:focus-visible` wherever there are controls, no tracked
   Korean, no class without a rule, the same sidebar and header frame on the
   product screens, every `id` a script reaches for, every class `system.js` writes styled
