@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
-import { bringBackAction, sendOnLeaveAction } from "../app/actions";
+import { bringBackAction, sendOnLeaveAction } from "../app/people-actions";
 import { getDictionary, type Dictionary, type Locale } from "../i18n";
-import type { EmployeeView, TeamView } from "../server/view-model";
+import type { AreaView, EmployeeView, MemoryView, TeamView } from "../server/view-model";
 import { castMember, paint, PALETTE, skin, TILES, tokenResolver, type ColorResolver, type Rows } from "../ui/paint";
 
+import { sinceText } from "./dates";
 import { HireDialog, type Choice } from "./hire-dialog";
-import { peopleIn, teamName, type Room } from "./office-rooms";
+import { Icon } from "./icons";
+import { teamName } from "./names";
+import { peopleIn, type Room } from "./office-rooms";
 import { statusClass, statusColor } from "./presence";
 import { Sprite } from "./sprite";
+import { TeachDialog } from "./teach-dialog";
 import { useDismiss } from "./use-dismiss";
 
 const S = 3;
@@ -182,11 +186,6 @@ function RoomView({
   );
 }
 
-function since(locale: Locale, words: Dictionary, at: number, now: number): string {
-  const day = (ms: number) => new Date(ms).toDateString();
-  if (day(at) === day(now)) return words.office.sinceToday;
-  return words.office.since(new Intl.DateTimeFormat(locale, { month: locale === "ko" ? "long" : "short", day: "numeric" }).format(at));
-}
 
 function Card({
   p,
@@ -210,7 +209,7 @@ function Card({
       : p.status === "reviewing" && p.review !== undefined
         ? [p.review.title, <><span>{o.spent(p.review.minutes)}</span><b>{words.employeeStatus.reviewing}</b></>, o.reviewKey]
         : p.status === "onLeave"
-          ? [o.away, <><span>{since(locale, words, p.leaveSince ?? now, now)}</span><b>{o.onLeave}</b></>, o.work]
+          ? [o.away, <><span>{sinceText(locale, words, p.leaveSince ?? now, now)}</span><b>{o.onLeave}</b></>, o.work]
           : [o.noTask, <><span>{p.lastFinished ?? o.justHired}</span><b>{o.waiting}</b></>, o.work];
 
   return (
@@ -245,37 +244,35 @@ interface Act {
   readonly off?: string;
   readonly href?: string;
   readonly run?: () => Promise<{ readonly error?: string }>;
+  readonly teach?: boolean;
 }
-
-const I = {
-  plus: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M8 3.5v9M3.5 8h9" /></svg>,
-  swap: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5.5h9.5l-2.4-2.4M13 10.5H3.5l2.4 2.4" /></svg>,
-  info: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M8 7.3v4M8 5.1v.1" /></svg>,
-  sun: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="8" cy="8" r="2.6" /><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1" /></svg>,
-  undo: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3.6 3.8v3.4h3.4" /><path d="M4 7.2a4.6 4.6 0 1 1 .8 4.4" /></svg>,
-};
 
 // Only transitions the domain allows from this state. The first row is the one
 // the user came here for.
 function actsFor(p: EmployeeView, companyId: string, ready: boolean, words: Dictionary): Act[] {
   const a = words.office.actions;
   const taskId = (p.task ?? p.review)?.taskId ?? "";
+  // Teaching is not a transition, so it is offered in every state.
+  const teach: Act = { icon: Icon.book, label: words.people.teach, teach: true };
   const acts: Act[] =
     p.status === "working"
       ? [
-          { icon: I.info, label: a.detail, key: true, href: `/projects?task=${taskId}` },
-          { icon: I.swap, label: a.reassign, href: `/projects?task=${taskId}&do=assign` },
+          { icon: Icon.info, label: a.detail, key: true, href: `/projects?task=${taskId}` },
+          { icon: Icon.swap, label: a.reassign, href: `/projects?task=${taskId}&do=assign` },
+          teach,
         ]
       : p.status === "reviewing"
-        ? [{ icon: I.info, label: a.detail, key: true, href: `/projects?task=${taskId}` }]
+        ? [{ icon: Icon.info, label: a.detail, key: true, href: `/projects?task=${taskId}` }, teach]
         : p.status === "available"
           ? [
-              { icon: I.plus, label: a.assign, key: true, starts: true, href: `/people/${p.id}?do=assign` },
-              { icon: I.sun, label: a.leave, run: () => sendOnLeaveAction(companyId, p.id) },
+              { icon: Icon.plus, label: a.assign, key: true, starts: true, href: `/people/${p.id}?do=assign` },
+              teach,
+              { icon: Icon.sun, label: a.leave, run: () => sendOnLeaveAction(companyId, p.id) },
             ]
           : [
-              { icon: I.plus, label: a.assign, key: true, off: words.office.cannotAssign },
-              { icon: I.undo, label: a.comeBack, run: () => bringBackAction(companyId, p.id) },
+              { icon: Icon.plus, label: a.assign, key: true, off: words.office.cannotAssign },
+              { icon: Icon.undo, label: a.comeBack, run: () => bringBackAction(companyId, p.id) },
+              teach,
             ];
   return acts.map((act) => (!ready && act.starts === true && act.off === undefined ? { ...act, off: words.claude.cannotStart } : act));
 }
@@ -302,7 +299,7 @@ function StateBlock({ p, locale, words, now }: { readonly p: EmployeeView; reado
     return (
       <>
         <span className="c-k">{o.leaveLabel}</span>
-        <span className="c-task">{since(locale, words, p.leaveSince ?? now, now)}</span>
+        <span className="c-task">{sinceText(locale, words, p.leaveSince ?? now, now)}</span>
       </>
     );
   // just hired is not finished work, so it is not headed as such
@@ -336,6 +333,8 @@ export function OfficeFloor({
   employees,
   teams,
   roles,
+  areas,
+  memories,
   ready,
   now,
 }: {
@@ -345,12 +344,15 @@ export function OfficeFloor({
   readonly employees: readonly EmployeeView[];
   readonly teams: readonly TeamView[];
   readonly roles: readonly Choice[];
+  readonly areas: readonly AreaView[];
+  readonly memories: readonly MemoryView[];
   readonly ready: boolean;
   readonly now: number;
 }) {
   const words = getDictionary(locale);
   const [openId, setOpenId] = useState<string | undefined>(undefined);
   const [hireTeam, setHireTeam] = useState<string | undefined>(undefined);
+  const [teaching, setTeaching] = useState<EmployeeView | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [, start] = useTransition();
   const pop = useRef<HTMLDivElement>(null);
@@ -362,6 +364,7 @@ export function OfficeFloor({
     anchor.current = null;
   }, []);
   const closeHire = useCallback(() => setHireTeam(undefined), []);
+  const closeTeach = useCallback(() => setTeaching(undefined), []);
   useDismiss(openId !== undefined, pop, anchor, close);
 
   const pick = (id: string, el: HTMLElement, viaKey: boolean) => {
@@ -405,6 +408,10 @@ export function OfficeFloor({
   const acts = person === undefined ? [] : actsFor(person, companyId, ready, words);
 
   const run = (act: Act) => {
+    if (act.teach === true) {
+      setTeaching(person);
+      return close();
+    }
     if (act.run === undefined) return close();
     const go = act.run;
     start(async () => {
@@ -432,7 +439,7 @@ export function OfficeFloor({
               {g.people.length === 0 && <p className="col-empty">{words.office.nobodyHere}</p>}
               {g.team !== undefined && g.people.length > 0 && (
                 <button className="addcard" type="button" onClick={() => setHireTeam(g.team)}>
-                  <span className="plus">{I.plus}</span>
+                  <span className="plus">{Icon.plus}</span>
                   {words.office.hireDesk}
                 </button>
               )}
@@ -492,6 +499,17 @@ export function OfficeFloor({
           </>
         )}
       </div>
+
+      {teaching !== undefined && (
+        <TeachDialog
+          locale={locale}
+          companyId={companyId}
+          person={teaching}
+          memories={memories.filter((m) => m.employeeId === teaching.id)}
+          areas={areas}
+          onClose={closeTeach}
+        />
+      )}
 
       {hireTeam !== undefined && (
         <HireDialog

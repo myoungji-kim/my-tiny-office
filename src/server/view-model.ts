@@ -2,6 +2,7 @@ import type { Company } from "../domain/company";
 import { toCompanyId } from "../domain/ids";
 import type { Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
+import type { MemoryKind } from "../domain/memory";
 import { timeTaken, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
@@ -23,13 +24,34 @@ export interface EmployeeView {
   readonly name: string;
   readonly species: string;
   readonly role: string;
+  readonly roleId: string;
   readonly teamId: string | undefined;
+  readonly hiredAt: number;
   readonly status: EmployeeStatus;
   // the task they are working on, or the one they are reviewing
   readonly task: WorkOnDesk | undefined;
   readonly review: WorkOnDesk | undefined;
   readonly lastFinished: string | undefined;
   readonly leaveSince: number | undefined;
+  readonly finished: number;
+  readonly reviewed: number;
+}
+
+export interface AreaView {
+  readonly id: string;
+  readonly starting: string | undefined;
+  readonly name: string | undefined;
+}
+
+export interface MemoryView {
+  readonly id: string;
+  readonly kind: MemoryKind;
+  readonly employeeId: string | undefined;
+  readonly areaId: string | undefined;
+  readonly text: string;
+  // the task it was taught from, by title
+  readonly source: string | undefined;
+  readonly createdAt: number;
 }
 
 export interface TeamView {
@@ -54,7 +76,9 @@ export interface ProjectView {
 
 export interface TaskView {
   readonly id: string;
+  readonly projectId: string;
   readonly projectName: string;
+  readonly area: string | undefined;
   readonly title: string;
   readonly description: string | undefined;
   readonly status: TaskStatus;
@@ -82,6 +106,8 @@ export interface OfficeView {
   readonly employees: readonly EmployeeView[];
   readonly roles: readonly RoleView[];
   readonly teams: readonly TeamView[];
+  readonly areas: readonly AreaView[];
+  readonly memories: readonly MemoryView[];
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
 }
@@ -93,6 +119,8 @@ const empty: Omit<OfficeView, "now"> = {
   employees: [],
   roles: [],
   teams: [],
+  areas: [],
+  memories: [],
   projects: [],
   tasks: [],
 };
@@ -143,6 +171,8 @@ export async function loadOffice(
   const roles = await ctx.roles.findByCompany(company.id);
   const reviews = await ctx.reviews.findByCompany(company.id);
   const teams = await ctx.teams.findByCompany(company.id);
+  const areas = await ctx.areas.findByCompany(company.id);
+  const memories = await ctx.memories.findByCompany(company.id);
   const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
@@ -179,13 +209,27 @@ export async function loadOffice(
       name: employee.name,
       species: employee.species,
       role: roleName.get(employee.roleId) ?? "",
+      roleId: employee.roleId,
       teamId: employee.teamId,
+      hiredAt: employee.hiredAt,
+      finished: tasks.filter((task) => task.assigneeId === employee.id && task.status === "done").length,
+      reviewed: reviews.filter((review) => review.reviewerId === employee.id && review.state === "settled").length,
       status: statusOf(employee, tasks, reviews),
       leaveSince: employee.leaveSince,
       ...deskOf(employee.id),
     })),
     roles: roles.map((role) => ({ id: role.id, name: role.name })),
     teams: teams.map((team) => ({ id: team.id, suggested: team.suggested, name: team.name })),
+    areas: areas.map((area) => ({ id: area.id, starting: area.starting, name: area.name })),
+    memories: memories.map((memory) => ({
+      id: memory.id,
+      kind: memory.kind,
+      employeeId: memory.employeeId,
+      areaId: memory.areaId,
+      text: memory.text,
+      source: memory.sourceTaskId === undefined ? undefined : taskById.get(memory.sourceTaskId)?.title,
+      createdAt: memory.createdAt,
+    })),
     projects: projects.map((project) => ({
       id: project.id,
       name: project.name,
@@ -195,8 +239,10 @@ export async function loadOffice(
     })),
     tasks: tasks.map((task) => ({
       id: task.id,
+      projectId: task.projectId,
       projectName: projectName.get(task.projectId) ?? "",
       title: task.title,
+      area: task.area,
       description: task.description,
       status: task.status,
       priority: task.priority,

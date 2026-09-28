@@ -103,7 +103,11 @@ describe("loadOffice", () => {
         name: "Min-su",
         species: expect.any(String),
         role: "Backend Engineer",
+        roleId: expect.any(String),
         teamId: undefined,
+        hiredAt: expect.any(Number),
+        finished: 0,
+        reviewed: 0,
         status: "available",
         task: undefined,
         review: undefined,
@@ -189,7 +193,9 @@ describe("work through the office view", () => {
     expect(office.tasks).toEqual([
       {
         id: expect.any(String),
+        projectId: office.projects[0].id,
         projectName: "결제 개편",
+        area: undefined,
         title: "Implement payment API",
         description: "Add payment endpoint and validation",
         status: "backlog",

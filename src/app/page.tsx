@@ -4,7 +4,8 @@ import { isReady } from "../application/runtime-status";
 import { FirstRun } from "../components/first-run";
 import { Head } from "../components/head";
 import { OfficeFloor } from "../components/office-floor";
-import { peopleIn, roomsOf, teamName, type Room } from "../components/office-rooms";
+import { teamName } from "../components/names";
+import { peopleIn, roomsOf, type Room } from "../components/office-rooms";
 import { Shell } from "../components/shell";
 import { STARTING_ROLES } from "../domain/organisation";
 import { getDictionary } from "../i18n";
@@ -56,6 +57,8 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
         employees={employees}
         teams={teams}
         roles={roles.map((r) => ({ id: r.id, label: r.name }))}
+        areas={office.areas}
+        memories={office.memories}
         ready={isReady(status)}
         now={office.now}
       />

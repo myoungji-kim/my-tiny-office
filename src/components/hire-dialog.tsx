@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { hireAction } from "../app/actions";
+import { editEmployeeAction, hireAction } from "../app/people-actions";
 import { MAX_EMPLOYEE_NAME } from "../domain/employee";
 import { getDictionary, type Locale } from "../i18n";
-import { CAST, type CastMember } from "../ui/paint";
+import { CAST, castMember, type CastMember } from "../ui/paint";
 
 import { Sprite } from "./sprite";
 
@@ -14,19 +14,29 @@ export interface Choice {
   readonly label: string;
 }
 
+export interface Who {
+  readonly id: string;
+  readonly name: string;
+  readonly species: string;
+  readonly roleId: string;
+  readonly teamId: string | undefined;
+}
+
 const Chevron = () => (
   <svg viewBox="0 0 11 8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 1.5l4.5 4.5L10 1.5" />
   </svg>
 );
 
-// Every hire after the first opens this dialog; a team is optional.
+// Every hire after the first opens this dialog; a team is optional. With
+// `edit` it corrects who someone already is.
 export function HireDialog({
   locale,
   companyId,
   roles,
   teams,
   team,
+  edit,
   onClose,
 }: {
   readonly locale: Locale;
@@ -34,14 +44,15 @@ export function HireDialog({
   readonly roles: readonly Choice[];
   readonly teams: readonly Choice[];
   readonly team?: string;
+  readonly edit?: Who;
   readonly onClose: () => void;
 }) {
   const t = getDictionary(locale);
   const w = t.hire;
-  const [chosen, setChosen] = useState<CastMember | undefined>(undefined);
-  const [name, setName] = useState("");
-  const [role, setRole] = useState(roles[0]?.id ?? "");
-  const [teamId, setTeamId] = useState(team ?? "");
+  const [chosen, setChosen] = useState<CastMember | undefined>(edit === undefined ? undefined : castMember(edit.species));
+  const [name, setName] = useState(edit?.name ?? "");
+  const [role, setRole] = useState(edit?.roleId ?? roles[0]?.id ?? "");
+  const [teamId, setTeamId] = useState(edit === undefined ? (team ?? "") : (edit.teamId ?? ""));
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const first = useRef<HTMLButtonElement>(null);
@@ -66,7 +77,8 @@ export function HireDialog({
   const hire = () =>
     start(async () => {
       if (chosen === undefined) return;
-      const result = await hireAction({ companyId, name: trimmed, species: chosen.key, roleId: role, teamId: teamId || undefined });
+      const who = { name: trimmed, species: chosen.key, roleId: role, teamId: teamId || undefined };
+      const result = edit === undefined ? await hireAction(companyId, who) : await editEmployeeAction(companyId, edit.id, who);
       if (result.error !== undefined) {
         setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
         return;
@@ -81,9 +93,9 @@ export function HireDialog({
           <span className="m-av">{chosen !== undefined && <Sprite species={chosen.key} size={32} />}</span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span className="m-t" id="hire-title">
-              {w.title}
+              {edit === undefined ? w.title : t.people.editTitle}
             </span>
-            <span className="m-s">{w.sub}</span>
+            <span className="m-s">{edit === undefined ? w.sub : t.people.editSub}</span>
           </span>
           <button className="ibtn" type="button" aria-label={w.cancel} onClick={onClose}>
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
@@ -173,7 +185,7 @@ export function HireDialog({
             {w.cancel}
           </button>
           <button className="btn btn-primary btn-md" type="button" disabled={!ready} onClick={hire}>
-            {w.hireAs(trimmed)}
+            {edit === undefined ? w.hireAs(trimmed) : t.people.save}
           </button>
         </div>
       </div>

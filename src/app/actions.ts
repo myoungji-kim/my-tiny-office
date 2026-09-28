@@ -5,20 +5,20 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { createCompany } from "../application/company";
-import type { AppContext } from "../application/context";
-import { bringBack, hireEmployee, sendOnLeave } from "../application/employee";
+import { hireEmployee } from "../application/employee";
 import { createProject } from "../application/project";
 import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
 import { assignTask, createTask } from "../application/task";
 import { MAX_COMPANY_NAME } from "../domain/company";
-import { MAX_EMPLOYEE_NAME, SPECIES, type Species } from "../domain/employee";
-import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId, toTeamId, type CompanyId } from "../domain/ids";
+import { MAX_EMPLOYEE_NAME, SPECIES } from "../domain/employee";
+import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
 import { checkName } from "../domain/name";
-import type { Priority } from "../domain/project";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
+
+import { inCompany, priorityOf, type Outcome } from "./action-context";
 
 export interface ActionState {
   readonly error?: string;
@@ -34,81 +34,12 @@ function optionalText(formData: FormData, field: string): string | undefined {
   return value === "" ? undefined : value;
 }
 
-// Every action names its company, and only a company that has a file here is opened.
-function contextFor(id: unknown): AppContext | undefined {
-  const files = getCompanyFiles();
-  return typeof id === "string" && files.has(id) ? createAppContext(files.open(toCompanyId(id))) : undefined;
-}
-
-const contextOf = (formData: FormData) => contextFor(text(formData, "companyId"));
-
-const optionalId = (value: unknown) => (typeof value === "string" && value !== "" ? value : undefined);
-
-export interface Outcome {
-  readonly error?: string;
-}
-
 // The company the screens open next; it stays until another is chosen.
 export async function switchCompanyAction(companyId: string): Promise<void> {
   const files = getCompanyFiles();
   if (typeof companyId !== "string" || !files.has(companyId)) return;
   writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: companyId });
   revalidatePath("/", "layout");
-}
-
-export interface HireInput {
-  readonly companyId: string;
-  readonly name: string;
-  readonly species: string;
-  readonly roleId: string;
-  readonly teamId: string | undefined;
-}
-
-export async function hireAction(input: HireInput): Promise<Outcome> {
-  const ctx = contextFor(input.companyId);
-  if (ctx === undefined) return { error: "companyNotFound" };
-  const species = SPECIES.find((s) => s === input.species);
-  if (species === undefined) return { error: "speciesUnknown" };
-  const teamId = optionalId(input.teamId);
-  const result = await hireEmployee(ctx, {
-    companyId: toCompanyId(input.companyId),
-    name: String(input.name),
-    species,
-    roleId: toRoleId(String(input.roleId)),
-    teamId: teamId === undefined ? undefined : toTeamId(teamId),
-  });
-  if (!result.ok) return { error: result.reason };
-  revalidatePath("/", "layout");
-  return {};
-}
-
-export async function sendOnLeaveAction(companyId: string, employeeId: string): Promise<Outcome> {
-  const ctx = contextFor(companyId);
-  if (ctx === undefined) return { error: "companyNotFound" };
-  const result = await sendOnLeave(ctx, toEmployeeId(String(employeeId)));
-  if (!result.ok) return { error: result.reason };
-  revalidatePath("/", "layout");
-  return {};
-}
-
-export async function bringBackAction(companyId: string, employeeId: string): Promise<Outcome> {
-  const ctx = contextFor(companyId);
-  if (ctx === undefined) return { error: "companyNotFound" };
-  const result = await bringBack(ctx, toEmployeeId(String(employeeId)));
-  if (!result.ok) return { error: result.reason };
-  revalidatePath("/", "layout");
-  return {};
-}
-
-// A hire gets the first sprite nobody in the company has yet.
-async function nextSpecies(ctx: AppContext, companyId: CompanyId): Promise<Species> {
-  const taken = new Set((await ctx.employees.findByCompany(companyId)).map((e) => e.species));
-  return SPECIES.find((s) => !taken.has(s)) ?? SPECIES[0];
-}
-
-function priority(formData: FormData): Priority {
-  const value = formData.get("priority");
-  return value === "low" || value === "high" ? value : "normal";
 }
 
 export interface StartCompanyInput {
@@ -151,96 +82,30 @@ export async function startCompanyAction(input: StartCompanyInput): Promise<Star
 // 다시 확인: asks Claude Code again rather than trusting the last answer.
 export async function recheckClaudeCodeAction(): Promise<ClaudeCodeStatus> {
   const status = await claudeCodeStatus({ refresh: true });
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return status;
 }
 
-export async function hireEmployeeAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const ctx = contextOf(formData);
-  if (ctx === undefined) {
-    return { error: "companyNotFound" };
-  }
-
-  const result = await hireEmployee(ctx, {
-    companyId: toCompanyId(text(formData, "companyId")),
-    name: text(formData, "name"),
-    roleId: toRoleId(text(formData, "roleId")),
-    species: await nextSpecies(ctx, toCompanyId(text(formData, "companyId"))),
-  });
-  if (!result.ok) {
-    return { error: result.reason };
-  }
-
-  revalidatePath("/");
-  return {};
+export async function createTaskAction(_state: ActionState, formData: FormData): Promise<Outcome> {
+  return inCompany(text(formData, "companyId"), (ctx, companyId) =>
+    createTask(ctx, {
+      companyId,
+      title: text(formData, "title"),
+      description: optionalText(formData, "description"),
+      projectId: toProjectId(text(formData, "projectId")),
+      priority: priorityOf(formData.get("priority")),
+    }),
+  );
 }
 
-export async function createTaskAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const ctx = contextOf(formData);
-  if (ctx === undefined) {
-    return { error: "companyNotFound" };
-  }
-
-  const result = await createTask(ctx, {
-    companyId: toCompanyId(text(formData, "companyId")),
-    title: text(formData, "title"),
-    description: optionalText(formData, "description"),
-    projectId: toProjectId(text(formData, "projectId")),
-    priority: priority(formData),
-  });
-  if (!result.ok) {
-    return { error: result.reason };
-  }
-
-  revalidatePath("/");
-  return {};
+export async function assignTaskAction(_state: ActionState, formData: FormData): Promise<Outcome> {
+  return inCompany(text(formData, "companyId"), (ctx) =>
+    assignTask(ctx, { taskId: toTaskId(text(formData, "taskId")), employeeId: toEmployeeId(text(formData, "employeeId")) }),
+  );
 }
 
-export async function assignTaskAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const ctx = contextOf(formData);
-  if (ctx === undefined) {
-    return { error: "companyNotFound" };
-  }
-
-  const result = await assignTask(ctx, {
-    taskId: toTaskId(text(formData, "taskId")),
-    employeeId: toEmployeeId(text(formData, "employeeId")),
-  });
-  if (!result.ok) {
-    return { error: result.reason };
-  }
-
-  revalidatePath("/");
-  return {};
-}
-
-export async function createProjectAction(
-  _state: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const ctx = contextOf(formData);
-  if (ctx === undefined) {
-    return { error: "companyNotFound" };
-  }
-
-  const result = await createProject(ctx, {
-    companyId: toCompanyId(text(formData, "companyId")),
-    name: text(formData, "name"),
-    priority: priority(formData),
-  });
-  if (!result.ok) {
-    return { error: result.reason };
-  }
-
-  revalidatePath("/");
-  return {};
+export async function createProjectAction(_state: ActionState, formData: FormData): Promise<Outcome> {
+  return inCompany(text(formData, "companyId"), (ctx, companyId) =>
+    createProject(ctx, { companyId, name: text(formData, "name"), priority: priorityOf(formData.get("priority")) }),
+  );
 }

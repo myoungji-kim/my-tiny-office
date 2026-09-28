@@ -71,6 +71,7 @@ export function Shell({
   company,
   employees,
   screen,
+  current,
   head,
   children,
 }: {
@@ -80,6 +81,8 @@ export function Shell({
   readonly company: CompanyOption;
   readonly employees: readonly EmployeeView[];
   readonly screen: Screen;
+  // the person whose page is open
+  readonly current?: string;
   readonly head: ReactNode;
   readonly children: ReactNode;
 }) {
@@ -111,7 +114,7 @@ export function Shell({
         <div className="rule" />
         <div>
           {employees.map((e) => (
-            <Link key={e.id} className="member" href={`/people/${e.id}`}>
+            <Link key={e.id} className="member" href={`/people/${e.id}`} aria-current={e.id === current ? "page" : undefined}>
               <span className="av">
                 <Sprite species={e.species} size={22} />
               </span>

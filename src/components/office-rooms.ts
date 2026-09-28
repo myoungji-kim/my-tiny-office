@@ -32,5 +32,3 @@ export function peopleIn(room: Room, employees: readonly EmployeeView[]): Employ
   }
 }
 
-export const teamName = (team: TeamView, names: Readonly<Record<string, string>>): string =>
-  team.name ?? (team.suggested === undefined ? "" : names[team.suggested] ?? team.suggested);

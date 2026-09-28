@@ -13,3 +13,9 @@ a.member,
 a.mrow {
   text-decoration: none;
 }
+
+a.rail-item,
+a.tcard,
+.panel-hd a.link {
+  text-decoration: none;
+}
