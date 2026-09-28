@@ -59,14 +59,14 @@ describe("settings", () => {
   });
 
   it("keeps only values it understands", () => {
-    writeFileSync(join(directory, "settings.json"), JSON.stringify({ language: "fr", lastCompanyId: "../x", extra: 1 }));
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ locale: "fr", lastCompanyId: "../x", extra: 1 }));
     expect(readSettings(directory)).toEqual({});
   });
 
   it("round-trips what it writes", () => {
     const lastCompanyId = randomUUID();
-    writeSettings(directory, { lastCompanyId });
-    expect(readSettings(directory)).toEqual({ lastCompanyId });
+    writeSettings(directory, { lastCompanyId, locale: "en" });
+    expect(readSettings(directory)).toEqual({ lastCompanyId, locale: "en" });
   });
 });
 

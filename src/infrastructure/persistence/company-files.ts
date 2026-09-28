@@ -16,6 +16,7 @@ export interface CompanyFiles {
   readonly directory: string;
   ids(): readonly CompanyId[];
   has(id: string): boolean;
+  pathOf(id: CompanyId): string;
   // Opens an existing company's file; never creates one.
   open(id: CompanyId): DatabaseHandle;
   create(id: CompanyId): DatabaseHandle;
@@ -54,6 +55,7 @@ export function createCompanyFiles(directory: string): CompanyFiles {
             .map(toCompanyId)
         : [],
     has: (id) => isCompanyId(id) && existsSync(pathOf(id)),
+    pathOf,
     open: (id) => connect(id, false),
     create(id) {
       if (existsSync(pathOf(id))) {

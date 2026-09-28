@@ -82,4 +82,21 @@ export const Icon = {
       <path d="M10 3.5L5.5 8l4.5 4.5" />
     </svg>
   ),
+  // one line of what an employee may, may not, or stops to ask
+  yes: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.4 8.4l3 3 6.2-6.6" />
+    </svg>
+  ),
+  no: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="8" cy="8" r="5.6" />
+      <path d="M4 12L12 4" />
+    </svg>
+  ),
+  ask: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M6 4v8M10 4v8" />
+    </svg>
+  ),
 };

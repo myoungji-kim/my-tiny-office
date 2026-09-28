@@ -12,19 +12,6 @@ import { Icon } from "./icons";
 
 const PRIORITIES = ["low", "normal", "high"] as const;
 
-const SCOPE = {
-  yes: (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3.4 8.4l3 3 6.2-6.6" />
-    </svg>
-  ),
-  no: (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="8" cy="8" r="5.6" />
-      <path d="M4 12L12 4" />
-    </svg>
-  ),
-};
 
 const FOLDER = (
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
@@ -189,15 +176,15 @@ export function ProjectDialog({
             {folder !== undefined && !typing && (
               <div className="scope">
                 <div className="scope-row yes">
-                  {SCOPE.yes}
+                  {Icon.yes}
                   <span>{w.scopeFiles}</span>
                 </div>
                 <div className="scope-row yes">
-                  {SCOPE.yes}
+                  {Icon.yes}
                   <span>{w.scopeRuns}</span>
                 </div>
                 <div className="scope-row no">
-                  {SCOPE.no}
+                  {Icon.no}
                   <span>{w.scopeNot}</span>
                 </div>
               </div>

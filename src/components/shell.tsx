@@ -88,7 +88,7 @@ export function Shell({
 }) {
   const t = getDictionary(locale);
   return (
-    <div className="app">
+    <div className="app" data-screen={screen}>
       <nav className="side">
         <div className="side-head">
           <Link className="side-top" href={HREF.company}>

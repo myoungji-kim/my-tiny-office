@@ -4,8 +4,9 @@ import { join } from "node:path";
 // A screen's own styles live in its sample page. When the app needs them, it
 // carries them in a CSS file that names the page on its first line; every rule
 // there must match that page's rule for the same selector, declaration for
-// declaration. Rules under a scoped selector (".wizard h1" for the page's
-// bare "h1") are compared with the page's unscoped rule.
+// declaration. Rules under a scope (".wizard h1" for the page's bare "h1",
+// or [data-screen="settings"] for a rule only that screen should carry) are
+// compared with the page's unscoped rule.
 
 const rulesOf = (css) => {
   const rules = new Map();
@@ -28,7 +29,7 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith(".css"))) {
   const pageRules = rulesOf((html.match(/<style>([\s\S]*?)<\/style>/) ?? [, ""])[1]);
   for (const [selector, body] of rulesOf(css)) {
     compared++;
-    const own = pageRules.get(selector) ?? pageRules.get(selector.replace(/^\.\w[\w-]* (?=[a-z]+\d?$)/, ""));
+    const own = pageRules.get(selector) ?? pageRules.get(selector.replace(/^(\.\w[\w-]* (?=[a-z]+\d?$)|\[data-screen="[\w-]+"\] )/, ""));
     if (own === undefined) {
       console.log(`  ✗ ${file}: "${selector}" is not a rule of ${page}`);
       bad++;

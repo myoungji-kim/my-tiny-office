@@ -61,6 +61,13 @@ export async function startCompanyAction(input: StartCompanyInput): Promise<Star
   return { companyId: id };
 }
 
+export async function setLocaleAction(locale: string): Promise<void> {
+  if (locale !== "ko" && locale !== "en") return;
+  const files = getCompanyFiles();
+  writeSettings(files.directory, { ...readSettings(files.directory), locale });
+  revalidatePath("/", "layout");
+}
+
 // 다시 확인: asks Claude Code again rather than trusting the last answer.
 export async function recheckClaudeCodeAction(): Promise<ClaudeCodeStatus> {
   const status = await claudeCodeStatus({ refresh: true });

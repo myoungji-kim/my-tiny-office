@@ -6,6 +6,8 @@ import { isCompanyId } from "./company-files";
 // What belongs to this computer rather than to a company.
 export interface AppSettings {
   readonly lastCompanyId?: string;
+  // the language chosen here; without it, the browser's
+  readonly locale?: "ko" | "en";
 }
 
 const FILE = "settings.json";
@@ -23,8 +25,11 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { lastCompanyId } = raw as Record<string, unknown>;
-  return typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {};
+  const { lastCompanyId, locale } = raw as Record<string, unknown>;
+  return {
+    ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
+    ...(locale === "ko" || locale === "en" ? { locale } : {}),
+  };
 }
 
 // Written beside the target and renamed over it, so a crash never leaves half a file.
