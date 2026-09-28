@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 
@@ -30,17 +30,38 @@ export const branchOf = (taskId: string): string => {
   return `mto/${taskId}`;
 };
 
-const DIFF_TIMEOUT_MS = 30_000;
+const GIT_TIMEOUT_MS = 30_000;
+// a new file bigger than this is counted, not read into a diff
+const MAX_NEW_FILE = 1024 * 1024;
 
-// No repository hook runs and no external diff tool is called: an agent can
-// edit files a hook or driver may point at, and those run with the user's
+// No repository hook, filesystem monitor or external diff tool ever runs: an
+// agent can edit files those may point at, and they would run with the user's
 // rights, outside the session's boundary.
 const NO_HOOKS = join(tmpdir(), "my-tiny-office-no-hooks", randomUUID());
 
-async function git(args: readonly string[], cwd?: string): Promise<RunResult | undefined> {
+async function git(args: readonly string[]): Promise<RunResult | undefined> {
   const found = findExecutable("git");
   if (found.kind !== "found") return undefined;
-  return runProcess(found.path, ["-c", "core.quotepath=false", "-c", `core.hooksPath=${NO_HOOKS}`, ...args], { cwd, timeoutMs: DIFF_TIMEOUT_MS });
+  const safe = ["-c", "core.quotepath=false", "-c", `core.hooksPath=${NO_HOOKS}`, "-c", "core.fsmonitor=false"];
+  return runProcess(found.path, [...safe, ...args], { timeoutMs: GIT_TIMEOUT_MS });
+}
+
+async function commonDirOf(folder: string): Promise<string | undefined> {
+  const top = await git(["-C", folder, "rev-parse", "--git-common-dir"]);
+  if (top?.code !== 0) return undefined;
+  const common = top.stdout.trim();
+  return isAbsolute(common) ? common : resolve(folder, common);
+}
+
+// The task's worktree as git should see it: its git directory is the one the
+// repository keeps for it, never what the `.git` file inside says, since the
+// agent can rewrite that file to point at a directory it made.
+async function worktreeGit(folder: string, taskId: string): Promise<{ readonly path: string; readonly args: readonly string[] } | undefined> {
+  const path = worktreePath(folder, taskId);
+  const common = await commonDirOf(folder);
+  if (common === undefined || !existsSync(path)) return undefined;
+  const admin = join(common, "worktrees", taskId);
+  return existsSync(admin) ? { path, args: ["--git-dir", admin, "--work-tree", path] } : undefined;
 }
 
 // The worktrees stay out of the user's own status and history.
@@ -57,13 +78,16 @@ function excludeWorktrees(commonDir: string): void {
 export async function prepareWorktree(folder: string, taskId: string): Promise<WorktreeResult> {
   const path = worktreePath(folder, taskId);
   const branch = branchOf(taskId);
-  const top = await git(["-C", folder, "rev-parse", "--git-common-dir"]);
-  if (top === undefined) return { ok: false, reason: "gitMissing" };
-  if (top.code !== 0) return { ok: false, reason: "notARepository" };
-  const common = top.stdout.trim();
-  excludeWorktrees(isAbsolute(common) ? common : resolve(folder, common));
+  if (findExecutable("git").kind !== "found") return { ok: false, reason: "gitMissing" };
+  const common = await commonDirOf(folder);
+  if (common === undefined) return { ok: false, reason: "notARepository" };
+  try {
+    excludeWorktrees(common);
+  } catch {
+    return { ok: false, reason: "worktreeFailed" };
+  }
 
-  if (existsSync(join(path, ".git"))) return { ok: true, path, branch };
+  if ((await worktreeGit(folder, taskId)) !== undefined) return { ok: true, path, branch };
   const head = await git(["-C", folder, "rev-parse", "--verify", "--quiet", "HEAD"]);
   if (head?.code !== 0) return { ok: false, reason: "repositoryEmpty" };
 
@@ -72,33 +96,67 @@ export async function prepareWorktree(folder: string, taskId: string): Promise<W
   return added?.code === 0 ? { ok: true, path, branch } : { ok: false, reason: "worktreeFailed" };
 }
 
-// What the task changed against where its branch started, new files included.
-export async function changesIn(path: string): Promise<readonly FileChange[]> {
-  await git(["-C", path, "add", "--intent-to-add", "--all"]);
-  const stat = await git(["-C", path, "diff", "--no-ext-diff", "--no-textconv", "--numstat", "HEAD"]);
-  if (stat === undefined || stat.code !== 0) return [];
-  return stat.stdout
-    .split("\n")
-    .map((line) => line.split("\t"))
-    .filter((parts) => parts.length === 3)
-    .map(([added, removed, file]) => ({ path: file, added: Number(added) || 0, removed: Number(removed) || 0 }));
+const DIFF = ["--no-ext-diff", "--no-textconv", "--no-renames"];
+
+// Files git does not know yet, as the worktree lists them.
+async function newFiles(wt: { readonly args: readonly string[] }): Promise<string[]> {
+  const listed = await git([...wt.args, "ls-files", "--others", "--exclude-standard", "-z"]);
+  return listed?.code === 0 ? listed.stdout.split("\0").filter((f) => f !== "") : [];
+}
+
+// A new file's lines, or none when it is not plain text a person could read.
+function newFileLines(path: string, file: string): string[] | undefined {
+  const full = join(path, file);
+  const stat = lstatSync(full, { throwIfNoEntry: false });
+  if (stat === undefined || !stat.isFile() || stat.size > MAX_NEW_FILE) return undefined;
+  const text = readFileSync(full, "utf8");
+  if (text.includes("\0")) return undefined;
+  const lines = text.split(/\r?\n/);
+  if (lines.at(-1) === "") lines.pop();
+  return lines;
+}
+
+// What the task changed against where its branch started, new files
+// included. It only reads: nothing is staged to find out.
+export async function changesIn(folder: string, taskId: string): Promise<readonly FileChange[]> {
+  const wt = await worktreeGit(folder, taskId);
+  if (wt === undefined) return [];
+  const stat = await git([...wt.args, "diff", ...DIFF, "--numstat", "-z", "HEAD"]);
+  const tracked =
+    stat?.code === 0
+      ? stat.stdout
+          .split("\0")
+          .map((entry) => entry.split("\t"))
+          .filter((parts) => parts.length === 3)
+          .map(([added, removed, file]) => ({ path: file, added: Number(added) || 0, removed: Number(removed) || 0 }))
+      : [];
+  const created = (await newFiles(wt)).map((file) => ({ path: file, added: newFileLines(wt.path, file)?.length ?? 0, removed: 0 }));
+  return [...tracked, ...created].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
 // One file's diff as text; it is shown, never run or rendered as markup.
-export async function diffOf(path: string, file: string): Promise<string> {
-  const result = await git(["-C", path, "diff", "--no-ext-diff", "--no-textconv", "HEAD", "--", file]);
+export async function diffOf(folder: string, taskId: string, file: string): Promise<string> {
+  const wt = await worktreeGit(folder, taskId);
+  if (wt === undefined) return "";
+  if ((await newFiles(wt)).includes(file)) {
+    const lines = newFileLines(wt.path, file);
+    return lines === undefined ? "" : [`@@ -0,0 +1,${lines.length} @@`, ...lines.map((l) => "+" + l)].join("\n");
+  }
+  const result = await git([...wt.args, "--literal-pathspecs", "diff", ...DIFF, "HEAD", "--", file]);
   return result?.code === 0 ? result.stdout : "";
 }
 
 // Approving commits the worktree to the task's branch. Nothing is pushed.
-export async function commitAll(path: string, message: string): Promise<{ readonly ok: true; readonly commit: string | undefined } | { readonly ok: false }> {
-  const staged = await git(["-C", path, "add", "--all"]);
+export async function commitAll(folder: string, taskId: string, message: string): Promise<{ readonly ok: true; readonly commit: string | undefined } | { readonly ok: false }> {
+  const wt = await worktreeGit(folder, taskId);
+  if (wt === undefined) return { ok: false };
+  const staged = await git([...wt.args, "add", "--all"]);
   if (staged?.code !== 0) return { ok: false };
-  const pending = await git(["-C", path, "diff", "--cached", "--quiet"]);
+  const pending = await git([...wt.args, "diff", "--cached", "--quiet"]);
   if (pending?.code === 0) return { ok: true, commit: undefined };
-  const committed = await git(["-C", path, "commit", "--no-verify", "-m", message]);
+  const committed = await git([...wt.args, "commit", "--no-verify", "-m", message]);
   if (committed?.code !== 0) return { ok: false };
-  const head = await git(["-C", path, "rev-parse", "--short", "HEAD"]);
+  const head = await git([...wt.args, "rev-parse", "--short", "HEAD"]);
   return { ok: true, commit: head?.stdout.trim() };
 }
 
@@ -110,8 +168,7 @@ export async function removeWorktree(folder: string, taskId: string): Promise<vo
 export const gitWorkspace: Workspace = {
   prepare: prepareWorktree,
   async commit(folder, taskId, message) {
-    const path = worktreePath(folder, taskId);
-    return !existsSync(path) || (await commitAll(path, message)).ok;
+    return !existsSync(worktreePath(folder, taskId)) || (await commitAll(folder, taskId, message)).ok;
   },
   remove: removeWorktree,
 };

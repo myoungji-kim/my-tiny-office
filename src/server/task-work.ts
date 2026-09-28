@@ -18,13 +18,19 @@ const STEPS_SHOWN = 40;
 
 // What a task's runs did and what its worktree now holds. Read from the task's
 // own records and folder only; nothing here comes from the browser but ids.
-export async function loadTaskWork(companyId: string, taskId: string): Promise<TaskWork | undefined> {
+async function taskIn(companyId: string, taskId: string) {
   const files = getCompanyFiles();
   if (!files.has(companyId)) return undefined;
   const ctx = createAppContext(files.open(toCompanyId(companyId)));
   const task = await ctx.tasks.findById(toTaskId(taskId));
   if (task === undefined || task.companyId !== companyId) return undefined;
-  const folder = (await ctx.projects.findById(task.projectId))?.folder;
+  return { ctx, task, folder: (await ctx.projects.findById(task.projectId))?.folder };
+}
+
+export async function loadTaskWork(companyId: string, taskId: string): Promise<TaskWork | undefined> {
+  const found = await taskIn(companyId, taskId);
+  if (found === undefined) return undefined;
+  const { ctx, task, folder } = found;
 
   const [steps, runs] = await Promise.all([ctx.runSteps.findByTask(task.companyId, task.id, STEPS_SHOWN), ctx.runs.findByCompany(task.companyId)]);
   const sessionId = runs
@@ -35,7 +41,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
 
   return {
     steps: steps.map((s) => ({ at: s.at, kind: s.kind, detail: s.detail })),
-    changes: present ? await changesIn(worktree) : [],
+    changes: present && folder !== undefined ? await changesIn(folder, task.id) : [],
     sessionId,
     worktree: present ? worktree : undefined,
     branch: branchOf(task.id),
@@ -44,7 +50,8 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
 
 // One file's diff, only for a file the task's worktree says it changed.
 export async function loadDiff(companyId: string, taskId: string, file: string): Promise<string> {
-  const work = await loadTaskWork(companyId, taskId);
-  if (work?.worktree === undefined || !work.changes.some((c) => c.path === file)) return "";
-  return diffOf(work.worktree, file);
+  const found = await taskIn(companyId, taskId);
+  if (found?.folder === undefined) return "";
+  const changed = await changesIn(found.folder, found.task.id);
+  return changed.some((c) => c.path === file) ? diffOf(found.folder, found.task.id, file) : "";
 }

@@ -41,13 +41,16 @@ describe("a task's worktree", () => {
     writeFileSync(join(made.path, "a.txt"), "one\ntwo\n");
     writeFileSync(join(made.path, "b.txt"), "new\n");
 
-    expect(await changesIn(made.path)).toEqual([
+    expect(await changesIn(repo, TASK)).toEqual([
       { path: "a.txt", added: 1, removed: 0 },
       { path: "b.txt", added: 1, removed: 0 },
     ]);
-    expect(await diffOf(made.path, "a.txt")).toContain("+two");
+    expect(await diffOf(repo, TASK, "a.txt")).toContain("+two");
+    expect(await diffOf(repo, TASK, "b.txt")).toBe("@@ -0,0 +1,1 @@\n+new");
+    // looking is only looking: nothing was staged to find out
+    expect(execFileSync("git", ["-C", made.path, "diff", "--cached", "--name-only"], { encoding: "utf8" })).toBe("");
 
-    const committed = await commitAll(made.path, "Paginate the history");
+    const committed = await commitAll(repo, TASK, "Paginate the history");
     assert(committed.ok);
     expect(committed.commit).toMatch(/^[0-9a-f]{7,}$/);
     expect(run("log", "-1", "--format=%s", branchOf(TASK)).trim()).toBe("Paginate the history");
@@ -62,7 +65,7 @@ describe("a task's worktree", () => {
     assert(made.ok);
     writeFileSync(join(made.path, "c.txt"), "x\n");
 
-    await commitAll(made.path, "c");
+    await commitAll(repo, TASK, "c");
     expect(existsSync(marker)).toBe(false);
 
     // the same commit made by hand does run it, so the check above means something
@@ -70,6 +73,45 @@ describe("a task's worktree", () => {
     execFileSync("git", ["-C", made.path, "add", "d.txt"]);
     execFileSync("git", ["-C", made.path, "commit", "-q", "-m", "d"]);
     expect(existsSync(marker)).toBe(true);
+  });
+
+  it("never takes the git directory, or a monitor, from the worktree's own .git file", async () => {
+    const made = await prepareWorktree(repo, TASK);
+    assert(made.ok);
+    const marker = join(repo, "monitor-ran");
+    // what an agent could write inside its worktree: a git directory of its own, with a command to run
+    const fake = join(made.path, "fake-git");
+    execFileSync("git", ["init", "-q", "--bare", fake]);
+    execFileSync("git", ["--git-dir", fake, "config", "core.bare", "false"]);
+    const script = join(made.path, "monitor.js");
+    writeFileSync(script, `require("fs").writeFileSync(${JSON.stringify(marker)}, "x");`);
+    execFileSync("git", ["--git-dir", fake, "config", "core.fsmonitor", `"${process.execPath.split("\\").join("/")}" "${script.split("\\").join("/")}"`]);
+    rmSync(join(made.path, ".git"), { force: true });
+    writeFileSync(join(made.path, ".git"), `gitdir: ${fake}\n`);
+    writeFileSync(join(made.path, "a.txt"), "changed\n");
+
+    expect((await changesIn(repo, TASK)).map((c) => c.path)).toContain("a.txt");
+    await diffOf(repo, TASK, "a.txt");
+    await commitAll(repo, TASK, "x");
+
+    expect(existsSync(marker)).toBe(false);
+    expect(run("log", "-1", "--format=%s", branchOf(TASK)).trim()).toBe("x");
+
+    // a git that trusts the worktree's .git file does run it, so the check above means something
+    execFileSync("git", ["-C", made.path, "status", "--porcelain"]);
+    expect(existsSync(marker)).toBe(true);
+  });
+
+  it("lists a renamed file and one named outside ASCII as they are, each with its diff", async () => {
+    const made = await prepareWorktree(repo, TASK);
+    assert(made.ok);
+    execFileSync("git", ["-C", made.path, "mv", "a.txt", "moved.txt"]);
+    writeFileSync(join(made.path, "새 파일.txt"), "x\n");
+
+    const changes = await changesIn(repo, TASK);
+
+    expect(changes.map((c) => c.path)).toEqual(["a.txt", "moved.txt", "새 파일.txt"]);
+    for (const c of changes) expect(await diffOf(repo, TASK, c.path)).not.toBe("");
   });
 
   it("refuses a folder that is not a repository or has no commit yet", async () => {
