@@ -121,9 +121,14 @@ export const claudeCodeRuntime: AgentRuntime = {
     }
     // what the employee was taught goes in as a file the session reads at start, removed at exit
     const folder = mkdtempSync(join(tmpdir(), "my-tiny-office-run-"));
-    const memoryFile = join(folder, "memory.md");
-    writeFileSync(memoryFile, input.memory);
     const cleanUp = () => rmSync(folder, { recursive: true, force: true });
+    const memoryFile = join(folder, "memory.md");
+    try {
+      writeFileSync(memoryFile, input.memory);
+    } catch (error) {
+      cleanUp();
+      throw error;
+    }
     const calls = new Map<string, { tool: string; command: string }>();
     return startProcess(found.path, launchArgs({ commands: input.commands, memoryFile, resume: input.resume }), {
       cwd: input.cwd,

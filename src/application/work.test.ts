@@ -25,6 +25,8 @@ interface Launched {
 let ctx: AppContext;
 let launched: Launched[];
 let workspaceWorks: boolean;
+// runs while a worktree is being prepared, as a user acting meanwhile would
+let whilePreparing: (taskId: string) => Promise<void>;
 let committed: string[];
 let ready: boolean;
 let picksUp: boolean;
@@ -49,7 +51,10 @@ const runtime: AgentRuntime = {
 };
 
 const workspace: Workspace = {
-  prepare: async (folder, taskId) => (workspaceWorks ? { ok: true, path: `${folder}/.worktrees/${taskId}` } : { ok: false }),
+  prepare: async (folder, taskId) => {
+    await whilePreparing(taskId);
+    return workspaceWorks ? { ok: true, path: `${folder}/.worktrees/${taskId}` } : { ok: false };
+  },
   commit: async (_, taskId, message) => {
     committed.push(`${taskId}:${message}`);
     return true;
@@ -62,6 +67,7 @@ beforeEach(async () => {
   launched = [];
   committed = [];
   workspaceWorks = true;
+  whilePreparing = async () => undefined;
   ready = true;
   picksUp = true;
   supervisor = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => ready, picksUp: () => picksUp });
@@ -220,6 +226,55 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[1].input).toMatchObject({ resume: SESSION });
+  });
+
+  it("starts afresh on work already begun when the session to resume is gone", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "result", outcome: "budgetReached", costUsd: 2 });
+    launched[0].exit();
+    await settle();
+    assert((await carryOn(ctx, id)).ok);
+    await settle();
+    expect(launched[1].input.resume).toBe(SESSION);
+
+    // the runtime could not find it, and ended without naming a session
+    launched[1].exit();
+    await settle();
+    assert((await carryOn(ctx, id)).ok);
+    await settle();
+
+    expect(launched[2].input.resume).toBeUndefined();
+    expect(launched[2].input.prompt).toContain("already begun in this folder");
+  });
+
+  it("does not launch work held while its worktree was being prepared", async () => {
+    const id = await oneTask();
+    whilePreparing = async (taskId) => {
+      assert((await holdTask(ctx, taskId as TaskId, "잠깐")).ok);
+    };
+    await settle();
+
+    expect(launched).toEqual([]);
+    expect(await statusOf(id)).toMatchObject({ status: "held" });
+  });
+
+  it("blocks the one task whose worktree throws, and gets on with the rest", async () => {
+    const first = await oneTask();
+    const hired = await hireEmployee(ctx, { companyId, name: "보리", species: "cat", roleId: await firstRole(ctx, companyId) });
+    assert(hired.ok);
+    const task = await statusOf(first);
+    assert(task !== undefined);
+    const second = await createTask(ctx, { companyId, projectId: task.projectId, title: "Second", priority: "normal" });
+    assert(second.ok);
+    whilePreparing = async (taskId) => {
+      if (taskId === first) throw new Error("EACCES");
+    };
+    await settle();
+
+    expect(await statusOf(first)).toMatchObject({ blocker: { kind: "workspaceUnavailable" } });
+    expect(launched.map((l) => l.input.prompt)).toEqual(["Task: Second"]);
   });
 
   it("ends a run that the budget stopped as blocked until the user carries on", async () => {

@@ -33,5 +33,7 @@ export function startWork(): void {
   if (cache.myTinyOfficeWorkTimer !== undefined) return;
   cache.myTinyOfficeWorkTimer = setInterval(() => void getWork().kick(), TICK_MS);
   cache.myTinyOfficeWorkTimer.unref();
+  // A run is a child of the server: when the server goes, so do its agents.
+  process.once("exit", () => getWork().stopAll());
   void getWork().kick();
 }

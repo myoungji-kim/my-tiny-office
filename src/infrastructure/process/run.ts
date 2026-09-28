@@ -155,6 +155,8 @@ export function runProcess(file: string, args: readonly string[], options: RunOp
   });
 }
 
+const EXIT_GRACE_MS = 2_000;
+
 export interface Running {
   readonly pid: number | undefined;
   // Ends the program and everything it started; its exit still arrives.
@@ -181,18 +183,27 @@ export function startProcess(
   const exit = (code: number | null) => {
     if (exited) return;
     exited = true;
+    child.stdout.destroy();
     if (pending.trim() !== "") options.onLine(pending);
     options.onExit(code);
   };
   child.stdout.setEncoding("utf8").on("data", (chunk: string) => {
-    pending += chunk;
-    if (pending.length > MAX_OUTPUT) pending = pending.slice(-MAX_OUTPUT);
-    const lines = pending.split("\n");
-    pending = lines.pop() ?? "";
+    // only the new chunk can end a line, so a long one is not split again and again
+    const cut = chunk.lastIndexOf("\n");
+    if (cut < 0) {
+      pending += chunk;
+      if (pending.length > MAX_OUTPUT) pending = pending.slice(-MAX_OUTPUT);
+      return;
+    }
+    const lines = (pending + chunk.slice(0, cut)).split("\n");
+    pending = chunk.slice(cut + 1);
     for (const line of lines) if (line.trim() !== "") options.onLine(line);
   });
   child.on("error", () => exit(null));
   child.on("close", (code) => exit(code));
+  // Something the program started may keep its output open after it is gone,
+  // so its own exit ends the run once what it wrote has had time to arrive.
+  child.on("exit", (code) => setTimeout(() => exit(code), EXIT_GRACE_MS).unref());
   child.stdin.on("error", () => undefined);
   child.stdin.end(options.input);
   return {

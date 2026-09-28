@@ -30,13 +30,13 @@ function memoryPrompt(employee: Employee, memories: readonly Memory[], commands:
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-function taskPrompt(task: taskDomain.Task, continuing: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
+function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
   if (task.changesRequested !== undefined) {
     return continuing
       ? `The user sent your work back:\n\n${task.changesRequested}\n\nMake the changes.`
       : `${brief(task)}\n\nSomeone worked on this before, and the user sent it back:\n\n${task.changesRequested}`;
   }
-  if (!continuing) return brief(task);
+  if (!continuing) return begun ? `${brief(task)}\n\nWork on it has already begun in this folder: carry on from what is there.` : brief(task);
   if (lastEnd?.kind === "denied") {
     return commands.includes(lastEnd.command)
       ? `\`${lastEnd.command}\` is allowed now. Carry on with the task.`
@@ -129,12 +129,17 @@ export function createWorkSupervisor(deps: {
     if (employee === undefined) return;
     const prepared = project?.folder !== undefined && project.folderConfirmed ? await deps.workspace.prepare(project.folder, task.id) : { ok: false as const };
     if (!prepared.ok || project === undefined) return block(ctx, task.id, { kind: "workspaceUnavailable" });
+    // preparing takes a while, and the task may have been held or handed over meanwhile
+    const current = await ctx.tasks.findById(task.id);
+    if (!wantsRun(current, employee.id)) return;
 
     const agent = await agentOf(ctx, employee);
     const runs = await ctx.runs.findByCompany(task.companyId);
     const resume = sessionToContinue(runs, task.id, agent.id);
     const last = runs.filter((r) => r.taskId === task.id && r.agentId === agent.id).sort((a, b) => b.startedAt - a.startedAt)[0];
-    const run = startRun({ id: toRunId(ctx.newId()), agent, taskId: task.id, sessionId: resume }, ctx.now());
+    const begun = runs.some((r) => r.taskId === task.id);
+    // the session is the runtime's to name; a resume that never names it did not take
+    const run = startRun({ id: toRunId(ctx.newId()), agent, taskId: task.id, sessionId: undefined }, ctx.now());
     await ctx.runs.save(run);
 
     const entry: LiveRun = {
@@ -152,7 +157,7 @@ export function createWorkSupervisor(deps: {
     live.set(run.id, entry);
     try {
       entry.handle = deps.runtime.launch(
-        { cwd: prepared.path, prompt: taskPrompt(task, resume !== undefined, last?.end, project.commands), memory, commands: project.commands, resume },
+        { cwd: prepared.path, prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project.commands), memory, commands: project.commands, resume },
         (event) => void serial(() => onEvent(entry, event)),
         () => void serial(() => onExit(entry)),
       );
@@ -195,6 +200,7 @@ export function createWorkSupervisor(deps: {
     const run = await ctx.runs.findById(entry.runId);
     if (run !== undefined) await ctx.runs.save(endRun(run, end, entry.result?.costUsd ?? 0, ctx.now()));
 
+    kick();
     const task = await ctx.tasks.findById(entry.taskId);
     if (end.kind === "stopped" || !wantsRun(task, entry.employeeId)) return;
     if (end.kind === "finished") {
@@ -203,7 +209,6 @@ export function createWorkSupervisor(deps: {
     } else {
       await block(ctx, task.id, end.kind === "denied" ? { kind: "commandNotAllowed", command: end.command } : end.kind === "budgetReached" ? { kind: "budgetReached" } : { kind: "disconnected" });
     }
-    kick();
   }
 
   async function tick(): Promise<void> {
@@ -213,13 +218,27 @@ export function createWorkSupervisor(deps: {
 
     const ready = await deps.ready();
     for (const company of companies) {
-      await reconcile(company);
-      if (!ready) continue;
-      if (deps.picksUp()) await pickUpWork(company.ctx, company.companyId);
-      const running = new Set([...live.values()].map((e) => e.taskId));
-      for (const task of await company.ctx.tasks.findByCompany(company.companyId)) {
-        if (wantsRun(task, undefined) && !running.has(task.id)) await launch(company.ctx, task);
+      try {
+        await reconcile(company);
+        if (!ready) continue;
+        if (deps.picksUp()) await pickUpWork(company.ctx, company.companyId);
+        const running = new Set([...live.values()].map((e) => e.taskId));
+        for (const task of await company.ctx.tasks.findByCompany(company.companyId)) {
+          if (wantsRun(task, undefined) && !running.has(task.id)) await launchOrBlock(company.ctx, task);
+        }
+      } catch (error) {
+        deps.onError?.(error);
       }
+    }
+  }
+
+  // A launch that throws blocks its task rather than being tried again every tick.
+  async function launchOrBlock(ctx: AppContext, task: taskDomain.Task): Promise<void> {
+    try {
+      await launch(ctx, task);
+    } catch (error) {
+      deps.onError?.(error);
+      if (wantsRun(await ctx.tasks.findById(task.id), undefined)) await block(ctx, task.id, { kind: "workspaceUnavailable" });
     }
   }
 
@@ -233,7 +252,13 @@ export function createWorkSupervisor(deps: {
     });
   }
 
-  return { kick };
+  return {
+    kick,
+    // Ends every run at once, as when the server stops; each is found lost and resumed later.
+    stopAll: () => {
+      for (const entry of live.values()) entry.handle.stop();
+    },
+  };
 }
 
 export type WorkSupervisor = ReturnType<typeof createWorkSupervisor>;

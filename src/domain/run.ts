@@ -86,11 +86,15 @@ export function endRun(run: Run, end: RunEnd, costUsd: number, now: Timestamp): 
 export const isLive = (run: Run): boolean => run.state !== "ended";
 
 // The session a new run of this agent on this task continues, if any: a
-// session belongs to one agent, so another employee starts afresh.
+// session belongs to one agent, so another employee starts afresh. A run that
+// ended without the runtime naming a session was a resume that did not take —
+// the session is gone, as after its retention or on another computer — so the
+// next one starts afresh too; one stopped on purpose before that says nothing.
 export function sessionToContinue(runs: readonly Run[], taskId: TaskId, agentId: AgentId): string | undefined {
-  return runs
-    .filter((r) => r.taskId === taskId && r.agentId === agentId && r.sessionId !== undefined)
-    .sort((a, b) => b.startedAt - a.startedAt || b.id.localeCompare(a.id))[0]?.sessionId;
+  const latest = runs
+    .filter((r) => r.taskId === taskId && r.agentId === agentId && !(r.sessionId === undefined && r.end?.kind === "stopped"))
+    .sort((a, b) => b.startedAt - a.startedAt || b.id.localeCompare(a.id))[0];
+  return latest?.sessionId;
 }
 
 export const stepDetail = (text: string): string => {

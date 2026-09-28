@@ -31,6 +31,16 @@ describe("a run", () => {
     expect(sessionToContinue(runs, task, toAgentId("c"))).toBeUndefined();
   });
 
+  it("starts afresh after a resume that never named its session, not after one stopped on purpose", () => {
+    const a = agent("a");
+    const named = startRun({ id: toRunId("1"), agent: a, taskId: task, sessionId: "kept" }, 1);
+    const stopped = endRun(startRun({ id: toRunId("2"), agent: a, taskId: task, sessionId: undefined }, 2), { kind: "stopped" }, 0, 3);
+    const lost = endRun(startRun({ id: toRunId("3"), agent: a, taskId: task, sessionId: undefined }, 4), { kind: "disconnected" }, 0, 5);
+
+    expect(sessionToContinue([named, stopped], task, a.id)).toBe("kept");
+    expect(sessionToContinue([named, stopped, lost], task, a.id)).toBeUndefined();
+  });
+
   it("keeps a step to one short line", () => {
     expect(stepDetail("  npm   test\n-- history ")).toBe("npm test -- history");
     expect(stepDetail("x".repeat(400))).toHaveLength(300);

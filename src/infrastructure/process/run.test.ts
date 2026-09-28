@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { childEnvironment, findExecutable, MAX_OUTPUT, runProcess } from "./run";
+import { childEnvironment, findExecutable, MAX_OUTPUT, runProcess, startProcess } from "./run";
 
 const node = process.execPath;
 
@@ -108,4 +108,22 @@ describe("runProcess, and what it keeps from a child", () => {
     await new Promise((r) => setTimeout(r, 300));
     expect(() => process.kill(pid, 0)).toThrow();
   }, 20000);
+});
+
+describe("startProcess", () => {
+  it("reads a line at a time and ends with the program, even when something it started holds the output", async () => {
+    // the grandchild inherits stdout and outlives its parent by far
+    const script =
+      "require('child_process').spawn(process.execPath, ['-e', 'setTimeout(() => {}, 8000)'], { stdio: 'inherit' }).unref();" +
+      "process.stdout.write('one\\ntw'); setTimeout(() => process.stdout.write('o\\n'), 50); setTimeout(() => process.exit(0), 100);";
+    const lines: string[] = [];
+    const started = Date.now();
+    const code = await new Promise<number | null>((done) => {
+      startProcess(process.execPath, ["-e", script], { cwd: tmpdir(), input: "", onLine: (l) => lines.push(l), onExit: done });
+    });
+
+    expect(lines).toEqual(["one", "two"]);
+    expect(code).toBe(0);
+    expect(Date.now() - started).toBeLessThan(6000);
+  }, 10_000);
 });
