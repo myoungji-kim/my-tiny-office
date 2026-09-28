@@ -9,6 +9,10 @@ export interface MenuItem {
   readonly label: string;
   readonly icon?: ReactNode;
   readonly bad?: boolean;
+  // the one the user came for
+  readonly key?: boolean;
+  // why it cannot be done now; the row stays, disabled
+  readonly off?: string;
   // asked once more in place, for what cannot be undone
   readonly confirm?: string;
   readonly run: () => void;
@@ -47,7 +51,7 @@ export function RowMenu({
     const r = a.getBoundingClientRect();
     p.style.left = Math.round(Math.min(Math.max(EDGE, r.right - p.offsetWidth), innerWidth - p.offsetWidth - EDGE)) + "px";
     p.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - p.offsetHeight - EDGE)) + "px";
-    p.querySelector<HTMLElement>(".mrow")?.focus({ preventScroll: true });
+    p.querySelector<HTMLElement>(".mrow:not(:disabled)")?.focus({ preventScroll: true });
     addEventListener("scroll", close, { passive: true });
     return () => removeEventListener("scroll", close);
   }, [open, asking, close]);
@@ -59,10 +63,19 @@ export function RowMenu({
   };
 
   const row = (item: MenuItem, onClick: () => void) => (
-    <button key={item.label} className={item.bad === true ? "mrow mrow-bad" : "mrow"} type="button" role="menuitem" onClick={onClick}>
-      {item.icon}
-      {item.label}
-    </button>
+    <span key={item.label} style={{ display: "contents" }}>
+      <button
+        className={["mrow", item.bad === true && "mrow-bad", item.key === true && "mrow-key"].filter(Boolean).join(" ")}
+        type="button"
+        role="menuitem"
+        disabled={item.off !== undefined}
+        onClick={onClick}
+      >
+        {item.icon}
+        {item.label}
+      </button>
+      {item.off !== undefined && <p className="p-why">{item.off}</p>}
+    </span>
   );
 
   return (

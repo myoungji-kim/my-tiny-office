@@ -5,7 +5,14 @@ const sameDay = (a: number, b: number) => new Date(a).toDateString() === new Dat
 // Leave keeps since when, never until when.
 export function sinceText(locale: Locale, t: Dictionary, at: number, now: number): string {
   if (sameDay(at, now)) return t.office.sinceToday;
-  return t.office.since(new Intl.DateTimeFormat(locale, { month: locale === "ko" ? "long" : "short", day: "numeric" }).format(at));
+  return t.office.since(dayText(locale, at));
 }
 
 export const dateText = (locale: Locale, at: number): string => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(at);
+
+export const dayText = (locale: Locale, at: number): string =>
+  new Intl.DateTimeFormat(locale, { month: locale === "ko" ? "long" : "short", day: "numeric" }).format(at);
+
+// both days count, as the company screen counts them
+export const daysSpanned = (from: number, to: number): number =>
+  Math.round((new Date(to).setHours(0, 0, 0, 0) - new Date(from).setHours(0, 0, 0, 0)) / 86_400_000) + 1;

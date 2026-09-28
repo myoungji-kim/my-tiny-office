@@ -6,33 +6,15 @@ import { revalidatePath } from "next/cache";
 
 import { createCompany } from "../application/company";
 import { hireEmployee } from "../application/employee";
-import { createProject } from "../application/project";
 import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
-import { assignTask, createTask } from "../application/task";
 import { MAX_COMPANY_NAME } from "../domain/company";
 import { MAX_EMPLOYEE_NAME, SPECIES } from "../domain/employee";
-import { toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
+import { toCompanyId } from "../domain/ids";
 import { checkName } from "../domain/name";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
-
-import { inCompany, priorityOf, type Outcome } from "./action-context";
-
-export interface ActionState {
-  readonly error?: string;
-}
-
-function text(formData: FormData, field: string): string {
-  const value = formData.get(field);
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function optionalText(formData: FormData, field: string): string | undefined {
-  const value = text(formData, field);
-  return value === "" ? undefined : value;
-}
 
 // The company the screens open next; it stays until another is chosen.
 export async function switchCompanyAction(companyId: string): Promise<void> {
@@ -84,28 +66,4 @@ export async function recheckClaudeCodeAction(): Promise<ClaudeCodeStatus> {
   const status = await claudeCodeStatus({ refresh: true });
   revalidatePath("/", "layout");
   return status;
-}
-
-export async function createTaskAction(_state: ActionState, formData: FormData): Promise<Outcome> {
-  return inCompany(text(formData, "companyId"), (ctx, companyId) =>
-    createTask(ctx, {
-      companyId,
-      title: text(formData, "title"),
-      description: optionalText(formData, "description"),
-      projectId: toProjectId(text(formData, "projectId")),
-      priority: priorityOf(formData.get("priority")),
-    }),
-  );
-}
-
-export async function assignTaskAction(_state: ActionState, formData: FormData): Promise<Outcome> {
-  return inCompany(text(formData, "companyId"), (ctx) =>
-    assignTask(ctx, { taskId: toTaskId(text(formData, "taskId")), employeeId: toEmployeeId(text(formData, "employeeId")) }),
-  );
-}
-
-export async function createProjectAction(_state: ActionState, formData: FormData): Promise<Outcome> {
-  return inCompany(text(formData, "companyId"), (ctx, companyId) =>
-    createProject(ctx, { companyId, name: text(formData, "name"), priority: priorityOf(formData.get("priority")) }),
-  );
 }

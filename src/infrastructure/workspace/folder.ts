@@ -1,4 +1,5 @@
 import { readFileSync, realpathSync, statSync } from "node:fs";
+import { homedir } from "node:os";
 import { isAbsolute, join } from "node:path";
 
 import { isAllowableCommand, MAX_COMMANDS } from "../../domain/project";
@@ -9,8 +10,10 @@ export type FolderCheck =
 
 // A folder the user typed is only ever used as the canonical absolute path it
 // resolves to, and only if it is a folder on this computer.
-export function checkFolder(raw: string): FolderCheck {
-  const typed = raw.trim();
+export function checkFolder(raw: string, home = homedir()): FolderCheck {
+  const trimmed = raw.trim();
+  // ~ is the one shorthand a person types for a path
+  const typed = trimmed === "~" || /^~[\\/]/.test(trimmed) ? join(home, trimmed.slice(1)) : trimmed;
   if (!isAbsolute(typed)) return { ok: false, reason: "folderNotAbsolute" };
   let folder: string;
   try {

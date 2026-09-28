@@ -3,7 +3,7 @@ import { toCompanyId } from "../domain/ids";
 import type { Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
-import { timeTaken, type TaskStatus } from "../domain/task";
+import { timeTaken, type Blocker, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
@@ -68,8 +68,14 @@ export interface RoleView {
 export interface ProjectView {
   readonly id: string;
   readonly name: string;
+  readonly description: string | undefined;
+  readonly folder: string | undefined;
+  readonly commands: readonly string[];
   readonly status: ProjectStatus;
   readonly priority: Priority;
+  readonly heldReason: string | undefined;
+  readonly startedAt: number | undefined;
+  readonly finishedAt: number | undefined;
   // work is written down only in a planned or active project
   readonly takesWork: boolean;
 }
@@ -86,7 +92,10 @@ export interface TaskView {
   readonly assigneeId: string | undefined;
   readonly assigneeName: string | undefined;
   readonly minutesTaken: number;
-  readonly blocked: boolean;
+  readonly blocker: Blocker | undefined;
+  readonly heldReason: string | undefined;
+  readonly heldWithProject: boolean;
+  readonly createdAt: number;
 }
 
 export interface OfficeView {
@@ -233,8 +242,14 @@ export async function loadOffice(
     projects: projects.map((project) => ({
       id: project.id,
       name: project.name,
+      description: project.description,
+      folder: project.folder,
+      commands: project.commands,
       status: project.status,
       priority: project.priority,
+      heldReason: project.heldReason,
+      startedAt: project.startedAt,
+      finishedAt: project.finishedAt,
       takesWork: project.status === "planned" || project.status === "active",
     })),
     tasks: tasks.map((task) => ({
@@ -249,7 +264,10 @@ export async function loadOffice(
       assigneeId: task.assigneeId,
       assigneeName: task.assigneeId === undefined ? undefined : nameById.get(task.assigneeId),
       minutesTaken: Math.floor(timeTaken(task, now) / 60_000),
-      blocked: task.blocker !== undefined,
+      blocker: task.blocker,
+      heldReason: task.heldReason,
+      heldWithProject: task.heldWithProject,
+      createdAt: task.createdAt,
     })),
   };
 }

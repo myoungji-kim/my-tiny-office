@@ -29,6 +29,13 @@ describe("checkFolder", () => {
     expect(checkFolder(`  ${join(root, "app", "..", "app")}  `)).toEqual({ ok: true, folder: join(root, "app"), scripts: [] });
   });
 
+  it("reads ~ as the home folder, and only at the start", () => {
+    mkdirSync(join(root, "code"));
+
+    expect(checkFolder("~/code", root)).toMatchObject({ ok: true, folder: join(root, "code") });
+    expect(checkFolder("~other", root)).toEqual({ ok: false, reason: "folderNotAbsolute" });
+  });
+
   it("starts the commands from package.json, leaving out any that could not be one plain command", () => {
     writeFileSync(join(root, "package.json"), JSON.stringify({ scripts: { test: "vitest", lint: "eslint .", "a;b": "x", "e2e*": "y" } }));
 

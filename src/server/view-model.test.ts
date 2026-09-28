@@ -203,7 +203,10 @@ describe("work through the office view", () => {
         assigneeId: undefined,
         assigneeName: undefined,
         minutesTaken: 0,
-        blocked: false,
+        blocker: undefined,
+        heldReason: undefined,
+        heldWithProject: false,
+        createdAt: expect.any(Number),
       },
     ]);
   });
