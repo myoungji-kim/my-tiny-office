@@ -50,10 +50,6 @@
 
   .step-tx code { font-family: var(--mono); font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
 
-  .said { display: block; margin-top: 12px; background: var(--sunk); border-radius: 9px; padding: 9px 11px; font-size: 15px; line-height: 1.5; }
-
-  .said b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
-
   .file { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid var(--line); background: none; text-align: left; font: inherit; cursor: pointer; }
 
   .file:last-of-type { border-bottom: none; }
@@ -101,6 +97,22 @@
   .tk-apply { display: block; font-size: 14px; color: var(--muted); margin-top: 10px; }
 
   .tk-apply code { font-family: var(--mono); color: var(--ink); }
+
+  .fold > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; }
+
+  .fold > summary::-webkit-details-marker { display: none; }
+
+  .fold > summary .fold-ic { margin-left: auto; display: grid; place-items: center; color: var(--faint); transition: transform .15s; }
+
+  .fold > summary .fold-ic svg { width: 12px; height: 8px; }
+
+  .fold[open] > summary .fold-ic { transform: rotate(180deg); }
+
+  .fold:not([open]) > summary { border-bottom: none; }
+
+  .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
+
+  .said-bd { font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 

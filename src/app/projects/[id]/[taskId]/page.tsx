@@ -88,30 +88,34 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const actions = (work?.steps ?? []).flatMap((s) => (s.kind === "say" ? [] : [{ ...s, kind: s.kind }]));
   const said = work?.steps.find((s) => s.kind === "say");
 
+  const stepRow = (s: (typeof actions)[number], latest: boolean, key: number) => (
+    <div key={key} className={latest ? "step latest" : "step"}>
+      <span className="step-at">{timeText(locale, s.at)}</span>
+      <span className="step-ic">{STEP_ICON[s.kind]}</span>
+      <span className="step-tx">
+        {w.tk.steps[s.kind]} <code>{s.detail}</code>
+      </span>
+    </div>
+  );
+  // What they did is there to look into, not to read through: while they work
+  // the step they are on shows, and the rest opens on request.
+  const now = running && actions.length > 0 ? <Fragment key="now">{panel(w.tk.now, stepRow(actions[0], true, 0))}</Fragment> : undefined;
   const steps =
-    actions.length === 0 && said === undefined ? undefined : (
-      <Fragment key="steps">
-        {panel(
-          running ? w.tk.now : w.tk.did,
-          <>
-            {actions.map((s, i) => (
-              <div key={i} className={i === 0 && running ? "step latest" : "step"}>
-                <span className="step-at">{timeText(locale, s.at)}</span>
-                <span className="step-ic">{STEP_ICON[s.kind]}</span>
-                <span className="step-tx">
-                  {w.tk.steps[s.kind]} <code>{s.detail}</code>
-                </span>
-              </div>
-            ))}
-            {said !== undefined && who !== undefined && (
-              <span className="said">
-                <b>{w.tk.said(who.name)}</b>
-                <span style={{ whiteSpace: "pre-wrap" }}>{said.detail}</span>
-              </span>
-            )}
-          </>,
-        )}
-      </Fragment>
+    actions.length === 0 ? undefined : (
+      <details key="steps" className="panel fold">
+        <summary className="panel-hd">
+          <h2>
+            {w.tk.did}
+            <span className="kn">{actions.length}</span>
+          </h2>
+          <span className="fold-ic">{Icon.chevron}</span>
+        </summary>
+        <div className="panel-bd">{actions.map((s, i) => stepRow(s, false, i))}</div>
+      </details>
+    );
+  const saidPanel =
+    said === undefined || who === undefined ? undefined : (
+      <Fragment key="said">{panel(w.tk.said(who.name), <span className="said-bd">{said.detail}</span>)}</Fragment>
     );
   const changes =
     task.status === "backlog" || work === undefined ? undefined : (
@@ -132,7 +136,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         )}
       </Fragment>
     );
-  const main = (task.status === "approval" || task.status === "done" ? [changes, steps] : [steps, changes]).filter((x) => x !== undefined);
+  const main = (task.status === "approval" || task.status === "done" ? [changes, saidPanel, steps] : [now, saidPanel, changes, steps]).filter((x) => x !== undefined);
 
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
   const side: ReactNode[] = [

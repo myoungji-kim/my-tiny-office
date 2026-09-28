@@ -58,10 +58,6 @@
 
   .step-tx code { font-family: var(--mono); font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
 
-  .said { display: block; margin-top: 12px; background: var(--sunk); border-radius: 9px; padding: 9px 11px; font-size: 15px; line-height: 1.5; }
-
-  .said b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
-
   .file { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid var(--line); background: none; text-align: left; font: inherit; cursor: pointer; }
 
   .file:last-of-type { border-bottom: none; }
@@ -109,6 +105,22 @@
   .tk-apply { display: block; font-size: 14px; color: var(--muted); margin-top: 10px; }
 
   .tk-apply code { font-family: var(--mono); color: var(--ink); }
+
+  .fold > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; }
+
+  .fold > summary::-webkit-details-marker { display: none; }
+
+  .fold > summary .fold-ic { margin-left: auto; display: grid; place-items: center; color: var(--faint); transition: transform .15s; }
+
+  .fold > summary .fold-ic svg { width: 12px; height: 8px; }
+
+  .fold[open] > summary .fold-ic { transform: rotate(180deg); }
+
+  .fold:not([open]) > summary { border-bottom: none; }
+
+  .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
+
+  .said-bd { font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 
@@ -968,12 +980,18 @@
         : `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect${off}>${t().reconnect}</button></span></div>`;
 
+    // What they did is there to look into, not to read through: while they
+    // work the step they are on shows, and the rest opens on request.
+    const stepRow = (s, latest) => `
+          <div class="step${latest ? " latest" : ""}"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
+            <span class="step-tx">${k.steps[s.kind]} <code>${s.what}</code>${s.note ? " · " + tx(s.note) : ""}</span></div>`;
+    const working = task.status === "working" && !task.blocked;
     const steps = task.steps?.length
-      ? panel(task.status === "working" ? k.now : k.did, task.steps.map((s, i) => `
-          <div class="step${i === 0 && task.status === "working" ? " latest" : ""}"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
-            <span class="step-tx">${k.steps[s.kind]} <code>${s.what}</code>${s.note ? " · " + tx(s.note) : ""}</span></div>`).join("")
-          + (task.said && who ? `<span class="said"><b>${k.said(who.name)}</b>${tx(task.said)}</span>` : ""))
+      ? `<details class="panel fold"><summary class="panel-hd"><h2>${k.did}<span class="kn">${task.steps.length}</span></h2><span class="fold-ic">${chevron}</span></summary>
+          <div class="panel-bd">${task.steps.map((s) => stepRow(s, false)).join("")}</div></details>`
       : "";
+    const now = working && task.steps?.length ? panel(k.now, stepRow(task.steps[0], true)) : "";
+    const said = task.said && who ? panel(k.said(who.name), `<span class="said-bd">${tx(task.said)}</span>`) : "";
 
     const changes = task.status === "backlog" ? "" : panel(k.changed,
       (task.files?.length
@@ -987,7 +1005,7 @@
       (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}${note.text}</span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
       + (task.thread ?? []).map((m) => `<div class="msg"><span class="w-av" data-av="${m.by}"></span><span><b>${byId.get(m.by).name}</b>${tx(m.text)}</span></div>`).join(""));
 
-    const main = task.status === "approval" || task.status === "done" ? [changes, review, steps] : [steps, changes, review];
+    const main = task.status === "approval" || task.status === "done" ? [changes, said, review, steps] : [now, said, changes, review, steps];
 
     const mine = who ? who.memories : [];
     const memory = panel(who ? k.mem(mine.length) : k.memAhead,
