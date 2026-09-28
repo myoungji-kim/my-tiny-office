@@ -4,6 +4,7 @@ import { toCompanyId, toEventId, toProjectId } from "./ids";
 import {
   allowCommand,
   createProject,
+  editProject,
   finishProject,
   holdProject,
   isAllowableCommand,
@@ -63,6 +64,19 @@ describe("a project's life", () => {
     const reopened = reopenProject(done.project, eventId, t0 + 10);
     assert(reopened.ok);
     expect(reopened.project).toMatchObject({ status: "active", finishedAt: undefined, startedAt: t0 + 1 });
+  });
+});
+
+describe("editing a project", () => {
+  it("changes its details, but not its folder while work is running there", () => {
+    const made = createProject({ id: toProjectId("p"), companyId: toCompanyId("c"), name: "pay", folder: "/a", priority: "normal" }, toEventId("e"), 1);
+    assert(made.ok);
+    const details = { name: " Payments ", description: " ", folder: "/a", commands: ["npm test", "npm test"], priority: "high" as const };
+
+    expect(editProject(made.project, details, 1)).toMatchObject({ ok: true, project: { name: "Payments", description: undefined, commands: ["npm test"], priority: "high" } });
+    expect(editProject(made.project, { ...details, folder: "/b" }, 1)).toEqual({ ok: false, reason: "folderInUse" });
+    expect(editProject(made.project, { ...details, folder: "/b" }, 0)).toMatchObject({ ok: true, project: { folder: "/b" } });
+    expect(editProject(made.project, { ...details, commands: ["a;b"] }, 0)).toEqual({ ok: false, reason: "commandNotAllowable" });
   });
 });
 

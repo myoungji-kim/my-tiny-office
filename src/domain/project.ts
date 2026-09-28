@@ -99,6 +99,35 @@ export function createProject(
   };
 }
 
+export interface ProjectDetails {
+  readonly name: string;
+  readonly description: string | undefined;
+  readonly folder: string | undefined;
+  readonly commands: readonly string[];
+  readonly priority: Priority;
+}
+
+export type EditProjectFailure = CreateProjectFailure | "folderInUse";
+
+// A project's details can change at any time, except its folder while work is
+// running in it: the runs already have their worktrees there.
+export function editProject(
+  project: Project,
+  details: ProjectDetails,
+  running: number,
+): { readonly ok: true; readonly project: Project } | { readonly ok: false; readonly reason: EditProjectFailure } {
+  const name = details.name.trim();
+  if (name === "") return { ok: false, reason: "projectNameRequired" };
+  const commands = [...new Set(details.commands)];
+  if (!commands.every(isAllowableCommand)) return { ok: false, reason: "commandNotAllowable" };
+  if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
+  if (details.folder !== project.folder && running > 0) return { ok: false, reason: "folderInUse" };
+  return {
+    ok: true,
+    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, commands, priority: details.priority },
+  };
+}
+
 const event = <T extends string>(type: T, project: Project, eventId: EventId, now: Timestamp) => ({
   eventId,
   type,

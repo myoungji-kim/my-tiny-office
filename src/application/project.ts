@@ -70,6 +70,22 @@ async function saveAll(ctx: AppContext, changes: readonly TaskChange[]): Promise
   return events;
 }
 
+export function editProject(
+  ctx: AppContext,
+  projectId: ProjectId,
+  details: projectDomain.ProjectDetails,
+): Promise<ProjectResult<"projectNotFound" | projectDomain.EditProjectFailure>> {
+  return ctx.withTransaction(async () => {
+    const project = await ctx.projects.findById(projectId);
+    if (project === undefined) return { ok: false, reason: "projectNotFound" };
+    const running = (await ctx.tasks.findByCompany(project.companyId)).filter((t) => t.projectId === project.id && t.status === "working").length;
+    const edited = projectDomain.editProject(project, details, running);
+    if (!edited.ok) return edited;
+    await ctx.projects.save(edited.project);
+    return { ok: true, value: { project: edited.project }, events: [] };
+  });
+}
+
 export const startProject = (ctx: AppContext, projectId: ProjectId) =>
   changeProject(ctx, projectId, (p) => projectDomain.startProject(p, eventId(ctx), ctx.now()));
 
