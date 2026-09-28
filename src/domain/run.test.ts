@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { toAgentId, toCompanyId, toEmployeeId, toRunId, toTaskId } from "./ids";
-import { endRun, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
+import { endRun, reportDetail, sessionStarted, sessionToContinue, startRun, stepDetail, type Agent } from "./run";
 
 const agent = (id: string): Agent => ({ id: toAgentId(id), companyId: toCompanyId("c"), employeeId: toEmployeeId("e-" + id), runtime: "claudeCode", createdAt: 0 });
 const task = toTaskId("t");
@@ -34,5 +34,10 @@ describe("a run", () => {
   it("keeps a step to one short line", () => {
     expect(stepDetail("  npm   test\n-- history ")).toBe("npm test -- history");
     expect(stepDetail("x".repeat(400))).toHaveLength(300);
+  });
+
+  it("keeps the closing report whole, lines and all", () => {
+    expect(reportDetail("## 1. 제품\r\n\r\n\r\n\r\n- 로컬 도구\n")).toBe("## 1. 제품\n\n- 로컬 도구");
+    expect(reportDetail("x".repeat(5000))).toHaveLength(4000);
   });
 });

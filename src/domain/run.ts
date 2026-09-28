@@ -55,6 +55,8 @@ export interface RunStep {
 }
 
 export const MAX_STEP_DETAIL = 300;
+// The agent's closing account of the work is kept whole, lines and all.
+export const MAX_REPORT = 4000;
 
 export function startRun(input: { readonly id: RunId; readonly agent: Agent; readonly taskId: TaskId; readonly sessionId: string | undefined }, now: Timestamp): Run {
   return {
@@ -94,4 +96,9 @@ export function sessionToContinue(runs: readonly Run[], taskId: TaskId, agentId:
 export const stepDetail = (text: string): string => {
   const line = text.replace(/\s+/g, " ").trim();
   return line.length > MAX_STEP_DETAIL ? line.slice(0, MAX_STEP_DETAIL - 1) + "…" : line;
+};
+
+export const reportDetail = (text: string): string => {
+  const report = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  return report.length > MAX_REPORT ? report.slice(0, MAX_REPORT - 1) + "…" : report;
 };

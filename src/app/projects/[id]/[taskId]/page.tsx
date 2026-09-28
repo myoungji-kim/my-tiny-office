@@ -104,7 +104,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
             {said !== undefined && who !== undefined && (
               <span className="said">
                 <b>{w.tk.said(who.name)}</b>
-                {said.detail}
+                <span style={{ whiteSpace: "pre-wrap" }}>{said.detail}</span>
               </span>
             )}
           </>,

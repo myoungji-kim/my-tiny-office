@@ -51,7 +51,7 @@ describe("readLine", () => {
       toolUse("b", "Edit", { file_path: `${CWD}\\src\\pay.ts`, old_string: "x", new_string: "y" }),
       toolUse("c", "Bash", { command: "npm test" }),
       "not json",
-      line({ type: "result", subtype: "success", is_error: false, total_cost_usd: 0.05, session_id: SESSION }),
+      line({ type: "result", subtype: "success", is_error: false, result: "Paginated.\n\n- 20 a page", total_cost_usd: 0.05, session_id: SESSION }),
     ].flatMap((l) => readLine(l, calls, CWD));
 
     expect(events).toEqual([
@@ -60,6 +60,7 @@ describe("readLine", () => {
       { kind: "step", step: "read", detail: "src/pay.ts" },
       { kind: "step", step: "edit", detail: "src/pay.ts" },
       { kind: "step", step: "run", detail: "npm test" },
+      { kind: "step", step: "say", detail: "Paginated.\n\n- 20 a page" },
       { kind: "result", outcome: "finished", costUsd: 0.05 },
     ]);
   });

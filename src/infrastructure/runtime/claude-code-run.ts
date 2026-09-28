@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { AgentEvent, AgentRuntime, LaunchInput } from "../../application/agent-runtime";
-import { stepDetail, type StepKind } from "../../domain/run";
+import { reportDetail, stepDetail, type StepKind } from "../../domain/run";
 import { findExecutable, startProcess } from "../process/run";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
@@ -105,7 +105,8 @@ export function readLine(line: string, calls: Map<string, { tool: string; comman
   if (event.type === "result") {
     const cost = typeof event.total_cost_usd === "number" && Number.isFinite(event.total_cost_usd) ? event.total_cost_usd : 0;
     const outcome = event.subtype === "success" && event.is_error !== true ? "finished" : event.subtype === "error_max_budget_usd" ? "budgetReached" : "failed";
-    return [{ kind: "result", outcome, costUsd: cost }];
+    const report = text(event.result).trim();
+    return [...(report === "" ? [] : [{ kind: "step" as const, step: "say" as const, detail: reportDetail(report) }]), { kind: "result", outcome, costUsd: cost }];
   }
   return [];
 }
