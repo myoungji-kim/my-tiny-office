@@ -1,0 +1,1140 @@
+{
+  "palette": {
+    ".": null,
+    "K": "#2f2a3d",
+    "E": "#2f2a3d",
+    "w": "#c9a06a",
+    "W": "#d8b17c",
+    "d": "var(--floor)",
+    "a": "#e9dcc4",
+    "A": "#f4ead7",
+    "b": "#c2b195",
+    "g": "#8ec3e8",
+    "G": "#bcdcf2",
+    "s": "#c9964f",
+    "S": "#dcae6c",
+    "t": "#9c6f3a",
+    "m": "#454b63",
+    "M": "#6f9fd8",
+    "o": "#99a3b8",
+    "c": "#5d6480",
+    "C": "#767ea0",
+    "p": "#b5674a",
+    "n": "#4f8f55",
+    "N": "#6fae6e",
+    "f": "#8a6240",
+    "r": "#d8574f",
+    "u": "#5b8de0",
+    "v": "#e0a93c"
+  },
+  "tiles": {
+    "floor": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw"
+    ],
+    "wall": [
+      "KKKKKKKKKKKKKKKK",
+      "AAAAAAAAAAAAAAAA",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "aaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbb",
+      "KKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "window": [
+      "KKKKKKKKKKKKKKKK",
+      "AAAAAAAAAAAAAAAA",
+      "aKKKKKKKKKKKKKKa",
+      "aKGGGGGGGGGGGGKa",
+      "aKGgggggggggggKa",
+      "aKGgggggggggggKa",
+      "aKGgggggggggggKa",
+      "aKKKKKKKKKKKKKKa",
+      "aKGgggggggggggKa",
+      "aKGgggggggggggKa",
+      "aKKKKKKKKKKKKKKa",
+      "KKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "shelf": [
+      "KKKKKKKKKKKKKKKK",
+      "AAAAAAAAAAAAAAAA",
+      "aKKKKKKKKKKKKKKa",
+      "aKfffffffffffKKa",
+      "aKfrrfuuvvfrrfKa",
+      "aKfrrfuuvvfrrfKa",
+      "aKfffffffffffKKa",
+      "aKfuuvvfrrfuufKa",
+      "aKfuuvvfrrfuufKa",
+      "aKfffffffffffKKa",
+      "bKKKKKKKKKKKKKKb",
+      "KKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "board": [
+      "KKKKKKKKKKKKKKKK",
+      "AAAAAAAAAAAAAAAA",
+      "aKKKKKKKKKKKKKKa",
+      "aKAAAAAAAAAAAAKa",
+      "aKAoooooooAAAAKa",
+      "aKAAAAAAAAAAAAKa",
+      "aKAooooooooooAKa",
+      "aKAAAAAAAAAAAAKa",
+      "aKAooooooAAAAAKa",
+      "aKAAAAAAAAAAAAKa",
+      "aKKKKKKKKKKKKKKa",
+      "KKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "deskL": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwKKKKKKKKKKKKKK",
+      "wKSSSSSSSSSSSSSS",
+      "wKSsssssssssssss",
+      "wKSsssssssssssss",
+      "wKSsssssssssssss",
+      "wKtttttttttttttt",
+      "wKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwKKwwwwwwwwwwww",
+      "wwKKwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "deskR": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "KKKKKKKKKKKKKKww",
+      "SSSSSSSSSSSSSSKw",
+      "ssssssssssssssKw",
+      "ssssssssssssssKw",
+      "ssssssssssssssKw",
+      "ttttttttttttttKw",
+      "KKKKKKKKKKKKKKKw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwKKww",
+      "wwwwwwwwwwwwKKww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "deskM": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "KKKKKKKKKKKKKKKK",
+      "SSSSSSSSSSSSSSSS",
+      "ssssssssssssssss",
+      "ssssssssssssssss",
+      "ssssssssssssssss",
+      "tttttttttttttttt",
+      "KKKKKKKKKKKKKKKK",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "plant": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwKKKKwwwwwww",
+      "wwwKKnnnnKKwwwww",
+      "wwKnNNnnnnNKwwww",
+      "wwKnnnnnnnnKwwww",
+      "wwKNnnnKnnnNKwww",
+      "wwwKnnnKnnnKwwww",
+      "wwwwKnnKnnKwwwww",
+      "wwwwwKKKKKwwwwww",
+      "wwwwKKpppKKwwwww",
+      "wwwwKppppppKwwww",
+      "wwwwKppppppKwwww",
+      "wwwwwKKKKKKwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "sofaBackL": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "wwKKKKKKKKKKKKKK",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC",
+      "wwKCCCCCCCCCCCCC"
+    ],
+    "sofaBackR": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "KKKKKKKKKKKKKKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww",
+      "CCCCCCCCCCCCCKww"
+    ],
+    "sofaL": [
+      "wwKKKKKKKKKKKKKK",
+      "wwKCCKcccccccccc",
+      "wwKCCKcccccccccc",
+      "wwKCCKcccccccccc",
+      "wwKCCKcccccccccc",
+      "wwKKKKKKKKKKKKKK",
+      "wwwKKwwwwwwwwwww",
+      "wwwKKwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw"
+    ],
+    "sofaR": [
+      "KKKKKKKKKKKKKKww",
+      "ccccccccccKCCKww",
+      "ccccccccccKCCKww",
+      "ccccccccccKCCKww",
+      "ccccccccccKCCKww",
+      "KKKKKKKKKKKKKKww",
+      "wwwwwwwwwwwKKwww",
+      "wwwwwwwwwwwKKwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw"
+    ],
+    "table": [
+      "wwwwwwwwwwwwwwww",
+      "wWWWWWWWWWWWWWWw",
+      "wwwwwwwwwwwwwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww",
+      "wwwKKKKKKKKKKwww",
+      "wwKSSSSSSSSSSKww",
+      "wwKSssssssssSKww",
+      "wwKKKKKKKKKKKKww",
+      "wwwwwwKttKwwwwww",
+      "wwwwwwKttKwwwwww",
+      "wwwwwKKttKKwwwww",
+      "wwwwKttttttKwwww",
+      "wwwwKKKKKKKKwwww",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "coffee": [
+      "KKKKKKKKKKKKKKKK",
+      "AAAAAAAAAAAAAAAA",
+      "aaaaaaaaaaaaaaaa",
+      "aaaKKKKKKKKKKaaa",
+      "aaaKmmmmmmmmKaaa",
+      "aaaKmMMMMMMmKaaa",
+      "aaaKmMMMMMMmKaaa",
+      "aaaKmmmmmmmmKaaa",
+      "aaaKmmrrrrmmKaaa",
+      "aaaKmmmmmmmmKaaa",
+      "aaaKKKKKKKKKKaaa",
+      "KKffffffffffffKK",
+      "KffffffffffffffK",
+      "KKKKKKKKKKKKKKKK",
+      "dddddddddddddddd",
+      "wwwwwwwwwwwwwwww"
+    ],
+    "monitor": [
+      "................",
+      "..KKKKKKKKKKKK..",
+      "..KmmmmmmmmmmK..",
+      "..KmMMMMMMMMmK..",
+      "..KmMMMMMMMMmK..",
+      "..KmMMMMMMMMmK..",
+      "..KmMMMMMMMMmK..",
+      "..KmMMMMMMMMmK..",
+      "..KmmmmmmmmmmK..",
+      "..KKKKKKKKKKKK..",
+      ".....KmmmmK.....",
+      ".....KmmmmK.....",
+      "...KKKKKKKKKK...",
+      "...KmmmmmmmmK...",
+      "....KKKKKKKK....",
+      "................"
+    ],
+    "chair": [
+      "................",
+      "................",
+      "....KKKKKKKK....",
+      "...KCCCCCCCCK...",
+      "...KcccccccCK...",
+      "...KcccccccCK...",
+      "...KcccccccCK...",
+      "....KKKKKKKK....",
+      "................",
+      "..KKKKKKKKKKKK..",
+      "..KCcccccccccK..",
+      "..KKKKKKKKKKKK..",
+      ".......KK.......",
+      ".......KK.......",
+      "....KKKKKKKK....",
+      "................"
+    ]
+  },
+  "cast": [
+    {
+      "key": "cat",
+      "sprite": [
+        "...KK......KK...",
+        "..KBBK....KBBK..",
+        "..KBBBKKKKBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#f3e0c8",
+        "L": "#fdf3e2",
+        "A": "#e3bfa0",
+        "H": "#f4a7b0",
+        "N": "#e3bfa0"
+      },
+      "name": {
+        "ko": "모카",
+        "en": "Mocha"
+      },
+      "species": {
+        "ko": "고양이",
+        "en": "Cat"
+      },
+      "family": {
+        "ko": "뾰족 귀",
+        "en": "Pointed ears"
+      }
+    },
+    {
+      "key": "fox",
+      "sprite": [
+        "..KK........KK..",
+        "..KAK......KAK..",
+        "..KAAKKKKKKAAK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHLEBEEBELHK..",
+        "..KBLLLLLLLLBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#e89055",
+        "L": "#fdf2e6",
+        "A": "#a85f34",
+        "H": "#f4a7b0",
+        "N": "#a85f34"
+      },
+      "name": {
+        "ko": "여우",
+        "en": "Fennec"
+      },
+      "species": {
+        "ko": "여우",
+        "en": "Fox"
+      },
+      "family": {
+        "ko": "뾰족 귀",
+        "en": "Pointed ears"
+      }
+    },
+    {
+      "key": "squirrel",
+      "sprite": [
+        "....K......K....",
+        "...KAK....KAK...",
+        "..KBAKKKKKKABK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHLEBEEBELHK..",
+        "..KBLLLLLLLLBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#c97f4a",
+        "L": "#f7e6cf",
+        "A": "#a8663a",
+        "H": "#f4a7b0",
+        "N": "#a8663a"
+      },
+      "name": {
+        "ko": "도토",
+        "en": "Acorn"
+      },
+      "species": {
+        "ko": "다람쥐",
+        "en": "Squirrel"
+      },
+      "family": {
+        "ko": "뾰족 귀",
+        "en": "Pointed ears"
+      }
+    },
+    {
+      "key": "bunny",
+      "sprite": [
+        "...KKK....KKK...",
+        "...KAK....KAK...",
+        "...KAK....KAK...",
+        "..KBBKKKKKKBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#fbfafb",
+        "L": "#fff1f4",
+        "A": "#f6c6d0",
+        "H": "#f4a7b0",
+        "N": "#f6c6d0"
+      },
+      "name": {
+        "ko": "두부",
+        "en": "Tofu"
+      },
+      "species": {
+        "ko": "토끼",
+        "en": "Rabbit"
+      },
+      "family": {
+        "ko": "긴 귀",
+        "en": "Long ears"
+      }
+    },
+    {
+      "key": "dog",
+      "sprite": [
+        "...KKKKKKKKKK...",
+        "..KAABBBBBBAAK..",
+        "..KAABBBBBBAAK..",
+        "..KAAEBEEBEAAK..",
+        "..KAABBBBBBAAK..",
+        "..KAABBNNBBAAK..",
+        "..KHBBBBBBBBHK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#d9b083",
+        "L": "#f3e2c9",
+        "A": "#a87f55",
+        "H": "#f4a7b0",
+        "N": "#6b4c33"
+      },
+      "name": {
+        "ko": "콩이",
+        "en": "Bean"
+      },
+      "species": {
+        "ko": "강아지",
+        "en": "Dog"
+      },
+      "family": {
+        "ko": "처진 귀",
+        "en": "Floppy ears"
+      }
+    },
+    {
+      "key": "bear",
+      "sprite": [
+        "..KKKK....KKKK..",
+        "..KAAK....KAAK..",
+        "..KBBKKKKKKBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#b79070",
+        "L": "#d2ad8c",
+        "A": "#96704f",
+        "H": "#e2929c",
+        "N": "#96704f"
+      },
+      "name": {
+        "ko": "코코",
+        "en": "Coco"
+      },
+      "species": {
+        "ko": "곰",
+        "en": "Bear"
+      },
+      "family": {
+        "ko": "둥근 귀",
+        "en": "Round ears"
+      }
+    },
+    {
+      "key": "panda",
+      "sprite": [
+        "..KKKK....KKKK..",
+        "..KAAK....KAAK..",
+        "..KBBKKKKKKBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KBAABBBBAABK..",
+        "..KHAEBEEBEAHK..",
+        "..KBBBBNNBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#fafafb",
+        "L": "#ffffff",
+        "A": "#3f3a44",
+        "H": "#f4a7b0",
+        "N": "#3f3a44"
+      },
+      "name": {
+        "ko": "반달",
+        "en": "Moon"
+      },
+      "species": {
+        "ko": "판다",
+        "en": "Panda"
+      },
+      "family": {
+        "ko": "둥근 귀",
+        "en": "Round ears"
+      }
+    },
+    {
+      "key": "mouse",
+      "sprite": [
+        ".KKK........KKK.",
+        ".KAAK......KAAK.",
+        "..KAAKKKKKKAAK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBNNBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#b9b4bd",
+        "L": "#d8d4dc",
+        "A": "#f2c0cb",
+        "H": "#f4a7b0",
+        "N": "#f2c0cb"
+      },
+      "name": {
+        "ko": "치즈",
+        "en": "Cheese"
+      },
+      "species": {
+        "ko": "생쥐",
+        "en": "Mouse"
+      },
+      "family": {
+        "ko": "둥근 귀",
+        "en": "Round ears"
+      }
+    },
+    {
+      "key": "hamster",
+      "sprite": [
+        "................",
+        "..KK........KK..",
+        "..KAKKKKKKKKAK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KHBBEBEEBEBBHK.",
+        "..KBBBBNNBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#f0cf9a",
+        "L": "#fdf0d8",
+        "A": "#d9a86a",
+        "H": "#f4a7b0",
+        "N": "#d9a86a"
+      },
+      "name": {
+        "ko": "밤톨",
+        "en": "Nut"
+      },
+      "species": {
+        "ko": "햄스터",
+        "en": "Hamster"
+      },
+      "family": {
+        "ko": "둥근 귀",
+        "en": "Round ears"
+      }
+    },
+    {
+      "key": "koala",
+      "sprite": [
+        "................",
+        ".KK..........KK.",
+        "KAAK........KAAK",
+        "KAAKKKKKKKKKKAAK",
+        ".KKBBBBBBBBBBKK.",
+        "..KHBEBEEBEBHK..",
+        "..KBBBNNNNBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#a8adb8",
+        "L": "#ccd0d8",
+        "A": "#8b909c",
+        "H": "#f4a7b0",
+        "N": "#5d6470"
+      },
+      "name": {
+        "ko": "유칼",
+        "en": "Euca"
+      },
+      "species": {
+        "ko": "코알라",
+        "en": "Koala"
+      },
+      "family": {
+        "ko": "둥근 귀",
+        "en": "Round ears"
+      }
+    },
+    {
+      "key": "chick",
+      "sprite": [
+        "................",
+        ".......KK.......",
+        "......KAAK......",
+        "...KKKKKKKKKK...",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBNNBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#f9da80",
+        "L": "#fdecb2",
+        "A": "#eda93c",
+        "H": "#f4a7b0",
+        "N": "#eda93c"
+      },
+      "name": {
+        "ko": "삐약",
+        "en": "Pip"
+      },
+      "species": {
+        "ko": "병아리",
+        "en": "Chick"
+      },
+      "family": {
+        "ko": "머리 장식",
+        "en": "Crest"
+      }
+    },
+    {
+      "key": "owl",
+      "sprite": [
+        "..KK........KK..",
+        "..KAKKKKKKKKAK..",
+        "..KBBBBBBBBBBK..",
+        "..KBOOBBBBOOBK..",
+        "..KBOEBBBBEOBK..",
+        "..KHOOBNNBOOHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#a3845f",
+        "L": "#c9ac86",
+        "A": "#7d6244",
+        "H": "#f4a7b0",
+        "N": "#f0a63c"
+      },
+      "name": {
+        "ko": "야간",
+        "en": "Nox"
+      },
+      "species": {
+        "ko": "부엉이",
+        "en": "Owl"
+      },
+      "family": {
+        "ko": "머리 장식",
+        "en": "Crest"
+      }
+    },
+    {
+      "key": "sheep",
+      "sprite": [
+        "..KK.KKKKKK.KK..",
+        ".KAAKAAAAAAKAAK.",
+        ".KAAAAAAAAAAAAK.",
+        ".KAAAAAAAAAAAAK.",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#e6d6bf",
+        "L": "#fff8ee",
+        "A": "#fdfbf6",
+        "H": "#f4a7b0",
+        "N": "#c9bda8"
+      },
+      "name": {
+        "ko": "구름",
+        "en": "Cloud"
+      },
+      "species": {
+        "ko": "양",
+        "en": "Sheep"
+      },
+      "family": {
+        "ko": "머리 장식",
+        "en": "Crest"
+      }
+    },
+    {
+      "key": "hedgehog",
+      "sprite": [
+        "...K.K.KK.K.K...",
+        "..KAKAKAAKAKAK..",
+        "..KAAAAAAAAAAK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBNNBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#e6d3b8",
+        "L": "#f6ecdc",
+        "A": "#8a6a4a",
+        "H": "#f4a7b0",
+        "N": "#8a6a4a"
+      },
+      "name": {
+        "ko": "가시",
+        "en": "Quill"
+      },
+      "species": {
+        "ko": "고슴도치",
+        "en": "Hedgehog"
+      },
+      "family": {
+        "ko": "머리 장식",
+        "en": "Crest"
+      }
+    },
+    {
+      "key": "duck",
+      "sprite": [
+        "................",
+        "................",
+        "...KKKKKKKKKK...",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBBBBEBHK..",
+        "..KBBNNNNNNBBK..",
+        "..KBKNNNNNNKBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#fbfbfc",
+        "L": "#ffffff",
+        "A": "#f0a63c",
+        "H": "#f4a7b0",
+        "N": "#f0a63c"
+      },
+      "name": {
+        "ko": "꽥꽥",
+        "en": "Quack"
+      },
+      "species": {
+        "ko": "오리",
+        "en": "Duck"
+      },
+      "family": {
+        "ko": "부리·코",
+        "en": "Beak or snout"
+      }
+    },
+    {
+      "key": "penguin",
+      "sprite": [
+        "................",
+        "................",
+        "...KKKKKKKKKK...",
+        "..KBBBBBBBBBBK..",
+        "..KBLLLLLLLLBK..",
+        "..KHLELNNLELHK..",
+        "..KBLLLLLLLLBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#61708f",
+        "L": "#fafbfd",
+        "A": "#495470",
+        "H": "#f4a7b0",
+        "N": "#f0a63c"
+      },
+      "name": {
+        "ko": "별",
+        "en": "Star"
+      },
+      "species": {
+        "ko": "펭귄",
+        "en": "Penguin"
+      },
+      "family": {
+        "ko": "부리·코",
+        "en": "Beak or snout"
+      }
+    },
+    {
+      "key": "pig",
+      "sprite": [
+        "................",
+        "..KK........KK..",
+        "..KAKKKKKKKKAK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBBBBEBHK..",
+        "..KBBNNNNNNBBK..",
+        "..KBBNNNNNNBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#f4b8c0",
+        "L": "#fbd9de",
+        "A": "#e295a2",
+        "H": "#e87f90",
+        "N": "#e08e9c"
+      },
+      "name": {
+        "ko": "분홍",
+        "en": "Rosy"
+      },
+      "species": {
+        "ko": "돼지",
+        "en": "Pig"
+      },
+      "family": {
+        "ko": "부리·코",
+        "en": "Beak or snout"
+      }
+    },
+    {
+      "key": "cow",
+      "sprite": [
+        "KK............KK",
+        ".KAK........KAK.",
+        "..KAKKKKKKKKAK..",
+        "..KBBBBBBBBBBK..",
+        "..KNNNBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#fafafb",
+        "L": "#ffffff",
+        "A": "#e8dfc8",
+        "H": "#f4a7b0",
+        "N": "#3f3a44"
+      },
+      "name": {
+        "ko": "얼룩",
+        "en": "Patch"
+      },
+      "species": {
+        "ko": "소",
+        "en": "Cow"
+      },
+      "family": {
+        "ko": "뿔",
+        "en": "Horns"
+      }
+    },
+    {
+      "key": "deer",
+      "sprite": [
+        "...K.K....K.K...",
+        "...KKK....KKK...",
+        "....KKKKKKKK....",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHBEBEEBEBHK..",
+        "..KBBBBNNBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#cfa274",
+        "L": "#ecd7ba",
+        "A": "#8a6b49",
+        "H": "#f4a7b0",
+        "N": "#8a6b49"
+      },
+      "name": {
+        "ko": "단풍",
+        "en": "Maple"
+      },
+      "species": {
+        "ko": "사슴",
+        "en": "Deer"
+      },
+      "family": {
+        "ko": "뿔",
+        "en": "Horns"
+      }
+    },
+    {
+      "key": "frog",
+      "sprite": [
+        "...KKK....KKK...",
+        "..KOOOK..KOOOK..",
+        "..KOEOK..KOEOK..",
+        "..KBBKKKKKKBBK..",
+        "..KBBBBBBBBBBK..",
+        "..KHHBBEEBBHHK..",
+        "..KBBBBBBBBBBK..",
+        "..KBBBBBBBBBBK..",
+        ".KBBBBBBBBBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        ".KBBBBLLLLBBBBK.",
+        "..KBBBLLLLBBBK..",
+        "..KBBBBLLBBBBK..",
+        "...KBBBBBBBBK...",
+        "....KKKKKKKK....",
+        "................"
+      ],
+      "colors": {
+        "B": "#a6d988",
+        "L": "#c4e8aa",
+        "A": "#7ab863",
+        "H": "#f2a0b8",
+        "N": "#7ab863"
+      },
+      "name": {
+        "ko": "완두",
+        "en": "Pea"
+      },
+      "species": {
+        "ko": "개구리",
+        "en": "Frog"
+      },
+      "family": {
+        "ko": "솟은 눈",
+        "en": "Raised eyes"
+      }
+    }
+  ]
+}

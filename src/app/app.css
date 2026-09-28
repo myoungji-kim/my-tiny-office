@@ -1,0 +1,10 @@
+/* What the app adds to docs/ui/system.css. The sample pages load Noto Sans KR
+   by its family name; the app serves it through next/font under its own name. */
+:root {
+  --sans: var(--font-noto), "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+}
+
+.sprite {
+  display: block;
+  image-rendering: pixelated;
+}

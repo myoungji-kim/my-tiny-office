@@ -7,6 +7,7 @@ const STEPS = [
   ["audit", "Is the system used the same way everywhere?"],
   ["parity", "Do the product screens agree where they share a selector?"],
   ["verify-docs", "Do the written docs still match the pages?"],
+  ["cast", "Does the app draw the cast the pages draw?"],
 ];
 
 let failed = [];
