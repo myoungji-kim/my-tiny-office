@@ -141,6 +141,39 @@ export function assignTask(task: Task, employee: Employee, eventId: EventId, now
   };
 }
 
+export interface TaskDetails {
+  readonly projectId: ProjectId;
+  readonly title: string;
+  readonly description: string | undefined;
+  readonly area: AreaId | undefined;
+  readonly priority: Priority;
+}
+
+export type EditTaskFailure = "taskNotEditable" | "taskTitleRequired" | "employeeFromAnotherCompany" | "employeeOnLeave";
+
+// Work nobody is running can be rewritten and handed to someone else, or to
+// whoever is free. Running work changes through its agent, and finished work
+// is the record of what happened.
+export function editTask(task: Task, details: TaskDetails, assignee: Employee | undefined): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: EditTaskFailure } {
+  if (task.status !== "backlog" && task.status !== "held") return { ok: false, reason: "taskNotEditable" };
+  const title = details.title.trim();
+  if (title === "") return { ok: false, reason: "taskTitleRequired" };
+  const refused = assignee === undefined ? undefined : assignable(task, assignee);
+  if (refused !== undefined) return { ok: false, reason: refused };
+  return {
+    ok: true,
+    task: {
+      ...task,
+      projectId: details.projectId,
+      title,
+      description: details.description?.trim() || undefined,
+      area: details.area,
+      priority: details.priority,
+      assigneeId: assignee?.id,
+    },
+  };
+}
+
 export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnLeave";
 
 export function startTask(task: Task, employee: Employee, eventId: EventId, now: Timestamp): Transition<TaskStarted, StartTaskFailure> {

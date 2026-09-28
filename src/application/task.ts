@@ -72,6 +72,30 @@ export async function assignTask(
   return { ok: true, value: { task: assigned.task }, events: assigned.events };
 }
 
+export function editTask(
+  ctx: AppContext,
+  taskId: TaskId,
+  details: taskDomain.TaskDetails & { readonly assigneeId: EmployeeId | undefined },
+): Promise<TaskResult<"taskNotFound" | "projectNotFound" | "projectClosed" | "areaNotFound" | "employeeNotFound" | taskDomain.EditTaskFailure>> {
+  return ctx.withTransaction(async () => {
+    const task = await ctx.tasks.findById(taskId);
+    if (task === undefined) return { ok: false, reason: "taskNotFound" };
+    const project = await ctx.projects.findById(details.projectId);
+    if (project === undefined || project.companyId !== task.companyId) return { ok: false, reason: "projectNotFound" };
+    if (project.id !== task.projectId && project.status !== "planned" && project.status !== "active") return { ok: false, reason: "projectClosed" };
+    if (details.area !== undefined && !(await ctx.areas.findByCompany(task.companyId)).some((a) => a.id === details.area)) {
+      return { ok: false, reason: "areaNotFound" };
+    }
+    const assignee = details.assigneeId === undefined ? undefined : await ctx.employees.findById(details.assigneeId);
+    if (details.assigneeId !== undefined && assignee === undefined) return { ok: false, reason: "employeeNotFound" };
+
+    const edited = taskDomain.editTask(task, details, assignee);
+    if (!edited.ok) return edited;
+    await ctx.tasks.save(edited.task);
+    return { ok: true, value: { task: edited.task }, events: [] };
+  });
+}
+
 type TaskTransition<TFailure extends string> =
   | { readonly ok: true; readonly task: taskDomain.Task; readonly events: readonly DomainEvent[] }
   | { readonly ok: false; readonly reason: TFailure };

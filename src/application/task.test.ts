@@ -9,7 +9,7 @@ import type { AppContext } from "./context";
 import { bringBack, hireEmployee, sendOnLeave } from "./employee";
 import { allowCommand, createProject, finishProject, holdProject, startProject } from "./project";
 import { createTestContext, firstRole } from "./test-context";
-import { applyTask, assignTask, createTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
+import { applyTask, assignTask, createTask, editTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
 
 const minute = 60_000;
 const t0 = 1_700_000_000_000;
@@ -43,6 +43,36 @@ async function task(projectId: ProjectId, title = "Paginate", priority: "low" | 
   now += 1;
   return made.value.task;
 }
+
+describe("editing work", () => {
+  it("rewrites work nobody is running and hands it to someone else, or to whoever is free", async () => {
+    const pay = await project();
+    const planned = await project({ start: false });
+    const mocha = await hire("모카");
+    const written = await task(pay);
+    const details = { projectId: planned, title: " Paginate history ", description: undefined, area: undefined, priority: "high" as const, assigneeId: mocha.id };
+
+    const edited = await editTask(ctx, written.id, details);
+
+    expect(edited).toMatchObject({ ok: true, value: { task: { projectId: planned, title: "Paginate history", priority: "high", assigneeId: mocha.id } } });
+    await expect(editTask(ctx, written.id, { ...details, assigneeId: undefined })).resolves.toMatchObject({ ok: true, value: { task: { assigneeId: undefined } } });
+  });
+
+  it("leaves running work to its agent and closed projects alone", async () => {
+    const pay = await project();
+    const done = await project();
+    assert((await finishProject(ctx, done)).ok);
+    const mocha = await hire("모카");
+    const running = await task(pay);
+    assert((await assignTask(ctx, { taskId: running.id, employeeId: mocha.id })).ok);
+    assert((await pickUpWork(ctx, companyId)).ok);
+    const waiting = await task(pay);
+    const details = { projectId: pay, title: "x", description: undefined, area: undefined, priority: "low" as const, assigneeId: undefined };
+
+    await expect(editTask(ctx, running.id, details)).resolves.toEqual({ ok: false, reason: "taskNotEditable" });
+    await expect(editTask(ctx, waiting.id, { ...details, projectId: done })).resolves.toEqual({ ok: false, reason: "projectClosed" });
+  });
+});
 
 describe("writing work down", () => {
   it("goes into a planned or active project and waits in the backlog", async () => {
