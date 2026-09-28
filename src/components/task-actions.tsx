@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-import { resumeTaskAction } from "../app/project-actions";
+import { approveTaskAction, holdTaskAction, resumeTaskAction, sendBackAction } from "../app/project-actions";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
 
 import { ActButton } from "./act-button";
+import { StepDialog } from "./step-dialog";
 import { TaskDialog } from "./task-dialog";
 
 // The header carries what the task's popover offers, as page buttons.
@@ -42,7 +43,9 @@ export function TaskActions({
   const canAssign = task.status === "backlog" && live;
   const canEdit = (task.status === "backlog" || task.status === "held") && project.takesWork;
   const canResume = task.status === "held" && live;
-  const [dialog, setDialog] = useState<"assign" | "edit" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
+  const deciding = task.status === "approval" && project.status !== "done";
+  const who = employees.find((e) => e.id === task.assigneeId);
+  const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "rework" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
   const close = useCallback(() => {
     setDialog(undefined);
     if (assignFirst) router.replace(`/projects/${project.id}/${task.id}`, { scroll: false });
@@ -51,7 +54,7 @@ export function TaskActions({
 
   return (
     <>
-      {!ready && (canAssign || canResume) && <span className="ghost-note">{t.claude.cannotStart}</span>}
+      {!ready && (canAssign || canResume || deciding) && <span className="ghost-note">{t.claude.cannotStart}</span>}
       {canEdit && (
         <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("edit")}>
           {w.actions.edit}
@@ -65,7 +68,42 @@ export function TaskActions({
       {canResume && (
         <ActButton className="btn btn-primary btn-lg" action={resumeTaskAction.bind(null, companyId, task.id)} label={w.actions.resume} disabled={!ready} errors={t.errors} />
       )}
-      {dialog !== undefined && (
+      {deciding && (
+        <>
+          <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("hold")}>
+            {w.actions.hold}
+          </button>
+          <button className="btn btn-secondary btn-lg" type="button" disabled={!ready} onClick={() => setDialog("rework")}>
+            {w.actions.rework}
+          </button>
+          <ActButton className="btn btn-primary btn-lg" action={approveTaskAction.bind(null, companyId, task.id)} label={w.actions.approve} errors={t.errors} />
+        </>
+      )}
+      {dialog === "hold" && (
+        <StepDialog
+          heading={w.holdTaskTitle}
+          why={w.holdTaskWhy}
+          yes={w.holdYes}
+          cancel={w.cancel}
+          field={{ label: w.holdReason, placeholder: w.holdTaskPlaceholder }}
+          errors={t.errors}
+          onYes={(reason) => holdTaskAction(companyId, task.id, reason)}
+          onClose={close}
+        />
+      )}
+      {dialog === "rework" && (
+        <StepDialog
+          heading={w.reworkTitle}
+          why={w.reworkWhy(who?.name ?? "")}
+          yes={w.actions.rework}
+          cancel={w.cancel}
+          field={{ label: w.reworkLabel, placeholder: w.reworkPlaceholder }}
+          errors={t.errors}
+          onYes={(reason) => sendBackAction(companyId, task.id, reason)}
+          onClose={close}
+        />
+      )}
+      {(dialog === "assign" || dialog === "edit") && (
         <TaskDialog
           locale={locale}
           companyId={companyId}

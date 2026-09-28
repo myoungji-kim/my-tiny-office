@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import type { Dictionary } from "../i18n";
 import type { TaskView } from "../server/view-model";
 
-// A command is shown as code wherever the words put it.
-export function withCommand(template: string, command: string): ReactNode {
-  const [before, after] = template.split("{command}");
+// A command or a branch is shown as code wherever the words put {code}.
+export function withCode(template: string, code: string): ReactNode {
+  const [before, after] = template.split("{code}");
   return (
     <>
       {before}
-      <code>{command}</code>
+      <code>{code}</code>
       {after}
     </>
   );
@@ -18,7 +18,7 @@ export function withCommand(template: string, command: string): ReactNode {
 export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNode {
   const b = task.blocker;
   if (b === undefined) return undefined;
-  if (b.kind === "commandNotAllowed") return withCommand(w.commandBlocked, b.command);
+  if (b.kind === "commandNotAllowed") return withCode(w.commandBlocked, b.command);
   return b.kind === "disconnected" ? w.agentLost : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
 }
 

@@ -6,6 +6,7 @@ import { getDictionary, type Locale } from "../i18n";
 import type { CompanyOption, EmployeeView } from "../server/view-model";
 
 import { CompanyMenu } from "./company-menu";
+import { LiveRefresh } from "./live-refresh";
 import { statusClass } from "./presence";
 import { RuntimeNotice } from "./runtime-notice";
 import { Sprite } from "./sprite";
@@ -89,6 +90,7 @@ export function Shell({
   const t = getDictionary(locale);
   return (
     <div className="app" data-screen={screen}>
+      <LiveRefresh />
       <nav className="side">
         <div className="side-head">
           <Link className="side-top" href={HREF.company}>

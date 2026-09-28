@@ -1,10 +1,12 @@
 "use server";
 
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand } from "../application/project";
-import { createTask, editTask, resumeTask } from "../application/task";
+import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toTaskId } from "../domain/ids";
 import { checkFolder } from "../infrastructure/workspace/folder";
 import { pickFolder } from "../infrastructure/workspace/folder-picker";
+import { gitWorkspace } from "../infrastructure/workspace/git";
+import { loadDiff } from "../server/task-work";
 
 import { inCompany, optional, priorityOf, str, type Outcome } from "./action-context";
 
@@ -122,4 +124,24 @@ export async function editTaskAction(companyId: string, taskId: string, input: T
 
 export async function resumeTaskAction(companyId: string, taskId: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => resumeTask(ctx, toTaskId(str(taskId))));
+}
+
+export async function approveTaskAction(companyId: string, taskId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => approveTask(ctx, gitWorkspace, toTaskId(str(taskId))));
+}
+
+export async function sendBackAction(companyId: string, taskId: string, reason: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => sendBack(ctx, toTaskId(str(taskId)), str(reason)));
+}
+
+export async function holdTaskAction(companyId: string, taskId: string, reason: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => holdTask(ctx, toTaskId(str(taskId)), str(reason)));
+}
+
+export async function carryOnAction(companyId: string, taskId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => carryOn(ctx, toTaskId(str(taskId))));
+}
+
+export async function diffAction(companyId: string, taskId: string, file: string): Promise<string> {
+  return loadDiff(str(companyId), str(taskId), str(file));
 }
