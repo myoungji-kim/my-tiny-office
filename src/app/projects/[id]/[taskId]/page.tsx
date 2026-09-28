@@ -12,6 +12,7 @@ import { Prio } from "../../../../components/project-marks";
 import { Shell } from "../../../../components/shell";
 import { CopyButton } from "../../../../components/settings-parts";
 import { TaskActions } from "../../../../components/task-actions";
+import { SaidPanel } from "../../../../components/said-panel";
 import { TaskChanges } from "../../../../components/task-changes";
 import { loadTaskWork } from "../../../../server/task-work";
 import { isAllowableCommand } from "../../../../domain/project";
@@ -115,7 +116,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     );
   const saidPanel =
     said === undefined || who === undefined ? undefined : (
-      <Fragment key="said">{panel(w.tk.said(who.name), <span className="said-bd">{said.detail}</span>)}</Fragment>
+      <SaidPanel key="said" locale={locale} name={who.name} text={said.detail} />
     );
   const changes =
     task.status === "backlog" || work === undefined ? undefined : (
