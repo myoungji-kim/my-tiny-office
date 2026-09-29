@@ -1,3 +1,4 @@
+import type { AtlassianWrite } from "../domain/project";
 import type { StepKind } from "../domain/run";
 
 // What any runtime reports about a run, in the app's words rather than its own.
@@ -6,6 +7,8 @@ export type AgentEvent =
   | { readonly kind: "step"; readonly step: StepKind; readonly detail: string }
   // a command the project does not allow, which the runtime refused
   | { readonly kind: "denied"; readonly command: string }
+  // a Jira or Confluence write the project does not allow, with where it would go and what it would say
+  | { readonly kind: "writeDenied"; readonly write: AtlassianWrite; readonly target: string; readonly text: string }
   // how the run ended, with what the agent said last, as it wrote it
   | { readonly kind: "result"; readonly outcome: "finished" | "budgetReached" | "failed"; readonly costUsd: number; readonly report: string | undefined };
 
@@ -17,6 +20,8 @@ export interface LaunchInput {
   readonly memory: string;
   // the exact commands the project allows
   readonly commands: readonly string[];
+  // the Jira and Confluence writes allowed, when the project uses the Atlassian connector
+  readonly atlassian: { readonly writes: readonly AtlassianWrite[] } | undefined;
   // the session to continue, when the same agent has worked on the task before
   readonly resume: string | undefined;
   // a reviewer only reads: no edits, no commands

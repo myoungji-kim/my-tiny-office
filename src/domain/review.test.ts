@@ -33,6 +33,8 @@ const pay: Project = {
   folder: "/code",
   folderConfirmed: true,
   commands: [],
+  atlassian: false,
+  writes: [],
   status: "active",
   priority: "normal",
   heldReason: undefined,

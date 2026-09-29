@@ -1,9 +1,10 @@
 "use server";
 
 import { requestReview } from "../application/review";
-import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand } from "../application/project";
+import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite } from "../application/project";
 import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
+import { isAtlassianWrite } from "../domain/project";
 import { checkFolder } from "../infrastructure/workspace/folder";
 import { pickFolder } from "../infrastructure/workspace/folder-picker";
 import { gitWorkspace } from "../infrastructure/workspace/git";
@@ -35,6 +36,8 @@ export interface ProjectInput {
   readonly priority: string;
   readonly folder: string | undefined;
   readonly commands: readonly string[];
+  readonly atlassian: boolean;
+  readonly writes: readonly string[];
 }
 
 // The folder is checked again here: only what it resolves to on this computer is kept.
@@ -48,6 +51,8 @@ function details(input: ProjectInput) {
     priority: priorityOf(input.priority),
     folder: folder?.folder,
     commands: Array.isArray(input.commands) ? input.commands.map(str) : [],
+    atlassian: input.atlassian === true,
+    writes: Array.isArray(input.writes) ? input.writes.filter(isAtlassianWrite) : [],
   };
 }
 
@@ -91,6 +96,11 @@ export async function reopenProjectAction(companyId: string, projectId: string):
 
 export async function allowCommandAction(companyId: string, projectId: string, command: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => allowCommand(ctx, toProjectId(str(projectId)), str(command)));
+}
+
+export async function allowWriteAction(companyId: string, projectId: string, write: string): Promise<Outcome> {
+  if (!isAtlassianWrite(write)) return { error: "writeNotAllowable" };
+  return inCompany(companyId, (ctx) => allowWrite(ctx, toProjectId(str(projectId)), write));
 }
 
 export interface TaskInput {

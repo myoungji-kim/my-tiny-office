@@ -7,7 +7,7 @@ const CWD = "C:\\code\\pay\\.worktrees\\t1";
 
 describe("launchArgs", () => {
   it("is the launch SECURITY.md measured, with each allowed command for both shells", () => {
-    expect(launchArgs({ commands: ["npm test"], memoryFile: "m.md", resume: undefined, readOnly: false })).toEqual([
+    expect(launchArgs({ commands: ["npm test"], atlassian: undefined, memoryFile: "m.md", resume: undefined, readOnly: false })).toEqual([
       "-p",
       "--output-format",
       "stream-json",
@@ -32,14 +32,27 @@ describe("launchArgs", () => {
   });
 
   it("gives a reviewer only the tools that read, whatever the project allows", () => {
-    const args = launchArgs({ commands: ["npm test"], memoryFile: "m.md", resume: undefined, readOnly: true });
+    const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"] }, memoryFile: "m.md", resume: undefined, readOnly: true });
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Glob,Grep");
     expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**)");
+    // and no connector, even in a project that uses one
+    expect(args).toContain("--strict-mcp-config");
+  });
+
+  it("lets the Atlassian connector in by name only, in a project that uses it", () => {
+    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"] }, memoryFile: "m.md", resume: undefined, readOnly: false });
+    const allowed = args[args.indexOf("--allowedTools") + 1].split(" ");
+    expect(args).not.toContain("--strict-mcp-config");
+    expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash,PowerShell,ToolSearch");
+    expect(allowed).toContain("mcp__claude_ai_Atlassian_Rovo__searchJiraIssuesUsingJql");
+    expect(allowed).toContain("mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue");
+    expect(allowed).not.toContain("mcp__claude_ai_Atlassian_Rovo__editJiraIssue");
+    expect(allowed.filter((t) => t.startsWith("mcp__") && !t.startsWith("mcp__claude_ai_Atlassian_Rovo__"))).toEqual([]);
   });
 
   it("continues a session only by its id, never by text that reads as a flag", () => {
-    expect(launchArgs({ commands: [], memoryFile: "m.md", resume: SESSION, readOnly: false }).slice(-2)).toEqual(["--resume", SESSION]);
-    expect(() => launchArgs({ commands: [], memoryFile: "m.md", resume: "--dangerously-skip-permissions", readOnly: false })).toThrow();
+    expect(launchArgs({ commands: [], atlassian: undefined, memoryFile: "m.md", resume: SESSION, readOnly: false }).slice(-2)).toEqual(["--resume", SESSION]);
+    expect(() => launchArgs({ commands: [], atlassian: undefined, memoryFile: "m.md", resume: "--dangerously-skip-permissions", readOnly: false })).toThrow();
   });
 });
 
@@ -79,6 +92,18 @@ describe("readLine", () => {
       { kind: "denied", command: "curl -s https://example.com" },
     ]);
     expect(readLine(line({ type: "system", subtype: "permission_denied", tool_name: "Read", tool_use_id: "r" }), calls, CWD)).toEqual([]);
+  });
+
+  it("names a Jira or Confluence write a denial refused, with where it goes and what it says", () => {
+    const calls = new Map();
+    readLine(toolUse("w", "mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue", { cloudId: "c1", issueIdOrKey: "ORD-231", commentBody: "타입을 좁혔어요." }), calls, CWD);
+    readLine(toolUse("g", "mcp__claude_ai_Gmail__create_draft", { to: "a@b.c", body: "hi" }), calls, CWD);
+
+    expect(readLine(line({ type: "system", subtype: "permission_denied", tool_name: "x", tool_use_id: "w" }), calls, CWD)).toEqual([
+      { kind: "writeDenied", write: "jiraComment", target: "ORD-231", text: "타입을 좁혔어요." },
+    ]);
+    // another connector is simply denied, and never something to allow
+    expect(readLine(line({ type: "system", subtype: "permission_denied", tool_name: "x", tool_use_id: "g" }), calls, CWD)).toEqual([]);
   });
 
   it("tells a spent budget from a failure", () => {

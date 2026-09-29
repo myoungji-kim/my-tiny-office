@@ -20,7 +20,7 @@ import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
 import { getDictionary } from "../../../../i18n";
-import { allowCommandAction, carryOnAction } from "../../../project-actions";
+import { allowCommandAction, allowWriteAction, carryOnAction } from "../../../project-actions";
 import { companyScreen, param, type SearchParams } from "../../../screen-data";
 
 export const dynamic = "force-dynamic";
@@ -240,7 +240,30 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     </>
   );
 
-  const now = blocker !== undefined && (
+  // A write shows where it would go and what it would say, as it would be posted.
+  const write = blocker?.kind === "writeNotAllowed" ? blocker : undefined;
+  const now =
+    write !== undefined ? (
+      <div className="notice notice-bad tk-now">
+        <span className="n-ic">{Icon.pen}</span>
+        <span className="n-tx">
+          <b>{w.writeStopped(w.writes[write.write])}</b>
+          {who !== undefined && <span>{w.writeWhy(who.name)}</span>}
+          <span className="write-what">
+            {write.target !== "" && (
+              <>
+                <code>{write.target}</code> ·{" "}
+              </>
+            )}
+            {write.text}
+          </span>
+        </span>
+        <span className="n-acts">
+          <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutWrite} disabled={!ready} errors={t.errors} />
+          <ActButton action={allowWriteAction.bind(null, company.id, project.id, write.write)} label={w.allowWrite} disabled={!ready} errors={t.errors} />
+        </span>
+      </div>
+    ) : blocker !== undefined && (
       <div className="notice notice-bad tk-now">
         <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : Icon.plug}</span>
         <span className="n-tx">

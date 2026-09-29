@@ -139,14 +139,22 @@ work to the task's branch; pushing, merging and deploying stay the user's.
 
 **Work stays in the folder.** An agent reads and edits files only in its
 task's worktree, runs only the commands its project allows, and reaches no
-network and no outside tool. What it needs beyond that it does not work
-around: the task stops, blocked with the reason, and the user decides.
-SECURITY.md is the full boundary.
+network and no outside tool but the connector its project turned on. What it
+needs beyond that it does not work around: the task stops, blocked with the
+reason, and the user decides. SECURITY.md is the full boundary.
 
 **A project allows its commands.** The list starts from the folder's
 `package.json` scripts when the folder is chosen, and the user edits it in the
 project dialog. Allowing a command from a blocked task adds it to the project,
 so the same command does not stop the next task.
+
+**A project may work with Jira and Confluence.** Turning on the Atlassian
+connector in the project dialog lets its employees read issues and pages
+through the connector the user's Claude account already has. Writing — a
+comment, an edited issue, a changed page — stops the task the first time, and
+the stop says what would be written and where. Allowing it adds that kind of
+write to the project, as allowing a command does; carrying on without it tells
+the agent it was not allowed. Nothing else the account connects is used.
 
 **Time is what the work has taken, not a share of an estimate.** With a real
 agent doing the work nobody knows when it ends, so a task carries how long it

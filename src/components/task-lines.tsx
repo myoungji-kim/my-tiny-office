@@ -20,6 +20,7 @@ export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNod
   if (b === undefined) return undefined;
   // the card names the reason; the command itself is on the task's page
   if (b.kind === "commandNotAllowed") return w.commandBlocked;
+  if (b.kind === "writeNotAllowed") return w.writeBlocked;
   return b.kind === "disconnected" ? w.agentLost : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
 }
 

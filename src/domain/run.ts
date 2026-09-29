@@ -1,5 +1,6 @@
 import type { AgentId, CompanyId, EmployeeId, MemoryId, RunId, TaskId } from "./ids";
 import { MAX_MEMORY_TEXT } from "./memory";
+import type { AtlassianWrite } from "./project";
 import type { Timestamp } from "./time";
 
 // The execution capability attached to an employee. The employee is who the
@@ -23,6 +24,8 @@ export type RunEnd =
   | { readonly kind: "finished" }
   // it needed a command the project does not allow
   | { readonly kind: "denied"; readonly command: string }
+  // it would have written to Jira or Confluence in a way the project does not allow
+  | { readonly kind: "writeDenied"; readonly write: AtlassianWrite }
   | { readonly kind: "budgetReached" }
   | { readonly kind: "failed" }
   // ended on purpose: held, handed over, or changed

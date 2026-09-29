@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm";
 
 import type { ProjectRepository } from "../../application/repositories";
 import { toCompanyId, toProjectId } from "../../domain/ids";
-import { isAllowableCommand, type Project } from "../../domain/project";
+import { isAllowableCommand, isAtlassianWrite, type Project } from "../../domain/project";
 
 import type { AppDatabase } from "./database";
 import { projects } from "./schema";
@@ -20,6 +20,17 @@ function toCommands(raw: string): string[] {
   }
 }
 
+// Likewise a write no project could allow is dropped, and none is kept with the connector off.
+function toWrites(raw: string, atlassian: boolean) {
+  if (!atlassian) return [];
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) ? [...new Set(value.filter(isAtlassianWrite))] : [];
+  } catch {
+    return [];
+  }
+}
+
 function toProject(row: ProjectRow): Project {
   return {
     id: toProjectId(row.id),
@@ -29,6 +40,8 @@ function toProject(row: ProjectRow): Project {
     folder: row.folder ?? undefined,
     folderConfirmed: row.folderConfirmed,
     commands: toCommands(row.commands),
+    atlassian: row.atlassian,
+    writes: toWrites(row.writes, row.atlassian),
     status: row.status,
     priority: row.priority,
     heldReason: row.heldReason ?? undefined,
@@ -47,6 +60,8 @@ function toRow(project: Project): typeof projects.$inferInsert {
     folder: project.folder ?? null,
     folderConfirmed: project.folderConfirmed,
     commands: JSON.stringify(project.commands),
+    atlassian: project.atlassian,
+    writes: JSON.stringify(project.writes),
     status: project.status,
     priority: project.priority,
     heldReason: project.heldReason ?? null,

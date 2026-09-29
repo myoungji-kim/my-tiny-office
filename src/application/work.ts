@@ -1,6 +1,7 @@
 import type { Employee } from "../domain/employee";
 import { toAgentId, toEventId, toRunId, type CompanyId, type EmployeeId, type MemoryId, type ReviewId, type RunId, type TaskId } from "../domain/ids";
 import { carriedBy, type Memory } from "../domain/memory";
+import type { Project } from "../domain/project";
 import * as reviewDomain from "../domain/review";
 import { endRun, isLive, readReport, reported, reportDetail, sessionStarted, sessionToContinue, startRun, type Agent, type RunEnd } from "../domain/run";
 import * as taskDomain from "../domain/task";
@@ -13,7 +14,8 @@ import { pickUpWork } from "./task";
 const taught = (own: readonly Memory[]): string[] => (own.length === 0 ? [] : ["", "What you have been taught, which you follow:", ...own.map((m, i) => `${i + 1}. ${m.text}`)]);
 
 // Who the agent is, the boundary it works in, and everything it carries, numbered.
-function memoryPrompt(employee: Employee, own: readonly Memory[], commands: readonly string[]): string {
+function memoryPrompt(employee: Employee, own: readonly Memory[], project: Pick<Project, "commands" | "atlassian">): string {
+  const { commands } = project;
   const allowed = commands.map((c) => "`" + c + "`").join(", ");
   const lines = [
     `You are ${employee.name}, working on one task in the current folder, which is your own copy of the project.`,
@@ -23,6 +25,12 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], commands: read
       ? "No shell command is allowed in this project."
       : `The only shell commands allowed are these, each run on its own exactly as written, never joined with && ; | or redirected: ${allowed}.`,
     "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
+    ...(project.atlassian
+      ? [
+          "You can read this project's Jira issues and Confluence pages with the Atlassian tools; load them with ToolSearch. No other connector is yours to use.",
+          "A write to Jira or Confluence the project has not allowed stops the task the first time: make it once, as you mean it, and the user decides.",
+        ]
+      : []),
     "You cannot delete files, and no command is there for it. To remove one, end your final message with a line `Remove: <path from this folder>` for each; they are removed when you finish.",
     "",
     "Begin your final message with one sentence that sums up what you did; the rest follows it.",
@@ -52,7 +60,8 @@ function reviewerPrompt(reviewer: Employee, own: readonly Memory[]): string {
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, commands: readonly string[]): string {
+function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">): string {
+  const { commands } = project;
   if (task.changesRequested !== undefined) {
     return continuing
       ? `Your work was sent back with this request:\n\n${task.changesRequested}\n\nMake the changes.`
@@ -63,6 +72,11 @@ function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, 
     return commands.includes(lastEnd.command)
       ? `\`${lastEnd.command}\` is allowed now. Carry on with the task.`
       : `The user did not allow \`${lastEnd.command}\`. Carry on with the task without it.`;
+  }
+  if (lastEnd?.kind === "writeDenied") {
+    return project.writes.includes(lastEnd.write)
+      ? "The write you tried is allowed now. Make it again, and carry on with the task."
+      : "The user did not allow the write you tried. Carry on with the task without it, and say in your final message what you would have written.";
   }
   return "Carry on with the task where you left off.";
 }
@@ -96,6 +110,7 @@ interface LiveRun {
   handle: RunningAgent;
   stopping: boolean;
   denied: string | undefined;
+  deniedWrite: Extract<AgentEvent, { kind: "writeDenied" }> | undefined;
   result: Extract<AgentEvent, { kind: "result" }> | undefined;
   // what it carries, in the order the prompt numbered it
   readonly carried: readonly MemoryId[];
@@ -207,6 +222,7 @@ export function createWorkSupervisor(deps: {
     handle: { stop: () => undefined },
     stopping: false,
     denied: undefined,
+    deniedWrite: undefined,
     result: undefined,
     carried: carried.map((m) => m.id),
     used: [],
@@ -238,9 +254,10 @@ export function createWorkSupervisor(deps: {
       deps.runtime.launch(
         {
           cwd: prepared.path,
-          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project.commands),
-          memory: memoryPrompt(employee, carried, project.commands),
+          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project),
+          memory: memoryPrompt(employee, carried, project),
           commands: project.commands,
+          atlassian: project.atlassian ? { writes: project.writes } : undefined,
           resume,
           readOnly: false,
         },
@@ -274,6 +291,7 @@ export function createWorkSupervisor(deps: {
           prompt: reviewPrompt(task, author?.name ?? "A colleague", diff, resume !== undefined),
           memory: reviewerPrompt(reviewer, carried),
           commands: [],
+          atlassian: undefined,
           resume,
           readOnly: true,
         },
@@ -295,8 +313,14 @@ export function createWorkSupervisor(deps: {
       await ctx.runSteps.add({ companyId: entry.companyId, taskId: entry.taskId, runId: entry.runId, at: ctx.now(), kind: event.step, detail: event.detail });
     } else if (event.kind === "denied") {
       // the task stops on the first command it may not run; the user decides
-      if (entry.denied === undefined) {
+      if (entry.denied === undefined && entry.deniedWrite === undefined) {
         entry.denied = event.command;
+        entry.handle.stop();
+      }
+    } else if (event.kind === "writeDenied") {
+      // and on the first write the project does not allow, likewise
+      if (entry.denied === undefined && entry.deniedWrite === undefined) {
+        entry.deniedWrite = event;
         entry.handle.stop();
       }
     } else {
@@ -322,6 +346,7 @@ export function createWorkSupervisor(deps: {
 
   function endOf(entry: LiveRun): RunEnd {
     if (entry.denied !== undefined) return { kind: "denied", command: entry.denied };
+    if (entry.deniedWrite !== undefined) return { kind: "writeDenied", write: entry.deniedWrite.write };
     if (entry.stopping) return { kind: "stopped" };
     if (entry.result !== undefined) return { kind: entry.result.outcome };
     return { kind: "disconnected" };
@@ -340,7 +365,18 @@ export function createWorkSupervisor(deps: {
     const task = await ctx.tasks.findById(entry.taskId);
     if (!wantsRun(task, entry.employeeId)) return;
     if (end.kind !== "finished") {
-      return block(ctx, task.id, end.kind === "denied" ? { kind: "commandNotAllowed", command: end.command } : end.kind === "budgetReached" ? { kind: "budgetReached" } : { kind: "disconnected" });
+      const denied = entry.deniedWrite;
+      return block(
+        ctx,
+        task.id,
+        end.kind === "denied"
+          ? { kind: "commandNotAllowed", command: end.command }
+          : end.kind === "writeDenied" && denied !== undefined
+            ? { kind: "writeNotAllowed", write: denied.write, target: denied.target, text: denied.text }
+            : end.kind === "budgetReached"
+              ? { kind: "budgetReached" }
+              : { kind: "disconnected" },
+      );
     }
     await finish(ctx, task.id);
     const reviewer = reviewDomain.reviewerToAsk(task, await ctx.reviews.findByCompany(task.companyId));

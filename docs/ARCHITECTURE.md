@@ -484,6 +484,15 @@ dontAsk` with an allow list). A denial arrives as a `permission_denied` event
 and blocks the task with the command as its reason; allowing it adds it to the
 project and resumes the run. SECURITY.md §3.
 
+A project that uses the Atlassian connector (`Project.atlassian`) launches
+without `--strict-mcp-config`, with `ToolSearch`, and allows the connector's
+read tools and the writes the project allows by name
+(`src/infrastructure/runtime/connectors.ts`). The domain knows writes by kind
+(`AtlassianWrite`), never by tool name. A write it does not allow is denied
+the same way, read from the call as where it goes and what it says, and blocks
+the task as `writeNotAllowed`; allowing it (`allowWrite`) adds the kind to the
+project. SECURITY.md §8.
+
 ### One thing happens outside the app
 
 **Login.** `claude auth login` opens a browser; `--claudeai`, `--console` and
@@ -645,7 +654,8 @@ The app must distinguish:
 
 Each reaches the user as the thing it is. A run that stops mid-task blocks the
 task with the reason — `disconnected` (the process went away, or the request
-failed), `commandNotAllowed` with the command, `budgetReached`, or
+failed), `commandNotAllowed` with the command, `writeNotAllowed` with the
+write, `budgetReached`, or
 `workspaceUnavailable` when the task's worktree could not be made — and the
 task keeps its assignee, its session and its worktree. Reconnecting, carrying
 on or trying again unblocks it, and the next tick resumes the session.

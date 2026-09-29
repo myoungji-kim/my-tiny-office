@@ -2,6 +2,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 
 import type { AgentRepository, RunRepository, RunStepRepository, TaskRequestRepository } from "../../application/repositories";
 import { toAgentId, toCompanyId, toEmployeeId, toMemoryId, toRunId, toTaskId } from "../../domain/ids";
+import { isAtlassianWrite } from "../../domain/project";
 import type { Agent, Run, RunEnd, RunStep } from "../../domain/run";
 
 import type { AppDatabase } from "./database";
@@ -36,6 +37,8 @@ export function createSqliteAgentRepository(db: AppDatabase): AgentRepository {
 function endOf(row: typeof runs.$inferSelect): RunEnd | undefined {
   if (row.end === null) return undefined;
   if (row.end === "denied") return { kind: "denied", command: row.deniedCommand ?? "" };
+  // a write that cannot be read back reads as a stop the user decides on, like any other
+  if (row.end === "writeDenied") return isAtlassianWrite(row.deniedCommand) ? { kind: "writeDenied", write: row.deniedCommand } : { kind: "stopped" };
   return { kind: row.end };
 }
 
@@ -83,7 +86,7 @@ export function createSqliteRunRepository(db: AppDatabase): RunRepository {
         sessionId: run.sessionId ?? null,
         state: run.state,
         end: run.end?.kind ?? null,
-        deniedCommand: run.end?.kind === "denied" ? run.end.command : null,
+        deniedCommand: run.end?.kind === "denied" ? run.end.command : run.end?.kind === "writeDenied" ? run.end.write : null,
         costUsd: run.costUsd,
         memoriesUsed: JSON.stringify(run.memoriesUsed),
         suggestions: JSON.stringify(run.suggestions),

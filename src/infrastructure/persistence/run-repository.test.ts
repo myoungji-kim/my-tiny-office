@@ -54,6 +54,13 @@ describe("runs on disk", () => {
     await expect(ctx.agents.save({ ...agent, id: toAgentId("agent-2") })).rejects.toThrow();
   });
 
+  it("keep the kind of write a run was denied", async () => {
+    const run = startRun({ id: toRunId("run-1"), agent, taskId, sessionId: undefined }, 10);
+    await ctx.runs.save(endRun(run, { kind: "writeDenied", write: "jiraTransition" }, 0, 20));
+
+    await expect(ctx.runs.findById(run.id)).resolves.toMatchObject({ end: { kind: "writeDenied", write: "jiraTransition" } });
+  });
+
   it("hand back a task's newest steps first", async () => {
     const run = startRun({ id: toRunId("run-1"), agent, taskId, sessionId: undefined }, 10);
     await ctx.runs.save(run);

@@ -36,6 +36,8 @@ const pay: Project = {
   folder: "/code/pay",
   folderConfirmed: true,
   commands: ["npm test", "npm run lint"],
+  atlassian: false,
+  writes: [],
   status: "active",
   priority: "high",
   heldReason: undefined,
@@ -109,6 +111,15 @@ describe("tasks", () => {
     await expect(repo.save({ ...backlog, runningSince: t0 })).rejects.toThrow();
   });
 
+  it("keeps a stop before a Jira write with where it goes and what it says", async () => {
+    const repo = createSqliteTaskRepository(database.handle.db);
+    const blocked: Task = { ...backlog, status: "working", assigneeId: mocha.id, startedAt: t0, blocker: { kind: "writeNotAllowed", write: "jiraComment", target: "ORD-231", text: "타입을 좁혔어요." } };
+
+    await repo.save(blocked);
+
+    await expect(repo.findById(blocked.id)).resolves.toEqual(blocked);
+  });
+
   it("reads an unreadable blocker as a lost connection, never as unblocked", async () => {
     const repo = createSqliteTaskRepository(database.handle.db);
     await repo.save({ ...backlog, status: "working", assigneeId: mocha.id, startedAt: t0, blocker: { kind: "disconnected" } });
@@ -127,6 +138,17 @@ describe("projects", () => {
     database.handle.db.run(sql`update projects set commands = '["npm test", "rm *", "a)b", 7]' where id = 'pay'`);
 
     await expect(createSqliteProjectRepository(database.handle.db).findById(pay.id)).resolves.toMatchObject({ commands: ["npm test"] });
+  });
+
+  it("keeps the Jira and Confluence writes it allows only with the connector on, and none it could not allow", async () => {
+    const repo = createSqliteProjectRepository(database.handle.db);
+    await repo.save({ ...pay, atlassian: true, writes: ["jiraComment", "confluenceEdit"] });
+    await expect(repo.findById(pay.id)).resolves.toMatchObject({ atlassian: true, writes: ["jiraComment", "confluenceEdit"] });
+
+    database.handle.db.run(sql`update projects set writes = '["jiraComment", "sendGmail", 7]' where id = 'pay'`);
+    await expect(repo.findById(pay.id)).resolves.toMatchObject({ writes: ["jiraComment"] });
+    database.handle.db.run(sql`update projects set atlassian = 0 where id = 'pay'`);
+    await expect(repo.findById(pay.id)).resolves.toMatchObject({ atlassian: false, writes: [] });
   });
 
   it("refuses an active project without a folder", async () => {

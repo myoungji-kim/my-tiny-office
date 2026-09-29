@@ -295,7 +295,10 @@ its tooltip — and the page gives the command in full. A stop leads the page wi
 its reason and the way on: 다시 연결 for a lost agent, 이어서 하기 at the spending
 cap, 다시 시도 when the worktree could not be made, and for a command 허용하고
 이어서 and 허용하지 않고 이어서 — only the second when the command could never be
-allowed, such as one chained with `&&`.
+allowed, such as one chained with `&&`. A Jira or Confluence write the project
+has not allowed stops the same way — "Jira에 코멘트 달기 전에 멈췄어요" — and
+shows where and what it would write, as it would be posted, above 쓰지 않고
+이어서 and 허용하고 이어서 (`projects.html?stop=write#order/t3`).
 
 ### The two dialogs
 
@@ -621,12 +624,15 @@ A folder belongs to a project, and **choosing it is the consent.** The project
 dialog shows, the moment a folder is chosen, what employees do there and what
 they never do, and the commands they may run — from its `package.json`,
 edited in place. Creating or saving the project allows exactly that; a project
-without a folder asks nothing, because there is nothing to allow. 안전 범위 in
+without a folder asks nothing, because there is nothing to allow. Below the
+commands, Jira · Confluence is 쓰지 않음 or Atlassian 커넥터로; turned on, the
+boundary's last line names Atlassian as the one way out, and 허용한 쓰기 lists
+the kinds of write the project's tasks make without asking, each removable. 안전 범위 in
 settings is the same promise in full, and the dialog links to it.
 
 When work needs more than it was allowed it stops and asks, on the task's page
-and in today's feed: a command the project does not allow (허용하고 이어서),
-or the spending cap (이어서 하기). SECURITY.md has the boundary and the
+and in today's feed: a command the project does not allow (허용하고 이어서), a
+write to Jira or Confluence it does not allow, or the spending cap (이어서 하기). SECURITY.md has the boundary and the
 measured flags behind it.
 
 ## Open questions
@@ -645,9 +651,9 @@ measured flags behind it.
   고르기 opens the operating system's folder dialog from the app's own server,
   with 경로 직접 입력 beside it; either is checked before anything is shown
   (SECURITY.md §4), and a folder that is not a git repository says so.
-- **Outside tools.** Out of the MVP: isolating the user's Claude Code setup
-  removes them too. Bringing them back is a per-company list of MCP servers,
-  reads allowed and writes made on approval — SECURITY.md §8.
+- **Outside tools beyond Atlassian.** Gmail, Drive and the rest of the
+  account's connectors are denied. Gmail waits on work that has no code
+  folder, which a project cannot be yet.
 - **A 내 차례 / Needs you inbox.** Today's feed already carries what waits on
   the user — approvals, agents that stopped — with the way to each. A separate
   inbox earns its place only if those rows turn out easy to miss.

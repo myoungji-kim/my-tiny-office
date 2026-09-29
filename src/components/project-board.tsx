@@ -69,7 +69,7 @@ function Card({
             {NONE}
             {w.blocked}
           </span>
-          <span className="r-line blocked" title={task.blocker?.kind === "commandNotAllowed" ? task.blocker.command : undefined}>
+          <span className="r-line blocked" title={task.blocker?.kind === "commandNotAllowed" ? task.blocker.command : task.blocker?.kind === "writeNotAllowed" ? task.blocker.target : undefined}>
             {NONE}
             <span className="r-tx">{blocked}</span>
           </span>

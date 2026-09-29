@@ -1,6 +1,6 @@
 import type { Company } from "../domain/company";
 import { toCompanyId } from "../domain/ids";
-import type { Priority, ProjectStatus } from "../domain/project";
+import type { AtlassianWrite, Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
 import type { RecordedMilestone } from "../domain/milestone";
@@ -77,6 +77,8 @@ export interface ProjectView {
   readonly folder: string | undefined;
   readonly folderConfirmed: boolean;
   readonly commands: readonly string[];
+  readonly atlassian: boolean;
+  readonly writes: readonly AtlassianWrite[];
   readonly status: ProjectStatus;
   readonly priority: Priority;
   readonly heldReason: string | undefined;
@@ -284,6 +286,8 @@ export async function loadOffice(
       folder: project.folder,
       folderConfirmed: project.folderConfirmed,
       commands: project.commands,
+      atlassian: project.atlassian,
+      writes: project.writes,
       status: project.status,
       priority: project.priority,
       heldReason: project.heldReason,

@@ -1,6 +1,7 @@
 import type { DomainEvent } from "../domain/events";
-import { toEventId, toProjectId, type CompanyId, type ProjectId } from "../domain/ids";
+import { toEventId, toProjectId, type ProjectId } from "../domain/ids";
 import * as projectDomain from "../domain/project";
+import type { AtlassianWrite } from "../domain/project";
 import * as taskDomain from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
@@ -9,14 +10,7 @@ import { withdrawReviewsOn } from "./review";
 
 type ProjectResult<TFailure extends string> = UseCaseResult<{ readonly project: projectDomain.Project }, TFailure>;
 
-export interface CreateProjectInput {
-  readonly companyId: CompanyId;
-  readonly name: string;
-  readonly description?: string;
-  readonly folder?: string;
-  readonly commands?: readonly string[];
-  readonly priority: projectDomain.Priority;
-}
+export type CreateProjectInput = Omit<projectDomain.CreateProjectInput, "id">;
 
 export async function createProject(
   ctx: AppContext,
@@ -127,6 +121,21 @@ export const finishProject = (ctx: AppContext, projectId: ProjectId) =>
       await recordMilestones(ctx, project.companyId, events);
       return [];
     },
+  );
+
+// Likewise a Jira or Confluence write, for every task stopped on that kind of write.
+export const allowWrite = (ctx: AppContext, projectId: ProjectId, write: AtlassianWrite) =>
+  changeProject(
+    ctx,
+    projectId,
+    (p) => projectDomain.allowWrite(p, write, eventId(ctx), ctx.now()),
+    async (_, tasks) =>
+      saveAll(
+        ctx,
+        tasks
+          .filter((t) => t.blocker?.kind === "writeNotAllowed" && t.blocker.write === write)
+          .map((t) => taskDomain.unblockTask(t, eventId(ctx), ctx.now())),
+      ),
   );
 
 // A command allowed from a stopped task is the project's from then on, and

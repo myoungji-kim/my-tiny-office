@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { checkFolderAction, editProjectAction, newProjectAction, pickFolderAction, type FolderOutcome } from "../app/project-actions";
-import { isAllowableCommand, MAX_COMMANDS, type Priority } from "../domain/project";
+import { isAllowableCommand, MAX_COMMANDS, type AtlassianWrite, type Priority } from "../domain/project";
 import { getDictionary, type Locale } from "../i18n";
 import type { ProjectView } from "../server/view-model";
 
@@ -47,6 +47,8 @@ export function ProjectDialog({
   const [typed, setTyped] = useState("");
   const [runs, setRuns] = useState<readonly string[]>(edit?.commands ?? []);
   const [run, setRun] = useState("");
+  const [atlassian, setAtlassian] = useState(edit?.atlassian ?? false);
+  const [writes, setWrites] = useState<readonly AtlassianWrite[]>(edit?.writes ?? []);
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const first = useRef<HTMLInputElement>(null);
@@ -94,7 +96,7 @@ export function ProjectDialog({
 
   const save = () =>
     start(async () => {
-      const input = { name, description: about, priority, folder, commands: folder === undefined ? [] : runs };
+      const input = { name, description: about, priority, folder, commands: folder === undefined ? [] : runs, atlassian: folder !== undefined && atlassian, writes: atlassian ? writes : [] };
       if (edit !== undefined) {
         const result = await editProjectAction(companyId, edit.id, input);
         if (result.error !== undefined) return say(result.error);
@@ -216,7 +218,7 @@ export function ProjectDialog({
                 </div>
                 <div className="scope-row no">
                   {Icon.no}
-                  <span>{w.scopeNot}</span>
+                  <span>{atlassian ? w.scopeNotTools : w.scopeNot}</span>
                 </div>
               </div>
             )}
@@ -262,6 +264,43 @@ export function ProjectDialog({
                 </button>
               </div>
               <span className="hint">{w.runsHint}</span>
+            </div>
+          )}
+
+          {folder !== undefined && chosen && (
+            <div className="field">
+              <span className="label">{w.fTools}</span>
+              <div className="opts" role="radiogroup" aria-label={w.fTools}>
+                <button className="opt" type="button" role="radio" aria-checked={!atlassian} onClick={() => setAtlassian(false)}>
+                  {w.toolsOff}
+                </button>
+                <button className="opt" type="button" role="radio" aria-checked={atlassian} onClick={() => setAtlassian(true)}>
+                  {w.toolsOn}
+                </button>
+              </div>
+              <span className="hint">{w.toolsHint}</span>
+            </div>
+          )}
+
+          {folder !== undefined && chosen && atlassian && (
+            <div className="field">
+              <span className="label">{w.fWrites}</span>
+              {writes.length > 0 ? (
+                <div className="runs">
+                  {writes.map((x) => (
+                    <span key={x} className="run word">
+                      {w.writes[x]}
+                      <button type="button" aria-label={w.removeWrite(w.writes[x])} onClick={() => setWrites(writes.filter((y) => y !== x))}>
+                        {Icon.x}
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="hint" style={{ marginTop: 0 }}>
+                  {w.writesNone}
+                </span>
+              )}
             </div>
           )}
 

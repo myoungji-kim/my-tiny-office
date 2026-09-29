@@ -3,8 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { AgentEvent, AgentRuntime, LaunchInput } from "../../application/agent-runtime";
+import type { AtlassianWrite } from "../../domain/project";
 import { stepDetail, type StepKind } from "../../domain/run";
 import { findExecutable, startProcess } from "../process/run";
+import { atlassianTools, writeOf, writeShown } from "./connectors";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
 const MAX_BUDGET_USD = "2";
@@ -15,15 +17,18 @@ const isSessionId = (value: unknown): value is string => typeof value === "strin
 // Exactly the launch SECURITY.md measured; anything added here is measured first.
 export function launchArgs(input: {
   readonly commands: readonly string[];
+  readonly atlassian: { readonly writes: readonly AtlassianWrite[] } | undefined;
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
 }): string[] {
   // a reviewer's session has only the tools that read, confined to the worktree
-  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell";
+  // connector tools arrive deferred, and ToolSearch is what loads them
+  const connector = input.readOnly ? undefined : input.atlassian;
+  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch");
   const allowed = input.readOnly
     ? ["Read(./**)"]
-    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`])];
+    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes)])];
   const args = [
     "-p",
     "--output-format",
@@ -36,7 +41,8 @@ export function launchArgs(input: {
     "--settings",
     JSON.stringify({ autoMemoryEnabled: false, disableAllHooks: true }),
     "--disable-slash-commands",
-    "--strict-mcp-config",
+    // without it the account's connectors join the session; allowed by name only
+    ...(connector === undefined ? ["--strict-mcp-config"] : []),
     "--tools",
     tools,
     "--allowedTools",
@@ -79,7 +85,7 @@ function subject(input: Json, cwd: string): string {
 
 // Reads one stream-json line. Tool calls are remembered by id, because a
 // denial names only the call, and the command is in the call.
-export function readLine(line: string, calls: Map<string, { tool: string; command: string }>, cwd: string): AgentEvent[] {
+export function readLine(line: string, calls: Map<string, { tool: string; command: string; input: Json }>, cwd: string): AgentEvent[] {
   let event: unknown;
   try {
     event = JSON.parse(line);
@@ -93,7 +99,10 @@ export function readLine(line: string, calls: Map<string, { tool: string; comman
   }
   if (event.type === "system" && event.subtype === "permission_denied") {
     const call = calls.get(text(event.tool_use_id));
-    return call !== undefined && COMMAND_TOOLS.has(call.tool) && call.command !== "" ? [{ kind: "denied", command: call.command }] : [];
+    if (call === undefined) return [];
+    if (COMMAND_TOOLS.has(call.tool)) return call.command !== "" ? [{ kind: "denied", command: call.command }] : [];
+    const write = writeOf(call.tool);
+    return write === undefined ? [] : [{ kind: "writeDenied", write, ...writeShown(call.input) }];
   }
   if (event.type === "assistant" && isObject(event.message) && Array.isArray(event.message.content)) {
     const out: AgentEvent[] = [];
@@ -104,7 +113,7 @@ export function readLine(line: string, calls: Map<string, { tool: string; comman
       }
       if (block.type === "tool_use" && isObject(block.input)) {
         const tool = text(block.name);
-        calls.set(text(block.id), { tool, command: text(block.input.command).trim() });
+        calls.set(text(block.id), { tool, command: text(block.input.command).trim(), input: block.input });
         const step = TOOL_STEP[tool];
         if (step !== undefined) out.push({ kind: "step", step, detail: stepDetail(subject(block.input, cwd)) });
       }
@@ -138,8 +147,8 @@ export const claudeCodeRuntime: AgentRuntime = {
       cleanUp();
       throw error;
     }
-    const calls = new Map<string, { tool: string; command: string }>();
-    return startProcess(found.path, launchArgs({ commands: input.commands, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    const calls = new Map<string, { tool: string; command: string; input: Json }>();
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

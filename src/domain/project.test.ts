@@ -3,6 +3,7 @@ import { assert, describe, expect, it } from "vitest";
 import { toCompanyId, toEventId, toProjectId } from "./ids";
 import {
   allowCommand,
+  allowWrite,
   createProject,
   editProject,
   finishProject,
@@ -72,7 +73,7 @@ describe("editing a project", () => {
   it("changes its details, but not its folder while work is running there", () => {
     const made = createProject({ id: toProjectId("p"), companyId: toCompanyId("c"), name: "pay", folder: "/a", priority: "normal" }, toEventId("e"), 1);
     assert(made.ok);
-    const details = { name: " Payments ", description: " ", folder: "/a", commands: ["npm test", "npm test"], priority: "high" as const };
+    const details = { name: " Payments ", description: " ", folder: "/a", commands: ["npm test", "npm test"], atlassian: false, writes: [], priority: "high" as const };
 
     expect(editProject(made.project, details, 1)).toMatchObject({ ok: true, project: { name: "Payments", description: undefined, commands: ["npm test"], priority: "high" } });
     expect(editProject(made.project, { ...details, folder: "/b" }, 1)).toEqual({ ok: false, reason: "folderInUse" });
@@ -116,5 +117,22 @@ describe("what an approval shows is what runs", () => {
     }
     expect(allowCommand(project, "npm run one-more", eventId, t0)).toMatchObject({ reason: "tooManyCommands" });
     expect(allowCommand(project, "npm test", eventId, t0)).toMatchObject({ ok: true });
+  });
+});
+
+describe("a project using Jira and Confluence", () => {
+  const made = createProject({ id: toProjectId("p"), companyId: toCompanyId("c"), name: "pay", folder: "/a", priority: "normal", atlassian: true, writes: ["jiraComment"] }, toEventId("e"), 1);
+  assert(made.ok);
+  const details = { name: "pay", description: undefined, folder: "/a", commands: [], atlassian: true, writes: ["jiraComment" as const], priority: "normal" as const };
+
+  it("keeps the writes it allows only while the connector is on", () => {
+    expect(made.project).toMatchObject({ atlassian: true, writes: ["jiraComment"] });
+    expect(editProject(made.project, { ...details, atlassian: false }, 0)).toMatchObject({ ok: true, project: { atlassian: false, writes: [] } });
+    expect(editProject(made.project, { ...details, writes: ["sendGmail" as never] }, 0)).toEqual({ ok: false, reason: "writeNotAllowable" });
+  });
+
+  it("allows a write from a stopped task, and none with the connector off", () => {
+    expect(allowWrite(made.project, "confluenceEdit", toEventId("e2"), 2)).toMatchObject({ ok: true, project: { writes: ["jiraComment", "confluenceEdit"] } });
+    expect(allowWrite({ ...made.project, atlassian: false, writes: [] }, "jiraComment", toEventId("e3"), 3)).toEqual({ ok: false, reason: "connectorOff" });
   });
 });

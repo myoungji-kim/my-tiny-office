@@ -13,7 +13,7 @@ import type {
   TaskUnblocked,
 } from "./events";
 import type { AreaId, CompanyId, EmployeeId, EventId, ProjectId, TaskId } from "./ids";
-import type { Priority } from "./project";
+import type { AtlassianWrite, Priority } from "./project";
 import type { Duration, Timestamp } from "./time";
 
 // backlog → working → approval → done, and held off to the side. Work is
@@ -25,6 +25,8 @@ export type TaskStatus = "backlog" | "working" | "approval" | "done" | "held";
 export type Blocker =
   | { readonly kind: "disconnected" }
   | { readonly kind: "commandNotAllowed"; readonly command: string }
+  // a Jira or Confluence write the project does not allow: where it would go and what it would say
+  | { readonly kind: "writeNotAllowed"; readonly write: AtlassianWrite; readonly target: string; readonly text: string }
   | { readonly kind: "budgetReached" }
   // the task's worktree could not be made in its project's folder
   | { readonly kind: "workspaceUnavailable" };

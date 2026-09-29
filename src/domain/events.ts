@@ -1,6 +1,6 @@
 import type { AreaId, CompanyId, EmployeeId, EventId, MemoryId, ProjectId, ReviewId, RoleId, TaskId, TeamId } from "./ids";
 import type { MemoryKind } from "./memory";
-import type { Priority } from "./project";
+import type { AtlassianWrite, Priority } from "./project";
 import type { Blocker } from "./task";
 import type { Duration, Timestamp } from "./time";
 
@@ -63,6 +63,11 @@ export interface ProjectFinished extends ProjectEvent {
 export interface ProjectReopened extends ProjectEvent {
   readonly type: "ProjectReopened";
 }
+export interface ProjectWriteAllowed extends ProjectEvent {
+  readonly type: "ProjectWriteAllowed";
+  readonly write: AtlassianWrite;
+}
+
 export interface ProjectCommandAllowed extends ProjectEvent {
   readonly type: "ProjectCommandAllowed";
   readonly command: string;
@@ -200,6 +205,7 @@ export type DomainEvent =
   | ProjectFinished
   | ProjectReopened
   | ProjectCommandAllowed
+  | ProjectWriteAllowed
   | TaskCreated
   | TaskAssigned
   | TaskStarted

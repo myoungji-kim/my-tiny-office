@@ -28,6 +28,8 @@ const project = (id: string, priority: Priority, status: ProjectStatus = "active
   folder: "/code/" + id,
   folderConfirmed: true,
   commands: [],
+  atlassian: false,
+  writes: [],
   status,
   priority,
   heldReason: undefined,

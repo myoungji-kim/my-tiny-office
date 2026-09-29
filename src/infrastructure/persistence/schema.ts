@@ -31,7 +31,7 @@ const milestoneKinds = [
 ] as const satisfies readonly MilestoneKind[];
 
 const runStates = ["starting", "running", "ended"] as const satisfies readonly RunState[];
-const runEnds = ["finished", "denied", "budgetReached", "failed", "stopped", "disconnected"] as const satisfies readonly RunEnd["kind"][];
+const runEnds = ["finished", "denied", "writeDenied", "budgetReached", "failed", "stopped", "disconnected"] as const satisfies readonly RunEnd["kind"][];
 const stepKinds = ["read", "edit", "run", "say"] as const satisfies readonly StepKind[];
 
 // The values are the constant lists above, never user input.
@@ -115,6 +115,9 @@ export const projects = sqliteTable(
     folderConfirmed: integer("folder_confirmed", { mode: "boolean" }).notNull().default(true),
     // a JSON array of exact commands
     commands: text("commands").notNull().default("[]"),
+    atlassian: integer("atlassian", { mode: "boolean" }).notNull().default(false),
+    // a JSON array of the Jira and Confluence writes allowed
+    writes: text("writes").notNull().default("[]"),
     status: text("status", { enum: projectStatuses }).notNull(),
     priority: text("priority", { enum: priorities }).notNull(),
     heldReason: text("held_reason"),
@@ -306,6 +309,7 @@ export const runs = sqliteTable(
     state: text("state", { enum: runStates }).notNull(),
     end: text("end", { enum: runEnds }),
     // the command it was denied, when that is how it ended
+    // the command denied, or for a denied write its kind
     deniedCommand: text("denied_command"),
     costUsd: real("cost_usd").notNull().default(0),
     // the memories the agent said it drew on, as a JSON list of ids
@@ -320,7 +324,7 @@ export const runs = sqliteTable(
     check("runs_state", oneOf(table.state, runStates)),
     check("runs_end", sql`${table.end} is null or ${oneOf(table.end, runEnds)}`),
     check("runs_ended", sql`(${table.state} = 'ended') = (${table.end} is not null and ${table.endedAt} is not null)`),
-    check("runs_denied", sql`(${table.end} = 'denied') = (${table.deniedCommand} is not null)`),
+    check("runs_denied", sql`(${table.end} in ('denied', 'writeDenied')) = (${table.deniedCommand} is not null)`),
   ],
 );
 

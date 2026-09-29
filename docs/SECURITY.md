@@ -5,8 +5,8 @@ user's computer, how that is enforced, and what the app itself must never do.
 The user-facing version of the same promise is 설정 › 안전 범위
 (`docs/ui/settings.html#safety`); the two must say the same thing.
 
-Every rule here was measured against `claude 2.1.283` in a scratch repository,
-not inferred from documentation. Re-measure on a Claude Code upgrade (see the
+Every rule here was measured against `claude 2.1.283` in a scratch repository
+(the connector rules of §8 against `2.1.284`), not inferred from documentation. Re-measure on a Claude Code upgrade (see the
 end of this document) before trusting it again.
 
 ## 1. The boundary in one table
@@ -15,9 +15,9 @@ end of this document) before trusting it again.
 | --- | --- |
 | Reads and edits files | Only inside the task's own worktree, `<folder>/.worktrees/<task>` |
 | Runs commands | Only the ones the project allows, plus read-only commands inside the worktree that Claude Code allows on its own (`git log`, `ls`, `echo`) |
-| Reaches the network | Never through its own tools. A command the project allows runs whatever it runs, and the agent can edit the scripts it calls (§3) |
+| Reaches the network | Never through its own tools, but for a connector its project turned on (§8). A command the project allows runs whatever it runs, and the agent can edit the scripts it calls (§3) |
 | Pushes, merges, deploys | Never. Approval commits to `mto/<task>`; the rest is the user's |
-| Uses outside tools (Jira, Slack, any MCP server) | Never, in the MVP |
+| Uses outside tools | Only the Atlassian connector (Jira, Confluence), in a project that turns it on: its read tools, and each write tool once the user has allowed it (§8). No other connector, MCP server or plugin |
 | Carries the user's personal Claude Code setup (hooks, skills, plugins, auto-memory, `~/.claude/CLAUDE.md`) | Never |
 | Reads Claude Code's credentials | Never; nor does the app |
 | Needs something outside this | Stops, and the task is blocked with the reason |
@@ -34,9 +34,9 @@ claude -p
   --setting-sources project
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
   --disable-slash-commands
-  --strict-mcp-config
-  --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell
-  --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands>"
+  --strict-mcp-config                          (not in a project using a connector)
+  --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell[,ToolSearch]
+  --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>]"
   --append-system-prompt-file <memory file>
   --max-budget-usd 2
   [--resume <session-id>]
@@ -57,8 +57,8 @@ Each flag earns its place:
 | `--permission-mode dontAsk` | Anything not allowed is denied without a prompt nobody would answer, and a `permission_denied` event is emitted | ✓ |
 | `--setting-sources project` | Drops the user's hooks, skills, plugins and MCP servers | ✓ 0 MCP tools, 0 skills, built-in plugins only |
 | `--settings …` | Auto-memory and hooks off even if a project setting turns them on | ✓ hooks gone |
-| `--strict-mcp-config` | No MCP server but those passed with `--mcp-config`, and none is. Without it the account's claude.ai connectors (Gmail, Drive, Calendar, Atlassian) join the session **after its first turn**, so the init event shows none | ✓ 0 connectors through a four-step run; without it 92 connector tools arrived after step 1, and the run cost $0.59 instead of $0.04 |
-| `--tools …` | Only these built-in tools exist in the session; no WebFetch, WebSearch, Task, Cron | ✓ 7 tools |
+| `--strict-mcp-config` | Left out only in a project using a connector (§8). No MCP server but those passed with `--mcp-config`, and none is. Without it the account's claude.ai connectors (Gmail, Drive, Calendar, Atlassian) join the session **after its first turn**, so the init event shows none | ✓ 0 connectors through a four-step run; without it 92 connector tools arrived after step 1, and the run cost $0.59 instead of $0.04 |
+| `--tools …` | Only these built-in tools exist in the session; no WebFetch, WebSearch, Task, Cron. `ToolSearch` only with a connector: connector tools arrive deferred and nothing loads them without it | ✓ 7 tools; without `ToolSearch` a connector run saw no `mcp__` tool at all |
 | `Read(./**)` and friends | File tools confined to the worktree. The `Read` rule also governs Grep and Glob | ✓ outside read, write, grep and glob denied |
 | `<project commands>` | Each allowed command as `Bash(<cmd>)` **and** `PowerShell(<cmd>)`: on Windows the agent runs commands through PowerShell | ✓ |
 | stdin for the prompt | `--allowedTools` and `--tools` are variadic and swallow a trailing prompt argument; stdin also keeps task text out of the process list and past Windows' command-line limit | ✓ |
@@ -146,12 +146,16 @@ like); the user adds and removes entries in the project dialog.
 An agent reads code and documents that anyone may have written. The design
 assumes something it reads will try to redirect it:
 
-- It cannot reach the network, so there is nowhere to send what it finds.
+- It cannot reach the network, so there is nowhere to send what it finds —
+  unless its project turned on a connector, which is a way out (§8).
 - It cannot read outside the worktree, so there is little worth sending.
 - It cannot write outside the worktree, and nothing it writes leaves the
   worktree until the user approves, which is a local commit.
-- Outside tools are not available at all in the MVP; a future integration must
-  keep writes behind approval (§8).
+- Jira issues and Confluence pages are text anyone in the organisation wrote,
+  so a connector brings more of it in. A connector's writes stop for the user
+  until allowed, and the stop shows what would be written; a read carries
+  whatever the agent puts in its query to Atlassian, which is the user's own
+  organisation.
 
 Approval is the last line, so the approval screen shows every changed file and
 its diff, and the guide asks the user to look before approving.
@@ -241,17 +245,43 @@ agents, so it is a target in its own right.
 
 ## 8. Outside tools
 
-Out of the MVP. `--strict-mcp-config` keeps the account's claude.ai connectors
-out, which `--setting-sources project` alone does not: they arrive after the
-first turn. Not isolating the user's setup brings every
-personal plugin and 350–400 tool definitions into each task, inconsistently
-(the Jira read tool appeared in one run and not the next) and at roughly $0.16
-per trivial call.
+A project may turn on the **Atlassian connector** (Jira, Confluence) — the one
+the user's Claude account already connected on claude.ai. The app never signs
+in to Atlassian, holds no token for it, and reads nothing of the account's
+setup: Claude Code brings the connector, as it does in the user's own sessions.
 
-When it returns, it is per company and explicit: a list of MCP servers in the
-company's settings passed with `--strict-mcp-config --mcp-config`, read tools
-allowed by name, write tools listed in `--disallowedTools` (measured: they
-leave the tool list) and made only on approval.
+Measured on `2.1.284`, a run without `--strict-mcp-config` and with
+`ToolSearch`:
+
+- The init event lists no MCP tool. The account's connectors arrive deferred —
+  92 tools (Atlassian 41, Gmail 23, Drive 11, Calendar 9, Claude Docs 8) — and
+  `ToolSearch` loads them. Without `ToolSearch` the agent saw none.
+- A tool named in `--allowedTools` ran: it listed the user's Jira issues.
+- A tool not named was denied in `dontAsk` before anything reached Jira, with
+  the same `permission_denied` event a command gets; the call itself shows
+  its input (the issue, the comment's text).
+- Five tool calls cost $0.26, against $0.05 for a run that used none.
+
+So a project using the connector launches without `--strict-mcp-config`,
+adds `ToolSearch` to `--tools`, and adds to `--allowedTools`:
+
+- **Atlassian's read tools**, by name, from the list the app keeps
+  (`src/infrastructure/runtime/connectors.ts`), measured against the tools
+  the connector offers. A tool not on that list is neither read nor write, and
+  is never allowed.
+- **The write tools the project allows.** None to start. A write the project
+  has not allowed stops the task, like a command (§3), and the stop names the
+  tool and shows what it would write; the user allows it — for the project,
+  and the run resumes — or carries on without it. Only Atlassian's write tools
+  can be allowed.
+
+Every other connector the account has is seen by the agent, by name, and
+denied. Gmail, Drive and the rest cannot be allowed from any project.
+
+Prompt injection (§5) is the risk this adds: an issue or a page can carry
+instructions, and the connector is a way out of the folder. Reads go to the
+user's own Atlassian organisation; writes stop for the user until allowed, so
+allowing a write tool is trusting every later use of it in that project.
 
 ## 9. Re-measuring
 
@@ -266,4 +296,11 @@ worktree and a file outside it, launch §2 with a prompt that attempts each of:
 
 and check that the init event lists no MCP servers, no skills, no hooks and
 only the listed tools, and that after several turns the agent is still told of
-no connector: they arrive late, so the init event alone does not show them. Record the version at the top of this document.
+no connector: they arrive late, so the init event alone does not show them.
+
+Then launch a connector project's run and check that it lists the connector's
+tools through `ToolSearch`, that an allowed read tool runs, that a write tool
+not allowed is denied with a `permission_denied` event before it reaches
+Atlassian (on an issue that does not exist), and that the read list still
+matches the tools the connector offers. Record the version at the top of this
+document.

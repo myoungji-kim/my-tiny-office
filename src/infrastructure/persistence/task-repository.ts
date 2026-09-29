@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 
 import type { TaskRepository } from "../../application/repositories";
 import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toTaskId } from "../../domain/ids";
+import { isAtlassianWrite } from "../../domain/project";
 import type { Blocker, Task } from "../../domain/task";
 
 import type { AppDatabase } from "./database";
@@ -14,9 +15,12 @@ type TaskRow = typeof tasks.$inferSelect;
 function toBlocker(raw: string | null): Blocker | undefined {
   if (raw === null) return undefined;
   try {
-    const value = JSON.parse(raw) as { kind?: unknown; command?: unknown };
+    const value = JSON.parse(raw) as { kind?: unknown; command?: unknown; write?: unknown; target?: unknown; text?: unknown };
     if (value.kind === "commandNotAllowed" && typeof value.command === "string") {
       return { kind: "commandNotAllowed", command: value.command };
+    }
+    if (value.kind === "writeNotAllowed" && isAtlassianWrite(value.write) && typeof value.target === "string" && typeof value.text === "string") {
+      return { kind: "writeNotAllowed", write: value.write, target: value.target, text: value.text };
     }
     if (value.kind === "budgetReached") return { kind: "budgetReached" };
     if (value.kind === "workspaceUnavailable") return { kind: "workspaceUnavailable" };

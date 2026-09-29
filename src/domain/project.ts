@@ -1,5 +1,6 @@
 import type {
   ProjectCommandAllowed,
+  ProjectWriteAllowed,
   ProjectCreated,
   ProjectFinished,
   ProjectHeld,
@@ -15,6 +16,23 @@ export type Priority = "low" | "normal" | "high";
 
 export const PRIORITY_RANK: Readonly<Record<Priority, number>> = { high: 0, normal: 1, low: 2 };
 
+// What a task may write to Jira or Confluence once the project allows it.
+// Anything else the connector can do, or any other connector, is never allowed.
+export const ATLASSIAN_WRITES = [
+  "jiraComment",
+  "jiraEdit",
+  "jiraTransition",
+  "jiraCreate",
+  "jiraWorklog",
+  "jiraLink",
+  "confluenceEdit",
+  "confluenceCreate",
+  "confluenceComment",
+] as const;
+export type AtlassianWrite = (typeof ATLASSIAN_WRITES)[number];
+
+export const isAtlassianWrite = (value: unknown): value is AtlassianWrite => (ATLASSIAN_WRITES as readonly unknown[]).includes(value);
+
 export interface Project {
   readonly id: ProjectId;
   readonly companyId: CompanyId;
@@ -26,6 +44,10 @@ export interface Project {
   readonly folderConfirmed: boolean;
   // Exact commands its employees may run; nothing else runs.
   readonly commands: readonly string[];
+  // Its employees read Jira and Confluence through the Atlassian connector.
+  readonly atlassian: boolean;
+  // The writes they make there without asking; only with the connector on.
+  readonly writes: readonly AtlassianWrite[];
   readonly status: ProjectStatus;
   readonly priority: Priority;
   readonly heldReason: string | undefined;
@@ -65,10 +87,15 @@ export interface CreateProjectInput {
   readonly description?: string;
   readonly folder?: string;
   readonly commands?: readonly string[];
+  readonly atlassian?: boolean;
+  readonly writes?: readonly AtlassianWrite[];
   readonly priority: Priority;
 }
 
-export type CreateProjectFailure = "projectNameRequired" | "commandNotAllowable" | "tooManyCommands";
+export type CreateProjectFailure = "projectNameRequired" | "commandNotAllowable" | "tooManyCommands" | "writeNotAllowable";
+
+// Writes go with the connector: turning it off lets them go too.
+const writesOf = (atlassian: boolean, writes: readonly AtlassianWrite[] | undefined) => (atlassian ? [...new Set(writes ?? [])] : []);
 
 export function createProject(
   input: CreateProjectInput,
@@ -80,6 +107,8 @@ export function createProject(
   const commands = [...new Set(input.commands ?? [])];
   if (!commands.every(isAllowableCommand)) return { ok: false, reason: "commandNotAllowable" };
   if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
+  const writes = writesOf(input.atlassian === true, input.writes);
+  if (!writes.every(isAtlassianWrite)) return { ok: false, reason: "writeNotAllowable" };
 
   const project: Project = {
     id: input.id,
@@ -89,6 +118,8 @@ export function createProject(
     folder: input.folder,
     folderConfirmed: true,
     commands,
+    atlassian: input.atlassian === true,
+    writes,
     status: "planned",
     priority: input.priority,
     heldReason: undefined,
@@ -108,6 +139,8 @@ export interface ProjectDetails {
   readonly description: string | undefined;
   readonly folder: string | undefined;
   readonly commands: readonly string[];
+  readonly atlassian: boolean;
+  readonly writes: readonly AtlassianWrite[];
   readonly priority: Priority;
 }
 
@@ -125,11 +158,13 @@ export function editProject(
   const commands = [...new Set(details.commands)];
   if (!commands.every(isAllowableCommand)) return { ok: false, reason: "commandNotAllowable" };
   if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
+  const writes = writesOf(details.atlassian, details.writes);
+  if (!writes.every(isAtlassianWrite)) return { ok: false, reason: "writeNotAllowable" };
   if (details.folder !== project.folder && running > 0) return { ok: false, reason: "folderInUse" };
   return {
     ok: true,
     // the dialog shows the folder and its boundary, so saving it is choosing it
-    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, folderConfirmed: true, commands, priority: details.priority },
+    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, folderConfirmed: true, commands, atlassian: details.atlassian, writes, priority: details.priority },
   };
 }
 
@@ -215,5 +250,22 @@ export function allowCommand(
     ok: true,
     project: { ...project, commands },
     events: [{ ...event("ProjectCommandAllowed", project, eventId, now), command }],
+  };
+}
+
+// A write allowed from a stopped task is the project's from then on.
+export function allowWrite(
+  project: Project,
+  write: AtlassianWrite,
+  eventId: EventId,
+  now: Timestamp,
+): Transition<ProjectWriteAllowed, "writeNotAllowable" | "connectorOff"> {
+  if (!isAtlassianWrite(write)) return { ok: false, reason: "writeNotAllowable" };
+  if (!project.atlassian) return { ok: false, reason: "connectorOff" };
+  const writes = project.writes.includes(write) ? project.writes : [...project.writes, write];
+  return {
+    ok: true,
+    project: { ...project, writes },
+    events: [{ ...event("ProjectWriteAllowed", project, eventId, now), write }],
   };
 }

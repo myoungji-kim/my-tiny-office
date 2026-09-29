@@ -8,7 +8,7 @@ import type { AppContext } from "./context";
 import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
 import { requestReview } from "./review";
-import { allowCommand, createProject, startProject } from "./project";
+import { allowCommand, allowWrite, createProject, startProject } from "./project";
 import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 import { createWorkSupervisor, type WorkSupervisor } from "./work";
@@ -80,10 +80,10 @@ beforeEach(async () => {
 });
 
 // A company with one person and one task waiting in a started project.
-async function oneTask(): Promise<TaskId> {
+async function oneTask(atlassian = false): Promise<TaskId> {
   const hired = await hireEmployee(ctx, { companyId, name: "모카", species: "cat", roleId: await firstRole(ctx, companyId) });
   assert(hired.ok);
-  const project = await createProject(ctx, { companyId, name: "pay", priority: "normal", folder: "/code/pay", commands: ["npm test"] });
+  const project = await createProject(ctx, { companyId, name: "pay", priority: "normal", folder: "/code/pay", commands: ["npm test"], atlassian });
   assert(project.ok);
   assert((await startProject(ctx, project.value.project.id)).ok);
   const task = await createTask(ctx, { companyId, projectId: project.value.project.id, title: "Paginate", description: "Twenty a page.", priority: "normal" });
@@ -229,6 +229,47 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The user did not allow `cd x && git status`. Carry on with the task without it." });
+  });
+
+  it("works without any connector in a project that does not use one", async () => {
+    await oneTask();
+    await settle();
+
+    expect(launched[0].input.atlassian).toBeUndefined();
+    expect(launched[0].input.memory).not.toContain("Jira");
+  });
+
+  it("stops before a Jira write the project does not allow, shows it, and carries on once it is allowed", async () => {
+    const id = await oneTask(true);
+    await settle();
+    expect(launched[0].input).toMatchObject({ atlassian: { writes: [] } });
+    expect(launched[0].input.memory).toContain("ToolSearch");
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "writeDenied", write: "jiraComment", target: "ORD-231", text: "타입을 좁혔어요." });
+    await settle();
+
+    expect(launched[0].stopped).toBe(true);
+    expect(await statusOf(id)).toMatchObject({ blocker: { kind: "writeNotAllowed", write: "jiraComment", target: "ORD-231", text: "타입을 좁혔어요." } });
+
+    const task = await statusOf(id);
+    assert(task !== undefined);
+    assert((await allowWrite(ctx, task.projectId, "jiraComment")).ok);
+    await settle();
+
+    expect(launched[1].input).toMatchObject({ resume: SESSION, atlassian: { writes: ["jiraComment"] }, prompt: "The write you tried is allowed now. Make it again, and carry on with the task." });
+  });
+
+  it("carries on without a Jira write the user does not allow", async () => {
+    const id = await oneTask(true);
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "writeDenied", write: "jiraTransition", target: "ORD-231", text: "{}" });
+    await settle();
+
+    assert((await carryOn(ctx, id)).ok);
+    await settle();
+
+    expect(launched[1].input.prompt).toContain("did not allow the write");
   });
 
   it("marks a run whose process is gone as disconnected, and reconnects to its session", async () => {
