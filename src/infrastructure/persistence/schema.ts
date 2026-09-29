@@ -12,7 +12,7 @@ import type { TaskStatus } from "../../domain/task";
 
 // Each list is checked against its domain union, and each CHECK is built from
 // its list, so widening a union without touching the schema fails to compile.
-const availabilities = ["available", "onLeave"] as const satisfies readonly Availability[];
+const availabilities = ["available", "onLeave", "left"] as const satisfies readonly Availability[];
 const priorities = ["low", "normal", "high"] as const satisfies readonly Priority[];
 const projectStatuses = ["planned", "active", "held", "done"] as const satisfies readonly ProjectStatus[];
 const taskStatuses = ["backlog", "working", "approval", "done", "held"] as const satisfies readonly TaskStatus[];

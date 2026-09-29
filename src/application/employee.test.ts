@@ -4,7 +4,10 @@ import { toCompanyId, toRoleId, toTeamId } from "../domain/ids";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
-import { editEmployee, hireEmployee } from "./employee";
+import { editEmployee, hireEmployee, letGo } from "./employee";
+import { teachMemory } from "./memory";
+import { createProject, startProject } from "./project";
+import { createTask, pickUpWork } from "./task";
 import { addTeam } from "./organisation";
 import { createTestContext, firstRole } from "./test-context";
 
@@ -65,5 +68,32 @@ describe("hireEmployee", () => {
     const result = await hireEmployee(ctx, { companyId: toCompanyId("missing"), name: "Min-su", species: "cat", roleId: toRoleId("r") });
 
     expect(result).toEqual({ ok: false, reason: "companyNotFound" });
+  });
+});
+
+describe("letGo", () => {
+  it("returns their work, takes what they were taught with them, and keeps them only as a name", async () => {
+    const roleId = await firstRole(ctx, companyId);
+    const mocha = await hireEmployee(ctx, { companyId, name: "모카", species: "cat", roleId });
+    const bori = await hireEmployee(ctx, { companyId, name: "보리", species: "cat", roleId });
+    assert(mocha.ok && bori.ok);
+    const project = await createProject(ctx, { companyId, name: "pay", priority: "normal", folder: "/code/pay" });
+    assert(project.ok && (await startProject(ctx, project.value.project.id)).ok);
+    const work = await createTask(ctx, { companyId, projectId: project.value.project.id, title: "Paginate", priority: "normal", assigneeId: mocha.value.employee.id, reviewerId: bori.value.employee.id });
+    assert(work.ok);
+    assert((await pickUpWork(ctx, companyId)).ok);
+    assert((await teachMemory(ctx, { companyId, kind: "style", employeeId: mocha.value.employee.id, text: "Small commits" })).ok);
+    assert((await teachMemory(ctx, { companyId, kind: "company", text: "Korean first" })).ok);
+
+    assert((await letGo(ctx, mocha.value.employee.id)).ok);
+    assert((await letGo(ctx, bori.value.employee.id)).ok);
+
+    await expect(ctx.tasks.findById(work.value.task.id)).resolves.toMatchObject({ status: "backlog", assigneeId: undefined, reviewerId: undefined });
+    expect((await ctx.memories.findByCompany(companyId)).map((m) => m.text)).toEqual(["Korean first"]);
+    await expect(ctx.employees.findById(mocha.value.employee.id)).resolves.toMatchObject({ name: "모카", availability: "left" });
+    await expect(letGo(ctx, mocha.value.employee.id)).resolves.toEqual({ ok: false, reason: "employeeGone" });
+    // nobody let go picks work up again
+    assert((await pickUpWork(ctx, companyId)).ok);
+    await expect(ctx.tasks.findById(work.value.task.id)).resolves.toMatchObject({ status: "backlog" });
   });
 });

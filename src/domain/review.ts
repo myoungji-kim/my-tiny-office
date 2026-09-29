@@ -81,7 +81,7 @@ export function askReviewer(
   if (review.state !== "suggested") return { ok: false, reason: "reviewNotOpen" };
   if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
   if (reviewer.id === task.assigneeId) return { ok: false, reason: "reviewerIsAssignee" };
-  if (reviewer.availability === "onLeave") return { ok: false, reason: "reviewerOnLeave" };
+  if (reviewer.availability !== "available") return { ok: false, reason: "reviewerOnLeave" };
   if (task.area === undefined || !expertise.has(task.area)) return { ok: false, reason: "reviewerDoesNotKnowArea" };
 
   if (reviewerBusy) {
@@ -165,7 +165,7 @@ export function liveReviews(tasks: readonly Task[], reviews: readonly Review[]):
 }
 
 export function statusOf(employee: Employee, tasks: readonly Task[], reviews: readonly Review[]): EmployeeStatus {
-  if (employee.availability === "onLeave") return "onLeave";
+  if (employee.availability !== "available") return "onLeave";
   if (liveReviews(tasks, reviews).some((r) => r.state === "reviewing" && r.reviewerId === employee.id)) return "reviewing";
   if (tasks.some((t) => t.status === "working" && t.assigneeId === employee.id)) return "working";
   return "available";

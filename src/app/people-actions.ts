@@ -1,6 +1,6 @@
 "use server";
 
-import { bringBack, editEmployee, hireEmployee, sendOnLeave } from "../application/employee";
+import { bringBack, editEmployee, hireEmployee, letGo, sendOnLeave } from "../application/employee";
 import { forgetMemory, reviseMemory, teachMemory } from "../application/memory";
 import { addTeam, moveEmployee, removeTeam, renameTeam } from "../application/organisation";
 import { assignTask, createTask } from "../application/task";
@@ -40,6 +40,10 @@ export async function editEmployeeAction(companyId: string, employeeId: string, 
   return inCompany(companyId, (ctx) =>
     editEmployee(ctx, toEmployeeId(str(employeeId)), { name: str(input.name), species, roleId: toRoleId(str(input.roleId)), teamId: teamOf(input.teamId) }),
   );
+}
+
+export async function letGoAction(companyId: string, employeeId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => letGo(ctx, toEmployeeId(str(employeeId))));
 }
 
 export async function sendOnLeaveAction(companyId: string, employeeId: string): Promise<Outcome> {

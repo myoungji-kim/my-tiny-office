@@ -112,6 +112,46 @@ export function sendOnLeave(ctx: AppContext, employeeId: EmployeeId): Promise<Em
   });
 }
 
+// Letting someone go returns their work to the backlog, gives back any review
+// they were asked for, and what they were taught leaves with them. The
+// history keeps their hire, and their past work keeps their name.
+export function letGo(ctx: AppContext, employeeId: EmployeeId): Promise<EmployeeResult<"employeeNotFound" | "employeeGone">> {
+  return ctx.withTransaction(async () => {
+    const employee = await ctx.employees.findById(employeeId);
+    if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
+    const gone = employeeDomain.letGo(employee);
+    if (!gone.ok) return gone;
+    const now = ctx.now();
+
+    const events: DomainEvent[] = [];
+    const returned = [];
+    for (const task of await ctx.tasks.findByCompany(employee.companyId)) {
+      // a colleague named to review it is asked no more
+      const unnamed = task.reviewerId === employee.id ? { ...task, reviewerId: undefined } : task;
+      const back = task.assigneeId === employee.id ? returnToBacklog(unnamed, toEventId(ctx.newId()), now) : undefined;
+      if (back?.ok) {
+        await ctx.tasks.save(back.task);
+        if (task.status === "working") returned.push(task.id);
+        events.push(...back.events);
+      } else if (unnamed !== task) await ctx.tasks.save(unnamed);
+    }
+    events.push(...(await withdrawReviewsOn(ctx, employee.companyId, returned)));
+    for (const review of await ctx.reviews.findByCompany(employee.companyId)) {
+      if (review.reviewerId !== employee.id) continue;
+      const released = releaseReview(review, toEventId(ctx.newId()), now);
+      if (!released.ok) continue;
+      await ctx.reviews.save(released.review);
+      events.push(...released.events);
+    }
+    for (const memory of await ctx.memories.findByCompany(employee.companyId)) {
+      if (memory.employeeId === employee.id) await ctx.memories.remove(memory.id);
+    }
+
+    await ctx.employees.save(gone.employee);
+    return { ok: true, value: { employee: gone.employee }, events };
+  });
+}
+
 export async function bringBack(ctx: AppContext, employeeId: EmployeeId): Promise<EmployeeResult<LeaveFailure>> {
   const employee = await ctx.employees.findById(employeeId);
   if (employee === undefined) return { ok: false, reason: "employeeNotFound" };

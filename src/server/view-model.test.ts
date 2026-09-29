@@ -7,7 +7,7 @@ import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 
 import { createCompany } from "../application/company";
 import type { AppContext } from "../application/context";
-import { hireEmployee } from "../application/employee";
+import { hireEmployee, letGo } from "../application/employee";
 import { createProject, startProject } from "../application/project";
 import { assignTask, createTask, pickUpWork } from "../application/task";
 import { toCompanyId, toEmployeeId, type CompanyId } from "../domain/ids";
@@ -65,6 +65,23 @@ async function seedEmployee(companyId: CompanyId) {
 }
 
 describe("loadOffice", () => {
+  it("keeps someone let go out of every list, and names them on what they did", async () => {
+    const company = await seedCompany();
+    const employee = await seedEmployee(company.id);
+    const project = await createProject(ctx, { companyId: company.id, name: "pay", priority: "normal", folder: "/code/pay" });
+    assert(project.ok);
+    const task = await createTask(ctx, { companyId: company.id, projectId: project.value.project.id, title: "Paginate", priority: "normal" });
+    assert(task.ok);
+    await ctx.tasks.save({ ...task.value.task, status: "done", assigneeId: employee.id, startedAt: current, finishedAt: current, appliedAt: current });
+    assert((await letGo(ctx, employee.id)).ok);
+
+    const office = await load();
+
+    expect(office.employees).toEqual([]);
+    expect(office.former).toEqual([{ id: employee.id, name: "Min-su", species: "cat" }]);
+    expect(office.tasks[0]).toMatchObject({ assigneeName: "Min-su" });
+  });
+
   it("reports no company on a fresh database", async () => {
     const office = await load();
 

@@ -3,7 +3,8 @@ import type { CompanyId, EmployeeId, EventId, RoleId, TeamId } from "./ids";
 import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
 
-export type Availability = "available" | "onLeave";
+// "left": let go; kept so what they did keeps their name, and never given work again
+export type Availability = "available" | "onLeave" | "left";
 
 // The species only decides the sprite; it is never spelled out beside the name.
 export const SPECIES = [
@@ -106,12 +107,17 @@ export function goOnLeave(
   eventId: EventId,
   now: Timestamp,
 ): LeaveTransition<EmployeeWentOnLeave, "employeeOnLeave"> {
-  if (employee.availability === "onLeave") return { ok: false, reason: "employeeOnLeave" };
+  if (employee.availability !== "available") return { ok: false, reason: "employeeOnLeave" };
   return {
     ok: true,
     employee: { ...employee, availability: "onLeave", leaveSince: now },
     events: [{ eventId, type: "EmployeeWentOnLeave", occurredAt: now, companyId: employee.companyId, employeeId: employee.id, employeeName: employee.name }],
   };
+}
+
+export function letGo(employee: Employee): { readonly ok: true; readonly employee: Employee } | { readonly ok: false; readonly reason: "employeeGone" } {
+  if (employee.availability === "left") return { ok: false, reason: "employeeGone" };
+  return { ok: true, employee: { ...employee, availability: "left", leaveSince: undefined } };
 }
 
 export function returnFromLeave(

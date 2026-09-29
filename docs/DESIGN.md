@@ -658,7 +658,11 @@ measured flags behind it.
   report), how often a memory was used (the person's page lists the memories taught
   lately instead of the most used). Waiting on the runtime: rewriting or handing over
   work that is running.
-  Not in `src/domain` yet: letting someone go.
+- **Letting someone go.** 내보내기 in their page's `⋯`, asked again with what
+  happens: their task goes back to the backlog, a review they held is given
+  back, a task naming them as reviewer names nobody, and what they were taught
+  leaves with them. They stay only as a name (`availability: left`), on what
+  they did and in the history, and in no list.
 - **Deleting.** A task that is not finished goes from its page's `⋯`, asked
   again with what is lost unless it is only written down, and takes its
   conversation, steps, reviews and worktree and branch with it. A project goes

@@ -135,6 +135,8 @@ export interface OfficeView {
       }
     | undefined;
   readonly employees: readonly EmployeeView[];
+  // those let go: named on what they did, in no list
+  readonly former: readonly { readonly id: string; readonly name: string; readonly species: string }[];
   readonly roles: readonly RoleView[];
   readonly teams: readonly TeamView[];
   readonly areas: readonly AreaView[];
@@ -150,6 +152,7 @@ const empty: Omit<OfficeView, "now"> = {
   unreadable: 0,
   company: undefined,
   employees: [],
+  former: [],
   roles: [],
   teams: [],
   areas: [],
@@ -200,7 +203,8 @@ export async function loadOffice(
   const ctx = clock === undefined ? base : { ...base, now: clock };
 
   const now = ctx.now();
-  const employees = await ctx.employees.findByCompany(company.id);
+  const everyone = await ctx.employees.findByCompany(company.id);
+  const employees = everyone.filter((employee) => employee.availability !== "left");
   const tasks = await ctx.tasks.findByCompany(company.id);
   const projects = await ctx.projects.findByCompany(company.id);
   const roles = await ctx.roles.findByCompany(company.id);
@@ -216,7 +220,7 @@ export async function loadOffice(
   const roleName = new Map(roles.map((role) => [role.id, role.name]));
   const projectName = new Map(projects.map((project) => [project.id, project.name]));
 
-  const nameById = new Map(employees.map((employee) => [employee.id, employee.name]));
+  const nameById = new Map(everyone.map((employee) => [employee.id, employee.name]));
   const taskById = new Map(tasks.map((task) => [task.id, task]));
   const minutes = (ms: number) => Math.floor(ms / 60_000);
 
@@ -259,6 +263,7 @@ export async function loadOffice(
       leaveSince: employee.leaveSince,
       ...deskOf(employee.id),
     })),
+    former: everyone.filter((employee) => employee.availability === "left").map((employee) => ({ id: employee.id, name: employee.name, species: employee.species })),
     roles: roles.map((role) => ({ id: role.id, name: role.name })),
     teams: teams.map((team) => ({ id: team.id, suggested: team.suggested, name: team.name })),
     areas: areas.map((area) => ({ id: area.id, starting: area.starting, name: area.name })),

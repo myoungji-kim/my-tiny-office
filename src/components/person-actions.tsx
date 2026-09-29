@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
-import { bringBackAction, sendOnLeaveAction } from "../app/people-actions";
+import { bringBackAction, letGoAction, sendOnLeaveAction } from "../app/people-actions";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
 
@@ -52,6 +52,7 @@ export function PersonActions({
   const why = away ? w.cannotAssign : ready ? undefined : t.claude.cannotStart;
   const [open, setOpen] = useState<Open>(assignFirst && why === undefined ? "assign" : undefined);
   const [, start] = useTransition();
+  const [error, setError] = useState<string | undefined>(undefined);
   const close = useCallback(() => {
     setOpen(undefined);
     if (assignFirst) router.replace(`/people/${person.id}`, { scroll: false });
@@ -70,6 +71,11 @@ export function PersonActions({
       <button className="btn btn-primary btn-lg" type="button" disabled={why !== undefined} aria-describedby={why === undefined ? undefined : "assign-why"} onClick={() => setOpen("assign")}>
         <span>{w.giveWork}</span>
       </button>
+      {error !== undefined && (
+        <span className="hint" role="alert" style={{ margin: 0 }}>
+          {error}
+        </span>
+      )}
       <RowMenu
         className="ibtn"
         label={w.personMenu}
@@ -84,6 +90,18 @@ export function PersonActions({
                 confirm: person.task === undefined ? undefined : w.leaveWhy(person.task.title),
                 run: () => start(async () => void (await sendOnLeaveAction(companyId, person.id))),
               },
+          {
+            label: w.dismiss,
+            icon: Icon.trash,
+            bad: true,
+            confirm: w.dismissWhy,
+            run: () =>
+              start(async () => {
+                const result = await letGoAction(companyId, person.id);
+                if (result.error !== undefined) return setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
+                router.push("/people");
+              }),
+          },
         ]}
       />
 

@@ -99,8 +99,10 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const allowable = blocker?.kind === "commandNotAllowed" && isAllowableCommand(blocker.command);
   const work = await loadTaskWork(company.id, task.id);
   const person = (id: string | undefined) => office.employees.find((e) => e.id === id);
+  // someone let go is still named on what they did
+  const named = (id: string | undefined) => person(id) ?? office.former.find((e) => e.id === id);
   const review = work?.review;
-  const reviewer = person(review?.reviewerId);
+  const reviewer = named(review?.reviewerId);
   const actions = work?.steps ?? [];
   const opened = task.publishedUrl !== undefined && /\/pull\/\d+$/.test(task.publishedUrl);
 
@@ -117,8 +119,9 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const view = (m: TalkMessage): TalkView | undefined => {
     const at = whenText(locale, m.at);
     if (m.kind === "request") return { id: m.id, name: w.tk.you, species: undefined, label: w.tk.talkRequest, tone: "changes", at, text: m.text, suggestions: undefined };
-    const by = person(m.by);
+    const by = named(m.by);
     if (by === undefined) return undefined;
+    const current = person(m.by);
     if (m.kind === "review") {
       const approve = m.verdict === "approve";
       const label = w.tk.talkReview + " · " + (approve ? w.tk.talkApprove : w.tk.talkChanges);
@@ -133,8 +136,8 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       at,
       text: m.text,
       suggestions:
-        m.suggestions.length === 0 ? undefined : (
-          <Suggestions locale={locale} companyId={company.id} person={by} task={{ id: task.id, title: task.title }} suggestions={m.suggestions} memories={office.memories} areas={office.areas} />
+        m.suggestions.length === 0 || current === undefined ? undefined : (
+          <Suggestions locale={locale} companyId={company.id} person={current} task={{ id: task.id, title: task.title }} suggestions={m.suggestions} memories={office.memories} areas={office.areas} />
         ),
     };
   };
@@ -179,7 +182,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   );
   const about = task.description;
   const logText = (entry: LogEntry): string => {
-    const name = person(entry.by)?.name ?? "";
+    const name = named(entry.by)?.name ?? "";
     const l = w.tk.logs;
     switch (entry.kind) {
       case "started":
@@ -204,8 +207,8 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         w.tk.details,
         <>
           {kv(w.tk.fStatus, <span className={"chip " + CHIP[task.status]}>{w.columns[task.status]}</span>)}
-          {kv(w.tk.fWho, who?.name ?? w.unassigned)}
-          {kv(w.tk.fReviewer, person(task.reviewerId ?? review?.reviewerId)?.name ?? w.tk.noReviewer)}
+          {kv(w.tk.fWho, named(task.assigneeId)?.name ?? w.unassigned)}
+          {kv(w.tk.fReviewer, named(task.reviewerId ?? review?.reviewerId)?.name ?? w.tk.noReviewer)}
           {area !== undefined && kv(w.tk.fArea, areaName(area, t.areas))}
           {kv(w.tk.fPrio, t.priority[task.priority])}
           {time !== undefined && kv(w.tk.fTime, time)}
@@ -397,7 +400,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         talk={talk}
         live={live}
         now={now}
-        decide={task.status === "approval" && who !== undefined ? { by: who.name, changesAskedBy: lastReview?.verdict === "changes" ? person(lastReview.by)?.name : undefined } : undefined}
+        decide={task.status === "approval" && who !== undefined ? { by: who.name, changesAskedBy: lastReview?.verdict === "changes" ? named(lastReview.by)?.name : undefined } : undefined}
         changes={changes}
         did={did}
         side={side}
