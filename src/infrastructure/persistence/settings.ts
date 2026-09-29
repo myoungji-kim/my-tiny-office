@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { SERVER_NAME } from "../runtime/connector-check";
+import { EXTENSION_ID, type Chosen } from "../runtime/extensions";
 
 import { isCompanyId } from "./company-files";
 
@@ -14,6 +15,8 @@ export interface AppSettings {
   readonly workPaused?: boolean;
   // the connectors this computer's Claude account had when last checked
   readonly connectors?: { readonly checkedAt: number; readonly servers: readonly string[] };
+  // the user's plugins and skills that employees are given
+  readonly extensions?: Chosen;
 }
 
 const FILE = "settings.json";
@@ -31,13 +34,23 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { lastCompanyId, locale, workPaused, connectors } = raw as Record<string, unknown>;
+  const { lastCompanyId, locale, workPaused, connectors, extensions } = raw as Record<string, unknown>;
   return {
     ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
     ...(locale === "ko" || locale === "en" ? { locale } : {}),
     ...(workPaused === true ? { workPaused } : {}),
     ...connectorsOf(connectors),
+    ...extensionsOf(extensions),
   };
+}
+
+const ids = (raw: unknown): string[] => (Array.isArray(raw) ? [...new Set(raw.filter((id): id is string => typeof id === "string" && EXTENSION_ID.test(id)))] : []);
+
+function extensionsOf(raw: unknown): Pick<AppSettings, "extensions"> {
+  if (typeof raw !== "object" || raw === null) return {};
+  const { plugins, skills } = raw as Record<string, unknown>;
+  const chosen = { plugins: ids(plugins), skills: ids(skills) };
+  return chosen.plugins.length + chosen.skills.length === 0 ? {} : { extensions: chosen };
 }
 
 function connectorsOf(raw: unknown): Pick<AppSettings, "connectors"> {

@@ -15,6 +15,7 @@ import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 import { checkConnectors } from "../infrastructure/runtime/connector-check";
+import { installedExtensions } from "../infrastructure/runtime/extensions";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 import { getWork } from "../infrastructure/work";
 
@@ -75,6 +76,19 @@ export async function setWorkPausedAction(paused: boolean): Promise<void> {
   const files = getCompanyFiles();
   writeSettings(files.directory, { ...readSettings(files.directory), workPaused: paused === true || undefined });
   void getWork().kick();
+  revalidatePath("/", "layout");
+}
+
+// 스킬과 플러그인: one of the user's own, given to employees or taken back.
+export async function setExtensionAction(kind: "plugins" | "skills", id: string, on: boolean): Promise<void> {
+  if ((kind !== "plugins" && kind !== "skills") || typeof id !== "string") return;
+  const installed = installedExtensions()[kind];
+  if (!installed.some((x) => x.id === id)) return;
+  const files = getCompanyFiles();
+  const settings = readSettings(files.directory);
+  const chosen = { plugins: settings.extensions?.plugins ?? [], skills: settings.extensions?.skills ?? [] };
+  const next = { ...chosen, [kind]: on === true ? [...new Set([...chosen[kind], id])] : chosen[kind].filter((x) => x !== id) };
+  writeSettings(files.directory, { ...settings, extensions: next.plugins.length + next.skills.length === 0 ? undefined : next });
   revalidatePath("/", "layout");
 }
 

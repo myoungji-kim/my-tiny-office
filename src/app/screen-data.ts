@@ -15,6 +15,9 @@ export async function currentLocale(): Promise<Locale> {
 
 export const workPaused = (): boolean => readSettings(getCompanyFiles().directory).workPaused === true;
 
+// The user's plugins and skills employees are given on this computer.
+export const chosenExtensions = () => readSettings(getCompanyFiles().directory).extensions;
+
 // What the last connector check found here, if one has run.
 export const checkedConnectors = () => readSettings(getCompanyFiles().directory).connectors;
 

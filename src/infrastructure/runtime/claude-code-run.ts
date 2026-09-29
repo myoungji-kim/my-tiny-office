@@ -9,6 +9,7 @@ import { resolveDataDirectory } from "../persistence/data-directory";
 import { readSettings } from "../persistence/settings";
 import { findExecutable, startProcess } from "../process/run";
 import { atlassianServer, atlassianTools, writeOf, writeShown } from "./connectors";
+import { pluginDirs } from "./extensions";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
 const MAX_BUDGET_USD = "2";
@@ -20,6 +21,8 @@ const isSessionId = (value: unknown): value is string => typeof value === "strin
 export function launchArgs(input: {
   readonly commands: readonly string[];
   readonly atlassian: { readonly writes: readonly AtlassianWrite[]; readonly server: string } | undefined;
+  // the chosen plugins' folders, the one carrying the chosen skills among them
+  readonly plugins: readonly string[];
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
@@ -27,10 +30,12 @@ export function launchArgs(input: {
   // a reviewer's session has only the tools that read, confined to the worktree
   // connector tools arrive deferred, and ToolSearch is what loads them
   const connector = input.readOnly ? undefined : input.atlassian;
-  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch");
+  // skills only with the user's choice, and never for a reviewer
+  const plugins = input.readOnly ? [] : input.plugins;
+  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch") + (plugins.length === 0 ? "" : ",Skill");
   const allowed = input.readOnly
     ? ["Read(./**)"]
-    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes, connector.server)])];
+    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes, connector.server)]), ...(plugins.length === 0 ? [] : ["Skill"])];
   const args = [
     "-p",
     "--output-format",
@@ -42,13 +47,15 @@ export function launchArgs(input: {
     "project",
     "--settings",
     JSON.stringify({ autoMemoryEnabled: false, disableAllHooks: true }),
-    "--disable-slash-commands",
+    // skills come only through the chosen plugins, which bring the built-in ones along (SECURITY.md §8)
+    ...(plugins.length === 0 ? ["--disable-slash-commands"] : []),
     // without it the account's connectors join the session; allowed by name only
     ...(connector === undefined ? ["--strict-mcp-config"] : []),
     "--tools",
     tools,
     "--allowedTools",
     allowed.join(" "),
+    ...plugins.flatMap((dir) => ["--plugin-dir", dir]),
     "--append-system-prompt-file",
     input.memoryFile,
     "--max-budget-usd",
@@ -143,6 +150,7 @@ export const claudeCodeRuntime: AgentRuntime = {
     const folder = mkdtempSync(join(tmpdir(), "my-tiny-office-run-"));
     const cleanUp = () => rmSync(folder, { recursive: true, force: true });
     const memoryFile = join(folder, "memory.md");
+    const settings = readSettings(resolveDataDirectory());
     try {
       writeFileSync(memoryFile, input.memory);
     } catch (error) {
@@ -150,7 +158,7 @@ export const claudeCodeRuntime: AgentRuntime = {
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string; input: Json }>();
-    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian && { ...input.atlassian, server: atlassianServer(readSettings(resolveDataDirectory()).connectors?.servers) }, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian && { ...input.atlassian, server: atlassianServer(settings.connectors?.servers) }, plugins: input.readOnly ? [] : pluginDirs(settings.extensions, folder), memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

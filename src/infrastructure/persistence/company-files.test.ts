@@ -81,6 +81,13 @@ describe("settings", () => {
     expect(readSettings(directory)).toEqual({});
   });
 
+  it("keeps the plugins and skills chosen, by names that could be theirs, and nothing when none are", () => {
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ extensions: { plugins: ["ponytail@ponytail", "../x", "ponytail@ponytail"], skills: ["minimalist-ui", 4] } }));
+    expect(readSettings(directory)).toEqual({ extensions: { plugins: ["ponytail@ponytail"], skills: ["minimalist-ui"] } });
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ extensions: { plugins: [], skills: [] } }));
+    expect(readSettings(directory)).toEqual({});
+  });
+
   it("keeps what the connector check found, and only names a connector could have", () => {
     writeFileSync(join(directory, "settings.json"), JSON.stringify({ connectors: { checkedAt: 5, servers: ["claude_ai_Atlassian_Rovo", "bad name", "a__b", 3] } }));
     expect(readSettings(directory)).toEqual({ connectors: { checkedAt: 5, servers: ["claude_ai_Atlassian_Rovo"] } });

@@ -18,7 +18,7 @@ end of this document) before trusting it again.
 | Reaches the network | Never through its own tools, but for a connector its project turned on (§8). A command the project allows runs whatever it runs, and the agent can edit the scripts it calls (§3) |
 | Pushes, merges, deploys | Never. Approval commits to `mto/<task>`; pushing that branch and opening its pull request is the user's click on the task's page (§6); merging and deploying stay the user's |
 | Uses outside tools | Only the Atlassian connector (Jira, Confluence), in a project that turns it on: its read tools, and each write tool once the user has allowed it (§8). No other connector, MCP server or plugin |
-| Carries the user's personal Claude Code setup (hooks, skills, plugins, auto-memory, `~/.claude/CLAUDE.md`) | Never |
+| Carries the user's personal Claude Code setup (hooks, settings, auto-memory, `~/.claude/CLAUDE.md`) | Never. Of the user's plugins and skills, only those ticked in 설정 › 스킬과 플러그인, with their hooks and MCP servers off (§8) |
 | Reads Claude Code's credentials | Never; nor does the app |
 | Needs something outside this | Stops, and the task is blocked with the reason |
 
@@ -33,10 +33,11 @@ claude -p
   --permission-mode dontAsk
   --setting-sources project
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
-  --disable-slash-commands
+  --disable-slash-commands                     (not when plugins are chosen, §8)
   --strict-mcp-config                          (not in a project using a connector)
-  --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell[,ToolSearch]
-  --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>]"
+  --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell[,ToolSearch][,Skill]
+  --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>] [Skill]"
+  [--plugin-dir <each chosen plugin, and one carrying the chosen skills>]
   --append-system-prompt-file <memory file>
   --max-budget-usd 2
   [--resume <session-id>]
@@ -302,6 +303,25 @@ is the server whose name says so; until a check has run, the measured one
 (`claude_ai_Atlassian_Rovo`). Measured: five servers confirmed, 7 turns,
 $0.09. A denied write is read as Atlassian's under any server named so.
 
+**Skills and plugins.** The user's Claude Code keeps plugins in
+`~/.claude/plugins` (`installed_plugins.json`, user scope) and skills in
+`~/.claude/skills/<name>/SKILL.md`. The app reads only those two to list them,
+and gives a task's run the ones ticked in settings — each chosen plugin with
+`--plugin-dir`, and the chosen skills copied into one plugin of the app's own
+in the run's temporary folder — with `Skill` added to `--tools` and
+`--allowedTools` and `--disable-slash-commands` dropped, since it removes the
+Skill tool too. A reviewer is given none. Measured on `2.1.284`:
+
+- A chosen plugin's `SessionStart` hook did not run (`disableAllHooks`), and a
+  chosen plugin's MCP server did not join (`--strict-mcp-config`): the tools
+  were exactly the listed ones.
+- A skill carried in the app's plugin loaded and was invoked.
+- **Claude Code's built-in skills come along** once skills are on, and a
+  `Skill(<name>)` allow rule does not narrow them: an unlisted built-in one
+  loaded. They work only through the session's tools, so the boundary holds;
+  the settings panel says they come.
+- `--disable-slash-commands` with a plugin leaves no Skill tool at all.
+
 Prompt injection (§5) is the risk this adds: an issue or a page can carry
 instructions, and the connector is a way out of the folder. Reads go to the
 user's own Atlassian organisation; writes stop for the user until allowed, so
@@ -321,6 +341,12 @@ worktree and a file outside it, launch §2 with a prompt that attempts each of:
 and check that the init event lists no MCP servers, no skills, no hooks and
 only the listed tools, and that after several turns the agent is still told of
 no connector: they arrive late, so the init event alone does not show them.
+
+Also check that a `.claude/settings.json` in the worktree allowing bare
+`Bash`, with `defaultMode: bypassPermissions`, changes nothing: a command
+not on the project's list is still denied (measured on `2.1.284`: the app's
+own flags decide). With a plugin chosen, check that its hook does not run and
+its MCP server does not join.
 
 Then launch a connector project's run and check that it lists the connector's
 tools through `ToolSearch`, that an allowed read tool runs, that a write tool

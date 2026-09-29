@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { setLocaleAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
+import { setExtensionAction, setLocaleAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
 import { deleteCompanyAction } from "../app/company-actions";
 import { getDictionary, type Locale } from "../i18n";
 
@@ -29,6 +29,34 @@ export function LanguagePicker({
       ))}
     </div>
   );
+}
+
+interface ExtensionRow {
+  readonly id: string;
+  readonly name: string;
+  readonly about: string | undefined;
+  readonly on: boolean;
+}
+
+// The user's plugins and skills, each given to employees once ticked.
+export function ExtensionPicker({ groups }: { readonly groups: readonly { readonly kind: "plugins" | "skills"; readonly title: string; readonly rows: readonly ExtensionRow[] }[] }) {
+  const [pending, start] = useTransition();
+  return groups
+    .filter((g) => g.rows.length > 0)
+    .map((g) => (
+      <div key={g.kind} className="ext-group">
+        <b>{g.title}</b>
+        {g.rows.map((row) => (
+          <label key={row.id} className="ext">
+            <input type="checkbox" checked={row.on} disabled={pending} onChange={(e) => start(() => setExtensionAction(g.kind, row.id, e.target.checked))} />
+            <span className="ext-tx">
+              <b>{row.name}</b>
+              {row.about !== undefined && <span>{row.about}</span>}
+            </span>
+          </label>
+        ))}
+      </div>
+    ));
 }
 
 export function WorkPicker({ paused, label, auto, pause }: { readonly paused: boolean; readonly label: string; readonly auto: string; readonly pause: string }) {

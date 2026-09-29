@@ -517,14 +517,16 @@ anything the user named, is shown as written.
 ## Settings
 
 Settings holds what belongs to this computer rather than to the company: the
-Claude Code everyone works through and the connectors its account has, the
-language, and the file the company is stored in. It is one column of panels, no tabs — there is too little for tabs
+Claude Code everyone works through, the connectors its account has and the
+plugins and skills employees are given, the language, and the file the
+company is stored in. It is one column of panels, no tabs — there is too little for tabs
 to earn their place.
 
 | Panel | Holds |
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
 | 직원이 할 수 있는 일 | The boundary in three lines, with 안내 보기 to 안전 범위, the guide in full. The commands are not here: they are per project |
+| 스킬과 플러그인 | What this computer's Claude Code has in user scope — plugins, then skills — each with its own words and a tick, none ticked to start. What is ticked goes into every task's work; the hint says hooks and MCP servers stay off and that Claude Code's built-in skills come along (`settings.html?exts=none` for a computer with none) |
 | 연결된 도구 | The connectors this computer's Claude account has, as the last check found them: Atlassian — used where a project turns it on — and the rest named, not used. 확인하기 / 다시 확인 runs the check, which says what it costs; before one, a single row says so. A project dialog turning Atlassian on warns when the check found none (`settings.html?connectors=unchecked`, `?connectors=noatlassian`; `projects.html?connectors=noatlassian`) |
 | 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
 | 화면 폭 | 보통 · 넓게 · 전체, for every screen, kept in this browser; a task's page changes the same setting |

@@ -6,15 +6,16 @@ import { CheckRows, ClaudeChecks, type Row } from "../../components/claude-check
 import { Head } from "../../components/head";
 import { Icon } from "../../components/icons";
 import { ConnectorCheckButton, RecheckButton } from "../../components/recheck-button";
-import { CopyButton, DataActions, DeleteCompany, LanguagePicker, WorkPicker } from "../../components/settings-parts";
+import { CopyButton, DataActions, DeleteCompany, ExtensionPicker, LanguagePicker, WorkPicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
 import { WidthPicker } from "../../components/width-picker";
 import { toCompanyId } from "../../domain/ids";
 import { getDictionary, type Dictionary } from "../../i18n";
 import { getCompanyFiles } from "../../infrastructure/persistence/company-files";
 import { isAtlassianServer } from "../../infrastructure/runtime/connectors";
+import { installedExtensions } from "../../infrastructure/runtime/extensions";
 import pkg from "../../../package.json";
-import { checkedConnectors, companyScreen, param, workPaused, type SearchParams } from "../screen-data";
+import { checkedConnectors, chosenExtensions, companyScreen, param, workPaused, type SearchParams } from "../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
   const guide = (await param(searchParams, "view")) === "safety";
   const path = getCompanyFiles().pathOf(toCompanyId(company.id));
   const connectors = checkedConnectors();
+  const installed = installedExtensions();
+  const chosen = chosenExtensions();
 
   const shell = (head: ReactNode, body: ReactNode) => (
     <Shell locale={locale} status={status} companies={office.companies} company={company} employees={office.employees} screen="settings" head={head}>
@@ -147,6 +150,28 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
             <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} failed={w.toolsFailed} disabled={!isReady(status)} />
           </div>
           <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-hd">
+          <h2>{w.extTitle}</h2>
+          <p>{w.extWhy}</p>
+        </div>
+        <div className="panel-bd">
+          {installed.plugins.length + installed.skills.length === 0 ? (
+            <p className="col-empty" style={{ margin: 0 }}>
+              {w.extNone}
+            </p>
+          ) : (
+            <ExtensionPicker
+              groups={[
+                { kind: "plugins", title: w.extPlugins, rows: installed.plugins.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.plugins.includes(x.id) === true })) },
+                { kind: "skills", title: w.extSkills, rows: installed.skills.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.skills.includes(x.id) === true })) },
+              ]}
+            />
+          )}
+          <p className="hint">{w.extHint}</p>
         </div>
       </div>
 
