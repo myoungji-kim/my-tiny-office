@@ -204,6 +204,66 @@
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 
+  /* ═══ a task's page: what to decide, the conversation, the details ═══ */
+
+  .tk2 { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+
+  @media (max-width: 1000px) { .tk2 { grid-template-columns: 1fr; } }
+
+  .tk-main { min-width: 0; }
+
+  .tk-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+  .tk-now { margin-bottom: 16px; }
+
+  .tk-tabs { display: flex; align-items: flex-end; gap: 12px; border-bottom: 1px solid var(--line); }
+
+  .tk-tabs .tabs { flex: 1; margin-top: 0; border-bottom: none; }
+
+  .tk-tabs .view-sw { margin-bottom: 6px; }
+
+  .tk-pane { padding-top: 6px; }
+
+  .talk { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+
+  .talk:last-child { border-bottom: none; }
+
+  .talk-av { width: 32px; height: 32px; border-radius: 9px; background: var(--subtle); display: grid; place-items: center; color: var(--muted); }
+
+  .talk-av svg { width: 16px; height: 16px; }
+
+  .talk-hd { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-right: 40px; }
+
+  .talk-hd b { font-size: 15px; font-weight: 600; }
+
+  .talk-k { font-size: 13px; color: var(--muted); }
+
+  .talk-k.changes { color: var(--bad-ink); }
+
+  .talk-k.approve { color: var(--ok-ink); }
+
+  .talk-at { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .talk-bd { margin-top: 6px; max-width: 60rem; }
+
+  .talk .copy-ic { top: 14px; right: 0; }
+
+  .talk:hover .copy-ic, .talk .copy-ic:focus-visible { opacity: 1; }
+
+  .talk-sug { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+
+  .talk-sug > b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+
+  .talk-live { display: flex; align-items: center; gap: 8px; padding: 14px 0 4px; font-size: 14px; color: var(--muted); }
+
+  .talk-live code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+
+  .talk-empty { padding: 18px 0; margin: 0; }
+
+  .side-kv .kv b { font-weight: 500; }
+
+  .side-kv .kv .chip { font-size: 13px; }
+
   .chip.planned { background: none; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
 
   /* A project's status reads by shape as well as colour, the same in the tabs
@@ -690,6 +750,11 @@
       allowRun: "허용하고 이어서",
       tk: {
         now: "지금 하는 일", did: "한 일", changed: "바뀐 것", review: "검토", desc: "업무 설명",
+        tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간",
+        talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완 요청", talkReply: "답", talkRequest: "보완 요청", you: "나",
+        talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
+        decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
+        noReviewer: "없음",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
         resumeHint: "멈춘 뒤에는 터미널에서 이 세션을 이어 볼 수 있어요.", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
@@ -818,6 +883,11 @@
       allowRun: "Allow and carry on",
       tk: {
         now: "Doing now", did: "What was done", changed: "What changed", review: "Review", desc: "About this task",
+        tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "On it", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time",
+        talkReport: "Report", talkNow: "while working", talkBefore: "before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
+        talkEmpty: "Nobody has started it yet.", liveNow: "Now",
+        decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
+        noReviewer: "None",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
         resumeHint: "Once it stops, you can open this session in a terminal.", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
@@ -1046,7 +1116,10 @@
   const branchOf = (task) => "mto/" + task.id;
   const panel = (title, body) => `<div class="panel"><div class="panel-hd"><h2>${title}</h2></div><div class="panel-bd">${body}</div></div>`;
 
+  let taskTab = "talk";
+  let tabOf = null;
   function renderTask(p, task) {
+    if (tabOf !== task.id) { taskTab = "talk"; tabOf = task.id; }
     const who = task.who ? byId.get(task.who) : null;
     const k = t().tk;
     document.getElementById("tkCrumb").href = "#" + p.id;
@@ -1064,68 +1137,109 @@
     renderTaskActions(p, task);
 
     const off = RUNTIME.off ? " disabled" : "";
-    const blocked = !task.blocked || task.status !== "working" ? ""
+    // What the user has to decide leads the page, and only when there is something.
+    const now = !task.blocked || task.status !== "working"
+      ? task.status === "approval" && who
+        ? `<div class="notice tk-now"><span class="n-ic">${TASK_ICON.used}</span><span class="n-tx"><b>${k.decideTitle(who.name)}</b><span>${k.decideWhy}</span></span>
+            <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tab-go="changes">${k.seeChanges}</button></span></div>`
+        : ""
       : task.blocked.kind === "command"
-        ? `<div class="notice notice-bad"><span class="n-ic">${TASK_ICON.run}</span><span class="n-tx"><b>${t().runStopped("<code>" + task.blocked.run + "</code>")}</b><span>${t().runWhy(who.name)}</span></span>
+        ? `<div class="notice notice-bad tk-now"><span class="n-ic">${TASK_ICON.run}</span><span class="n-tx"><b>${t().runStopped("<code>" + task.blocked.run + "</code>")}</b><span>${t().runWhy(who.name)}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-allow-run${off}>${t().allowRun}</button></span></div>`
-        : `<div class="notice notice-bad"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
+        : `<div class="notice notice-bad tk-now"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect${off}>${t().reconnect}</button></span></div>`;
 
-    // What they did is there to look into, not to read through: while they
-    // work the step they are on shows, and the rest opens on request.
-    const stepRow = (s, latest) => `
-          <div class="step${latest ? " latest" : ""}"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
-            <span class="step-tx">${k.steps[s.kind]} <code>${s.what}</code>${s.note ? " · " + tx(s.note) : ""}</span></div>`;
+    // The conversation: the work's reports, a colleague's review, the user's
+    // requests, in the order they came. What was done and what changed are
+    // the other two tabs.
+    const logAt = (kind) => task.log?.find((l) => l.kind === kind)?.at ?? "";
+    const talk = [];
+    for (const m of task.thread ?? []) {
+      const person = byId.get(m.by);
+      const reviewing = m.by !== task.who;
+      talk.push({ by: person, label: reviewing ? k.talkReview : k.talkReply, at: reviewing ? logAt("reviewDone") : "", text: m.text });
+    }
+    if (task.changes) talk.push({ by: null, label: k.talkRequest, at: "", text: task.changes, cls: "changes" });
+    // what they said last closes the conversation: their report, or where they are
+    if (task.said && who) {
+      const k2 = task.blocked ? k.talkBefore : task.status === "working" ? k.talkNow : k.talkReport;
+      talk.push({ by: who, label: k2, at: task.status === "working" ? "" : logAt("finished"), text: task.said, suggest: task.suggest });
+    }
     const working = task.status === "working" && !task.blocked;
-    const steps = task.steps?.length
-      ? `<details class="panel fold"><summary class="panel-hd"><h2>${k.did}<span class="kn">${task.steps.length}</span></h2><span class="fold-ic">${chevron}</span></summary>
-          <div class="panel-bd">${task.steps.map((s) => stepRow(s, false)).join("")}</div></details>`
+    const live = working && task.steps?.length
+      ? `<div class="talk-live"><span class="dot working"></span>${k.liveNow} · ${k.steps[task.steps[0].kind]} <code>${task.steps[0].what}</code></div>`
       : "";
-    const now = working && task.steps?.length ? panel(k.now, stepRow(task.steps[0], true)) : "";
-    // What they said reads formatted; the plain text is one choice away, and copyable.
-    const said = task.said && who ? `<div class="panel said-card"><div class="panel-hd said-hd"><span class="said-av" data-av="${who.id}" data-av-size="32"></span><h2>${task.blocked ? k.saidBefore(who.name) : task.status === "working" ? k.saidNow(who.name) : k.said(who.name)}</h2>
-          <div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg></button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div></div>
-        <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="said-text"><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div></div>` : "";
+    const YOU = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.7"/><path d="M2.8 14c.6-2.8 2.7-4.3 5.2-4.3s4.6 1.5 5.2 4.3"/></svg>';
+    const COPY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg>';
+    const talkHtml = talk.length
+      ? talk.map((m, i) => `<div class="talk">
+          <span class="talk-av"${m.by ? ` data-av="${m.by.id}" data-av-size="32"` : ""}>${m.by ? "" : YOU}</span>
+          <div style="min-width:0">
+            <div class="talk-hd"><b>${m.by ? m.by.name : k.you}</b><span class="talk-k${m.cls ? " " + m.cls : ""}">${m.label}</span><span class="talk-at">${m.at}</span></div>
+            <div class="talk-bd"><div class="md"><p>${tx(m.text)}</p></div><pre class="said-raw" hidden>${tx(m.text)}</pre></div>
+            ${m.suggest?.length ? `<div class="talk-sug"><b>${k.suggestTitle}</b>${m.suggest.map((x, j) => `<div class="sug"><span class="sug-tx">${tx(x)}</span><button class="btn btn-secondary btn-sm" type="button" data-pass="${j}">${k.passIt}</button><button class="btn btn-primary btn-sm" type="button" data-teach-sug="${j}">${k.teachIt}</button></div>`).join("")}</div>` : ""}
+          </div>
+          <button class="copy-ic" type="button" data-copy="${i}" aria-label="${t().copy}" title="${t().copy}">${COPY}</button>
+        </div>`).join("") + live
+      : live || `<p class="col-empty talk-empty">${k.talkEmpty} ${task.status === "backlog" && !who ? t().whoTakes : ""}</p>`;
 
-    // What the agent thought worth remembering waits on the user: taught, or passed on.
-    const suggest = task.suggest?.length && who ? `<div class="panel sug-card"><div class="panel-hd"><h2>${k.suggestTitle}</h2><p>${k.suggestWhy(who.name)}</p></div>
-        <div class="panel-bd">${task.suggest.map((x, i) => `<div class="sug"><span class="sug-tx">${tx(x)}</span><button class="btn btn-secondary btn-sm" type="button" data-pass="${i}">${k.passIt}</button><button class="btn btn-primary btn-sm" type="button" data-teach-sug="${i}">${k.teachIt}</button></div>`).join("")}</div></div>` : "";
-
-    const changes = task.status === "backlog" ? "" : panel(k.changed,
-      (task.files?.length
+    const stepRow = (s) => `
+          <div class="step"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
+            <span class="step-tx">${k.steps[s.kind]} <code>${s.what}</code>${s.note ? " · " + tx(s.note) : ""}</span></div>`;
+    const stepsHtml = task.steps?.length ? task.steps.map(stepRow).join("") : `<p class="col-empty talk-empty">${k.noChanges}</p>`;
+    const changesHtml = (task.files?.length
         ? task.files.map((c, i) => `<button class="file" type="button" data-file="${i}"><span class="file-path">${c.file}</span><span class="file-add">+${c.add}</span><span class="file-del">−${c.del}</span></button>`).join("")
-        : `<p class="col-empty" style="margin:0">${k.noChanges}</p>`)
+        : `<p class="col-empty talk-empty">${k.noChanges}</p>`)
       + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task))}</span>` : "")
-      + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : ""));
+      + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : "");
 
-    const note = noteFor(task);
-    const review = task.status === "backlog" ? "" : panel(k.review,
-      (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}<span class="r-tx">${note.text}</span></span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
-      + (task.thread ?? []).map((m) => `<div class="msg"><span class="w-av" data-av="${m.by}"></span><span><b>${byId.get(m.by).name}</b>${tx(m.text)}</span></div>`).join(""));
+    const tabsHtml = [["talk", k.tabTalk, talk.length], ["changes", k.changed, task.files?.length ?? 0], ["did", k.did, task.steps?.length ?? 0]]
+      .map(([id, label, n]) => `<button class="tab" type="button" role="tab" data-tab="${id}" aria-selected="${id === taskTab}"><span>${label}</span><span class="n">${n}</span></button>`).join("");
+    const switcher = `<div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}">${TASK_ICON.read}</button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div>`;
 
-    const main = task.status === "approval" || task.status === "done" ? [changes, review, steps] : [now, changes, review, steps];
-
+    // The details stay where they are; what is looked at now and then is folded.
+    const reviewer = task.peer ? byId.get(task.peer.by) : null;
+    const chipCls = { working: "working", approval: "reviewing", done: "available", held: "leave" }[task.status] ?? "planned";
+    const details = `<div class="panel side-kv"><div class="panel-hd"><h2>${k.details}</h2></div><div class="panel-bd">
+        <div class="kv"><span>${k.fStatus}</span><b><span class="chip ${chipCls}">${t().columns[task.status]}</span></b></div>
+        <div class="kv"><span>${k.fWho}</span><b>${who ? who.name : t().unassigned}</b></div>
+        <div class="kv"><span>${k.fReviewer}</span><b>${reviewer ? reviewer.name : k.noReviewer}</b></div>
+        <div class="kv"><span>${k.fArea}</span><b>${areaLabel(task.area)}</b></div>
+        <div class="kv"><span>${k.fPrio}</span><b>${t().priority[task.priority]}</b></div>
+        ${task.spent !== undefined ? `<div class="kv"><span>${k.fTime}</span><b>${task.status === "working" ? t().spent(task.spent) : k.took(task.spent)}</b></div>` : ""}
+      </div></div>`;
+    const fold = (title, n, bodyHtml) => `<details class="panel fold"><summary class="panel-hd"><h2>${title}${n === undefined ? "" : `<span class="kn">${n}</span>`}</h2><span class="fold-ic">${chevron}</span></summary><div class="panel-bd">${bodyHtml}</div></details>`;
     const mine = who ? who.memories : [];
-    const memory = panel(who ? k.mem(mine.length) : k.memAhead,
-      who
-        ? mine.map((m, i) => { const used = task.usedMem?.includes(i); return `<div class="tk-mem${used ? " used" : ""}">${used ? TASK_ICON.used : TASK_ICON.unused}<span>${tx(m.text)}</span></div>`; }).join("")
-          + `<span class="hint">${k.memHow}</span>`
-        : `<p class="col-empty" style="margin:0">${k.memNobody}</p>`);
-
     const side = [
+      details,
       task.desc ? panel(k.desc, `<span style="font-size:15px">${tx(task.desc)}</span>`) : "",
-      task.status === "backlog" ? panel(k.desc, `<span style="font-size:15px">${k.notStarted} ${who ? "" : t().whoTakes}</span>`) : "",
-      memory,
-      task.log?.length ? panel(k.log, task.log.map((l) => `<div class="kv"><span>${l.at}</span><b style="font-weight:500">${k.logs[l.kind]({ name: l.who ? byId.get(l.who).name : "", took: l.took })}</b></div>`).join("")) : "",
-      task.session ? panel(k.session, `
+      fold(who ? k.mem(mine.length) : k.memAhead, undefined, who
+        ? mine.map((m, i) => { const used = task.usedMem?.includes(i); return `<div class="tk-mem${used ? " used" : ""}">${used ? TASK_ICON.used : TASK_ICON.unused}<span>${tx(m.text)}</span></div>`; }).join("") + `<span class="hint">${k.memHow}</span>`
+        : `<p class="col-empty" style="margin:0">${k.memNobody}</p>`),
+      task.session ? fold(k.session, undefined, `
         <div class="kv"><span>${k.folder}</span><b class="mono">${p.folder}/.worktrees/${task.id}</b></div>
         <div class="kv"><span>branch</span><b class="mono">${branchOf(task)}</b></div>
         <span class="hint">${k.resumeHint}</span>
         <div class="cmd"><pre><span class="p">$</span> claude --resume ${task.session}</pre><button class="copy" type="button">${t().copy}</button></div>`) : "",
+      task.log?.length ? fold(k.log, task.log.length, task.log.map((l) => `<div class="kv"><span>${l.at}</span><b style="font-weight:500">${k.logs[l.kind]({ name: l.who ? byId.get(l.who).name : "", took: l.took })}</b></div>`).join("")) : "",
     ];
 
     const view = document.getElementById("taskView");
-    view.innerHTML = `${blocked}${said ? `<div style="${blocked ? "margin-top:16px" : ""}">${said}</div>` : ""}${suggest}<div class="tk-grid" style="${blocked && !said ? "margin-top:16px" : ""}"><div class="tk-col">${main.join("")}</div><div class="tk-col">${side.join("")}</div></div>`;
+    view.innerHTML = `${now}<div class="tk2">
+        <div class="tk-main">
+          <div class="tk-tabs"><div class="tabs" role="tablist">${tabsHtml}</div>${taskTab === "talk" ? switcher : ""}</div>
+          <div class="tk-pane" data-pane="talk"${taskTab === "talk" ? "" : " hidden"}>${talkHtml}</div>
+          <div class="tk-pane" data-pane="changes"${taskTab === "changes" ? "" : " hidden"}>${changesHtml}</div>
+          <div class="tk-pane" data-pane="did"${taskTab === "did" ? "" : " hidden"}>${stepsHtml}</div>
+        </div>
+        <div class="tk-side">${side.join("")}</div>
+      </div>`;
+    for (const b of view.querySelectorAll("[data-tab], [data-tab-go]")) b.addEventListener("click", () => { taskTab = b.dataset.tab ?? b.dataset.tabGo; renderTask(p, task); });
+    for (const b of view.querySelectorAll("[data-copy]")) b.addEventListener("click", () => {
+      navigator.clipboard?.writeText(tx(talk[b.dataset.copy].text));
+      b.classList.add("done");
+      b.innerHTML = TASK_ICON.used;
+    });
     view.querySelector("[data-allow-run]")?.addEventListener("click", () => {
       p.runs = [...(p.runs ?? []), task.blocked.run];
       task.blocked = undefined;
@@ -1134,17 +1248,12 @@
     for (const b of view.querySelectorAll("[data-said]")) {
       b.addEventListener("click", () => {
         for (const o of view.querySelectorAll("[data-said]")) o.setAttribute("aria-checked", String(o === b));
-        view.querySelector(".md").hidden = b.dataset.said !== "md";
-        view.querySelector(".said-raw").hidden = b.dataset.said !== "raw";
+        for (const md of view.querySelectorAll(".talk .md")) md.hidden = b.dataset.said !== "md";
+        for (const raw of view.querySelectorAll(".talk .said-raw")) raw.hidden = b.dataset.said !== "raw";
       });
     }
     for (const b of view.querySelectorAll("[data-pass]")) b.addEventListener("click", () => { task.suggest.splice(Number(b.dataset.pass), 1); render(); });
     for (const b of view.querySelectorAll("[data-teach-sug]")) b.addEventListener("click", () => teachFrom(task, task.suggest[b.dataset.teachSug], () => { task.suggest.splice(Number(b.dataset.teachSug), 1); render(); }));
-    view.querySelector("[data-copy-said]")?.addEventListener("click", (e) => {
-      navigator.clipboard?.writeText(tx(task.said));
-      e.currentTarget.classList.add("done");
-      e.currentTarget.innerHTML = TASK_ICON.used;
-    });
     view.querySelector("[data-reconnect]")?.addEventListener("click", () => {
       task.blocked = undefined;
       if (who) who.agentLost = false;

@@ -239,35 +239,41 @@ start button: the user says what the work is and who should do it.
 
 Every task has a page under its project's board (`#pay/t1`), reached from the
 task's popover, the office popover's 업무 상세, and back through the crumb to the
-board. Its header carries the task's status, area, priority, who and time, and
-the same actions its popover offers, as page buttons; an agent that stopped says
-so above everything.
+board. It reads like an issue in a tracker with a chat in it: what to decide,
+then the conversation, with the details to one side.
 
-| Panel | Holds | From |
+```text
+header     title · status · area · priority · who · time          [actions]
+지금 할 일  only when the user has something to decide
+───────────────────────────────────────────────┬──────────────
+[대화] [바뀐 것] [한 일]                [👁 <>] │ 세부 정보
+                                              │ 업무 설명
+the tab's content                             │ ▸ 들고 간 기억
+                                              │ ▸ 세션 · ▸ 기록
+```
+
+**지금 할 일** leads, and only when there is something to decide: a stop with
+its reason and the way on, or finished work — "모카가 작업을 마쳤어요" with 바뀐 것
+보기. The header keeps every action, as page buttons.
+
+**The tabs keep their place whatever the status**, so nothing moves around:
+
+| Tab | Holds | From |
 | --- | --- | --- |
-| {이름}의 말 | Titled by when: {이름}의 말 for a run's closing report, 지금 하는 말 while it runs, 멈추기 전에 한 말 when it stopped. What the employee said at the end, across the page like a reply: formatted markdown or its plain text (👁 · `<>`), copied from the icon that appears over it | The run's closing report |
-| 기억해 둘 만한 것 | Up to two things the agent thought later tasks should know, each with 넘기기 and 기억시키기 — which opens the teaching dialog starting from its words | The run's closing report |
-| 지금 하는 일 | While they work, the one step they are on | The runtime's event stream |
-| 한 일 | Every step — read, edited, ran — folded to one row with its count | The runtime's event stream |
-| 검토 | Where the review stands — 보리가 보고 있어요, 보완을 요청했어요 — and what the reviewer said, formatted | The task's review |
-| 바뀐 것 | Every file with lines added and removed, a file opening to its diff | The task's worktree |
-| 검토 | Where the review stands and what was said | The task's PullRequest |
-| 업무 설명 | What the task is for | The task |
-| 들고 간 기억 | Everything the person carries, ✓ on what they report drawing on | The person's memory |
-| 기록 | Created, started, sent back, held, disconnected, finished, applied | Domain events |
-| 세션 | The worktree, its branch, and `claude --resume` to open it in a terminal once it stops | The session |
+| 대화 | Everything said on the task, oldest first, one message each: a colleague's review, the reply, the user's request for changes, and last what the employee said — their report, what they are saying while they work, or what they said before they stopped. Each message is formatted markdown or its plain text (👁 · `<>` for all of them), copied from the icon that appears over it. What the agent thought worth remembering sits under its report, each with 넘기기 and 기억시키기. While they work, the step they are on closes the conversation. | Runs' reports, reviews, requests |
+| 바뀐 것 | Every file with lines added and removed, a file opening to its diff, and what approving does — it commits to the task's branch, nothing is pushed | The task's worktree |
+| 한 일 | Every step — read, edited, ran — with its time | The runtime's event stream |
 
-The page follows the status: a queued task shows only what it is and who will
-take it; one waiting for approval leads with what changed and says what
-approving does — it commits to the task's branch, nothing is pushed; a done
-one is its record, with the branch it went to. What the employee said sits
-above everything but a stop, because it is what the user reads first; the
-steps are there to look into, not to read through.
+**세부 정보** is fixed: status, who, reviewer, area, priority, time. 업무 설명
+follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
+report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.
 
-A card names a stop by its reason only — 허용되지 않은 명령, with the command in its tooltip — and the page gives the command in full. A stop leads the page with its reason and the way on: 다시 연결 for a lost
-agent, 이어서 하기 at the spending cap, 다시 시도 when the worktree could not be
-made, and for a command 허용하고 이어서 and 허용하지 않고 이어서 — only the
-second when the command could never be allowed, such as one chained with `&&`.
+A card names a stop by its reason only — 허용되지 않은 명령, with the command in
+its tooltip — and the page gives the command in full. A stop leads the page with
+its reason and the way on: 다시 연결 for a lost agent, 이어서 하기 at the spending
+cap, 다시 시도 when the worktree could not be made, and for a command 허용하고
+이어서 and 허용하지 않고 이어서 — only the second when the command could never be
+allowed, such as one chained with `&&`.
 
 ### The two dialogs
 
