@@ -656,8 +656,7 @@ measured flags behind it.
   `docs/ui`. Left out until what they show exists: today's feed in the office
   and the people screen's 기억 tab (the activity feed and the memory-used
   report), how often a memory was used (the person's page lists the memories taught
-  lately instead of the most used), a
-  task's history of events. Waiting on the runtime: rewriting or handing over
+  lately instead of the most used). Waiting on the runtime: rewriting or handing over
   work that is running.
   Not in `src/domain` yet: letting someone go, and deleting a project or a
   task.

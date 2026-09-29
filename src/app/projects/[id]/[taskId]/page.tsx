@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { isReady } from "../../../../application/runtime-status";
 import { ActButton } from "../../../../components/act-button";
@@ -16,7 +16,7 @@ import { Suggestions } from "../../../../components/suggestions";
 import { TaskActions } from "../../../../components/task-actions";
 import { TaskChanges } from "../../../../components/task-changes";
 import { TaskView, type TalkView } from "../../../../components/task-view";
-import { loadTaskWork, type TalkMessage } from "../../../../server/task-work";
+import { loadTaskWork, type LogEntry, type TalkMessage } from "../../../../server/task-work";
 import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
@@ -66,10 +66,13 @@ const panel = (title: string, body: ReactNode, className = "panel") => (
   </div>
 );
 
-const fold = (title: string, body: ReactNode) => (
+const fold = (title: string, body: ReactNode, count?: number) => (
   <details className="panel fold">
     <summary className="panel-hd">
-      <h2>{title}</h2>
+      <h2>
+        {title}
+        {count !== undefined && <span className="kn">{count}</span>}
+      </h2>
       <span className="fold-ic">{Icon.chevron}</span>
     </summary>
     <div className="panel-bd">{body}</div>
@@ -175,6 +178,20 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     </div>
   );
   const about = task.description;
+  const logText = (entry: LogEntry): string => {
+    const name = person(entry.by)?.name ?? "";
+    const l = w.tk.logs;
+    switch (entry.kind) {
+      case "started":
+      case "reviewStarted":
+      case "reviewDone":
+        return l[entry.kind](name);
+      case "finished":
+        return l.finished(name, entry.took ?? 0);
+      default:
+        return l[entry.kind];
+    }
+  };
   // the user sends applied work up; a pull request's page, or GitHub's page for opening one
   const pullRequest = task.publishedUrl !== undefined && (
     <a className="btn btn-secondary btn-sm" href={task.publishedUrl} target="_blank" rel="noreferrer" title={opened ? undefined : w.tk.makePrHint}>
@@ -224,6 +241,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           </>
         ),
       )}
+      {work !== undefined && work.log.length > 0 && fold(w.tk.log, <>{work.log.map((entry, i) => <Fragment key={i}>{kv(whenText(locale, entry.at), logText(entry))}</Fragment>)}</>, work.log.length)}
       {work?.sessionId !== undefined &&
         fold(
           w.tk.session,

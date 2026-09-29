@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { toCompanyId, toTaskId } from "../domain/ids";
 import type { Review, ReviewState, Verdict } from "../domain/review";
 import type { Run, RunStep, StepKind } from "../domain/run";
-import type { TaskRequest } from "../domain/task";
+import type { Task, TaskRequest } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { branchOf, changesIn, diffOf, worktreePath, type FileChange } from "../infrastructure/workspace/git";
@@ -24,6 +24,18 @@ export type TalkMessage =
   | { readonly kind: "review"; readonly id: string; readonly by: string; readonly at: number; readonly text: string; readonly verdict: Verdict }
   | { readonly kind: "request"; readonly id: string; readonly at: number; readonly text: string };
 
+// What happened to the task, in order: read from the task, its runs, its
+// reviews and the requests it was sent back with; nothing is kept for it apart.
+export type LogKind = "created" | "started" | "finished" | "stoppedAtRun" | "stoppedAtWrite" | "budget" | "failed" | "stopped" | "lost" | "reviewStarted" | "reviewDone" | "sentBack" | "applied";
+export interface LogEntry {
+  readonly at: number;
+  readonly kind: LogKind;
+  // the employee it was about, when it was someone's
+  readonly by: string | undefined;
+  // minutes, for a finished run
+  readonly took: number | undefined;
+}
+
 export interface TaskWork {
   readonly steps: readonly { readonly at: number; readonly kind: Exclude<StepKind, "say">; readonly detail: string }[];
   readonly talk: readonly TalkMessage[];
@@ -35,6 +47,7 @@ export interface TaskWork {
   readonly review: { readonly state: ReviewState; readonly reviewerId: string | undefined } | undefined;
   readonly worktree: string | undefined;
   readonly branch: string;
+  readonly log: readonly LogEntry[];
 }
 
 // enough for every run's report on any task worked on for a while
@@ -58,6 +71,36 @@ function conversation(taskId: string, runs: readonly Run[], employeeOf: (agentId
   }
   requests.forEach((r, i) => talk.push({ kind: "request", id: `${taskId}:${i}`, at: r.at, text: r.text }));
   return talk.sort((a, b) => a.at - b.at);
+}
+
+const RUN_END: Readonly<Record<NonNullable<Run["end"]>["kind"], LogKind>> = {
+  finished: "finished",
+  denied: "stoppedAtRun",
+  writeDenied: "stoppedAtWrite",
+  budgetReached: "budget",
+  failed: "failed",
+  stopped: "stopped",
+  disconnected: "lost",
+};
+
+export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: string) => string | undefined, reviews: readonly Review[], requests: readonly TaskRequest[]): LogEntry[] {
+  const entry = (at: number, kind: LogKind, by?: string, took?: number): LogEntry => ({ at, kind, by, took });
+  const mine = reviews.filter((r) => r.taskId === task.id && r.startedAt !== undefined);
+  // a reviewer's run is the review, said once as the review
+  const reviewing = (run: Run) => mine.some((r) => r.reviewerId === employeeOf(run.agentId) && r.startedAt! <= run.startedAt && run.startedAt <= (r.settledAt ?? Infinity));
+  const log = [entry(task.createdAt, "created")];
+  for (const run of runs.filter((r) => r.taskId === task.id && !reviewing(r))) {
+    const by = employeeOf(run.agentId);
+    log.push(entry(run.startedAt, "started", by));
+    if (run.end !== undefined && run.endedAt !== undefined) log.push(entry(run.endedAt, RUN_END[run.end.kind], by, run.end.kind === "finished" ? Math.max(1, Math.round((run.endedAt - run.startedAt) / 60_000)) : undefined));
+  }
+  for (const review of mine) {
+    log.push(entry(review.startedAt!, "reviewStarted", review.reviewerId));
+    if (review.state === "settled" && review.settledAt !== undefined) log.push(entry(review.settledAt, "reviewDone", review.reviewerId));
+  }
+  for (const request of requests) log.push(entry(request.at, "sentBack"));
+  if (task.appliedAt !== undefined) log.push(entry(task.appliedAt, "applied"));
+  return log.sort((a, b) => a.at - b.at);
 }
 
 // What a task's runs did and what its worktree now holds. Read from the task's
@@ -100,6 +143,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
     memoriesUsed: [...new Set(runs.filter((r) => r.taskId === task.id).flatMap((r) => r.memoriesUsed))],
     worktree: present ? worktree : undefined,
     branch: branchOf(task.id),
+    log: logOf(task, runs, employeeOf, reviews, requests),
   };
 }
 
