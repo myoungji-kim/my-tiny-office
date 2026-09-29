@@ -192,6 +192,8 @@
 
   .md tr:last-child td { border-bottom: none; }
 
+  .md td:first-child { white-space: nowrap; }
+
   .md th { background: var(--sunk); color: var(--muted); font-size: 14px; font-weight: 600; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }

@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 type Block =
   | { readonly kind: "heading"; readonly level: number; readonly text: string }
   | { readonly kind: "paragraph"; readonly text: string }
-  | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] }
+  | { readonly kind: "list"; readonly ordered: boolean; readonly start: number; readonly items: readonly string[] }
   | { readonly kind: "quote"; readonly text: string }
   | { readonly kind: "code"; readonly text: string }
   | { readonly kind: "table"; readonly head: readonly string[]; readonly rows: readonly (readonly string[])[] };
@@ -38,8 +38,10 @@ function parseMarkdown(text: string): Block[] {
     if (line.trim() === "") {
       i += 1;
     } else if (FENCE.test(line)) {
+      // a fence inside a list item is indented; the code keeps only its own indentation
+      const indent = line.length - line.trimStart().length;
       const body: string[] = [];
-      for (i += 1; i < lines.length && !FENCE.test(lines[i]); i += 1) body.push(lines[i]);
+      for (i += 1; i < lines.length && !FENCE.test(lines[i]); i += 1) body.push(lines[i].slice(Math.min(indent, lines[i].length - lines[i].trimStart().length)));
       blocks.push({ kind: "code", text: body.join("\n") });
       i += 1;
     } else if (HEADING.test(line)) {
@@ -52,10 +54,11 @@ function parseMarkdown(text: string): Block[] {
       for (i += 2; i < lines.length && ROW.test(lines[i]); i += 1) rows.push(cells(lines[i]));
       blocks.push({ kind: "table", head, rows });
     } else if (ITEM.test(line)) {
-      const ordered = ITEM.exec(line)?.[1] !== undefined;
+      const number = ITEM.exec(line)?.[1];
       const items: string[] = [];
       for (; i < lines.length && ITEM.test(lines[i]); i += 1) items.push(ITEM.exec(lines[i])?.[2] ?? "");
-      blocks.push({ kind: "list", ordered, items });
+      // a list broken by a code block goes on counting where it was
+      blocks.push({ kind: "list", ordered: number !== undefined, start: Number(number ?? 1), items });
     } else if (line.startsWith(">")) {
       const body: string[] = [];
       for (; i < lines.length && lines[i].startsWith(">"); i += 1) body.push(lines[i].replace(/^>\s?/, ""));
@@ -97,7 +100,13 @@ function block(b: Block, key: number): ReactNode {
       );
     case "list": {
       const items = b.items.map((item, i) => <li key={i}>{inline(item)}</li>);
-      return b.ordered ? <ol key={key}>{items}</ol> : <ul key={key}>{items}</ul>;
+      return b.ordered ? (
+        <ol key={key} start={b.start === 1 ? undefined : b.start}>
+          {items}
+        </ol>
+      ) : (
+        <ul key={key}>{items}</ul>
+      );
     }
     case "table":
       return (

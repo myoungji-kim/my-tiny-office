@@ -200,6 +200,8 @@
 
   .md tr:last-child td { border-bottom: none; }
 
+  .md td:first-child { white-space: nowrap; }
+
   .md th { background: var(--sunk); color: var(--muted); font-size: 14px; font-weight: 600; }
 
   @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
@@ -599,27 +601,64 @@
       peer: { by: "p4", state: "done" },
       desc: { ko: "에러 응답을 { code, message, retryable } 하나로 맞춰요.", en: "Give every error response one shape: { code, message, retryable }." },
       session: "5d02aa91-3f7c-4e28-a6b0-91d4c2e8f735", usedMem: [2],
-      said: { ko: "에러 응답을 { code, message, retryable } 하나로 맞췄어요. 문서도 같이 고쳤어요.", en: "Every error response now has one shape, { code, message, retryable }, and the docs say so." },
-      suggest: [{ ko: "API 에러 응답은 항상 { code, message, retryable } 모양이에요.", en: "API error responses always take the shape { code, message, retryable }." }],
+      // the whole conversation, oldest first: reports, reviews, what the user asked
+      talk: [
+        { by: "p1", kind: "report", at: "09:48", text: { ko: "## 한 일\n에러 응답을 `{ code, message, retryable }` 하나로 맞췄어요. 응답은 이제 `toResponse` 한 곳에서만 만들어져요.\n\n| 파일 | 바뀐 것 |\n|---|---|\n| `src/api/errors.ts` | `AppError`를 `ErrorBody`로 바꾸는 `toResponse`와 재시도 코드 목록 `RETRYABLE` |\n| `src/api/payments.ts` | 결제 실패 세 곳이 `toResponse`를 쓰도록 변경 |\n| `docs/api/errors.md` | 새 응답 형식과 에러 코드 목록 |\n\n## 확인한 것\n- `npm test` 통과 (42개)\n- 예전 `{ error }` 응답을 만드는 곳은 저장소에 더 없어요.\n\n## 확실하지 않은 것\n어떤 코드가 재시도 대상인지는 코드와 문서에 없어서 추측했어요. 지금은 `timeout`, `rate_limited`만 `retryable: true`예요.", en: "## What I did\nEvery error response now has one shape, `{ code, message, retryable }`, built in one place, `toResponse`.\n\n| File | Change |\n|---|---|\n| `src/api/errors.ts` | `toResponse`, turning an `AppError` into an `ErrorBody`, and `RETRYABLE` |\n| `src/api/payments.ts` | The three payment failures go through `toResponse` |\n| `docs/api/errors.md` | The new shape and the list of codes |\n\n## Checked\n- `npm test` passes (42)\n- Nothing in the repository builds the old `{ error }` response any more.\n\n## Not sure\nWhich codes can be retried is written nowhere, so I guessed: only `timeout` and `rate_limited` are `retryable: true`." } },
+        { by: "p4", kind: "review", verdict: "changes", at: "09:55", text: { ko: "**좋은 점**\n- 응답 모양이 `toResponse` 한 곳에서만 만들어져서 앞으로 바꾸기 쉬워요.\n- 문서에 코드 목록이 같이 들어간 것도 좋아요.\n\n**바꿔야 할 점**\n1. 카드사 일시 오류(`issuer_unavailable`)는 다시 시도하면 대부분 성공해요. 재시도 대상에 넣어 주세요.\n   ```ts\n   const RETRYABLE = new Set<ErrorCode>(['timeout', 'rate_limited', 'issuer_unavailable']);\n   ```\n2. `src/api/payments.ts:88`에서 알 수 없는 에러를 `message: err.message` 그대로 내보내요. 내부 메시지가 밖으로 새지 않게 `internal`로 감싸 주세요.", en: "**Good**\n- The shape is built only in `toResponse`, so it is easy to change later.\n- The docs carry the list of codes too.\n\n**To change**\n1. A card issuer's temporary failure (`issuer_unavailable`) mostly succeeds when retried. Make it retryable.\n   ```ts\n   const RETRYABLE = new Set<ErrorCode>(['timeout', 'rate_limited', 'issuer_unavailable']);\n   ```\n2. `src/api/payments.ts:88` sends an unknown error's `err.message` out as it is. Wrap it as `internal` so internal messages do not leak." } },
+        { by: null, kind: "request", at: "10:02", text: { ko: "삐약 의견대로 고쳐 주세요. 그리고 앱 클라이언트가 아직 `error` 필드를 읽고 있으니, 한 버전 동안은 `error`도 같이 내려 주세요.", en: "Make the changes the review asked for. The app client still reads `error`, so keep sending `error` too for one release." } },
+        { by: "p1", kind: "report", at: "10:14", text: { ko: "## 고친 것\n1. `issuer_unavailable`을 재시도 대상에 넣었어요 (`src/api/errors.ts:12`).\n2. 알 수 없는 에러는 `code: 'internal'`, `message: 'Something went wrong'`으로 감싸고, 원래 메시지는 로그에만 남겨요.\n3. 하위 호환: 한 버전 동안 `error` 필드도 같이 내려요. 지울 시점은 `docs/api/errors.md`에 적었어요.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  /* v2.3에서 지워요: 클라이언트가 message를 읽게 되면 */\n+  error: err.message,\n };\n```\n\n## 확인한 것\n- `npm test` 통과 (45개, 새 테스트 3개: 재시도 코드, internal 감싸기, `error` 필드)", en: "## Changed\n1. `issuer_unavailable` is retryable now (`src/api/errors.ts:12`).\n2. An unknown error becomes `code: 'internal'`, `message: 'Something went wrong'`; the original message only goes to the log.\n3. For one release `error` is sent too. When to drop it is in `docs/api/errors.md`.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  // drop in v2.3, once clients read message\n+  error: err.message,\n };\n```\n\n## Checked\n- `npm test` passes (45, three new: retryable codes, the internal wrap, the `error` field)" },
+          suggest: [{ ko: "결제 API 에러는 { code, message, retryable } 모양이고, 알 수 없는 에러는 internal로 감싸요.", en: "Payment API errors take the shape { code, message, retryable }, and an unknown one is wrapped as internal." }] },
+        { by: "p4", kind: "review", verdict: "approve", at: "10:19", text: { ko: "두 가지 모두 반영됐어요. `error` 필드를 언제 지울지 문서에 적어 둔 것도 좋아요. 이대로 반영해도 돼요.", en: "Both are in. Writing down when `error` goes is good too. It can be applied as it is." } },
+      ],
+      steps: [
+        { at: "10:13", kind: "run", what: "npm test" },
+        { at: "10:11", kind: "edit", what: "docs/api/errors.md" },
+        { at: "10:09", kind: "edit", what: "src/api/errors.test.ts" },
+        { at: "10:07", kind: "edit", what: "src/api/payments.ts" },
+        { at: "10:05", kind: "edit", what: "src/api/errors.ts" },
+        { at: "10:04", kind: "read", what: "src/api/payments.ts" },
+        { at: "09:46", kind: "run", what: "npm test" },
+        { at: "09:40", kind: "edit", what: "docs/api/errors.md" },
+        { at: "09:31", kind: "edit", what: "src/api/payments.ts" },
+        { at: "09:22", kind: "edit", what: "src/api/errors.ts" },
+        { at: "09:14", kind: "read", what: "src/api/payments.ts" },
+        { at: "09:10", kind: "read", what: "src/api/errors.ts" },
+      ],
       files: [
         { file: "src/api/errors.ts", add: 42, del: 17, diff: [
+          "@@ -1,9 +1,24 @@",
           "-export function toResponse(err) { return { error: err.message }; }",
+          "+const RETRYABLE = new Set<ErrorCode>([\"timeout\", \"rate_limited\", \"issuer_unavailable\"]);",
+          "+",
           "+export function toResponse(err: AppError): ErrorBody {",
-          "+  return { code: err.code, message: err.message, retryable: RETRYABLE.has(err.code) };",
+          "+  if (!isKnown(err)) return { code: \"internal\", message: \"Something went wrong\", retryable: false, error: \"Something went wrong\" };",
+          "+  return {",
+          "+    code: err.code,",
+          "+    message: err.message,",
+          "+    retryable: RETRYABLE.has(err.code),",
+          "+    // drop in v2.3, once clients read message",
+          "+    error: err.message,",
+          "+  };",
           "+}",
         ] },
-        { file: "src/api/payments.ts", add: 9, del: 12 },
+        { file: "src/api/payments.ts", add: 9, del: 12, diff: [
+          "@@ -82,10 +82,7 @@ export async function charge(req, res) {",
+          "   } catch (err) {",
+          "-    log.warn(err);",
+          "-    return res.status(502).json({ error: err.message });",
+          "+    log.warn(err);",
+          "+    return res.status(502).json(toResponse(err));",
+          "   }",
+        ] },
+        { file: "src/api/errors.test.ts", add: 38, del: 0 },
         { file: "docs/api/errors.md", add: 21, del: 4 },
-      ],
-      thread: [
-        { by: "p4", text: { ko: "재시도할 수 있는 실패는 따로 나눠 주세요.", en: "Split out the failures that can be retried." } },
-        { by: "p1", text: { ko: "retryable 필드로 나눴어요.", en: "Split them with a retryable field." } },
       ],
       log: [
         { at: "09:02", kind: "created" },
         { at: "09:08", kind: "started", who: "p1" },
-        { at: "09:31", kind: "reviewDone", who: "p4" },
-        { at: "10:00", kind: "finished", who: "p1", took: 52 },
+        { at: "09:55", kind: "reviewDone", who: "p4" },
+        { at: "10:19", kind: "reviewDone", who: "p4" },
+        { at: "10:20", kind: "finished", who: "p1", took: 52 },
       ] },
 
     { id: "t5", project: "order", area: "db", priority: "normal", status: "approval", who: "p4", spent: 19,
@@ -1116,6 +1155,54 @@
   const branchOf = (task) => "mto/" + task.id;
   const panel = (title, body) => `<div class="panel"><div class="panel-hd"><h2>${title}</h2></div><div class="panel-bd">${body}</div></div>`;
 
+  // The subset of markdown an agent writes, as the app draws it: headings,
+  // paragraphs, lists, quotes, tables, code, bold and inline code. Escaped
+  // first, so nothing in the text becomes markup.
+  function markdown(text) {
+    const esc = (v) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const inline = (v) => esc(v).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    const lines = text.split("\n");
+    const out = [];
+    for (let i = 0; i < lines.length; ) {
+      const line = lines[i];
+      if (line.trim() === "") { i++; continue; }
+      if (/^\s*```/.test(line)) {
+        // a fence inside a list item is indented; the code keeps only its own indentation
+        const indent = line.length - line.trimStart().length;
+        const body = [];
+        for (i++; i < lines.length && !/^\s*```/.test(lines[i]); i++) body.push(lines[i].slice(Math.min(indent, lines[i].length - lines[i].trimStart().length)));
+        out.push(`<pre><code>${esc(body.join("\n"))}</code></pre>`);
+        i++;
+      } else if (/^#{1,6}\s/.test(line)) {
+        out.push(`<h3>${inline(line.replace(/^#+\s*/, ""))}</h3>`);
+        i++;
+      } else if (/^\s*\|.*\|\s*$/.test(line) && /^\s*\|?\s*:?-{3,}/.test(lines[i + 1] ?? "")) {
+        const cells = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => inline(c.trim()));
+        const head = cells(line);
+        const rows = [];
+        for (i += 2; i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i]); i++) rows.push(cells(lines[i]));
+        out.push(`<table><thead><tr>${head.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+      } else if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {
+        const ordered = /^\s*\d/.test(line);
+        // a list broken by a code block goes on counting where it was
+        const first = ordered ? Number(/\d+/.exec(line)[0]) : 1;
+        const items = [];
+        for (; i < lines.length && (/^\s*([-*+]|\d+[.)])\s+/.test(lines[i]) || /^ {2,}\S/.test(lines[i])); i++) {
+          if (/^ {2,}\S/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) {
+            if (/^\s*```/.test(lines[i])) break;
+            items[items.length - 1] += " " + lines[i].trim();
+          } else items.push(lines[i].replace(/^\s*([-*+]|\d+[.)])\s+/, ""));
+        }
+        out.push(`<${ordered ? `ol${first === 1 ? "" : ` start="${first}"`}` : "ul"}>${items.map((x) => `<li>${inline(x)}</li>`).join("")}</${ordered ? "ol" : "ul"}>`);
+      } else {
+        const body = [];
+        for (; i < lines.length && lines[i].trim() !== "" && !/^(#{1,6}\s|\s*```|\s*([-*+]|\d+[.)])\s)/.test(lines[i]); i++) body.push(lines[i].trim());
+        out.push(`<p>${inline(body.join(" "))}</p>`);
+      }
+    }
+    return out.join("");
+  }
+
   let taskTab = "talk";
   let tabOf = null;
   function renderTask(p, task) {
@@ -1154,14 +1241,19 @@
     // the other two tabs.
     const logAt = (kind) => task.log?.find((l) => l.kind === kind)?.at ?? "";
     const talk = [];
-    for (const m of task.thread ?? []) {
+    const LABEL = { report: k.talkReport, review: k.talkReview, request: k.talkRequest, reply: k.talkReply };
+    for (const m of task.talk ?? []) {
+      talk.push({ by: m.by ? byId.get(m.by) : null, label: LABEL[m.kind] + (m.verdict ? " · " + (m.verdict === "approve" ? k.talkApprove : k.talkChanges) : ""),
+        cls: m.verdict === "approve" ? "approve" : m.verdict === "changes" || m.kind === "request" ? "changes" : "", at: m.at, text: m.text, suggest: m.suggest });
+    }
+    for (const m of task.talk ? [] : task.thread ?? []) {
       const person = byId.get(m.by);
       const reviewing = m.by !== task.who;
       talk.push({ by: person, label: reviewing ? k.talkReview : k.talkReply, at: reviewing ? logAt("reviewDone") : "", text: m.text });
     }
-    if (task.changes) talk.push({ by: null, label: k.talkRequest, at: "", text: task.changes, cls: "changes" });
+    if (task.changes && !task.talk) talk.push({ by: null, label: k.talkRequest, at: "", text: task.changes, cls: "changes" });
     // what they said last closes the conversation: their report, or where they are
-    if (task.said && who) {
+    if (task.said && who && !task.talk) {
       const k2 = task.blocked ? k.talkBefore : task.status === "working" ? k.talkNow : k.talkReport;
       talk.push({ by: who, label: k2, at: task.status === "working" ? "" : logAt("finished"), text: task.said, suggest: task.suggest });
     }
@@ -1176,7 +1268,7 @@
           <span class="talk-av"${m.by ? ` data-av="${m.by.id}" data-av-size="32"` : ""}>${m.by ? "" : YOU}</span>
           <div style="min-width:0">
             <div class="talk-hd"><b>${m.by ? m.by.name : k.you}</b><span class="talk-k${m.cls ? " " + m.cls : ""}">${m.label}</span><span class="talk-at">${m.at}</span></div>
-            <div class="talk-bd"><div class="md"><p>${tx(m.text)}</p></div><pre class="said-raw" hidden>${tx(m.text)}</pre></div>
+            <div class="talk-bd"><div class="md">${markdown(tx(m.text))}</div><pre class="said-raw" hidden>${tx(m.text)}</pre></div>
             ${m.suggest?.length ? `<div class="talk-sug"><b>${k.suggestTitle}</b>${m.suggest.map((x, j) => `<div class="sug"><span class="sug-tx">${tx(x)}</span><button class="btn btn-secondary btn-sm" type="button" data-pass="${j}">${k.passIt}</button><button class="btn btn-primary btn-sm" type="button" data-teach-sug="${j}">${k.teachIt}</button></div>`).join("")}</div>` : ""}
           </div>
           <button class="copy-ic" type="button" data-copy="${i}" aria-label="${t().copy}" title="${t().copy}">${COPY}</button>

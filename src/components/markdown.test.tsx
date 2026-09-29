@@ -31,6 +31,13 @@ describe("Markdown", () => {
     );
   });
 
+  it("keeps counting a list a code block broke, and the code's own indentation", () => {
+    const out = html(["1. first", "   ```ts", "   if (x) {", "     y();", "   }", "   ```", "2. second"].join("\n"));
+
+    expect(out).toContain("<pre><code>if (x) {\n  y();\n}</code></pre>");
+    expect(out).toContain('<ol start="2"><li>second</li></ol>');
+  });
+
   it("never lets the text become markup or a link", () => {
     const out = html('<img src=x onerror="alert(1)"> [여기](javascript:alert(1)) <script>x</script>');
 
