@@ -71,7 +71,7 @@ function Card({
           </span>
           <span className="r-line blocked">
             {NONE}
-            {blocked}
+            <span className="r-tx">{blocked}</span>
           </span>
         </>
       )}

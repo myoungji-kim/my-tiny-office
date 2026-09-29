@@ -23,6 +23,7 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], commands: read
       ? "No shell command is allowed in this project."
       : `The only shell commands allowed are these, each run on its own exactly as written, never joined with && ; | or redirected: ${allowed}.`,
     "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
+    "You cannot delete files, and no command is there for it. To remove one, end your final message with a line `Remove: <path from this folder>` for each; they are removed when you finish.",
     "",
     "If this task showed you something about this project that later tasks should know — a convention, a command, a pitfall — end your final message with at most two lines, each `Worth remembering: <one sentence>`, written in the language the task is written in. Leave them out when nothing stands out.",
     ...taught(own),
@@ -300,10 +301,21 @@ export function createWorkSupervisor(deps: {
     } else {
       entry.result = event;
       if (event.report === undefined) return;
-      const { report, used, suggestions } = readReport(event.report, entry.carried);
+      const { report, used, suggestions, removals } = readReport(event.report, entry.carried);
       entry.used = used;
       entry.suggestions = suggestions;
+      if (removals.length > 0) await removeAsked(entry, removals);
       if (report !== "") await ctx.runSteps.add({ companyId: entry.companyId, taskId: entry.taskId, runId: entry.runId, at: ctx.now(), kind: "say", detail: reportDetail(report) });
+    }
+  }
+
+  async function removeAsked(entry: LiveRun, paths: readonly string[]): Promise<void> {
+    const { ctx } = entry;
+    const task = await ctx.tasks.findById(entry.taskId);
+    const folder = task === undefined ? undefined : (await ctx.projects.findById(task.projectId))?.folder;
+    if (folder === undefined) return;
+    for (const path of await deps.workspace.removeFiles(folder, entry.taskId, paths)) {
+      await ctx.runSteps.add({ companyId: entry.companyId, taskId: entry.taskId, runId: entry.runId, at: ctx.now(), kind: "edit", detail: path });
     }
   }
 

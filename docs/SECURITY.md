@@ -200,6 +200,11 @@ agents, so it is a target in its own right.
   app, so opening a task's page stages nothing.
   A worktree and its branch are named only from the task's own UUID
   (`.worktrees/<task>`, `mto/<task>`), never from text anyone wrote.
+- **Removing files.** An agent's tools cannot delete, and no command is
+  allowed for it; it ends its report with `Remove: <path>` instead, and the app
+  deletes the file only if the path stays inside the worktree, is not absolute
+  and is not under `.git`. A link is removed, never what it points at, and
+  folders are left alone.
 - **Sessions.** A session id is checked to be a UUID before it becomes
   `--resume <id>`, so nothing stored can turn into a flag.
 - **Output.** Agent output, file names, diffs and anything else from a run is

@@ -31,6 +31,7 @@ let whilePreparing: (taskId: string) => Promise<void>;
 let committed: string[];
 let ready: boolean;
 let picksUp: boolean;
+let removed: readonly string[];
 let supervisor: WorkSupervisor;
 
 const runtime: AgentRuntime = {
@@ -62,6 +63,7 @@ const workspace: Workspace = {
   },
   remove: async () => undefined,
   diff: async () => "+new line",
+  removeFiles: async (_, __, paths) => (removed = [...paths]),
 };
 
 beforeEach(async () => {
@@ -72,6 +74,7 @@ beforeEach(async () => {
   whilePreparing = async () => undefined;
   ready = true;
   picksUp = true;
+  removed = [];
   supervisor = createWorkSupervisor({ runtime, workspace, companies: () => [{ companyId, ctx }], ready: async () => ready, picksUp: () => picksUp });
   await createCompany(ctx, { id: companyId, name: "TinySoft" });
 });
@@ -180,6 +183,19 @@ describe("the work supervisor", () => {
 
     assert((await settleSuggestion(ctx, run.id, "테스트는 npm test로 돌려요")).ok);
     expect((await ctx.runs.findById(run.id))?.suggestions).toEqual([]);
+  });
+
+  it("removes the files an agent asks for, since its own tools cannot", async () => {
+    const id = await oneTask();
+    await settle();
+    expect(launched[0].input.memory).toContain("Remove: <path from this folder>");
+
+    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "Moved the notes.\nRemove: memory-notes.md" });
+    launched[0].exit();
+    await settle();
+
+    expect(removed).toEqual(["memory-notes.md"]);
+    expect(await ctx.runSteps.findByTask(companyId, id, 10)).toMatchObject([{ kind: "say", detail: "Moved the notes." }, { kind: "edit", detail: "memory-notes.md" }]);
   });
 
   it("stops on a command the project does not allow, and carries on in the same session once it is allowed", async () => {

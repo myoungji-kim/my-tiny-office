@@ -305,14 +305,16 @@
 
   /* ═══ what a review is waiting on ═══ */
 
-  .r-line { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .r-line { display: flex; align-items: flex-start; gap: 6px; font-size: 14px; min-width: 0; }
+
+  .r-tx { min-width: 0; overflow-wrap: anywhere; }
 
   .r-line.changes { color: var(--bad-ink); }
   .r-line.blocked { color: var(--bad-ink); }
 
-  .r-line code { font-family: var(--mono); font-size: .92em; white-space: nowrap; }
+  .r-line code { font-family: var(--mono); font-size: .92em; overflow-wrap: anywhere; }
 
-  .r-line svg { width: 13px; height: 13px; flex: none; }
+  .r-line svg { width: 13px; height: 13px; flex: none; margin-top: 3px; }
 
   /* Blocked is not a column: a task is always blocked out of some status, so
      it is a mark on the card rather than a place of its own. */
@@ -1001,7 +1003,7 @@
       <span class="area-chip">${areaLabel(task.area)}</span>
       <span class="w-title">${tx(task.title)}</span>
       ${task.blocked ? `<span class="w-block">${icon.none}${t().blocked}</span>` : ""}
-      ${note ? `<span class="r-line ${note.cls}">${note.svg}${note.text}</span>` : ""}
+      ${note ? `<span class="r-line ${note.cls}">${note.svg}<span class="r-tx">${note.text}</span></span>` : ""}
       <span class="w-foot">
         ${who ? `<span class="w-who"><span class="w-av"></span><span>${who.name}</span></span>` : `<span>${t().unassigned}</span>`}
         ${time ? `<span class="w-time">${icon.clock}${time}</span>` : `<span class="prio ${task.priority}">${icon.flag}${t().priority[task.priority]}</span>`}
@@ -1097,7 +1099,7 @@
 
     const note = noteFor(task);
     const review = task.status === "backlog" ? "" : panel(k.review,
-      (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}${note.text}</span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
+      (note && note.cls !== "blocked" ? `<span class="r-line ${note.cls}">${note.svg}<span class="r-tx">${note.text}</span></span>` : `<p class="col-empty" style="margin:0">${k.noReview}</p>`)
       + (task.thread ?? []).map((m) => `<div class="msg"><span class="w-av" data-av="${m.by}"></span><span><b>${byId.get(m.by).name}</b>${tx(m.text)}</span></div>`).join(""));
 
     const main = task.status === "approval" || task.status === "done" ? [changes, review, steps] : [now, changes, review, steps];

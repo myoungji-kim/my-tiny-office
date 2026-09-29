@@ -45,9 +45,9 @@ describe("a run", () => {
   it("reads which numbered memories a report drew on, and leaves the line out of it", () => {
     const carried = [toMemoryId("m1"), toMemoryId("m2"), toMemoryId("m3")];
 
-    expect(readReport("Paginated.\n\n**Memories used:** 3, 1, 9", carried)).toEqual({ report: "Paginated.", used: ["m3", "m1"], suggestions: [] });
-    expect(readReport("Done.\nMemories used: none", carried)).toEqual({ report: "Done.", used: [], suggestions: [] });
-    expect(readReport("Done, using 2 of them.", carried)).toEqual({ report: "Done, using 2 of them.", used: [], suggestions: [] });
+    expect(readReport("Paginated.\n\n**Memories used:** 3, 1, 9", carried)).toEqual({ report: "Paginated.", used: ["m3", "m1"], suggestions: [], removals: [] });
+    expect(readReport("Done.\nMemories used: none", carried)).toEqual({ report: "Done.", used: [], suggestions: [], removals: [] });
+    expect(readReport("Done, using 2 of them.", carried)).toEqual({ report: "Done, using 2 of them.", used: [], suggestions: [], removals: [] });
   });
 
   it("keeps up to two things worth remembering, each short enough to teach", () => {
@@ -64,7 +64,11 @@ describe("a run", () => {
       [toMemoryId("m1")],
     );
 
-    expect(report).toEqual({ report: "Done.", used: ["m1"], suggestions: ["테스트는 `npm run test:unit`으로 돌려요", "Dates are stored as epoch ms"] });
+    expect(report).toEqual({ report: "Done.", used: ["m1"], removals: [], suggestions: ["테스트는 `npm run test:unit`으로 돌려요", "Dates are stored as epoch ms"] });
+  });
+
+  it("reads which files the agent asked to remove", () => {
+    expect(readReport("Moved it.\nRemove: `memory-notes.md`\n**Remove:** old/a.js\nMemories used: none", []).removals).toEqual(["memory-notes.md", "old/a.js"]);
   });
 
   it("forgets a suggestion once taught or passed on", () => {

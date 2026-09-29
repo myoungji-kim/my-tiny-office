@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 
-import { branchOf, changesIn, commitAll, diffOf, prepareWorktree, removeWorktree, worktreePath } from "./git";
+import { branchOf, changesIn, commitAll, diffOf, prepareWorktree, removeFiles, removeWorktree, worktreePath } from "./git";
 
 const TASK = "11111111-2222-4333-8444-555555555555";
 let repo: string;
@@ -112,6 +112,21 @@ describe("a task's worktree", () => {
 
     expect(changes.map((c) => c.path)).toEqual(["a.txt", "moved.txt", "새 파일.txt"]);
     for (const c of changes) expect(await diffOf(repo, TASK, c.path)).not.toBe("");
+  });
+
+  it("removes only files inside the worktree that the agent asked for", async () => {
+    const made = await prepareWorktree(repo, TASK);
+    assert(made.ok);
+    writeFileSync(join(made.path, "b.txt"), "x");
+    writeFileSync(join(repo, "outside.txt"), "keep");
+
+    const removed = await removeFiles(repo, TASK, ["a.txt", "b.txt", "../../outside.txt", join(repo, "outside.txt"), ".git", ".GIT/config", "missing.txt"]);
+
+    expect(removed).toEqual(["a.txt", "b.txt"]);
+    expect(existsSync(join(made.path, "a.txt"))).toBe(false);
+    expect(existsSync(join(repo, "outside.txt"))).toBe(true);
+    expect(existsSync(join(made.path, ".git"))).toBe(true);
+    expect(await changesIn(repo, TASK)).toEqual([{ path: "a.txt", added: 0, removed: 1 }]);
   });
 
   it("refuses a folder that is not a repository or has no commit yet", async () => {

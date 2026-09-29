@@ -154,7 +154,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           <>
             <span className={`r-line ${reviewNote.cls}`}>
               {reviewNote.icon}
-              {reviewNote.text}
+              <span className="r-tx">{reviewNote.text}</span>
             </span>
             {work?.review?.comments !== undefined && (
               <div className="msg" style={{ marginTop: 8 }}>

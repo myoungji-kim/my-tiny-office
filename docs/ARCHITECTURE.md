@@ -378,8 +378,9 @@ stopped on purpose.
 What the agent is told before any task, as its appended system prompt: who it
 is, that it works only in this folder and never commits, that it is already in
 the folder and uses Read, Glob and Grep to look at files, which commands the
-project allows and that each runs on its own as written, and everything it has
-been taught, numbered.
+project allows and that each runs on its own as written, that a file it wants
+gone is named in a closing `Remove: <path>` line for the app to delete, and
+everything it has been taught, numbered.
 
 Approving commits the worktree to the task's branch and removes the worktree
 (`approveTask`); sending back queues the task for the same person, whose next

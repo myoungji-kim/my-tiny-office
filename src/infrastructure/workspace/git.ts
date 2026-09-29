@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import type { Workspace } from "../../application/agent-runtime";
 import { findExecutable, runProcess, type RunResult } from "../process/run";
@@ -164,6 +164,24 @@ export async function removeWorktree(folder: string, taskId: string): Promise<vo
   await git(["-C", folder, "worktree", "remove", "--force", worktreePath(folder, taskId)]);
 }
 
+// A file the agent asked to remove, deleted only when it lies inside the
+// worktree and outside its git data; a link is removed, never what it points at.
+export async function removeFiles(folder: string, taskId: string, paths: readonly string[]): Promise<string[]> {
+  const root = worktreePath(folder, taskId);
+  const removed: string[] = [];
+  for (const asked of paths) {
+    if (isAbsolute(asked)) continue;
+    const full = resolve(root, asked);
+    const inside = relative(root, full);
+    if (inside === "" || inside.startsWith("..") || isAbsolute(inside) || inside.split(sep)[0].toLowerCase() === ".git") continue;
+    const stat = lstatSync(full, { throwIfNoEntry: false });
+    if (stat === undefined || stat.isDirectory()) continue;
+    unlinkSync(full);
+    removed.push(inside.split(sep).join("/"));
+  }
+  return removed;
+}
+
 // what a reviewer is handed at most, so a huge change does not fill the whole prompt
 const MAX_REVIEW_DIFF = 60_000;
 
@@ -191,5 +209,6 @@ export const gitWorkspace: Workspace = {
     return !existsSync(worktreePath(folder, taskId)) || (await commitAll(folder, taskId, message)).ok;
   },
   remove: removeWorktree,
+  removeFiles,
   diff: fullDiff,
 };

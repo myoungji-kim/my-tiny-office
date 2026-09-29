@@ -97,6 +97,8 @@ export interface Reported {
   readonly report: string;
   readonly used: readonly MemoryId[];
   readonly suggestions: readonly string[];
+  // files it asked the app to remove, since its own tools cannot
+  readonly removals: readonly string[];
 }
 
 export const MAX_SUGGESTIONS = 2;
@@ -106,27 +108,32 @@ export const reported = (run: Run, { used, suggestions }: Pick<Reported, "used" 
 // Taught or passed on, a suggestion is done with.
 export const settleSuggestion = (run: Run, text: string): Run => ({ ...run, suggestions: run.suggestions.filter((s) => s !== text) });
 
-// The lines a report ends with: "Worth remembering: …" for something the next
-// task should know, and "Memories used: 2, 5" (or "none") for the numbered
-// memories it drew on. Anything else is part of what it said.
+// The lines a report ends with: "Remove: <path>" for a file to delete,
+// "Worth remembering: …" for something the next task should know, and
+// "Memories used: 2, 5" (or "none") for the numbered memories it drew on.
+// Anything else is part of what it said.
 const USED_LINE = /^\W*memories used\W*:?\W*(.*?)\W*$/i;
 // \W would take Korean too, so only markdown's marks are stripped around the words
 const SUGGEST_LINE = /^[\s*_>-]*worth remembering[\s*_]*:[\s*_]*(.+?)\s*$/i;
+const REMOVE_LINE = /^[\s*_>-]*remove[\s*_]*:[\s*_`]*(.+?)[\s*_`]*$/i;
 
 export function readReport(text: string, carried: readonly MemoryId[]): Reported {
   const lines = text.trimEnd().split("\n");
   let used: MemoryId[] = [];
   const suggested: string[] = [];
+  const removals: string[] = [];
   for (let last = lines.at(-1); last !== undefined; last = lines.at(-1)) {
     const usedLine = USED_LINE.exec(last.trim());
     const suggestLine = SUGGEST_LINE.exec(last.trim());
-    if (usedLine !== null) used = [...usedLine[1].matchAll(/\d+/g)].map((m) => carried[Number(m[0]) - 1]).filter((id): id is MemoryId => id !== undefined);
+    const removeLine = REMOVE_LINE.exec(last.trim());
+    if (removeLine !== null) removals.unshift(removeLine[1]);
+    else if (usedLine !== null) used = [...usedLine[1].matchAll(/\d+/g)].map((m) => carried[Number(m[0]) - 1]).filter((id): id is MemoryId => id !== undefined);
     else if (suggestLine !== null) suggested.unshift(suggestLine[1].replace(/\*+$/, "").trim());
     else if (last.trim() !== "") break;
     lines.pop();
   }
   const suggestions = [...new Set(suggested)].filter((s) => s !== "" && s.length <= MAX_MEMORY_TEXT).slice(0, MAX_SUGGESTIONS);
-  return { report: lines.join("\n").trimEnd(), used: [...new Set(used)], suggestions };
+  return { report: lines.join("\n").trimEnd(), used: [...new Set(used)], suggestions, removals: [...new Set(removals)] };
 }
 
 // The session a new run of this agent on this task continues, if any: a
