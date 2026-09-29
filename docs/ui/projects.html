@@ -208,9 +208,24 @@
 
   /* ═══ a task's page: what to decide, the conversation, the details ═══ */
 
-  .tk2 { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+  .tk2 { display: grid; grid-template-columns: minmax(0, 1fr) 16px var(--tk-side, 300px); gap: 6px; align-items: start; }
 
-  @media (max-width: 1000px) { .tk2 { grid-template-columns: 1fr; } }
+  @media (max-width: 1000px) { .tk2 { grid-template-columns: 1fr; gap: 20px; } .tk-split { display: none; } }
+
+  .tk-split { position: relative; align-self: stretch; min-height: 120px; cursor: col-resize; touch-action: none; }
+
+  .tk-split::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%); border-radius: 2px; background: transparent; transition: background .12s; }
+
+  .tk-split:hover::before, .tk-split.dragging::before { background: var(--line-2); }
+
+
+  .tk-split:focus-visible::before { background: var(--brand); }
+
+  .tk2.resizing { user-select: none; cursor: col-resize; }
+
+  .tk-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+  .view-sw.words button { width: auto; padding: 0 10px; font-size: 13px; font-weight: 500; }
 
   .tk-main { min-width: 0; }
 
@@ -222,7 +237,6 @@
 
   .tk-tabs .tabs { flex: 1; margin-top: 0; border-bottom: none; }
 
-  .tk-tabs .view-sw { margin-bottom: 6px; }
 
   .tk-pane { padding-top: 6px; }
 
@@ -246,7 +260,7 @@
 
   .talk-at { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
 
-  .talk-bd { margin-top: 6px; max-width: 60rem; }
+  .talk-bd { margin-top: 6px; }
 
   .talk .copy-ic { top: 14px; right: 0; }
 
@@ -819,7 +833,7 @@
         tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간",
         talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완 요청", talkReply: "답", talkRequest: "보완 요청", you: "나",
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
-        talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
+        splitLabel: "세부 정보 폭 조절", widthLabel: "화면 폭", widths: { normal: "보통", wide: "넓게", full: "전체" }, talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
         decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
         noReviewer: "없음",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
@@ -953,7 +967,7 @@
         tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "On it", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time",
         talkReport: "Report", talkNow: "while working", talkBefore: "before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
-        talkOpen: "Open", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
+        splitLabel: "Resize the details", widthLabel: "Width", widths: { normal: "Normal", wide: "Wide", full: "Full" }, talkOpen: "Open", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
         decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
         noReviewer: "None",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
@@ -1232,6 +1246,53 @@
     return out.join("");
   }
 
+// How wide the details are is this person's to choose, and it is remembered
+  // here; a double click puts it back.
+  const SIDE = { min: 220, max: 560, start: 300, step: 24, key: "mto.taskSide" };
+  const sideWidth = () => {
+    try {
+      const saved = Number(localStorage.getItem(SIDE.key));
+      return saved >= SIDE.min && saved <= SIDE.max ? saved : SIDE.start;
+    } catch {
+      return SIDE.start;
+    }
+  };
+  function mountSplit(grid) {
+    const split = grid.querySelector(".tk-split");
+    const set = (w, keep = true) => {
+      const width = Math.round(Math.min(SIDE.max, Math.max(SIDE.min, w)));
+      grid.style.setProperty("--tk-side", width + "px");
+      split.setAttribute("aria-valuenow", String(width));
+      if (keep) try { localStorage.setItem(SIDE.key, String(width)); } catch {}
+    };
+    set(sideWidth(), false);
+    split.addEventListener("pointerdown", (e) => {
+      split.setPointerCapture(e.pointerId);
+      split.classList.add("dragging");
+      grid.classList.add("resizing");
+      const right = grid.getBoundingClientRect().right;
+      const move = (ev) => set(right - ev.clientX - 8);
+      const up = () => {
+        split.classList.remove("dragging");
+        grid.classList.remove("resizing");
+        split.removeEventListener("pointermove", move);
+        split.removeEventListener("pointerup", up);
+      };
+      split.addEventListener("pointermove", move);
+      split.addEventListener("pointerup", up);
+    });
+    split.addEventListener("dblclick", () => set(SIDE.start));
+    split.addEventListener("keydown", (e) => {
+      const now = Number(split.getAttribute("aria-valuenow"));
+      if (e.key === "ArrowLeft") set(now + SIDE.step);
+      else if (e.key === "ArrowRight") set(now - SIDE.step);
+      else if (e.key === "Home") set(SIDE.max);
+      else if (e.key === "End") set(SIDE.min);
+      else return;
+      e.preventDefault();
+    });
+  }
+
   let taskTab = "talk";
   let tabOf = null;
   function renderTask(p, task) {
@@ -1326,6 +1387,8 @@
       .map(([id, label, n]) => `<button class="tab" type="button" role="tab" data-tab="${id}" aria-selected="${id === taskTab}"><span>${label}</span><span class="n">${n}</span></button>`).join("");
     const switcher = `<div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}">${TASK_ICON.read}</button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div>`;
 
+    const widthSwitch = `<div class="view-sw words" role="radiogroup" aria-label="${k.widthLabel}">${Object.keys(APP_WIDTHS).map((w) => `<button type="button" role="radio" aria-checked="${w === appWidth()}" data-width="${w}">${k.widths[w]}</button>`).join("")}</div>`;
+
     // The details stay where they are; what is looked at now and then is folded.
     const reviewer = task.peer ? byId.get(task.peer.by) : null;
     const chipCls = { working: "working", approval: "reviewing", done: "available", held: "leave" }[task.status] ?? "planned";
@@ -1356,13 +1419,19 @@
     const view = document.getElementById("taskView");
     view.innerHTML = `${now}<div class="tk2">
         <div class="tk-main">
-          <div class="tk-tabs"><div class="tabs" role="tablist">${tabsHtml}</div>${taskTab === "talk" ? switcher : ""}</div>
+          <div class="tk-tabs"><div class="tabs" role="tablist">${tabsHtml}</div><div class="tk-tools">${taskTab === "talk" ? switcher : ""}${widthSwitch}</div></div>
           <div class="tk-pane" data-pane="talk"${taskTab === "talk" ? "" : " hidden"}>${talkHtml}</div>
           <div class="tk-pane" data-pane="changes"${taskTab === "changes" ? "" : " hidden"}>${changesHtml}</div>
           <div class="tk-pane" data-pane="did"${taskTab === "did" ? "" : " hidden"}>${stepsHtml}</div>
         </div>
+        <div class="tk-split" role="separator" aria-orientation="vertical" aria-label="${k.splitLabel}" tabindex="0" aria-valuemin="${SIDE.min}" aria-valuemax="${SIDE.max}" aria-valuenow="${sideWidth()}"></div>
         <div class="tk-side">${side.join("")}</div>
       </div>`;
+    mountSplit(view.querySelector(".tk2"));
+    for (const b of view.querySelectorAll("[data-width]")) b.addEventListener("click", () => {
+      setAppWidth(b.dataset.width);
+      for (const o of view.querySelectorAll("[data-width]")) o.setAttribute("aria-checked", String(o === b));
+    });
     for (const b of view.querySelectorAll("[data-tab], [data-tab-go]")) b.addEventListener("click", () => { taskTab = b.dataset.tab ?? b.dataset.tabGo; renderTask(p, task); });
     // An open message longer than the screen is cut short until asked for,
     // and one with sections lists them, to jump to.

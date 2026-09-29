@@ -214,7 +214,7 @@ button { font: inherit; color: inherit; }
 body:has(> .app) { padding: 22px 18px 40px; }
 
 .app {
-    max-width: 1400px; margin: 0 auto;
+    max-width: var(--app-width, 1400px); margin: 0 auto;
     background: var(--surface);
     border-radius: var(--r-app);
     box-shadow: 0 1px 2px rgb(20 20 25 / .05), 0 12px 40px rgb(20 20 25 / .08);

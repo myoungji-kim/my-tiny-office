@@ -997,6 +997,28 @@ function openMoveDialog({ title, sub, label, options, cancel, confirm, onConfirm
 // as [{ key, label }] when the caller holds it. The dialog stores
 // nothing itself: it hands the memory to onSave.
 
+/* ═══ how wide the app is ═══ */
+// Normal, wide or the whole window: the user's choice, kept in this browser
+// and applied on every page before it draws.
+const APP_WIDTHS = { normal: "1400px", wide: "1760px", full: "100%" };
+const WIDTH_KEY = "mto.appWidth";
+
+function appWidth() {
+  try {
+    const saved = localStorage.getItem(WIDTH_KEY);
+    return saved in APP_WIDTHS ? saved : "normal";
+  } catch {
+    return "normal";
+  }
+}
+
+function setAppWidth(key) {
+  document.documentElement.style.setProperty("--app-width", APP_WIDTHS[key]);
+  try { localStorage.setItem(WIDTH_KEY, key); } catch {}
+}
+
+document.documentElement.style.setProperty("--app-width", APP_WIDTHS[appWidth()]);
+
 function uiLang() {
   return new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
 }

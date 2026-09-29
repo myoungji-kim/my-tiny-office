@@ -274,6 +274,12 @@ are several of them, so:
 - a message with sections lists them as chips above it, and a chip jumps to
   its section.
 
+**The widths are the user's.** The split between the conversation and the
+details drags, 220 to 560 px for the details, and a double click puts it back;
+arrow keys move it too. The whole app is 보통, 넓게 or 전체 — 1400 px, 1760 px or
+the window — chosen beside the tabs and kept for every screen. Both are kept in
+this browser only.
+
 **세부 정보** is fixed: status, who, reviewer, area, priority, time. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
 report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.
