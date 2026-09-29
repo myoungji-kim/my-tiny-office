@@ -29,12 +29,12 @@ type Draft = Exclude<PublishDraft, { readonly error: string }>;
 function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly locale: Locale; readonly companyId: string; readonly taskId: string; readonly draft: Draft; readonly onClose: () => void }) {
   const t = getDictionary(locale);
   const w = t.projects.tk;
-  const [base, setBase] = useState(draft.base ?? "");
+  const [base, setBase] = useState(draft.base ?? draft.bases[0] ?? "");
   const [title, setTitle] = useState(draft.title);
   const [body, setBody] = useState(draft.body);
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
-  const first = useRef<HTMLSelectElement>(null);
+  const first = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     first.current?.focus({ preventScroll: true });
@@ -84,7 +84,7 @@ function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly
               {w.prBase}
             </label>
             <span className="select-wrap">
-              <select ref={first} className="select" id="pr-base" value={base} disabled={draft.bases.length === 0} onChange={(e) => setBase(e.target.value)}>
+              <select className="select" id="pr-base" value={base} disabled={draft.bases.length === 0} onChange={(e) => setBase(e.target.value)}>
                 {draft.bases.map((b) => (
                   <option key={b} value={b}>
                     {b}
@@ -106,7 +106,7 @@ function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly
             <label className="label" htmlFor="pr-title">
               {w.prName}
             </label>
-            <input className="input" id="pr-title" autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input ref={first} className="input" id="pr-title" autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="field">
             <label className="label" htmlFor="pr-body">
@@ -150,7 +150,7 @@ export function PublishButton({ locale, companyId, taskId }: { readonly locale: 
   return (
     <>
       <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={open}>
-        {t.projects.tk.publish}
+        {pending ? t.projects.tk.prOpening : t.projects.tk.publish}
       </button>
       {error !== undefined && (
         <span className="hint" role="alert" style={{ margin: 0 }}>

@@ -309,6 +309,8 @@ body:has(> .app) { padding: 22px 18px 40px; }
 
 .select-wrap:has(:disabled) svg { color: var(--faint); }
 
+.hint[role="alert"] { color: var(--bad-ink); }
+
 .hint { display: block; font-size: 14px; color: var(--faint); margin-top: 6px; }
 
 .req { color: var(--bad); }

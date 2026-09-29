@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
@@ -225,7 +226,10 @@ export function ProjectDialog({
                 </div>
               </div>
             )}
-            <span className="hint">{folder === undefined ? w.noFolderHint : w.folderHint}</span>
+            <span className="hint">
+              {folder === undefined ? w.noFolderHint : w.folderHint}{" "}
+              {folder !== undefined && <Link href="/settings?view=safety">{w.scopeMore}</Link>}
+            </span>
           </div>
 
           {folder !== undefined && chosen && (

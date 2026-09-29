@@ -112,7 +112,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         <div className="panel-bd">
           <ClaudeChecks status={status} words={t.claude} />
           <div className="recheck">
-            <RecheckButton label={t.claude.recheck} busyLabel={t.claude.checking} />
+            <RecheckButton label={t.claude.recheck} busyLabel={t.claude.checking} doneLabel={t.claude.checkedNow} />
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         <div className="panel-bd">
           <CheckRows rows={connectorRows(connectors?.servers, w)} words={t.claude} />
           <div className="recheck">
-            <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} failed={w.toolsFailed} disabled={!isReady(status)} />
+            <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} doneLabel={t.claude.checkedNow} failed={w.toolsFailed} disabled={!isReady(status)} />
           </div>
           <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
         </div>

@@ -21,7 +21,7 @@ export function RuntimeNotice({ status, words }: { readonly status: ClaudeCodeSt
         <span>{words.stoppedWhy}</span>
       </span>
       <span className="n-acts">
-        <RecheckButton label={words.recheck} busyLabel={words.checking} />
+        <RecheckButton label={words.recheck} busyLabel={words.checking} doneLabel={words.checkedNow} />
       </span>
     </div>
   );

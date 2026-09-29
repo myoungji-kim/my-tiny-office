@@ -257,17 +257,17 @@ export function TaskView({
               <WidthPicker label={t.settings.widthTitle} names={t.settings.widths} look="switch" />
             </div>
           </div>
-          <div className="tk-pane" hidden={tab !== "talk"}>
+          <div className="tk-pane" role="tabpanel" aria-label={w.tabTalk} hidden={tab !== "talk"}>
             {talk.map((m, i) => (
               <TalkItem key={m.id} locale={locale} message={m} folded={i < talk.length - OPEN_LATEST} plain={plain} latestRef={i === talk.length - 1 ? scrollToLatest : undefined} />
             ))}
             {live}
             {talk.length === 0 && live === undefined && <p className="col-empty talk-empty">{w.talkEmpty}</p>}
           </div>
-          <div className="tk-pane" hidden={tab !== "changes"}>
+          <div className="tk-pane" role="tabpanel" aria-label={w.changed} hidden={tab !== "changes"}>
             {changes}
           </div>
-          <div className="tk-pane" hidden={tab !== "did"}>
+          <div className="tk-pane" role="tabpanel" aria-label={w.did} hidden={tab !== "did"}>
             {did}
           </div>
         </div>

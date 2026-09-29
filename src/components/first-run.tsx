@@ -102,7 +102,7 @@ export function FirstRun({
             <ClaudeChecks status={status} words={claude} />
             {!ready && (
               <div className="recheck">
-                <RecheckButton label={claude.recheck} busyLabel={claude.checking} onChecked={setStatus} />
+                <RecheckButton label={claude.recheck} busyLabel={claude.checking} doneLabel={claude.checkedNow} onChecked={setStatus} />
               </div>
             )}
           </div>

@@ -3,7 +3,7 @@
 import { APP_WIDTH_KEY, APP_WIDTHS, type AppWidth } from "./app-width";
 import { useLocalChoice } from "./local-choice";
 
-const parse = (saved: string | null) => (saved !== null && saved in APP_WIDTHS ? (saved as AppWidth) : undefined);
+const parse = (saved: string | null) => (saved !== null && Object.hasOwn(APP_WIDTHS, saved) ? (saved as AppWidth) : undefined);
 
 // The same choice from the settings screen (as options) and a task's page (as a switch).
 export function WidthPicker({ label, names, look }: { readonly label: string; readonly names: Readonly<Record<AppWidth, string>>; readonly look: "opts" | "switch" }) {

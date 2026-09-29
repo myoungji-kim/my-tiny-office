@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
+import type { Outcome } from "../app/action-context";
 import { finishProjectAction, holdProjectAction, reopenProjectAction, resumeProjectAction, startProjectAction } from "../app/project-actions";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
@@ -52,7 +53,12 @@ export function ProjectControls({
     setOpen(undefined);
     if (editFirst) router.replace(`/projects/${project.id}`, { scroll: false });
   }, [editFirst, router, project.id]);
-  const act = (action: () => Promise<unknown>) => start(async () => void (await action()));
+  const [error, setError] = useState<string | undefined>(undefined);
+  const act = (action: () => Promise<Outcome>) =>
+    start(async () => {
+      const result = await action();
+      setError(result.error === undefined ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
+    });
 
   const mine = tasks.filter((x) => x.projectId === project.id);
   const running = mine.filter((x) => x.status === "working").length;
@@ -84,6 +90,11 @@ export function ProjectControls({
 
   return (
     <>
+      {error !== undefined && (
+        <span className="hint" role="alert" style={{ margin: 0 }}>
+          {error}
+        </span>
+      )}
       <RowMenu className="ibtn" label={w.projectActions} keep={t.people.keep} items={items} />
       {project.takesWork && (
         <button className="btn btn-primary btn-lg" type="button" onClick={() => setOpen("task")}>

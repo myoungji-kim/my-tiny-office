@@ -166,7 +166,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       {work !== undefined && task.status === "done" && task.publishedUrl !== undefined && !opened && <span className="hint">{w.tk.makePrHint}</span>}
     </>
   );
-  const did = actions.length > 0 ? actions.map(stepRow) : <p className="col-empty talk-empty">{w.tk.noChanges}</p>;
+  const did = actions.length > 0 ? actions.map(stepRow) : <p className="col-empty talk-empty">{w.tk.noSteps}</p>;
 
   const kv = (label: string, value: ReactNode) => (
     <div className="kv">
@@ -174,7 +174,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       <b>{value}</b>
     </div>
   );
-  const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
+  const about = task.description;
   // the user sends applied work up; a pull request's page, or GitHub's page for opening one
   const pullRequest = task.publishedUrl !== undefined && (
     <a className="btn btn-secondary btn-sm" href={task.publishedUrl} target="_blank" rel="noreferrer" title={opened ? undefined : w.tk.makePrHint}>

@@ -309,7 +309,6 @@ export const runs = sqliteTable(
     sessionId: text("session_id"),
     state: text("state", { enum: runStates }).notNull(),
     end: text("end", { enum: runEnds }),
-    // the command it was denied, when that is how it ended
     // the command denied, or for a denied write its kind
     deniedCommand: text("denied_command"),
     costUsd: real("cost_usd").notNull().default(0),

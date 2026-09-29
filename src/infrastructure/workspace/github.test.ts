@@ -29,7 +29,8 @@ describe("newPullRequestUrl", () => {
   });
 
   it("cuts a long body so the address stays usable", () => {
-    const body = new URL(newPullRequestUrl(repo, "main", "mto/x", "t", "가".repeat(20_000))).searchParams.get("body") ?? "";
-    expect(body.length).toBeLessThan(5_100);
+    const url = newPullRequestUrl(repo, "main", "mto/x", "t", "가".repeat(20_000));
+    expect(url.length).toBeLessThan(6_300);
+    expect(new URL(url).searchParams.get("body")).toMatch(/…$/);
   });
 });

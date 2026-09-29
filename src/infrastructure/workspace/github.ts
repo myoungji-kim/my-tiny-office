@@ -27,9 +27,11 @@ export function githubRepository(remote: string): Repository | undefined {
 // GitHub's own page for a new pull request from the branch into the base,
 // filled in; the user reads it over and opens it there. A long body is cut to
 // keep the address usable.
-const MAX_BODY_IN_URL = 5_000;
+const MAX_BODY_ENCODED = 6_000;
 export function newPullRequestUrl(repo: Repository, base: string, branch: string, title: string, body: string): string {
-  const query = new URLSearchParams({ expand: "1", title, body: body.length > MAX_BODY_IN_URL ? body.slice(0, MAX_BODY_IN_URL) + "\n\n…" : body });
+  let shown = body;
+  while (encodeURIComponent(shown).length > MAX_BODY_ENCODED) shown = shown.slice(0, Math.floor(shown.length * 0.8));
+  const query = new URLSearchParams({ expand: "1", title, body: shown === body ? body : shown + "\n\n…" });
   return `https://${repo.host}/${repo.owner}/${repo.name}/compare/${base}...${branch}?${query}`;
 }
 
@@ -42,7 +44,7 @@ async function openWithGh(folder: string, repo: Repository, base: string, branch
   if (gh.kind !== "found") return undefined;
   const signedIn = await runProcess(gh.path, ["auth", "status", "--hostname", repo.host], { cwd: folder, timeoutMs: GH_TIMEOUT_MS });
   if (signedIn.code !== 0) return undefined;
-  const made = await runProcess(gh.path, ["pr", "create", "--head", branch, "--base", base, "--title", title, "--body-file", "-"], { cwd: folder, input: body, timeoutMs: GH_TIMEOUT_MS });
+  const made = await runProcess(gh.path, ["pr", "create", "--repo", `${repo.host}/${repo.owner}/${repo.name}`, "--head", branch, "--base", base, "--title", title, "--body-file", "-"], { cwd: folder, input: body, timeoutMs: GH_TIMEOUT_MS });
   const pull = new RegExp(`https://${repo.host.replace(/\./g, "\\.")}/${repo.owner}/${repo.name}/pull/\\d+`);
   return pull.exec(made.stdout)?.[0] ?? pull.exec(made.stderr)?.[0];
 }

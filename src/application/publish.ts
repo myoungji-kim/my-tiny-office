@@ -71,7 +71,9 @@ export async function publishTask(
 
   const published = await publisher.publish(found.folder, found.task.id, { base: pr.base, title, body: pr.body });
   if (!published.ok) return published;
-  const done = taskDomain.publishTask(found.task, published.url);
+  const now = await ctx.tasks.findById(found.task.id);
+  if (now === undefined) return { ok: false, reason: "taskNotFound" };
+  const done = taskDomain.publishTask(now, published.url);
   if (!done.ok) return done;
   await ctx.tasks.save(done.task);
   return { ok: true, value: { task: done.task }, events: [] };

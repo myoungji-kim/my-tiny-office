@@ -19,6 +19,7 @@ export interface ClaudeWords {
   readonly afterAbove: string;
   readonly recheck: string;
   readonly checking: string;
+  readonly checkedNow: string;
   readonly copy: string;
   readonly copied: string;
   readonly stoppedTitle: string;

@@ -101,7 +101,12 @@ export function OrgChart({
   const label = (team: TeamView) => teamName(team, t.teams);
   const choices = teams.map((team) => ({ id: team.id, label: label(team) }));
   const loose = employees.filter((e) => e.teamId === undefined || !teams.some((team) => team.id === e.teamId));
-  const act = (work: () => Promise<Outcome>) => start(async () => void (await work()));
+  const [error, setError] = useState<string | undefined>(undefined);
+  const act = (work: () => Promise<Outcome>) =>
+    start(async () => {
+      const result = await work();
+      setError(result.error === undefined ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
+    });
 
   const personCard = (p: EmployeeView) => (
     <div key={p.id} className="tcard-wrap">
@@ -131,6 +136,11 @@ export function OrgChart({
 
   return (
     <div className="org">
+      {error !== undefined && (
+        <p className="hint" role="alert" style={{ margin: 0 }}>
+          {error}
+        </p>
+      )}
       {loose.length > 0 && (
         <div className="team-box">
           <div className="team-box-hd">
