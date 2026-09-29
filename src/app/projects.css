@@ -170,7 +170,7 @@
 
   .md > * + h3, .md > * + h4 { margin-top: 22px; }
 
-  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; }
+  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; scroll-margin-top: 16px; }
 
   .md h4 { font-size: 16px; font-weight: 600; line-height: 1.4; }
 

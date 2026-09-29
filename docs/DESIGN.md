@@ -264,6 +264,16 @@ its reason and the way on, or finished work — "모카가 작업을 마쳤어�
 | 바뀐 것 | Every file with lines added and removed, a file opening to its diff, and what approving does — it commits to the task's branch, nothing is pushed | The task's worktree |
 | 한 일 | Every step — read, edited, ran — with its time | The runtime's event stream |
 
+**A long conversation stays readable.** Reports run to forty lines and there
+are several of them, so:
+
+- the latest two messages are open; older ones fold to one line — who, what,
+  when and their first sentence, never a heading — and open when clicked;
+- an open message taller than about a screen is cut off under a fade, with
+  전체 보기 · 줄여 보기;
+- a message with sections lists them as chips above it, and a chip jumps to
+  its section.
+
 **세부 정보** is fixed: status, who, reviewer, area, priority, time. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
 report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.

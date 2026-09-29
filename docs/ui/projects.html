@@ -178,7 +178,7 @@
 
   .md > * + h3, .md > * + h4 { margin-top: 22px; }
 
-  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; }
+  .md h3 { font-size: 18px; font-weight: 600; line-height: 1.4; scroll-margin-top: 16px; }
 
   .md h4 { font-size: 16px; font-weight: 600; line-height: 1.4; }
 
@@ -261,6 +261,33 @@
   .talk-live code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
 
   .talk-empty { padding: 18px 0; margin: 0; }
+
+  .talk-sum { display: none; width: 100%; margin-top: 2px; padding: 0; border: 0; background: none; font: inherit; font-size: 15px; color: var(--muted); text-align: left; cursor: pointer; align-items: baseline; gap: 10px; }
+
+  .talk-sum > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .talk.folded { padding: 12px 0; }
+
+  .talk.folded .talk-sum { display: flex; }
+
+  .talk.folded .talk-bd, .talk.folded .talk-sug, .talk.folded .talk-toc, .talk.folded .copy-ic, .talk.folded .talk-more { display: none; }
+
+  .talk-toggle { flex: none; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--brand-ink); cursor: pointer; }
+
+  .talk-more { display: block; margin-top: 8px; }
+
+  .talk-bd.clip { max-height: 520px; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, var(--ink) 78%, transparent); mask-image: linear-gradient(to bottom, var(--ink) 78%, transparent); }
+
+  .talk-toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  .talk-toc:empty { display: none; }
+
+  .talk-toc button { height: 26px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--surface); font: inherit; font-size: 13px; color: var(--muted); cursor: pointer; }
+
+  .talk-toc button:hover { color: var(--ink); background: var(--subtle); }
+
+  .talk-toc button:focus-visible, .talk-toggle:focus-visible, .talk-sum:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+
 
   .side-kv .kv b { font-weight: 500; }
 
@@ -606,7 +633,7 @@
         { by: "p1", kind: "report", at: "09:48", text: { ko: "## 한 일\n에러 응답을 `{ code, message, retryable }` 하나로 맞췄어요. 응답은 이제 `toResponse` 한 곳에서만 만들어져요.\n\n| 파일 | 바뀐 것 |\n|---|---|\n| `src/api/errors.ts` | `AppError`를 `ErrorBody`로 바꾸는 `toResponse`와 재시도 코드 목록 `RETRYABLE` |\n| `src/api/payments.ts` | 결제 실패 세 곳이 `toResponse`를 쓰도록 변경 |\n| `docs/api/errors.md` | 새 응답 형식과 에러 코드 목록 |\n\n## 확인한 것\n- `npm test` 통과 (42개)\n- 예전 `{ error }` 응답을 만드는 곳은 저장소에 더 없어요.\n\n## 확실하지 않은 것\n어떤 코드가 재시도 대상인지는 코드와 문서에 없어서 추측했어요. 지금은 `timeout`, `rate_limited`만 `retryable: true`예요.", en: "## What I did\nEvery error response now has one shape, `{ code, message, retryable }`, built in one place, `toResponse`.\n\n| File | Change |\n|---|---|\n| `src/api/errors.ts` | `toResponse`, turning an `AppError` into an `ErrorBody`, and `RETRYABLE` |\n| `src/api/payments.ts` | The three payment failures go through `toResponse` |\n| `docs/api/errors.md` | The new shape and the list of codes |\n\n## Checked\n- `npm test` passes (42)\n- Nothing in the repository builds the old `{ error }` response any more.\n\n## Not sure\nWhich codes can be retried is written nowhere, so I guessed: only `timeout` and `rate_limited` are `retryable: true`." } },
         { by: "p4", kind: "review", verdict: "changes", at: "09:55", text: { ko: "**좋은 점**\n- 응답 모양이 `toResponse` 한 곳에서만 만들어져서 앞으로 바꾸기 쉬워요.\n- 문서에 코드 목록이 같이 들어간 것도 좋아요.\n\n**바꿔야 할 점**\n1. 카드사 일시 오류(`issuer_unavailable`)는 다시 시도하면 대부분 성공해요. 재시도 대상에 넣어 주세요.\n   ```ts\n   const RETRYABLE = new Set<ErrorCode>(['timeout', 'rate_limited', 'issuer_unavailable']);\n   ```\n2. `src/api/payments.ts:88`에서 알 수 없는 에러를 `message: err.message` 그대로 내보내요. 내부 메시지가 밖으로 새지 않게 `internal`로 감싸 주세요.", en: "**Good**\n- The shape is built only in `toResponse`, so it is easy to change later.\n- The docs carry the list of codes too.\n\n**To change**\n1. A card issuer's temporary failure (`issuer_unavailable`) mostly succeeds when retried. Make it retryable.\n   ```ts\n   const RETRYABLE = new Set<ErrorCode>(['timeout', 'rate_limited', 'issuer_unavailable']);\n   ```\n2. `src/api/payments.ts:88` sends an unknown error's `err.message` out as it is. Wrap it as `internal` so internal messages do not leak." } },
         { by: null, kind: "request", at: "10:02", text: { ko: "삐약 의견대로 고쳐 주세요. 그리고 앱 클라이언트가 아직 `error` 필드를 읽고 있으니, 한 버전 동안은 `error`도 같이 내려 주세요.", en: "Make the changes the review asked for. The app client still reads `error`, so keep sending `error` too for one release." } },
-        { by: "p1", kind: "report", at: "10:14", text: { ko: "## 고친 것\n1. `issuer_unavailable`을 재시도 대상에 넣었어요 (`src/api/errors.ts:12`).\n2. 알 수 없는 에러는 `code: 'internal'`, `message: 'Something went wrong'`으로 감싸고, 원래 메시지는 로그에만 남겨요.\n3. 하위 호환: 한 버전 동안 `error` 필드도 같이 내려요. 지울 시점은 `docs/api/errors.md`에 적었어요.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  /* v2.3에서 지워요: 클라이언트가 message를 읽게 되면 */\n+  error: err.message,\n };\n```\n\n## 확인한 것\n- `npm test` 통과 (45개, 새 테스트 3개: 재시도 코드, internal 감싸기, `error` 필드)", en: "## Changed\n1. `issuer_unavailable` is retryable now (`src/api/errors.ts:12`).\n2. An unknown error becomes `code: 'internal'`, `message: 'Something went wrong'`; the original message only goes to the log.\n3. For one release `error` is sent too. When to drop it is in `docs/api/errors.md`.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  // drop in v2.3, once clients read message\n+  error: err.message,\n };\n```\n\n## Checked\n- `npm test` passes (45, three new: retryable codes, the internal wrap, the `error` field)" },
+        { by: "p1", kind: "report", at: "10:14", text: { ko: "`issuer_unavailable` 재시도, `internal` 감싸기, 하위 호환 `error` 필드까지 반영했어요. 테스트는 45개 모두 통과해요.\n\n## 고친 것\n1. **재시도 대상**: `issuer_unavailable`을 `RETRYABLE`에 넣었어요 (`src/api/errors.ts:12`).\n2. **알 수 없는 에러**: `code: 'internal'`, `message: 'Something went wrong'`으로 감싸요. 원래 메시지와 스택은 `log.error`로만 남겨요.\n3. **하위 호환**: 한 버전 동안 `error` 필드를 같이 내려요. 지울 시점은 문서에 적었어요.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  /* v2.3에서 지워요: 클라이언트가 message를 읽게 되면 */\n+  error: err.message,\n };\n```\n\n## 바뀐 파일\n| 파일 | 바뀐 것 | 줄 |\n|---|---|---|\n| `src/api/errors.ts` | 재시도 코드, `internal` 감싸기, `error` 필드 | +42 −17 |\n| `src/api/payments.ts` | `charge`, `refund`, `capture`가 `toResponse`를 씀 | +9 −12 |\n| `src/api/errors.test.ts` | 새 테스트 3개 | +38 |\n| `docs/api/errors.md` | 응답 형식, 코드 목록, `error` 필드를 지울 시점 | +21 −4 |\n\n## 확인한 것\n- `npm test` 통과: 45개 (새 테스트 3개)\n  - 재시도 코드 세 가지가 `retryable: true`인지\n  - 모르는 에러가 `internal`로 감싸지고 원래 메시지가 응답에 없는지\n  - `error` 필드가 `message`와 같은지\n- `npm run lint` 통과\n- `{ error }`만 내려 주던 곳은 저장소에 더 없어요 (`src/` 전체 검색).\n\n## 남은 것\n- 앱 클라이언트가 `message`를 읽도록 바뀌면 `error` 필드를 지워야 해요. 문서에 v2.3으로 적었어요.\n- `issuer_unavailable`을 몇 번까지 다시 시도할지는 이 저장소에 정해진 게 없어요. 지금은 호출하는 쪽에 맡겨요.\n\n## 참고\n> 결제 실패 응답의 HTTP 상태는 그대로 `502`예요. 상태 코드를 나누는 건 이번 범위가 아니라서 건드리지 않았어요.\n\n```ts\n/* 호출하는 쪽에서 쓰는 모양 */\nconst res = await pay(order);\nif (!res.ok && res.body.retryable) await retryLater(order);\n```", en: "`issuer_unavailable` is retried, unknown errors are wrapped as `internal`, and `error` stays for one release. All 45 tests pass.\n\n## Changed\n1. **Retryable**: `issuer_unavailable` is in `RETRYABLE` (`src/api/errors.ts:12`).\n2. **Unknown errors**: wrapped as `code: 'internal'`, `message: 'Something went wrong'`; the original message and stack only go to `log.error`.\n3. **Compatibility**: `error` is sent too for one release; when it goes is in the docs.\n\n```diff\n return {\n   code: err.code,\n   message: err.message,\n   retryable: RETRYABLE.has(err.code),\n+  /* drop in v2.3, once clients read message */\n+  error: err.message,\n };\n```\n\n## Files\n| File | Change | Lines |\n|---|---|---|\n| `src/api/errors.ts` | Retryable codes, the `internal` wrap, the `error` field | +42 −17 |\n| `src/api/payments.ts` | `charge`, `refund`, `capture` go through `toResponse` | +9 −12 |\n| `src/api/errors.test.ts` | Three new tests | +38 |\n| `docs/api/errors.md` | The shape, the codes, when `error` goes | +21 −4 |\n\n## Checked\n- `npm test` passes: 45 (three new)\n  - the three retryable codes are `retryable: true`\n  - an unknown error is wrapped and its message is not in the response\n  - `error` equals `message`\n- `npm run lint` passes\n- Nothing in `src/` sends only `{ error }` any more.\n\n## Left\n- Once the app client reads `message`, `error` has to go; the docs say v2.3.\n- How often to retry `issuer_unavailable` is written nowhere here; callers decide for now.\n\n## Note\n> The HTTP status of a failed payment is still `502`. Splitting status codes was not part of this, so it is untouched.\n\n```ts\n/* how a caller uses it */\nconst res = await pay(order);\nif (!res.ok && res.body.retryable) await retryLater(order);\n```" },
           suggest: [{ ko: "결제 API 에러는 { code, message, retryable } 모양이고, 알 수 없는 에러는 internal로 감싸요.", en: "Payment API errors take the shape { code, message, retryable }, and an unknown one is wrapped as internal." }] },
         { by: "p4", kind: "review", verdict: "approve", at: "10:19", text: { ko: "두 가지 모두 반영됐어요. `error` 필드를 언제 지울지 문서에 적어 둔 것도 좋아요. 이대로 반영해도 돼요.", en: "Both are in. Writing down when `error` goes is good too. It can be applied as it is." } },
       ],
@@ -792,6 +819,7 @@
         tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간",
         talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완 요청", talkReply: "답", talkRequest: "보완 요청", you: "나",
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
+        talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
         decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
         noReviewer: "없음",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
@@ -925,6 +953,7 @@
         tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "On it", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time",
         talkReport: "Report", talkNow: "while working", talkBefore: "before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
+        talkOpen: "Open", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
         decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
         noReviewer: "None",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
@@ -1263,11 +1292,19 @@
       : "";
     const YOU = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.7"/><path d="M2.8 14c.6-2.8 2.7-4.3 5.2-4.3s4.6 1.5 5.2 4.3"/></svg>';
     const COPY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg>';
+    // The latest two stay open; anything older folds to its first line.
+    // what a folded message shows: its first sentence, not a heading or a label
+    const lead = (text) => text.split("\n")
+      .filter((l) => !/^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*$|```|\|)/.test(l))
+      .map((l) => l.replace(/^[>*\-\d.\s]+/, "").replace(/[*`]/g, "").trim())
+      .find((l) => l !== "") ?? "";
     const talkHtml = talk.length
-      ? talk.map((m, i) => `<div class="talk">
+      ? talk.map((m, i) => `<div class="talk${i < talk.length - 2 ? " folded" : ""}" data-talk="${i}">
           <span class="talk-av"${m.by ? ` data-av="${m.by.id}" data-av-size="32"` : ""}>${m.by ? "" : YOU}</span>
           <div style="min-width:0">
             <div class="talk-hd"><b>${m.by ? m.by.name : k.you}</b><span class="talk-k${m.cls ? " " + m.cls : ""}">${m.label}</span><span class="talk-at">${m.at}</span></div>
+            <button class="talk-sum" type="button" data-unfold="${i}"><span>${lead(tx(m.text))}</span><span class="talk-toggle">${k.talkOpen}</span></button>
+            <div class="talk-toc" data-toc></div>
             <div class="talk-bd"><div class="md">${markdown(tx(m.text))}</div><pre class="said-raw" hidden>${tx(m.text)}</pre></div>
             ${m.suggest?.length ? `<div class="talk-sug"><b>${k.suggestTitle}</b>${m.suggest.map((x, j) => `<div class="sug"><span class="sug-tx">${tx(x)}</span><button class="btn btn-secondary btn-sm" type="button" data-pass="${j}">${k.passIt}</button><button class="btn btn-primary btn-sm" type="button" data-teach-sug="${j}">${k.teachIt}</button></div>`).join("")}</div>` : ""}
           </div>
@@ -1327,6 +1364,31 @@
         <div class="tk-side">${side.join("")}</div>
       </div>`;
     for (const b of view.querySelectorAll("[data-tab], [data-tab-go]")) b.addEventListener("click", () => { taskTab = b.dataset.tab ?? b.dataset.tabGo; renderTask(p, task); });
+    // An open message longer than the screen is cut short until asked for,
+    // and one with sections lists them, to jump to.
+    for (const el of view.querySelectorAll(".talk")) {
+      const bd = el.querySelector(".talk-bd");
+      const heads = [...bd.querySelectorAll(".md h3")];
+      if (heads.length > 1) {
+        el.querySelector("[data-toc]").innerHTML = heads.map((h, j) => `<button type="button" data-jump="${j}">${h.textContent}</button>`).join("");
+        for (const b of el.querySelectorAll("[data-jump]")) b.addEventListener("click", () => {
+          bd.classList.remove("clip");
+          heads[b.dataset.jump].scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+      if (!el.classList.contains("folded") && bd.scrollHeight > 560) {
+        bd.classList.add("clip");
+        const more = document.createElement("button");
+        more.type = "button";
+        more.className = "talk-toggle talk-more";
+        more.textContent = k.talkAll;
+        more.addEventListener("click", () => { const cut = bd.classList.toggle("clip"); more.textContent = cut ? k.talkAll : k.talkLess; });
+        bd.after(more);
+      }
+    }
+    for (const b of view.querySelectorAll("[data-unfold]")) b.addEventListener("click", () => {
+      b.closest(".talk").classList.remove("folded");
+    });
     for (const b of view.querySelectorAll("[data-copy]")) b.addEventListener("click", () => {
       navigator.clipboard?.writeText(tx(talk[b.dataset.copy].text));
       b.classList.add("done");
