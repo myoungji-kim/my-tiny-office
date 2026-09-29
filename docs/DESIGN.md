@@ -658,8 +658,12 @@ measured flags behind it.
   report), how often a memory was used (the person's page lists the memories taught
   lately instead of the most used). Waiting on the runtime: rewriting or handing over
   work that is running.
-  Not in `src/domain` yet: letting someone go, and deleting a project or a
-  task.
+  Not in `src/domain` yet: letting someone go.
+- **Deleting.** A task that is not finished goes from its page's `⋯`, asked
+  again with what is lost unless it is only written down, and takes its
+  conversation, steps, reviews and worktree and branch with it. A project goes
+  from its `⋯` with all its tasks; an applied task's branch stays, since it
+  holds what approving committed. The history keeps its lines.
 - **Choosing a folder.** A browser cannot hand over a folder's path, so
   고르기 opens the operating system's folder dialog from the app's own server,
   with 경로 직접 입력 beside it; either is checked before anything is shown

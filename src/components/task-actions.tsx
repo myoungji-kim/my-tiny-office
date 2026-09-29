@@ -1,14 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useTransition } from "react";
 
-import { approveTaskAction, holdTaskAction, resumeTaskAction, sendBackAction } from "../app/project-actions";
+import { approveTaskAction, holdTaskAction, removeTaskAction, resumeTaskAction, sendBackAction } from "../app/project-actions";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
 
 import { ActButton } from "./act-button";
+import { Icon } from "./icons";
 import { ReviewDialog } from "./review-dialog";
+import { RowMenu } from "./row-menu";
 import { StepDialog } from "./step-dialog";
 import { TaskDialog } from "./task-dialog";
 
@@ -52,10 +54,32 @@ export function TaskActions({
     if (assignFirst) router.replace(`/projects/${project.id}/${task.id}`, { scroll: false });
   }, [assignFirst, router, project.id, task.id]);
   const choices = projects.some((p) => p.id === project.id) ? projects : [project, ...projects];
+  const [removing, startRemoving] = useTransition();
+  const [error, setError] = useState<string | undefined>(undefined);
+  const remove = () =>
+    startRemoving(async () => {
+      const result = await removeTaskAction(companyId, task.id);
+      if (result.error !== undefined) return setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
+      router.push(`/projects/${project.id}`);
+    });
+  const canRemove = task.status !== "done" && project.status !== "done" && !removing;
 
   return (
     <>
       {!ready && (canAssign || canResume || deciding) && <span className="ghost-note">{t.claude.cannotStart}</span>}
+      {error !== undefined && (
+        <span className="hint" role="alert" style={{ margin: 0 }}>
+          {error}
+        </span>
+      )}
+      {canRemove && (
+        <RowMenu
+          className="ibtn"
+          label={w.taskActions}
+          keep={t.people.keep}
+          items={[{ label: w.actions.removeTask, icon: Icon.trash, bad: true, confirm: task.status === "backlog" ? undefined : w.removeTaskWhy[task.status], run: remove }]}
+        />
+      )}
       {canEdit && (
         <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("edit")}>
           {w.actions.edit}

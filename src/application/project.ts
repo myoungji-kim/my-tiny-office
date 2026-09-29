@@ -4,9 +4,11 @@ import * as projectDomain from "../domain/project";
 import type { AtlassianWrite } from "../domain/project";
 import * as taskDomain from "../domain/task";
 
+import type { Workspace } from "./agent-runtime";
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
 import { withdrawReviewsOn } from "./review";
+import { forgetTask } from "./task";
 
 type ProjectResult<TFailure extends string> = UseCaseResult<{ readonly project: projectDomain.Project }, TFailure>;
 
@@ -122,6 +124,25 @@ export const finishProject = (ctx: AppContext, projectId: ProjectId) =>
       return [];
     },
   );
+
+// A project goes with its tasks. Work not yet applied is thrown away; an
+// applied task's branch holds what was committed, so it stays.
+export async function removeProject(ctx: AppContext, workspace: Workspace, projectId: ProjectId): Promise<UseCaseResult<Record<string, never>, "projectNotFound">> {
+  const project = await ctx.projects.findById(projectId);
+  if (project === undefined) return { ok: false, reason: "projectNotFound" };
+  const mine = (await ctx.tasks.findByCompany(project.companyId)).filter((t) => t.projectId === project.id);
+  await ctx.withTransaction(async () => {
+    for (const task of mine) await forgetTask(ctx, task.id);
+    await ctx.projects.remove(project.id);
+  });
+  if (project.folder !== undefined) {
+    for (const task of mine) {
+      if (task.status === "done") await workspace.remove(project.folder, task.id);
+      else await workspace.discard(project.folder, task.id);
+    }
+  }
+  return { ok: true, value: {}, events: [] };
+}
 
 // Likewise a Jira or Confluence write, for every task stopped on that kind of write.
 export const allowWrite = (ctx: AppContext, projectId: ProjectId, write: AtlassianWrite) =>

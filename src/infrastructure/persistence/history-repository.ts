@@ -46,6 +46,9 @@ export function createSqliteReviewRepository(db: AppDatabase): ReviewRepository 
       };
       db.insert(reviews).values({ id: review.id, ...row }).onConflictDoUpdate({ target: reviews.id, set: row }).run();
     },
+    async removeByTask(taskId) {
+      db.delete(reviews).where(eq(reviews.taskId, taskId)).run();
+    },
   };
 }
 

@@ -9,7 +9,9 @@ import type { AppContext } from "./context";
 import { bringBack, hireEmployee, sendOnLeave } from "./employee";
 import { allowCommand, createProject, finishProject, holdProject, startProject } from "./project";
 import { createTestContext, firstRole } from "./test-context";
-import { applyTask, assignTask, createTask, editTask, holdTask, pickUpWork, resumeTask, sendBack } from "./task";
+import type { Workspace } from "./agent-runtime";
+import { applyTask, assignTask, createTask, editTask, holdTask, pickUpWork, removeTask, resumeTask, sendBack } from "./task";
+import { removeProject } from "./project";
 
 const minute = 60_000;
 const t0 = 1_700_000_000_000;
@@ -225,5 +227,40 @@ describe("allowCommand", () => {
 
     await expect(allowCommand(ctx, pay, "npm run typecheck")).resolves.toMatchObject({ value: { project: { commands: ["npm run typecheck"] } } });
     await expect(allowCommand(ctx, pay, "npm *")).resolves.toMatchObject({ reason: "commandNotAllowable" });
+  });
+});
+
+describe("throwing work away", () => {
+  const thrown: string[] = [];
+  const kept: string[] = [];
+  const workspace = { discard: async (_: string, id: string) => void thrown.push(id), remove: async (_: string, id: string) => void kept.push(id) } as unknown as Workspace;
+
+  it("deletes a task that is not finished, and refuses one that is", async () => {
+    const pay = await project();
+    const written = await task(pay);
+    await ctx.requests.add({ companyId, taskId: written.id, at: now, text: "more" });
+
+    assert((await removeTask(ctx, workspace, written.id)).ok);
+    await expect(ctx.tasks.findById(written.id)).resolves.toBeUndefined();
+    await expect(ctx.requests.findByTask(companyId, written.id)).resolves.toEqual([]);
+    expect(thrown).toContain(written.id);
+
+    const done = await task(pay, "Done");
+    await ctx.tasks.save({ ...done, status: "done", assigneeId: (await hire("모카")).id, startedAt: now, finishedAt: now, appliedAt: now });
+    await expect(removeTask(ctx, workspace, done.id)).resolves.toEqual({ ok: false, reason: "taskNotRemovable" });
+  });
+
+  it("deletes a project with its tasks, and keeps an applied task's branch", async () => {
+    const pay = await project();
+    const open = await task(pay, "Open");
+    const done = await task(pay, "Done");
+    await ctx.tasks.save({ ...done, status: "done", assigneeId: (await hire("보리")).id, startedAt: now, finishedAt: now, appliedAt: now });
+
+    assert((await removeProject(ctx, workspace, pay)).ok);
+    await expect(ctx.projects.findById(pay)).resolves.toBeUndefined();
+    await expect(ctx.tasks.findByCompany(companyId)).resolves.toEqual([]);
+    expect(thrown).toContain(open.id);
+    expect(kept).toContain(done.id);
+    expect(thrown).not.toContain(done.id);
   });
 });

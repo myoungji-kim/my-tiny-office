@@ -2,8 +2,8 @@
 
 import { draftPublish, publishTask } from "../application/publish";
 import { requestReview } from "../application/review";
-import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite } from "../application/project";
-import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
+import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite, removeProject } from "../application/project";
+import { approveTask, carryOn, createTask, editTask, holdTask, removeTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
 import { isAtlassianWrite } from "../domain/project";
 import { checkFolder } from "../infrastructure/workspace/folder";
@@ -94,6 +94,14 @@ export async function finishProjectAction(companyId: string, projectId: string):
 
 export async function reopenProjectAction(companyId: string, projectId: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => reopenProject(ctx, toProjectId(str(projectId))));
+}
+
+export async function removeProjectAction(companyId: string, projectId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => removeProject(ctx, gitWorkspace, toProjectId(str(projectId))));
+}
+
+export async function removeTaskAction(companyId: string, taskId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => removeTask(ctx, gitWorkspace, toTaskId(str(taskId))));
 }
 
 export async function allowCommandAction(companyId: string, projectId: string, command: string): Promise<Outcome> {

@@ -156,6 +156,26 @@ export async function approveTask(
   return applied;
 }
 
+// Everything the task kept goes with it; the history keeps its names.
+export async function forgetTask(ctx: AppContext, taskId: TaskId): Promise<void> {
+  await ctx.requests.removeByTask(taskId);
+  await ctx.runSteps.removeByTask(taskId);
+  await ctx.reviews.removeByTask(taskId);
+  await ctx.runs.removeByTask(taskId);
+  await ctx.tasks.remove(taskId);
+}
+
+// A task that is not finished can be thrown away, with the work done on it so far.
+export async function removeTask(ctx: AppContext, workspace: Workspace, taskId: TaskId): Promise<UseCaseResult<Record<string, never>, "taskNotFound" | "taskNotRemovable">> {
+  const task = await ctx.tasks.findById(taskId);
+  if (task === undefined) return { ok: false, reason: "taskNotFound" };
+  if (!taskDomain.isRemovable(task)) return { ok: false, reason: "taskNotRemovable" };
+  const folder = (await ctx.projects.findById(task.projectId))?.folder;
+  await ctx.withTransaction(() => forgetTask(ctx, task.id));
+  if (folder !== undefined) await workspace.discard(folder, task.id);
+  return { ok: true, value: {}, events: [] };
+}
+
 // A stopped agent carries on in its own session; one stopped on a command
 // carries on without it, since allowing a command is the project's to do.
 export const carryOn = (ctx: AppContext, taskId: TaskId) => changeTask(ctx, taskId, (t) => taskDomain.unblockTask(t, eventId(ctx), ctx.now()));

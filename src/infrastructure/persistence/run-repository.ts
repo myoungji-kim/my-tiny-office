@@ -95,6 +95,9 @@ export function createSqliteRunRepository(db: AppDatabase): RunRepository {
       };
       db.insert(runs).values({ id: run.id, ...row }).onConflictDoUpdate({ target: runs.id, set: row }).run();
     },
+    async removeByTask(taskId) {
+      db.delete(runs).where(eq(runs.taskId, taskId)).run();
+    },
   };
 }
 
@@ -102,6 +105,9 @@ export function createSqliteRunStepRepository(db: AppDatabase, newId: () => stri
   return {
     async add(step) {
       db.insert(runSteps).values({ id: newId(), ...step }).run();
+    },
+    async removeByTask(taskId) {
+      db.delete(runSteps).where(eq(runSteps.taskId, taskId)).run();
     },
     async findByTask(companyId, taskId, limit) {
       return db
@@ -129,6 +135,9 @@ export function createSqliteTaskRequestRepository(db: AppDatabase, newId: () => 
   return {
     async add(request) {
       db.insert(taskRequests).values({ id: newId(), ...request }).run();
+    },
+    async removeByTask(taskId) {
+      db.delete(taskRequests).where(eq(taskRequests.taskId, taskId)).run();
     },
     async findByTask(companyId, taskId) {
       return db

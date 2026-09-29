@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
 import type { Outcome } from "../app/action-context";
-import { finishProjectAction, holdProjectAction, reopenProjectAction, resumeProjectAction, startProjectAction } from "../app/project-actions";
+import { finishProjectAction, holdProjectAction, removeProjectAction, reopenProjectAction, resumeProjectAction, startProjectAction } from "../app/project-actions";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
 
@@ -87,6 +87,18 @@ export function ProjectControls({
         : project.status === "held"
           ? [{ label: a.resumeProject, key: true, off: stopped, run: () => act(() => resumeProjectAction(companyId, project.id)) }, edit]
           : [{ label: a.reopenProject, run: () => act(() => reopenProjectAction(companyId, project.id)) }];
+  const removal: MenuItem = {
+    label: a.removeProject,
+    icon: Icon.trash,
+    bad: true,
+    confirm: project.status === "done" ? w.removeProjectDone : mine.length === 0 ? w.removeProjectEmpty : w.removeProjectWhy(mine.length),
+    run: () =>
+      start(async () => {
+        const result = await removeProjectAction(companyId, project.id);
+        if (result.error !== undefined) return setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
+        router.push("/projects");
+      }),
+  };
 
   return (
     <>
@@ -95,7 +107,7 @@ export function ProjectControls({
           {error}
         </span>
       )}
-      <RowMenu className="ibtn" label={w.projectActions} keep={t.people.keep} items={items} />
+      <RowMenu className="ibtn" label={w.projectActions} keep={t.people.keep} items={[...items, removal]} />
       {project.takesWork && (
         <button className="btn btn-primary btn-lg" type="button" onClick={() => setOpen("task")}>
           {Icon.plus}

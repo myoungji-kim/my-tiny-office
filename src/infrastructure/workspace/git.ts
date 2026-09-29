@@ -193,6 +193,11 @@ export async function pushBranch(folder: string, taskId: string): Promise<boolea
   return result?.code === 0;
 }
 
+export async function discardWork(folder: string, taskId: string): Promise<void> {
+  await removeWorktree(folder, taskId);
+  await git(["-C", folder, "branch", "-D", branchOf(taskId)]);
+}
+
 export async function removeWorktree(folder: string, taskId: string): Promise<void> {
   await git(["-C", folder, "worktree", "remove", "--force", worktreePath(folder, taskId)]);
 }
@@ -242,6 +247,7 @@ export const gitWorkspace: Workspace = {
     return !existsSync(worktreePath(folder, taskId)) || (await commitAll(folder, taskId, message)).ok;
   },
   remove: removeWorktree,
+  discard: discardWork,
   removeFiles,
   diff: fullDiff,
 };

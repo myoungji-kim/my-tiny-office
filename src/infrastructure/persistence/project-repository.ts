@@ -89,5 +89,9 @@ export function createSqliteProjectRepository(db: AppDatabase): ProjectRepositor
         .onConflictDoUpdate({ target: projects.id, set: updatable })
         .run();
     },
+
+    async remove(id) {
+      db.delete(projects).where(eq(projects.id, id)).run();
+    },
   };
 }

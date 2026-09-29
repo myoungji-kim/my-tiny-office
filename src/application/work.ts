@@ -304,6 +304,8 @@ export function createWorkSupervisor(deps: {
 
   async function onEvent(entry: LiveRun, event: AgentEvent): Promise<void> {
     const { ctx } = entry;
+    // the task was deleted while it ran
+    if ((await ctx.tasks.findById(entry.taskId)) === undefined) return stop(entry);
     if (event.kind === "session") {
       const run = await ctx.runs.findById(entry.runId);
       if (run !== undefined) await ctx.runs.save(sessionStarted(run, event.sessionId));

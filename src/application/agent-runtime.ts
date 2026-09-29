@@ -43,6 +43,8 @@ export interface Workspace {
   // Commits the task's work to its own branch. Nothing is pushed.
   commit(folder: string, taskId: string, message: string): Promise<boolean>;
   remove(folder: string, taskId: string): Promise<void>;
+  // Throws the task's work away: its worktree and its branch.
+  discard(folder: string, taskId: string): Promise<void>;
   // Deletes files the agent asked to remove, only ever inside the task's worktree; says which it removed.
   removeFiles(folder: string, taskId: string, paths: readonly string[]): Promise<readonly string[]>;
   // everything the task changed, as one diff for a reviewer to read; cut short past a size

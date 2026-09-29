@@ -102,5 +102,9 @@ export function createSqliteTaskRepository(db: AppDatabase): TaskRepository {
         .onConflictDoUpdate({ target: tasks.id, set: updatable })
         .run();
     },
+
+    async remove(id) {
+      db.delete(tasks).where(eq(tasks.id, id)).run();
+    },
   };
 }

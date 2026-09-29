@@ -24,12 +24,14 @@ export interface ProjectRepository {
   findById(id: ProjectId): Promise<Project | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Project[]>;
   save(project: Project): Promise<void>;
+  remove(id: ProjectId): Promise<void>;
 }
 
 export interface TaskRepository {
   findById(id: TaskId): Promise<Task | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Task[]>;
   save(task: Task): Promise<void>;
+  remove(id: TaskId): Promise<void>;
 }
 
 export interface AreaRepository {
@@ -54,6 +56,7 @@ export interface ReviewRepository {
   findById(id: ReviewId): Promise<Review | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Review[]>;
   save(review: Review): Promise<void>;
+  removeByTask(taskId: TaskId): Promise<void>;
 }
 
 // History is only ever added to.
@@ -77,16 +80,19 @@ export interface RunRepository {
   findById(id: RunId): Promise<Run | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Run[]>;
   save(run: Run): Promise<void>;
+  removeByTask(taskId: TaskId): Promise<void>;
 }
 
-// A task's requests are only ever added to, and read oldest first.
+// A task's requests are only ever added to, read oldest first, and go with the task.
 export interface TaskRequestRepository {
   add(request: TaskRequest): Promise<void>;
   findByTask(companyId: CompanyId, taskId: TaskId): Promise<readonly TaskRequest[]>;
+  removeByTask(taskId: TaskId): Promise<void>;
 }
 
-// What a run reported is only ever added to; a task's page reads the newest.
+// What a run reported is only ever added to, and goes with its task; a task's page reads the newest.
 export interface RunStepRepository {
   add(step: RunStep): Promise<void>;
   findByTask(companyId: CompanyId, taskId: TaskId, limit: number): Promise<readonly RunStep[]>;
+  removeByTask(taskId: TaskId): Promise<void>;
 }

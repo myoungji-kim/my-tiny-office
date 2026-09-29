@@ -9,7 +9,7 @@ import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
 import { requestReview } from "./review";
 import { allowCommand, allowWrite, createProject, startProject } from "./project";
-import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion } from "./task";
+import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion, removeTask } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 import { createWorkSupervisor, type WorkSupervisor } from "./work";
 
@@ -32,6 +32,7 @@ let committed: string[];
 let ready: boolean;
 let picksUp: boolean;
 let removed: readonly string[];
+let discarded: string[];
 let supervisor: WorkSupervisor;
 
 const runtime: AgentRuntime = {
@@ -62,6 +63,7 @@ const workspace: Workspace = {
     return true;
   },
   remove: async () => undefined,
+  discard: async (_, taskId) => void discarded.push(taskId),
   diff: async () => "+new line",
   removeFiles: async (_, __, paths) => (removed = [...paths]),
 };
@@ -70,6 +72,7 @@ beforeEach(async () => {
   ctx = createTestContext();
   launched = [];
   committed = [];
+  discarded = [];
   workspaceWorks = true;
   whilePreparing = async () => undefined;
   ready = true;
@@ -270,6 +273,22 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[1].input.prompt).toContain("did not allow the write");
+  });
+
+  it("stops a run whose task was deleted, throws its work away, and writes nothing more for it", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    await settle();
+
+    assert((await removeTask(ctx, workspace, id)).ok);
+    launched[0].emit({ kind: "step", step: "edit", detail: "src/a.ts" });
+    await settle();
+
+    expect(launched[0].stopped).toBe(true);
+    expect(discarded).toEqual([id]);
+    await expect(ctx.runSteps.findByTask(companyId, id, 10)).resolves.toEqual([]);
+    await expect(ctx.runs.findByCompany(companyId)).resolves.toEqual([]);
   });
 
   it("marks a run whose process is gone as disconnected, and reconnects to its session", async () => {

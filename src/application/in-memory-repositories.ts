@@ -77,6 +77,9 @@ function createInMemoryList<TId extends string, TItem extends { readonly id: TId
     async remove(id: TId) {
       items.delete(id);
     },
+    async removeWhere(gone: (item: TItem) => boolean) {
+      for (const [id, item] of items) if (gone(item)) items.delete(id);
+    },
   };
 }
 
@@ -86,7 +89,10 @@ export const createInMemoryAreaRepository = (): AreaRepository => createInMemory
 export const createInMemoryMemoryRepository = (): MemoryRepository => createInMemoryList<MemoryId, Memory>();
 export const createInMemoryRoleRepository = (): RoleRepository => createInMemoryList<RoleId, Role>();
 export const createInMemoryTeamRepository = (): TeamRepository => createInMemoryList<TeamId, Team>();
-export const createInMemoryReviewRepository = (): ReviewRepository => createInMemoryList<ReviewId, Review>();
+export function createInMemoryReviewRepository(): ReviewRepository {
+  const list = createInMemoryList<ReviewId, Review>();
+  return { ...list, removeByTask: (taskId) => list.removeWhere((r) => r.taskId === taskId) };
+}
 
 export function createInMemoryMilestoneRepository(): MilestoneRepository {
   const history: RecordedMilestone[] = [];
@@ -114,12 +120,18 @@ export function createInMemoryRunRepository(): RunRepository {
     async save(run) {
       runs.set(run.id, run);
     },
+    async removeByTask(taskId) {
+      for (const [id, run] of runs) if (run.taskId === taskId) runs.delete(id);
+    },
   };
 }
 
 export function createInMemoryTaskRequestRepository(): TaskRequestRepository {
-  const requests: TaskRequest[] = [];
+  let requests: TaskRequest[] = [];
   return {
+    async removeByTask(taskId) {
+      requests = requests.filter((r) => r.taskId !== taskId);
+    },
     async add(request) {
       requests.push(request);
     },
@@ -130,8 +142,11 @@ export function createInMemoryTaskRequestRepository(): TaskRequestRepository {
 }
 
 export function createInMemoryRunStepRepository(): RunStepRepository {
-  const steps: RunStep[] = [];
+  let steps: RunStep[] = [];
   return {
+    async removeByTask(taskId) {
+      steps = steps.filter((s) => s.taskId !== taskId);
+    },
     async add(step) {
       steps.push(step);
     },

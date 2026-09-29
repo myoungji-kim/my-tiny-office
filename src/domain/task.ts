@@ -230,6 +230,9 @@ export function applyTask(task: Task, eventId: EventId, now: Timestamp): Transit
   };
 }
 
+// A finished task is the record of what happened; anything else can be thrown away.
+export const isRemovable = (task: Task): boolean => task.status !== "done";
+
 // Only applied work goes up, and the user sends it.
 export function publishTask(task: Task, url: string): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: "taskNotDone" } {
   if (task.status !== "done") return { ok: false, reason: "taskNotDone" };
