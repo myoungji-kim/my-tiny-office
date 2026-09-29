@@ -68,9 +68,15 @@ export function TaskDialog({
   const picked = employees.find((e) => e.id === who);
   const target = projects.find((p) => p.id === into);
 
+  const running = edit?.status === "working";
   // What naming this person means for where the work goes next.
-  const whatHappens =
-    edit?.status === "held"
+  const whatHappens = running
+    ? who === edit.assigneeId
+      ? w.keepsGoing
+      : picked === undefined
+        ? w.handOverAnyone
+        : w.handOver(picked.name)
+    : edit?.status === "held"
       ? picked === undefined
         ? w.whenResumedAnyone
         : w.whenResumed(picked.name)
@@ -110,7 +116,7 @@ export function TaskDialog({
               {w.fProject}
             </label>
             <span className="select-wrap">
-              <select className="select" id="nt-project" value={into} onChange={(e) => setInto(e.target.value)}>
+              <select className="select" id="nt-project" value={into} disabled={running} aria-describedby={running ? "nt-project-why" : undefined} onChange={(e) => setInto(e.target.value)}>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -119,6 +125,11 @@ export function TaskDialog({
               </select>
               {Icon.chevron}
             </span>
+            {running && (
+              <span className="hint" id="nt-project-why">
+                {w.projectLocked}
+              </span>
+            )}
           </div>
           <div className="field">
             <label className="label" htmlFor="nt-title">
@@ -230,7 +241,7 @@ export function TaskDialog({
             {w.cancel}
           </button>
           <button className="btn btn-primary btn-md" type="button" disabled={pending || title.trim() === "" || target === undefined} onClick={save}>
-            {edit === undefined ? w.create : w.save}
+            {edit === undefined ? w.create : running ? w.sendChange : w.save}
           </button>
         </div>
       </div>

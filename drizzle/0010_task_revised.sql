@@ -1,0 +1,1 @@
+ALTER TABLE `tasks` ADD `revised_at` integer;

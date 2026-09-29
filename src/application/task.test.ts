@@ -60,18 +60,29 @@ describe("editing work", () => {
     await expect(editTask(ctx, written.id, { ...details, assigneeId: undefined })).resolves.toMatchObject({ ok: true, value: { task: { assigneeId: undefined } } });
   });
 
-  it("leaves running work to its agent and closed projects alone", async () => {
+  it("changes running work for whoever has it, hands it over by starting over, and keeps its project", async () => {
     const pay = await project();
-    const done = await project();
-    assert((await finishProject(ctx, done)).ok);
+    const other = await project();
     const mocha = await hire("모카");
+    const bori = await hire("보리");
     const running = await task(pay);
     assert((await assignTask(ctx, { taskId: running.id, employeeId: mocha.id })).ok);
     assert((await pickUpWork(ctx, companyId)).ok);
+    const details = { projectId: pay, title: "Paginate by cursor", description: undefined, area: undefined, priority: "low" as const, assigneeId: mocha.id, reviewerId: undefined };
+
+    now += minute;
+    await expect(editTask(ctx, running.id, details)).resolves.toMatchObject({ ok: true, value: { task: { status: "working", title: "Paginate by cursor", revisedAt: now } } });
+    await expect(editTask(ctx, running.id, { ...details, projectId: other })).resolves.toEqual({ ok: false, reason: "projectLockedWhileRunning" });
+    await expect(editTask(ctx, running.id, { ...details, assigneeId: bori.id })).resolves.toMatchObject({ ok: true, value: { task: { status: "backlog", assigneeId: bori.id } } });
+  });
+
+  it("leaves closed projects alone", async () => {
+    const pay = await project();
+    const done = await project();
+    assert((await finishProject(ctx, done)).ok);
     const waiting = await task(pay);
     const details = { projectId: pay, title: "x", description: undefined, area: undefined, priority: "low" as const, assigneeId: undefined, reviewerId: undefined };
 
-    await expect(editTask(ctx, running.id, details)).resolves.toEqual({ ok: false, reason: "taskNotEditable" });
     await expect(editTask(ctx, waiting.id, { ...details, projectId: done })).resolves.toEqual({ ok: false, reason: "projectClosed" });
   });
 });

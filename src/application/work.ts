@@ -61,8 +61,9 @@ function reviewerPrompt(reviewer: Employee, own: readonly Memory[]): string {
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">): string {
+function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">, revised: boolean): string {
   const { commands } = project;
+  if (continuing && revised) return `The task was changed while you were working on it. It now reads:\n\n${brief(task)}\n\nCarry on with it as it is now.`;
   if (task.changesRequested !== undefined) {
     return continuing
       ? `Your work was sent back with this request:\n\n${task.changesRequested}\n\nMake the changes.`
@@ -107,6 +108,7 @@ interface LiveRun {
   readonly employeeId: EmployeeId;
   // the review this run is, when it is a colleague's rather than the work itself
   readonly reviewId: ReviewId | undefined;
+  readonly startedAt: number;
   readonly ctx: AppContext;
   handle: RunningAgent;
   stopping: boolean;
@@ -191,7 +193,7 @@ export function createWorkSupervisor(deps: {
       const task = await ctx.tasks.findById(entry.taskId);
       const wanted =
         entry.reviewId === undefined
-          ? wantsRun(task, entry.employeeId) && !heldForReview(entry.taskId, now)
+          ? wantsRun(task, entry.employeeId) && !heldForReview(entry.taskId, now) && !(task.revisedAt !== undefined && entry.startedAt < task.revisedAt)
           : task?.status === "working" && now.some((r) => r.id === entry.reviewId && r.state === "reviewing");
       if (!wanted) stop(entry);
     }
@@ -219,6 +221,7 @@ export function createWorkSupervisor(deps: {
     taskId: task.id,
     employeeId: employee.id,
     reviewId,
+    startedAt: ctx.now(),
     ctx,
     handle: { stop: () => undefined },
     stopping: false,
@@ -255,7 +258,8 @@ export function createWorkSupervisor(deps: {
       deps.runtime.launch(
         {
           cwd: prepared.path,
-          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project),
+          // the last run stopped for a change made after it started
+          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project, current.revisedAt !== undefined && last !== undefined && last.startedAt < current.revisedAt),
           memory: memoryPrompt(employee, carried, project),
           commands: project.commands,
           atlassian: project.atlassian ? { writes: project.writes } : undefined,

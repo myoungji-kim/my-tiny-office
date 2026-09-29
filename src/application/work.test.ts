@@ -9,7 +9,7 @@ import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
 import { requestReview } from "./review";
 import { allowCommand, allowWrite, createProject, startProject } from "./project";
-import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion, removeTask } from "./task";
+import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion, removeTask, editTask } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 import { createWorkSupervisor, type WorkSupervisor } from "./work";
 
@@ -273,6 +273,26 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[1].input.prompt).toContain("did not allow the write");
+  });
+
+  it("stops a run when its task changes, and carries on in the same session with the change", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    await settle();
+    const task = await statusOf(id);
+    assert(task !== undefined);
+
+    // the change comes after the run started, and the next run after the change
+    const started = ctx.now();
+    assert((await editTask({ ...ctx, now: () => started + 1 }, id, { projectId: task.projectId, title: "Paginate by cursor", description: "Keyset, not offset.", area: task.area, priority: task.priority, assigneeId: task.assigneeId, reviewerId: undefined })).ok);
+    ctx = { ...ctx, now: () => started + 2 };
+    await supervisor.kick();
+    launched[0].exit();
+    await settle();
+
+    expect(launched[0].stopped).toBe(true);
+    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The task was changed while you were working on it. It now reads:\n\nTask: Paginate by cursor\n\nKeyset, not offset.\n\nCarry on with it as it is now." });
   });
 
   it("stops a run whose task was deleted, throws its work away, and writes nothing more for it", async () => {

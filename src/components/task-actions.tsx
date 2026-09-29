@@ -44,7 +44,7 @@ export function TaskActions({
   const router = useRouter();
   const live = project.status === "active";
   const canAssign = task.status === "backlog" && live;
-  const canEdit = (task.status === "backlog" || task.status === "held") && project.takesWork;
+  const canEdit = (task.status === "backlog" || task.status === "held" || task.status === "working") && project.takesWork;
   const canResume = task.status === "held" && live;
   const deciding = task.status === "approval" && project.status !== "done";
   const who = employees.find((e) => e.id === task.assigneeId);

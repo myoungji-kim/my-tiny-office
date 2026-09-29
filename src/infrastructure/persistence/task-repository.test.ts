@@ -68,6 +68,7 @@ const backlog: Task = {
   finishedAt: undefined,
   appliedAt: undefined,
   publishedUrl: undefined,
+  revisedAt: undefined,
 };
 
 let database: TestDatabase;

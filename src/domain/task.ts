@@ -58,6 +58,8 @@ export interface Task {
   readonly appliedAt: Timestamp | undefined;
   // where applied work went up for review: its pull request, or the page that opens one
   readonly publishedUrl: string | undefined;
+  // changed while it was being worked on: a run started before this carries on with the change
+  readonly revisedAt: Timestamp | undefined;
 }
 
 // What the user asked for when they sent the work back, as they wrote it.
@@ -138,6 +140,7 @@ export function createTask(input: CreateTaskInput, eventId: EventId, now: Timest
     finishedAt: undefined,
     appliedAt: undefined,
     publishedUrl: undefined,
+    revisedAt: undefined,
   };
   return {
     ok: true,
@@ -169,31 +172,35 @@ export interface TaskDetails {
   readonly reviewerId: EmployeeId | undefined;
 }
 
-export type EditTaskFailure = "taskNotEditable" | "taskTitleRequired" | "employeeFromAnotherCompany" | "employeeOnLeave" | "reviewerIsAssignee";
+export type EditTaskFailure = "taskNotEditable" | "taskTitleRequired" | "employeeFromAnotherCompany" | "employeeOnLeave" | "reviewerIsAssignee" | "projectLockedWhileRunning";
 
 // Work nobody is running can be rewritten and handed to someone else, or to
 // whoever is free. Running work changes through its agent, and finished work
 // is the record of what happened.
-export function editTask(task: Task, details: TaskDetails, assignee: Employee | undefined): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: EditTaskFailure } {
-  if (task.status !== "backlog" && task.status !== "held") return { ok: false, reason: "taskNotEditable" };
+// Work in progress can change too: the same person carries on with the change in
+// their session; someone else starts over, with the folder as it is. Its project
+// cannot change while it runs, since the run is in that project's folder.
+export function editTask(task: Task, details: TaskDetails, assignee: Employee | undefined, now: Timestamp): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: EditTaskFailure } {
+  if (task.status !== "backlog" && task.status !== "held" && task.status !== "working") return { ok: false, reason: "taskNotEditable" };
+  if (task.status === "working" && details.projectId !== task.projectId) return { ok: false, reason: "projectLockedWhileRunning" };
   const title = details.title.trim();
   if (title === "") return { ok: false, reason: "taskTitleRequired" };
   const refused = assignee === undefined ? undefined : assignable(task, assignee);
   if (refused !== undefined) return { ok: false, reason: refused };
   if (details.reviewerId !== undefined && details.reviewerId === assignee?.id) return { ok: false, reason: "reviewerIsAssignee" };
-  return {
-    ok: true,
-    task: {
-      ...task,
-      reviewerId: details.reviewerId,
-      projectId: details.projectId,
-      title,
-      description: details.description?.trim() || undefined,
-      area: details.area,
-      priority: details.priority,
-      assigneeId: assignee?.id,
-    },
+  const changed: Task = {
+    ...task,
+    reviewerId: details.reviewerId,
+    projectId: details.projectId,
+    title,
+    description: details.description?.trim() || undefined,
+    area: details.area,
+    priority: details.priority,
+    assigneeId: assignee?.id,
   };
+  if (task.status !== "working") return { ok: true, task: changed };
+  if (assignee?.id !== task.assigneeId) return { ok: true, task: { ...paused(changed, now), status: "backlog", blocker: undefined, revisedAt: undefined } };
+  return { ok: true, task: { ...changed, revisedAt: now } };
 }
 
 export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnLeave";

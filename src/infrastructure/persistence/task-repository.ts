@@ -53,6 +53,7 @@ function toTask(row: TaskRow): Task {
     runningSince: row.runningSince ?? undefined,
     finishedAt: row.finishedAt ?? undefined,
     appliedAt: row.appliedAt ?? undefined,
+    revisedAt: row.revisedAt ?? undefined,
     publishedUrl: row.publishedUrl !== null && /^https:\/\/\S+$/.test(row.publishedUrl) ? row.publishedUrl : undefined,
   };
 }
@@ -81,6 +82,7 @@ function toRow(task: Task): typeof tasks.$inferInsert {
     finishedAt: task.finishedAt ?? null,
     appliedAt: task.appliedAt ?? null,
     publishedUrl: task.publishedUrl ?? null,
+    revisedAt: task.revisedAt ?? null,
   };
 }
 

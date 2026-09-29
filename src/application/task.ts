@@ -96,7 +96,7 @@ export function editTask(
     const assignee = details.assigneeId === undefined ? undefined : await ctx.employees.findById(details.assigneeId);
     if (details.assigneeId !== undefined && assignee === undefined) return { ok: false, reason: "employeeNotFound" };
 
-    const edited = taskDomain.editTask(task, details, assignee);
+    const edited = taskDomain.editTask(task, details, assignee, ctx.now());
     if (!edited.ok) return edited;
     await ctx.tasks.save(edited.task);
     return { ok: true, value: { task: edited.task }, events: [] };

@@ -656,8 +656,11 @@ measured flags behind it.
   `docs/ui`. Left out until what they show exists: today's feed in the office
   and the people screen's 기억 tab (the activity feed and the memory-used
   report), how often a memory was used (the person's page lists the memories taught
-  lately instead of the most used). Waiting on the runtime: rewriting or handing over
-  work that is running.
+  lately instead of the most used).
+- **Changing work in progress.** 업무 수정 stays on a working task. Its button
+  is 바뀐 내용 전달: the same person stops and carries on with the change in
+  their session (`Task.revisedAt`); someone else, or nobody, starts over with
+  the folder as it is. The project is locked while it runs, with why.
 - **Letting someone go.** 내보내기 in their page's `⋯`, asked again with what
   happens: their task goes back to the backlog, a review they held is given
   back, a task naming them as reviewer names nobody, and what they were taught
