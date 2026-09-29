@@ -56,6 +56,8 @@ export interface Task {
   readonly runningSince: Timestamp | undefined;
   readonly finishedAt: Timestamp | undefined;
   readonly appliedAt: Timestamp | undefined;
+  // where applied work went up for review: its pull request, or the page that opens one
+  readonly publishedUrl: string | undefined;
 }
 
 // What the user asked for when they sent the work back, as they wrote it.
@@ -135,6 +137,7 @@ export function createTask(input: CreateTaskInput, eventId: EventId, now: Timest
     runningSince: undefined,
     finishedAt: undefined,
     appliedAt: undefined,
+    publishedUrl: undefined,
   };
   return {
     ok: true,
@@ -225,6 +228,12 @@ export function applyTask(task: Task, eventId: EventId, now: Timestamp): Transit
     task: { ...task, status: "done", appliedAt: now },
     events: [{ ...base(task, eventId, now), type: "TaskApplied" }],
   };
+}
+
+// Only applied work goes up, and the user sends it.
+export function publishTask(task: Task, url: string): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: "taskNotDone" } {
+  if (task.status !== "done") return { ok: false, reason: "taskNotDone" };
+  return { ok: true, task: { ...task, publishedUrl: url } };
 }
 
 // Back to whoever did it: they pick it up as soon as they are free.

@@ -60,6 +60,7 @@ const task = (id: string, projectId: string, priority: Priority, createdAt: numb
   runningSince: undefined,
   finishedAt: undefined,
   appliedAt: undefined,
+  publishedUrl: undefined,
   ...extra,
 });
 

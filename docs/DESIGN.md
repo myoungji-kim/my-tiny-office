@@ -286,7 +286,9 @@ the window — set in Settings' 화면 폭 and kept for every screen; a task's p
 has the same choice beside its tabs, as a shortcut to the same setting. Both are kept in
 this browser only.
 
-**세부 정보** is fixed: status, who, reviewer, area, priority, time. 업무 설명
+**세부 정보** is fixed: status, who, reviewer, area, priority, time — and once
+the work is applied, PR: PR 올리기, then PR 열기, or GitHub에서 PR 만들기 when
+this computer has no signed-in GitHub CLI and GitHub's own page finishes it. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
 report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.
 

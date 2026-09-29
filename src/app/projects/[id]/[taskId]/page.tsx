@@ -20,7 +20,7 @@ import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
 import { getDictionary } from "../../../../i18n";
-import { allowCommandAction, allowWriteAction, carryOnAction } from "../../../project-actions";
+import { allowCommandAction, allowWriteAction, carryOnAction, publishTaskAction } from "../../../project-actions";
 import { companyScreen, param, type SearchParams } from "../../../screen-data";
 
 export const dynamic = "force-dynamic";
@@ -98,6 +98,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const review = work?.review;
   const reviewer = person(review?.reviewerId);
   const actions = work?.steps ?? [];
+  const opened = task.publishedUrl !== undefined && /\/pull\/\d+$/.test(task.publishedUrl);
 
   const stepRow = (s: (typeof actions)[number], key: number) => (
     <div key={key} className="step">
@@ -161,6 +162,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       )}
       {work !== undefined && task.status === "approval" && <span className="tk-apply">{withCode(w.tk.applyWhat, work.branch)}</span>}
       {work !== undefined && task.status === "done" && <span className="tk-apply">{withCode(w.tk.applied, work.branch)}</span>}
+      {work !== undefined && task.status === "done" && !opened && <span className="hint">{task.publishedUrl === undefined ? w.tk.publishHint : w.tk.makePrHint}</span>}
     </>
   );
   const did = actions.length > 0 ? actions.map(stepRow) : <p className="col-empty talk-empty">{w.tk.noChanges}</p>;
@@ -172,6 +174,15 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     </div>
   );
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
+  // the user sends applied work up; a pull request's page, or GitHub's page for opening one
+  const pullRequest =
+    task.publishedUrl === undefined ? (
+      <ActButton action={publishTaskAction.bind(null, company.id, task.id)} label={w.tk.publish} errors={t.errors} />
+    ) : (
+      <a className="btn btn-secondary btn-sm" href={task.publishedUrl} target="_blank" rel="noreferrer" title={opened ? undefined : w.tk.makePrHint}>
+        {opened ? w.tk.openPr : w.tk.makePr}
+      </a>
+    );
   const side = (
     <>
       {panel(
@@ -184,6 +195,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           {kv(w.tk.fPrio, t.priority[task.priority])}
           {time !== undefined && kv(w.tk.fTime, time)}
           {kv(w.tk.created, dateText(locale, task.createdAt))}
+          {task.status === "done" && project.folder !== undefined && kv(w.tk.fPr, pullRequest)}
         </>,
         "panel side-kv",
       )}

@@ -39,11 +39,11 @@ const MAX_NEW_FILE = 1024 * 1024;
 // rights, outside the session's boundary.
 const NO_HOOKS = join(tmpdir(), "my-tiny-office-no-hooks", randomUUID());
 
-async function git(args: readonly string[]): Promise<RunResult | undefined> {
+async function git(args: readonly string[], timeoutMs = GIT_TIMEOUT_MS): Promise<RunResult | undefined> {
   const found = findExecutable("git");
   if (found.kind !== "found") return undefined;
   const safe = ["-c", "core.quotepath=false", "-c", `core.hooksPath=${NO_HOOKS}`, "-c", "core.fsmonitor=false"];
-  return runProcess(found.path, [...safe, ...args], { timeoutMs: GIT_TIMEOUT_MS });
+  return runProcess(found.path, [...safe, ...args], { timeoutMs });
 }
 
 async function commonDirOf(folder: string): Promise<string | undefined> {
@@ -158,6 +158,21 @@ export async function commitAll(folder: string, taskId: string, message: string)
   if (committed?.code !== 0) return { ok: false };
   const head = await git([...wt.args, "rev-parse", "--short", "HEAD"]);
   return { ok: true, commit: head?.stdout.trim() };
+}
+
+// Signing in to push can take the user a while, in git's own window.
+const PUSH_TIMEOUT_MS = 180_000;
+
+export async function originOf(folder: string): Promise<string | undefined> {
+  const result = await git(["-C", folder, "remote", "get-url", "origin"]);
+  return result?.code === 0 ? result.stdout.trim() : undefined;
+}
+
+// Only ever the task's own branch, to a branch of the same name, and only when the user asks.
+export async function pushBranch(folder: string, taskId: string): Promise<boolean> {
+  const branch = branchOf(taskId);
+  const result = await git(["-C", folder, "push", "--no-verify", "origin", `refs/heads/${branch}:refs/heads/${branch}`], PUSH_TIMEOUT_MS);
+  return result?.code === 0;
 }
 
 export async function removeWorktree(folder: string, taskId: string): Promise<void> {

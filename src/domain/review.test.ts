@@ -65,6 +65,7 @@ const task = (id: string, extra: Partial<Task> = {}): Task => ({
   runningSince: t0,
   finishedAt: undefined,
   appliedAt: undefined,
+  publishedUrl: undefined,
   ...extra,
 });
 

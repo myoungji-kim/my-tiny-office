@@ -57,6 +57,13 @@
       "when": 1790697325354,
       "tag": "0007_atlassian",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1790698847945,
+      "tag": "0008_published_url",
+      "breakpoints": true
     }
   ]
 }

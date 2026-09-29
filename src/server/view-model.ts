@@ -105,6 +105,7 @@ export interface TaskView {
   readonly heldReason: string | undefined;
   readonly heldWithProject: boolean;
   readonly createdAt: number;
+  readonly publishedUrl: string | undefined;
 }
 
 export type MilestoneView = RecordedMilestone;
@@ -312,6 +313,7 @@ export async function loadOffice(
       heldReason: task.heldReason,
       heldWithProject: task.heldWithProject,
       createdAt: task.createdAt,
+      publishedUrl: task.publishedUrl,
     })),
   };
 }

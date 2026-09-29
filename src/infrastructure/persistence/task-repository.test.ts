@@ -67,6 +67,7 @@ const backlog: Task = {
   runningSince: undefined,
   finishedAt: undefined,
   appliedAt: undefined,
+  publishedUrl: undefined,
 };
 
 let database: TestDatabase;
@@ -118,6 +119,16 @@ describe("tasks", () => {
     await repo.save(blocked);
 
     await expect(repo.findById(blocked.id)).resolves.toEqual(blocked);
+  });
+
+  it("keeps where applied work went up, and only a web address", async () => {
+    const repo = createSqliteTaskRepository(database.handle.db);
+    const done: Task = { ...backlog, status: "done", assigneeId: mocha.id, startedAt: t0, finishedAt: t0, appliedAt: t0, publishedUrl: "https://github.com/o/r/pull/7" };
+    await repo.save(done);
+    await expect(repo.findById(done.id)).resolves.toMatchObject({ publishedUrl: "https://github.com/o/r/pull/7" });
+
+    database.handle.db.run(sql`update tasks set published_url = 'javascript:alert(1)' where id = 't1'`);
+    await expect(repo.findById(done.id)).resolves.toMatchObject({ publishedUrl: undefined });
   });
 
   it("reads an unreadable blocker as a lost connection, never as unblocked", async () => {

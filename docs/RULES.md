@@ -135,7 +135,10 @@ then nobody free takes anything new, and what is running carries on.
 **Every task works apart and lands on its own branch.** A task runs in a
 worktree of its project's repository, so two people in one project never write
 over each other and what changed is always one task's. Approving commits that
-work to the task's branch; pushing, merging and deploying stay the user's.
+work to the task's branch; pushing, merging and deploying stay the user's. Once
+it is applied, the task's page sends it up when the user asks: PR 올리기 pushes
+the branch with this computer's git sign-in and opens its pull request — through
+GitHub CLI when it is signed in, or on GitHub's own page, filled in, when not.
 
 **Work stays in the folder.** An agent reads and edits files only in its
 task's worktree, runs only the commands its project allows, and reaches no

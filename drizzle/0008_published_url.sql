@@ -1,0 +1,1 @@
+ALTER TABLE `tasks` ADD `published_url` text;

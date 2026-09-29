@@ -383,6 +383,13 @@ project allows and that each runs on its own as written, that a file it wants
 gone is named in a closing `Remove: <path>` line for the app to delete, and
 everything it has been taught, numbered.
 
+Applied work goes up only when the user asks (`publishTask` through the
+`Publisher` port, `src/infrastructure/workspace/github.ts`): the task's branch
+is pushed to `origin`, and its pull request is opened with GitHub CLI when it is
+signed in to the remote's host, or the task keeps GitHub's page for opening one,
+filled in with the task and its last report. Setups differ from person to
+person, so nothing is assumed beyond `git` itself.
+
 Approving commits the worktree to the task's branch and removes the worktree
 (`approveTask`); sending back queues the task for the same person, whose next
 run resumes the session with the request, and keeps the request as written

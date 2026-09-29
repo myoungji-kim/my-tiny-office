@@ -183,6 +183,7 @@ export const tasks = sqliteTable(
     runningSince: integer("running_since"),
     finishedAt: integer("finished_at"),
     appliedAt: integer("applied_at"),
+    publishedUrl: text("published_url"),
   },
   (table) => [
     index("idx_tasks_company_status").on(table.companyId, table.status),

@@ -16,7 +16,7 @@ end of this document) before trusting it again.
 | Reads and edits files | Only inside the task's own worktree, `<folder>/.worktrees/<task>` |
 | Runs commands | Only the ones the project allows, plus read-only commands inside the worktree that Claude Code allows on its own (`git log`, `ls`, `echo`) |
 | Reaches the network | Never through its own tools, but for a connector its project turned on (§8). A command the project allows runs whatever it runs, and the agent can edit the scripts it calls (§3) |
-| Pushes, merges, deploys | Never. Approval commits to `mto/<task>`; the rest is the user's |
+| Pushes, merges, deploys | Never. Approval commits to `mto/<task>`; pushing that branch and opening its pull request is the user's click on the task's page (§6); merging and deploying stay the user's |
 | Uses outside tools | Only the Atlassian connector (Jira, Confluence), in a project that turns it on: its read tools, and each write tool once the user has allowed it (§8). No other connector, MCP server or plugin |
 | Carries the user's personal Claude Code setup (hooks, skills, plugins, auto-memory, `~/.claude/CLAUDE.md`) | Never |
 | Reads Claude Code's credentials | Never; nor does the app |
@@ -209,6 +209,15 @@ agents, so it is a target in its own right.
   deletes the file only if the path stays inside the worktree, is not absolute
   and is not under `.git`. A link is removed, never what it points at, and
   folders are left alone.
+- **Publishing.** Only on the user's click, for applied work: `git push
+  --no-verify origin refs/heads/mto/<task>:refs/heads/mto/<task>`, with the
+  same hook and monitor settings as every git the app runs, and the user's own
+  git credentials — the app never sees them. `origin` must read as a GitHub
+  repository (`github.com` or a `github.` host, a plain owner and name). The
+  pull request is opened with `gh` only when it is on `PATH` and `gh auth
+  status --hostname <host>` exits 0 — its output is not read — as `gh pr create
+  --head <branch> --title <task> --body-file -`; otherwise the task keeps a link
+  to GitHub's own page for it. Only an `https://` address is kept and linked.
 - **Sessions.** A session id is checked to be a UUID before it becomes
   `--resume <id>`, so nothing stored can turn into a flag.
 - **Output.** Agent output, file names, diffs and anything else from a run is

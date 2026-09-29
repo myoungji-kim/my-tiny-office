@@ -1,5 +1,6 @@
 "use server";
 
+import { publishTask } from "../application/publish";
 import { requestReview } from "../application/review";
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite } from "../application/project";
 import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
@@ -8,6 +9,7 @@ import { isAtlassianWrite } from "../domain/project";
 import { checkFolder } from "../infrastructure/workspace/folder";
 import { pickFolder } from "../infrastructure/workspace/folder-picker";
 import { gitWorkspace } from "../infrastructure/workspace/git";
+import { githubPublisher } from "../infrastructure/workspace/github";
 import { loadDiff } from "../server/task-work";
 
 import { inCompany, optional, priorityOf, str, type Outcome } from "./action-context";
@@ -142,6 +144,10 @@ export async function resumeTaskAction(companyId: string, taskId: string): Promi
 
 export async function approveTaskAction(companyId: string, taskId: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => approveTask(ctx, gitWorkspace, toTaskId(str(taskId))));
+}
+
+export async function publishTaskAction(companyId: string, taskId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => publishTask(ctx, githubPublisher, toTaskId(str(taskId))));
 }
 
 export async function sendBackAction(companyId: string, taskId: string, reason: string): Promise<Outcome> {
