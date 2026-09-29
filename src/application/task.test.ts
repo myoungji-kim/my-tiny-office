@@ -50,7 +50,7 @@ describe("editing work", () => {
     const planned = await project({ start: false });
     const mocha = await hire("모카");
     const written = await task(pay);
-    const details = { projectId: planned, title: " Paginate history ", description: undefined, area: undefined, priority: "high" as const, assigneeId: mocha.id };
+    const details = { projectId: planned, title: " Paginate history ", description: undefined, area: undefined, priority: "high" as const, assigneeId: mocha.id, reviewerId: undefined };
 
     const edited = await editTask(ctx, written.id, details);
 
@@ -67,7 +67,7 @@ describe("editing work", () => {
     assert((await assignTask(ctx, { taskId: running.id, employeeId: mocha.id })).ok);
     assert((await pickUpWork(ctx, companyId)).ok);
     const waiting = await task(pay);
-    const details = { projectId: pay, title: "x", description: undefined, area: undefined, priority: "low" as const, assigneeId: undefined };
+    const details = { projectId: pay, title: "x", description: undefined, area: undefined, priority: "low" as const, assigneeId: undefined, reviewerId: undefined };
 
     await expect(editTask(ctx, running.id, details)).resolves.toEqual({ ok: false, reason: "taskNotEditable" });
     await expect(editTask(ctx, waiting.id, { ...details, projectId: done })).resolves.toEqual({ ok: false, reason: "projectClosed" });

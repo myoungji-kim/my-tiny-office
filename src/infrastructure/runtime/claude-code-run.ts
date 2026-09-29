@@ -13,8 +13,17 @@ const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 const isSessionId = (value: unknown): value is string => typeof value === "string" && SESSION_ID.test(value);
 
 // Exactly the launch SECURITY.md measured; anything added here is measured first.
-export function launchArgs(input: { readonly commands: readonly string[]; readonly memoryFile: string; readonly resume: string | undefined }): string[] {
-  const allowed = ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`])];
+export function launchArgs(input: {
+  readonly commands: readonly string[];
+  readonly memoryFile: string;
+  readonly resume: string | undefined;
+  readonly readOnly: boolean;
+}): string[] {
+  // a reviewer's session has only the tools that read, confined to the worktree
+  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell";
+  const allowed = input.readOnly
+    ? ["Read(./**)"]
+    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`])];
   const args = [
     "-p",
     "--output-format",
@@ -29,7 +38,7 @@ export function launchArgs(input: { readonly commands: readonly string[]; readon
     "--disable-slash-commands",
     "--strict-mcp-config",
     "--tools",
-    "Read,Edit,Write,Glob,Grep,Bash,PowerShell",
+    tools,
     "--allowedTools",
     allowed.join(" "),
     "--append-system-prompt-file",
@@ -130,7 +139,7 @@ export const claudeCodeRuntime: AgentRuntime = {
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string }>();
-    return startProcess(found.path, launchArgs({ commands: input.commands, memoryFile, resume: input.resume }), {
+    return startProcess(found.path, launchArgs({ commands: input.commands, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

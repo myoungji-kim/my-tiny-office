@@ -1,12 +1,13 @@
 import { assert, beforeEach, describe, expect, it } from "vitest";
 
-import { toCompanyId, type TaskId } from "../domain/ids";
+import { toCompanyId, type EmployeeId, type TaskId } from "../domain/ids";
 
 import type { AgentEvent, AgentRuntime, LaunchInput, Workspace } from "./agent-runtime";
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
+import { requestReview } from "./review";
 import { allowCommand, createProject, startProject } from "./project";
 import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion } from "./task";
 import { createTestContext, firstRole } from "./test-context";
@@ -60,6 +61,7 @@ const workspace: Workspace = {
     return true;
   },
   remove: async () => undefined,
+  diff: async () => "+new line",
 };
 
 beforeEach(async () => {
@@ -84,6 +86,38 @@ async function oneTask(): Promise<TaskId> {
   const task = await createTask(ctx, { companyId, projectId: project.value.project.id, title: "Paginate", description: "Twenty a page.", priority: "normal" });
   assert(task.ok);
   return task.value.task.id;
+}
+
+// The same company, with a colleague who knows the task's area, and the task in it.
+async function taskWithReviewer(named: boolean): Promise<{ readonly id: TaskId; readonly reviewer: EmployeeId }> {
+  const author = await hireEmployee(ctx, { companyId, name: "모카", species: "cat", roleId: await firstRole(ctx, companyId) });
+  const colleague = await hireEmployee(ctx, { companyId, name: "보리", species: "cat", roleId: await firstRole(ctx, companyId) });
+  assert(author.ok && colleague.ok);
+  const [area] = await ctx.areas.findByCompany(companyId);
+  assert((await teachMemory(ctx, { companyId, kind: "expertise", employeeId: colleague.value.employee.id, areaId: area.id, text: "인덱스는 순서가 중요해요" })).ok);
+  const project = await createProject(ctx, { companyId, name: "pay", priority: "normal", folder: "/code/pay", commands: [] });
+  assert(project.ok);
+  assert((await startProject(ctx, project.value.project.id)).ok);
+  const task = await createTask(ctx, {
+    companyId,
+    projectId: project.value.project.id,
+    title: "Paginate",
+    area: area.id,
+    priority: "normal",
+    assigneeId: author.value.employee.id,
+    reviewerId: named ? colleague.value.employee.id : undefined,
+  });
+  assert(task.ok);
+  return { id: task.value.task.id, reviewer: colleague.value.employee.id };
+}
+
+// The first launch's work, finished.
+async function finishFirst(): Promise<void> {
+  await settle();
+  launched[0].emit({ kind: "session", sessionId: SESSION });
+  launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "Done." });
+  launched[0].exit();
+  await settle();
 }
 
 // Ticks until what the runs reported has all been written.
@@ -219,7 +253,7 @@ describe("the work supervisor", () => {
 
     assert((await sendBack(ctx, first, "페이지 크기는 50")).ok);
     await settle();
-    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The user sent your work back:\n\n페이지 크기는 50\n\nMake the changes." });
+    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "Your work was sent back with this request:\n\n페이지 크기는 50\n\nMake the changes." });
     launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0, report: undefined });
     launched[1].exit();
     await settle();
@@ -309,6 +343,59 @@ describe("the work supervisor", () => {
 
     expect(await statusOf(first)).toMatchObject({ blocker: { kind: "workspaceUnavailable" } });
     expect(launched.map((l) => l.input.prompt)).toEqual(["Task: Second"]);
+  });
+
+  it("has a colleague review finished work only by reading, and brings it to approval when they approve", async () => {
+    const { id, reviewer } = await taskWithReviewer(false);
+    await finishFirst();
+    expect(await statusOf(id)).toMatchObject({ status: "approval" });
+
+    assert((await requestReview(ctx, id, reviewer)).ok);
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ status: "working" });
+    expect(launched).toHaveLength(2);
+    expect(launched[1].input).toMatchObject({ readOnly: true, commands: [] });
+    expect(launched[1].input.prompt).toContain("+new line");
+    expect(launched[1].input.memory).toContain("인덱스는 순서가 중요해요");
+
+    launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "깔끔해요.\nVerdict: approve" });
+    launched[1].exit();
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ status: "approval" });
+    expect(await ctx.reviews.findByCompany(companyId)).toMatchObject([{ state: "settled", verdict: "approve", comments: "깔끔해요." }]);
+    expect(launched).toHaveLength(2);
+  });
+
+  it("hands work the review asks to change back to whoever did it, in their session, once", async () => {
+    const { id } = await taskWithReviewer(true);
+    await finishFirst();
+    // named on the task, the reviewer looks as soon as the work is first finished
+    expect(launched[1].input.readOnly).toBe(true);
+
+    launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "offset 대신 커서를 써 주세요.\nVerdict: changes" });
+    launched[1].exit();
+    await settle();
+
+    expect(launched[2].input).toMatchObject({ readOnly: false, resume: SESSION, prompt: "Your work was sent back with this request:\n\noffset 대신 커서를 써 주세요.\n\nMake the changes." });
+    launched[2].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "커서로 바꿨어요." });
+    launched[2].exit();
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ status: "approval" });
+    expect(launched).toHaveLength(3);
+  });
+
+  it("gives the work back as it was when a review does not conclude", async () => {
+    const { id } = await taskWithReviewer(true);
+    await finishFirst();
+    launched[1].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "잘 모르겠어요." });
+    launched[1].exit();
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ status: "approval" });
+    expect((await ctx.reviews.findByCompany(companyId))[0]).toMatchObject({ state: "withdrawn" });
   });
 
   it("ends a run that the budget stopped as blocked until the user carries on", async () => {

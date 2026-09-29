@@ -19,6 +19,8 @@ export interface LaunchInput {
   readonly commands: readonly string[];
   // the session to continue, when the same agent has worked on the task before
   readonly resume: string | undefined;
+  // a reviewer only reads: no edits, no commands
+  readonly readOnly: boolean;
 }
 
 export interface RunningAgent {
@@ -36,4 +38,6 @@ export interface Workspace {
   // Commits the task's work to its own branch. Nothing is pushed.
   commit(folder: string, taskId: string, message: string): Promise<boolean>;
   remove(folder: string, taskId: string): Promise<void>;
+  // everything the task changed, as one diff for a reviewer to read; cut short past a size
+  diff(folder: string, taskId: string): Promise<string>;
 }

@@ -99,6 +99,12 @@ export const Icon = {
       <path d="M6 4v8M10 4v8" />
     </svg>
   ),
+  eye: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z" />
+      <circle cx="8" cy="8" r="1.7" />
+    </svg>
+  ),
   plug: (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 2v3.6M10 2v3.6M4.4 5.6h7.2v2.6a3.6 3.6 0 0 1-7.2 0z" />

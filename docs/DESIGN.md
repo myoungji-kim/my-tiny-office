@@ -249,6 +249,7 @@ so above everything.
 | 기억해 둘 만한 것 | Up to two things the agent thought later tasks should know, each with 넘기기 and 기억시키기 — which opens the teaching dialog starting from its words | The run's closing report |
 | 지금 하는 일 | While they work, the one step they are on | The runtime's event stream |
 | 한 일 | Every step — read, edited, ran — folded to one row with its count | The runtime's event stream |
+| 검토 | Where the review stands — 보리가 보고 있어요, 보완을 요청했어요 — and what the reviewer said, formatted | The task's review |
 | 바뀐 것 | Every file with lines added and removed, a file opening to its diff | The task's worktree |
 | 검토 | Where the review stands and what was said | The task's PullRequest |
 | 업무 설명 | What the task is for | The task |
@@ -601,13 +602,14 @@ measured flags behind it.
 
 ## Open questions
 
+- **Asking for a review.** 동료 검토 받기 sits with the approval actions and opens a pick of colleagues who know the area, a busy one marked as looking after what they are on; the task dialog's 검토자 names one ahead. The mockup's in-progress 검토 붙이기 moved there, because real work finishes before anyone could catch it in progress.
 - **What is not built yet.** Every screen is built from its page in
   `docs/ui`. Left out until what they show exists: today's feed in the office
   and the people screen's 기억 tab (the activity feed and the memory-used
   report), how often a memory was used (the person's page lists the memories taught
   lately instead of the most used), a
-  task's review panel and its history of events. Waiting on the runtime:
-  asking for a review, and rewriting or handing over work that is running.
+  task's history of events. Waiting on the runtime: rewriting or handing over
+  work that is running.
   Not in `src/domain` yet: letting someone go, and deleting a project or a
   task.
 - **Choosing a folder.** A browser cannot hand over a folder's path, so

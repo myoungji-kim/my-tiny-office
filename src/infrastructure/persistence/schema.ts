@@ -172,6 +172,8 @@ export const tasks = sqliteTable(
     heldFrom: text("held_from", { enum: heldFrom }),
     heldWithProject: integer("held_with_project", { mode: "boolean" }).notNull().default(false),
     changesRequested: text("changes_requested"),
+    // the colleague who reviews it once it is first finished; read as unset when they cannot
+    reviewerId: text("reviewer_id"),
     createdAt: integer("created_at").notNull(),
     startedAt: integer("started_at"),
     workedFor: integer("worked_for").notNull().default(0),
@@ -232,6 +234,9 @@ export const reviews = sqliteTable(
     createdAt: integer("created_at").notNull(),
     startedAt: integer("started_at"),
     settledAt: integer("settled_at"),
+    // what the reviewer concluded and said; read as none when unreadable
+    verdict: text("verdict"),
+    comments: text("comments"),
   },
   (table) => [
     index("idx_reviews_company").on(table.companyId),

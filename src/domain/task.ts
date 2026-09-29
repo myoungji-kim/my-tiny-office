@@ -45,6 +45,8 @@ export interface Task {
   // held because its project was, so resuming the project resumes it
   readonly heldWithProject: boolean;
   readonly changesRequested: string | undefined;
+  // the colleague who reviews it once it is first finished
+  readonly reviewerId: EmployeeId | undefined;
   readonly createdAt: Timestamp;
   readonly startedAt: Timestamp | undefined;
   // Time is what the work has taken: runs add up, and a pause adds nothing.
@@ -92,6 +94,7 @@ export interface CreateTaskInput {
   readonly description?: string;
   readonly area?: AreaId;
   readonly priority: Priority;
+  readonly reviewerId?: EmployeeId;
 }
 
 export type CreateTaskFailure = "taskTitleRequired";
@@ -115,6 +118,7 @@ export function createTask(input: CreateTaskInput, eventId: EventId, now: Timest
     heldFrom: undefined,
     heldWithProject: false,
     changesRequested: undefined,
+    reviewerId: input.reviewerId,
     createdAt: now,
     startedAt: undefined,
     workedFor: 0,
@@ -149,9 +153,10 @@ export interface TaskDetails {
   readonly description: string | undefined;
   readonly area: AreaId | undefined;
   readonly priority: Priority;
+  readonly reviewerId: EmployeeId | undefined;
 }
 
-export type EditTaskFailure = "taskNotEditable" | "taskTitleRequired" | "employeeFromAnotherCompany" | "employeeOnLeave";
+export type EditTaskFailure = "taskNotEditable" | "taskTitleRequired" | "employeeFromAnotherCompany" | "employeeOnLeave" | "reviewerIsAssignee";
 
 // Work nobody is running can be rewritten and handed to someone else, or to
 // whoever is free. Running work changes through its agent, and finished work
@@ -162,10 +167,12 @@ export function editTask(task: Task, details: TaskDetails, assignee: Employee | 
   if (title === "") return { ok: false, reason: "taskTitleRequired" };
   const refused = assignee === undefined ? undefined : assignable(task, assignee);
   if (refused !== undefined) return { ok: false, reason: refused };
+  if (details.reviewerId !== undefined && details.reviewerId === assignee?.id) return { ok: false, reason: "reviewerIsAssignee" };
   return {
     ok: true,
     task: {
       ...task,
+      reviewerId: details.reviewerId,
       projectId: details.projectId,
       title,
       description: details.description?.trim() || undefined,
@@ -219,6 +226,24 @@ export function sendBack(task: Task, reason: string, eventId: EventId, now: Time
     ok: true,
     task: { ...task, status: "backlog", changesRequested: why, finishedAt: undefined },
     events: [{ ...base(task, eventId, now), type: "TaskSentBack", reason: why }],
+  };
+}
+
+// Finished work goes back to being worked on while a colleague reviews it;
+// nobody runs on it until the review settles.
+export function reopenForReview(task: Task): { readonly ok: true; readonly task: Task } | { readonly ok: false; readonly reason: "taskNotAwaitingApproval" } {
+  if (task.status !== "approval") return { ok: false, reason: "taskNotAwaitingApproval" };
+  return { ok: true, task: { ...task, status: "working", finishedAt: undefined, runningSince: undefined } };
+}
+
+// A review that asks for changes hands the work back to whoever did it, as
+// the user sending it back would.
+export function reviewAskedForChanges(task: Task, comments: string, eventId: EventId, now: Timestamp): Transition<TaskSentBack, "taskNotWorking"> {
+  if (task.status !== "working") return { ok: false, reason: "taskNotWorking" };
+  return {
+    ok: true,
+    task: { ...paused(task, now), status: "backlog", changesRequested: comments.trim() || undefined },
+    events: [{ ...base(task, eventId, now), type: "TaskSentBack", reason: comments.trim() }],
   };
 }
 

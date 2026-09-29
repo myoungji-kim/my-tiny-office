@@ -18,6 +18,8 @@ function toReview(row: typeof reviews.$inferSelect): Review {
     createdAt: row.createdAt,
     startedAt: row.startedAt ?? undefined,
     settledAt: row.settledAt ?? undefined,
+    verdict: row.verdict === "approve" || row.verdict === "changes" ? row.verdict : undefined,
+    comments: row.comments ?? undefined,
   };
 }
 
@@ -39,6 +41,8 @@ export function createSqliteReviewRepository(db: AppDatabase): ReviewRepository 
         createdAt: review.createdAt,
         startedAt: review.startedAt ?? null,
         settledAt: review.settledAt ?? null,
+        verdict: review.verdict ?? null,
+        comments: review.comments ?? null,
       };
       db.insert(reviews).values({ id: review.id, ...row }).onConflictDoUpdate({ target: reviews.id, set: row }).run();
     },

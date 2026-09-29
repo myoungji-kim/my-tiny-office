@@ -8,6 +8,7 @@ import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
 
 import { ActButton } from "./act-button";
+import { ReviewDialog } from "./review-dialog";
 import { StepDialog } from "./step-dialog";
 import { TaskDialog } from "./task-dialog";
 
@@ -45,7 +46,7 @@ export function TaskActions({
   const canResume = task.status === "held" && live;
   const deciding = task.status === "approval" && project.status !== "done";
   const who = employees.find((e) => e.id === task.assigneeId);
-  const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "rework" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
+  const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "rework" | "review" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
   const close = useCallback(() => {
     setDialog(undefined);
     if (assignFirst) router.replace(`/projects/${project.id}/${task.id}`, { scroll: false });
@@ -73,6 +74,9 @@ export function TaskActions({
           <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("hold")}>
             {w.actions.hold}
           </button>
+          <button className="btn btn-secondary btn-lg" type="button" disabled={!ready} onClick={() => setDialog("review")}>
+            {w.actions.askReview}
+          </button>
           <button className="btn btn-secondary btn-lg" type="button" disabled={!ready} onClick={() => setDialog("rework")}>
             {w.actions.rework}
           </button>
@@ -90,6 +94,9 @@ export function TaskActions({
           onYes={(reason) => holdTaskAction(companyId, task.id, reason)}
           onClose={close}
         />
+      )}
+      {dialog === "review" && (
+        <ReviewDialog locale={locale} companyId={companyId} task={task} employees={employees} memories={memories} areas={areas} onClose={close} />
       )}
       {dialog === "rework" && (
         <StepDialog

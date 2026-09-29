@@ -58,6 +58,7 @@ const backlog: Task = {
   heldFrom: undefined,
   heldWithProject: false,
   changesRequested: undefined,
+  reviewerId: undefined,
   createdAt: t0,
   startedAt: undefined,
   workedFor: 0,

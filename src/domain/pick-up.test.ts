@@ -51,6 +51,7 @@ const task = (id: string, projectId: string, priority: Priority, createdAt: numb
   heldFrom: undefined,
   heldWithProject: false,
   changesRequested: undefined,
+  reviewerId: undefined,
   createdAt,
   startedAt: undefined,
   workedFor: 0,

@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 
 import { toCompanyId, toTaskId } from "../domain/ids";
+import type { ReviewState, Verdict } from "../domain/review";
 import type { StepKind } from "../domain/run";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
@@ -12,6 +13,8 @@ export interface TaskWork {
   readonly sessionId: string | undefined;
   // every memory a run of this task said it drew on
   readonly memoriesUsed: readonly string[];
+  // the colleague's review it has, the latest asked for
+  readonly review: { readonly state: ReviewState; readonly reviewerId: string | undefined; readonly verdict: Verdict | undefined; readonly comments: string | undefined } | undefined;
   // what its runs thought worth remembering, still waiting on the user
   readonly suggestions: readonly { readonly runId: string; readonly text: string }[];
   readonly worktree: string | undefined;
@@ -40,6 +43,9 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
   const sessionId = runs
     .filter((r) => r.taskId === task.id && r.sessionId !== undefined)
     .sort((a, b) => b.startedAt - a.startedAt)[0]?.sessionId;
+  const review = (await ctx.reviews.findByCompany(task.companyId))
+    .filter((r) => r.taskId === task.id && r.state !== "suggested")
+    .sort((a, b) => b.createdAt - a.createdAt)[0];
   const worktree = folder === undefined ? undefined : worktreePath(folder, task.id);
   const present = worktree !== undefined && existsSync(worktree);
 
@@ -47,6 +53,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
     steps: steps.map((s) => ({ at: s.at, kind: s.kind, detail: s.detail })),
     changes: present && folder !== undefined ? await changesIn(folder, task.id) : [],
     sessionId,
+    review: review && { state: review.state, reviewerId: review.reviewerId, verdict: review.verdict, comments: review.comments },
     memoriesUsed: [...new Set(runs.filter((r) => r.taskId === task.id).flatMap((r) => r.memoriesUsed))],
     suggestions: runs.filter((r) => r.taskId === task.id).flatMap((r) => r.suggestions.map((text) => ({ runId: r.id, text }))),
     worktree: present ? worktree : undefined,

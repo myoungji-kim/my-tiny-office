@@ -124,7 +124,7 @@ describe("the history", () => {
     assert(suggested.ok);
     const asked = await askForReview(ctx, suggested.value.review.id, pip.id);
     assert(asked.ok);
-    assert((await settleReview(ctx, asked.value.review.id)).ok);
+    assert((await settleReview(ctx, asked.value.review.id, { verdict: "approve", comments: undefined })).ok);
     const working = (await ctx.tasks.findById(webhook.id))!;
     const done = finishWork(working, toEventId("f"), now);
     assert(done.ok);

@@ -164,6 +164,26 @@ export async function removeWorktree(folder: string, taskId: string): Promise<vo
   await git(["-C", folder, "worktree", "remove", "--force", worktreePath(folder, taskId)]);
 }
 
+// what a reviewer is handed at most, so a huge change does not fill the whole prompt
+const MAX_REVIEW_DIFF = 60_000;
+
+// Every file's diff, one after another, for a reviewer to read.
+export async function fullDiff(folder: string, taskId: string): Promise<string> {
+  const parts: string[] = [];
+  let size = 0;
+  for (const change of await changesIn(folder, taskId)) {
+    const diff = await diffOf(folder, taskId, change.path);
+    const part = diff.startsWith("diff --git") ? diff : `--- ${change.path} (new)\n${diff}`;
+    if (size + part.length > MAX_REVIEW_DIFF) {
+      parts.push(`… ${change.path} and the rest are too long to show; read them in the folder.`);
+      break;
+    }
+    parts.push(part);
+    size += part.length;
+  }
+  return parts.join("\n");
+}
+
 // A task's work as the application sees it; a worktree already gone has nothing left to commit.
 export const gitWorkspace: Workspace = {
   prepare: prepareWorktree,
@@ -171,4 +191,5 @@ export const gitWorkspace: Workspace = {
     return !existsSync(worktreePath(folder, taskId)) || (await commitAll(folder, taskId, message)).ok;
   },
   remove: removeWorktree,
+  diff: fullDiff,
 };

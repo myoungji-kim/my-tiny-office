@@ -10,6 +10,9 @@ import type { Timestamp } from "./time";
 // Withdrawn is a review the work moved on from before it settled.
 export type ReviewState = "suggested" | "queued" | "reviewing" | "settled" | "withdrawn";
 
+// What a reviewer concludes: it can be applied as it is, or it should change first.
+export type Verdict = "approve" | "changes";
+
 export interface Review {
   readonly id: ReviewId;
   readonly companyId: CompanyId;
@@ -19,6 +22,9 @@ export interface Review {
   readonly createdAt: Timestamp;
   readonly startedAt: Timestamp | undefined;
   readonly settledAt: Timestamp | undefined;
+  readonly verdict: Verdict | undefined;
+  // what they said, as they wrote it
+  readonly comments: string | undefined;
 }
 
 type Transition<TEvent, TFailure extends string> =
@@ -53,6 +59,8 @@ export function suggestReview(
     createdAt: now,
     startedAt: undefined,
     settledAt: undefined,
+    verdict: undefined,
+    comments: undefined,
   };
   return { ok: true, review, events: [{ ...base(review, eventId, now), type: "ReviewSuggested" }] };
 }
@@ -90,11 +98,31 @@ export function startQueuedReview(review: Review, reviewer: Employee, eventId: E
   return { ok: true, review: started, events: [{ ...base(started, eventId, now), type: "ReviewStarted", reviewerId: reviewer.id, reviewerName: reviewer.name }] };
 }
 
-export function settleReview(review: Review, reviewer: Employee, eventId: EventId, now: Timestamp): Transition<ReviewSettled, "reviewNotUnderWay"> {
+export function settleReview(
+  review: Review,
+  reviewer: Employee,
+  outcome: { readonly verdict: Verdict; readonly comments: string | undefined },
+  eventId: EventId,
+  now: Timestamp,
+): Transition<ReviewSettled, "reviewNotUnderWay"> {
   if (review.state !== "reviewing" || review.reviewerId !== reviewer.id) return { ok: false, reason: "reviewNotUnderWay" };
-  const settled: Review = { ...review, state: "settled", settledAt: now };
+  const settled: Review = { ...review, state: "settled", settledAt: now, verdict: outcome.verdict, comments: outcome.comments };
   return { ok: true, review: settled, events: [{ ...base(settled, eventId, now), type: "ReviewSettled", reviewerId: reviewer.id, reviewerName: reviewer.name }] };
 }
+
+// A review's closing line: "Verdict: approve" or "Verdict: changes". Without
+// one the review did not conclude.
+const VERDICT_LINE = /^[\s*_>-]*verdict[\s*_]*:[\s*_]*(approve|changes)[\s*_.]*$/i;
+
+export function readVerdict(report: string): { readonly verdict: Verdict | undefined; readonly comments: string } {
+  const lines = report.trimEnd().split("\n");
+  const match = VERDICT_LINE.exec(lines.at(-1)?.trim() ?? "");
+  if (match === null) return { verdict: undefined, comments: report.trim() };
+  return { verdict: match[1].toLowerCase() === "approve" ? "approve" : "changes", comments: lines.slice(0, -1).join("\n").trim() };
+}
+
+// A review that is asked for keeps whoever did the work waiting on it.
+export const holdsTheWork = (review: Review): boolean => review.state === "queued" || review.state === "reviewing";
 
 export const isOpen = (review: Review): boolean => review.state !== "settled" && review.state !== "withdrawn";
 

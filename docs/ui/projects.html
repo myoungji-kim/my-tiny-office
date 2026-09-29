@@ -647,7 +647,7 @@
       heldBecause: "보류한 이유",
       approveTitle: "반영해도 될까요?", approveWhy: "아직 어디에도 반영되지 않았어요. 승인하면 그때 적용돼요.",
       actions: {
-        assign: "담당자 지정", pickPeer: "검토 붙이기",
+        assign: "담당자 지정", pickPeer: "동료 검토 받기",
         approve: "승인하고 반영", rework: "보완 요청", hold: "보류",
         resume: "다시 진행", teach: "이걸 기억시키기", open: "직원 화면에서 보기",
         detail: "업무 상세", edit: "업무 수정", removeTask: "업무 삭제",
@@ -674,6 +674,8 @@
       canReview: (names) => names.join(" · ") + subjectParticle(names[names.length - 1]) + " 검토할 수 있어요",
       canReviewNobody: (a) => a + " 아는 사람이 아직 없어요. 만들 수는 있지만 검토를 받을 수 없어요.",
       cancel: "취소", create: "업무 만들기", fAssignee: "담당자",
+      fReviewer: "검토자", noReviewer: "검토 없이", reviewerNone: "끝나면 바로 승인 대기로 가요. 승인 전에 동료 검토를 받을 수도 있어요.",
+      reviewerWhen: (n) => "작업이 끝나면 " + n + subjectParticle(n) + " 먼저 검토해요.",
       anyoneFree: "비는 사람이 가져가요",
       busyNow: (n) => n + subjectParticle(n) + " 지금 다른 일을 하고 있어서 줄을 서요.",
       freeNow: (n) => n + subjectParticle(n) + " 지금 비어 있어서 바로 시작해요.",
@@ -773,7 +775,7 @@
       heldBecause: "Why it is held",
       approveTitle: "Ready to apply?", approveWhy: "Nothing has been applied anywhere yet. Approving is what applies it.",
       actions: {
-        assign: "Assign", pickPeer: "Ask for a review",
+        assign: "Assign", pickPeer: "Ask a colleague to review",
         approve: "Approve and apply", rework: "Send back", hold: "Hold",
         resume: "Resume", teach: "Teach them this", open: "Open in People",
         detail: "Task details", edit: "Edit task", removeTask: "Delete task",
@@ -800,6 +802,8 @@
       canReview: (names) => names.join(" · ") + " can review it",
       canReviewNobody: (a) => "Nobody knows " + a + " yet. You can still make it, but it cannot be reviewed.",
       cancel: "Cancel", create: "Create task", fAssignee: "Assignee",
+      fReviewer: "Reviewer", noReviewer: "No review", reviewerNone: "It goes straight to approval when done. You can still ask a colleague to review it first.",
+      reviewerWhen: (n) => "When the work is done, " + n + " reviews it first.",
       anyoneFree: "Whoever is free picks it up",
       busyNow: (n) => n + " is on something else, so it queues behind it.",
       freeNow: (n) => n + " is free and starts on it right away.",
@@ -1178,10 +1182,11 @@
     if (task.status === "backlog" && live) button(t().actions.assign, "primary", () => assignTask(task), true);
     if (task.status === "working" && live) {
       button(t().actions.edit, "secondary", () => openEditTask(task), true);
-      if (!task.peer) { const ask = button(t().actions.pickPeer, "secondary", () => open(task, ask, false, true), true); }
     }
     if (task.status === "approval" && p.status !== "done") {
       button(t().actions.hold, "secondary", () => askHoldTask(task));
+      // finished work is where a colleague's eyes are asked for
+      if (!task.peer || task.peer.state === "done") { const ask = button(t().actions.pickPeer, "secondary", () => open(task, ask, false, true), true); }
       button(t().actions.rework, "secondary", () => askRework(task), true);
       button(t().actions.approve, "primary", () => approveTask(task));
     }
@@ -1566,6 +1571,9 @@
     const who = dialog.dataset.who || "";
     const prio = dialog.dataset.prio || "normal";
     const knowers = reviewersFor(area).map((p) => p.name);
+    // only someone taught the area reviews it, and never whoever does the work
+    const reviewers = reviewersFor(area).filter((p) => p.id !== who);
+    const reviewer = reviewers.find((p) => p.id === dialog.dataset.reviewer) ?? null;
     const picked = who ? byId.get(who) : null;
     const heading = editing ? t().editTaskTitle : t().newTaskTitle;
     // An agent is running in this project's folder right now, so the work can
@@ -1667,6 +1675,17 @@
           </span>
           <span class="hint">${whatHappens()}</span>
         </div>
+        <div class="field">
+          <span class="label">${t().fReviewer}</span>
+          <span class="select-wrap">
+            <select class="select" id="ntReviewer"${reviewers.length ? "" : " disabled"}>
+              <option value="">${t().noReviewer}</option>
+              ${reviewers.map((p) => `<option value="${p.id}"${p.id === reviewer?.id ? " selected" : ""}>${p.name}</option>`).join("")}
+            </select>
+            ${chevron}
+          </span>
+          <span class="hint">${reviewer ? t().reviewerWhen(reviewer.name) : t().reviewerNone}</span>
+        </div>
       </div>
 
       <div class="m-foot">
@@ -1714,7 +1733,7 @@
         dialog.querySelector(focusId).focus();
       };
     };
-    for (const [id, key] of [["#ntArea", "area"], ["#ntProject", "project"], ["#ntWho", "who"]]) {
+    for (const [id, key] of [["#ntArea", "area"], ["#ntProject", "project"], ["#ntWho", "who"], ["#ntReviewer", "reviewer"]]) {
       dialog.querySelector(id).addEventListener("change", (e) => {
         const again = keep();
         dialog.dataset[key] = e.target.value;

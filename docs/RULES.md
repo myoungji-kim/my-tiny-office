@@ -161,16 +161,28 @@ not allowing it carries this one on without it.
 ## Review
 
 Review happens inside `working`, not after it: a task being reviewed is still
-being worked on.
+being worked on, and does not wait for the user until the review settles.
 
-When a task's area calls for another pair of eyes, the office suggests a
-colleague who has been taught that area — expertise comes from memory, not
-from a field — and the two of them settle it while the work is still open.
-Whoever does the work carries on meanwhile, at their desk; the reviewer sits in
-the meeting room until it is done. A reviewer who is free starts
-looking now; one who is busy looks once they finish; nobody on leave is asked.
-If nobody has been taught the area, there is nobody to suggest, and the user
-sees that.
+Only a colleague who has been taught the task's area reviews it — expertise
+comes from memory, not from a field — never whoever did the work, and nobody on
+leave. If nobody has been taught the area, there is nobody to pick, and the
+user sees that. A reviewer who is free starts looking now; one who is busy
+looks once they finish. They sit in the meeting room until it is done.
+
+A review is asked for in one of two ways:
+
+- **Named on the task.** Written into the task, the reviewer looks at its work
+  as soon as it is first finished, before it reaches approval. Once: work
+  corrected after their review goes to approval.
+- **Asked for from approval.** Finished work goes back to being worked on while
+  the colleague looks.
+
+The reviewer is a real agent that only reads (SECURITY.md §2), handed the
+task's diff, and ends with a verdict. **Approve** sends the work to approval as
+it is; **changes** sends it back to whoever did it, who picks their own session
+up with the review as the request; a review that does not conclude is
+withdrawn and the work returns to approval as it was. What the reviewer said
+stays on the task's page.
 
 What the user decides is the last step, not the verdict: whether the finished
 work may be applied. Sending it back takes a reason, which the card carries,

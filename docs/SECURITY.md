@@ -44,6 +44,11 @@ cwd = <folder>/.worktrees/<task>
 stdin = the task prompt
 ```
 
+A reviewer's run is the same launch with `--tools Read,Glob,Grep` and
+`--allowedTools "Read(./**)"`: it reads the worktree and nothing else — no
+edits, no commands, whatever the project allows. It is handed the diff in its
+prompt, since it cannot run git.
+
 Each flag earns its place:
 
 | Flag | Why | Measured |

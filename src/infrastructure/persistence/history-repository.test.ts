@@ -45,7 +45,7 @@ describe("reviews and history on SQLite", () => {
     assert(suggested.ok);
     const asked = await askForReview(ctx, suggested.value.review.id, pip.value.employee.id);
     assert(asked.ok);
-    const settled = await settleReview(ctx, asked.value.review.id);
+    const settled = await settleReview(ctx, asked.value.review.id, { verdict: "approve", comments: undefined });
     assert(settled.ok);
 
     await expect(ctx.reviews.findById(asked.value.review.id)).resolves.toEqual(settled.value.review);
@@ -61,7 +61,7 @@ describe("reviews and history on SQLite", () => {
     assert(task.ok);
 
     await expect(
-      ctx.reviews.save({ id: toReviewId("r"), companyId, taskId: task.value.task.id, reviewerId: undefined, state: "reviewing", createdAt: 1, startedAt: 1, settledAt: undefined }),
+      ctx.reviews.save({ id: toReviewId("r"), companyId, taskId: task.value.task.id, reviewerId: undefined, state: "reviewing", createdAt: 1, startedAt: 1, settledAt: undefined, verdict: undefined, comments: undefined }),
     ).rejects.toThrow();
   });
 });

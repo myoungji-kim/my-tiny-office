@@ -1,5 +1,6 @@
 "use server";
 
+import { requestReview } from "../application/review";
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand } from "../application/project";
 import { approveTask, carryOn, createTask, editTask, holdTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
@@ -99,11 +100,13 @@ export interface TaskInput {
   readonly areaId: string | undefined;
   readonly priority: string;
   readonly assigneeId: string | undefined;
+  readonly reviewerId: string | undefined;
 }
 
 function taskDetails(input: TaskInput) {
   const area = optional(input.areaId);
   const assignee = optional(input.assigneeId);
+  const reviewer = optional(input.reviewerId);
   return {
     projectId: toProjectId(str(input.projectId)),
     title: str(input.title),
@@ -111,6 +114,7 @@ function taskDetails(input: TaskInput) {
     area: area === undefined ? undefined : toAreaId(area),
     priority: priorityOf(input.priority),
     assigneeId: assignee === undefined ? undefined : toEmployeeId(assignee),
+    reviewerId: reviewer === undefined ? undefined : toEmployeeId(reviewer),
   };
 }
 
@@ -140,6 +144,10 @@ export async function holdTaskAction(companyId: string, taskId: string, reason: 
 
 export async function carryOnAction(companyId: string, taskId: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => carryOn(ctx, toTaskId(str(taskId))));
+}
+
+export async function requestReviewAction(companyId: string, taskId: string, reviewerId: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => requestReview(ctx, toTaskId(str(taskId)), toEmployeeId(str(reviewerId))));
 }
 
 export async function settleSuggestionAction(companyId: string, runId: string, text: string): Promise<Outcome> {

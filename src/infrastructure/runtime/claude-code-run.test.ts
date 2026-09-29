@@ -7,7 +7,7 @@ const CWD = "C:\\code\\pay\\.worktrees\\t1";
 
 describe("launchArgs", () => {
   it("is the launch SECURITY.md measured, with each allowed command for both shells", () => {
-    expect(launchArgs({ commands: ["npm test"], memoryFile: "m.md", resume: undefined })).toEqual([
+    expect(launchArgs({ commands: ["npm test"], memoryFile: "m.md", resume: undefined, readOnly: false })).toEqual([
       "-p",
       "--output-format",
       "stream-json",
@@ -31,9 +31,15 @@ describe("launchArgs", () => {
     ]);
   });
 
+  it("gives a reviewer only the tools that read, whatever the project allows", () => {
+    const args = launchArgs({ commands: ["npm test"], memoryFile: "m.md", resume: undefined, readOnly: true });
+    expect(args[args.indexOf("--tools") + 1]).toBe("Read,Glob,Grep");
+    expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**)");
+  });
+
   it("continues a session only by its id, never by text that reads as a flag", () => {
-    expect(launchArgs({ commands: [], memoryFile: "m.md", resume: SESSION }).slice(-2)).toEqual(["--resume", SESSION]);
-    expect(() => launchArgs({ commands: [], memoryFile: "m.md", resume: "--dangerously-skip-permissions" })).toThrow();
+    expect(launchArgs({ commands: [], memoryFile: "m.md", resume: SESSION, readOnly: false }).slice(-2)).toEqual(["--resume", SESSION]);
+    expect(() => launchArgs({ commands: [], memoryFile: "m.md", resume: "--dangerously-skip-permissions", readOnly: false })).toThrow();
   });
 });
 

@@ -13,7 +13,9 @@ import { Shell } from "../../../../components/shell";
 import { CopyButton } from "../../../../components/settings-parts";
 import { Suggestions } from "../../../../components/suggestions";
 import { TaskActions } from "../../../../components/task-actions";
+import { Markdown } from "../../../../components/markdown";
 import { SaidPanel } from "../../../../components/said-panel";
+import { Sprite } from "../../../../components/sprite";
 import { TaskChanges } from "../../../../components/task-changes";
 import { loadTaskWork } from "../../../../server/task-work";
 import { carriedBy } from "../../../../domain/memory";
@@ -133,7 +135,43 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         )}
       </Fragment>
     );
-  const main = (task.status === "approval" || task.status === "done" ? [changes, steps] : [now, changes, steps]).filter((x) => x !== undefined);
+  const reviewer = office.employees.find((e) => e.id === work?.review?.reviewerId);
+  const reviewNote = (() => {
+    const r = work?.review;
+    if (r === undefined || reviewer === undefined) return undefined;
+    if (r.state === "queued") return { cls: "peer", icon: Icon.eye, text: w.tk.rvQueued(reviewer.name) };
+    if (r.state === "reviewing") return { cls: "peer", icon: Icon.eye, text: w.tk.rvReviewing(reviewer.name) };
+    if (r.state === "withdrawn") return { cls: "blocked", icon: Icon.alert, text: w.tk.rvWithdrawn(reviewer.name) };
+    return r.verdict === "changes"
+      ? { cls: "changes", icon: Icon.back, text: w.tk.rvChanges(reviewer.name) }
+      : { cls: "settled", icon: Icon.yes, text: w.tk.rvApproved(reviewer.name) };
+  })();
+  const reviewPanel =
+    reviewNote === undefined || reviewer === undefined ? undefined : (
+      <Fragment key="review">
+        {panel(
+          w.tk.review,
+          <>
+            <span className={`r-line ${reviewNote.cls}`}>
+              {reviewNote.icon}
+              {reviewNote.text}
+            </span>
+            {work?.review?.comments !== undefined && (
+              <div className="msg" style={{ marginTop: 8 }}>
+                <span className="w-av">
+                  <Sprite species={reviewer.species} size={20} />
+                </span>
+                <span>
+                  <b>{reviewer.name}</b>
+                  <Markdown text={work.review.comments} />
+                </span>
+              </div>
+            )}
+          </>,
+        )}
+      </Fragment>
+    );
+  const main = (task.status === "approval" || task.status === "done" ? [changes, reviewPanel, steps] : [now, reviewPanel, changes, steps]).filter((x) => x !== undefined);
 
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
   const side: ReactNode[] = [

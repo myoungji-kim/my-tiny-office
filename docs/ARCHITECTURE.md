@@ -385,6 +385,16 @@ Approving commits the worktree to the task's branch and removes the worktree
 (`approveTask`); sending back queues the task for the same person, whose next
 run resumes the session with the request.
 
+A review is a run too. While a review is queued or under way nobody runs on
+the task's work (`holdsTheWork`); when it is under way the supervisor
+launches the reviewer, read-only, with the task's diff (`Workspace.diff`) in
+the prompt and their own memory in the system prompt, in their own session. The
+report's last line is the verdict (`readVerdict`): approve finishes the task,
+changes sends it back with the review as the request
+(`reviewAskedForChanges`), and no verdict withdraws the review and finishes
+the task as it was. A reviewer named on the task (`Task.reviewerId`) is asked
+when its work is first finished (`requestReview`), and only then.
+
 ### Changing a task that is already running
 
 The user can correct a task while an agent is working on it. There is no way

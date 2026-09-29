@@ -46,6 +46,7 @@ export function TaskDialog({
   const [area, setArea] = useState(edit === undefined ? areas[0]?.id : edit.area);
   const [priority, setPriority] = useState<Priority>(edit?.priority ?? "normal");
   const [who, setWho] = useState(edit?.assigneeId ?? "");
+  const [reviewer, setReviewer] = useState(edit?.reviewerId ?? "");
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const titleField = useRef<HTMLInputElement>(null);
@@ -59,7 +60,11 @@ export function TaskDialog({
   }, [onClose, focusAssignee]);
 
   const chosen = areas.find((a) => a.id === area);
-  const knowers = employees.filter((e) => memories.some((m) => m.kind === "expertise" && m.employeeId === e.id && m.areaId === area)).map((e) => e.name);
+  const knowing = employees.filter((e) => memories.some((m) => m.kind === "expertise" && m.employeeId === e.id && m.areaId === area));
+  const knowers = knowing.map((e) => e.name);
+  // only someone taught the area reviews it, and never whoever does the work
+  const reviewers = knowing.filter((e) => e.id !== who);
+  const reviewing = reviewers.find((e) => e.id === reviewer);
   const picked = employees.find((e) => e.id === who);
   const target = projects.find((p) => p.id === into);
 
@@ -79,7 +84,7 @@ export function TaskDialog({
 
   const save = () =>
     start(async () => {
-      const input = { projectId: into, title, description, areaId: area, priority, assigneeId: who || undefined };
+      const input = { projectId: into, title, description, areaId: area, priority, assigneeId: who || undefined, reviewerId: reviewing?.id };
       const result = edit === undefined ? await newTaskAction(companyId, input) : await editTaskAction(companyId, edit.id, input);
       if (result.error !== undefined) {
         setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
@@ -195,6 +200,23 @@ export function TaskDialog({
               {Icon.chevron}
             </span>
             <span className="hint">{whatHappens}</span>
+          </div>
+          <div className="field">
+            <label className="label" htmlFor="nt-reviewer">
+              {w.fReviewer}
+            </label>
+            <span className="select-wrap">
+              <select className="select" id="nt-reviewer" value={reviewing?.id ?? ""} disabled={chosen === undefined || reviewers.length === 0} onChange={(e) => setReviewer(e.target.value)}>
+                <option value="">{w.noReviewer}</option>
+                {reviewers.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
+                ))}
+              </select>
+              {Icon.chevron}
+            </span>
+            <span className="hint">{chosen === undefined ? w.reviewerNeedsArea : reviewing === undefined ? w.reviewerNone : w.reviewerWhen(reviewing.name)}</span>
           </div>
           {error !== undefined && (
             <p className="hint" role="alert">

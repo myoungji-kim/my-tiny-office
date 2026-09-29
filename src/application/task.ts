@@ -21,6 +21,7 @@ export interface CreateTaskInput {
   readonly area?: AreaId;
   readonly priority: Priority;
   readonly assigneeId?: EmployeeId;
+  readonly reviewerId?: EmployeeId;
 }
 
 export type CreateTaskFailure =
@@ -28,6 +29,7 @@ export type CreateTaskFailure =
   | "areaNotFound"
   | "projectClosed"
   | "employeeNotFound"
+  | "reviewerIsAssignee"
   | taskDomain.CreateTaskFailure
   | taskDomain.AssignTaskFailure;
 
@@ -39,6 +41,9 @@ export async function createTask(ctx: AppContext, input: CreateTaskInput): Promi
   if (input.area !== undefined && !(await ctx.areas.findByCompany(input.companyId)).some((a) => a.id === input.area)) {
     return { ok: false, reason: "areaNotFound" };
   }
+
+  if (input.reviewerId !== undefined && input.reviewerId === input.assigneeId) return { ok: false, reason: "reviewerIsAssignee" };
+  if (input.reviewerId !== undefined && (await ctx.employees.findById(input.reviewerId))?.companyId !== input.companyId) return { ok: false, reason: "employeeNotFound" };
 
   const now = ctx.now();
   const created = taskDomain.createTask({ ...input, id: toTaskId(ctx.newId()) }, toEventId(ctx.newId()), now);

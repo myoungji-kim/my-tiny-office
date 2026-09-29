@@ -62,6 +62,7 @@ describe("importCompany", () => {
     const bytes = await exported((file) => {
       file.exec("drop table run_steps; drop table runs; drop table agents");
       file.exec("alter table projects drop column folder_confirmed");
+      file.exec("alter table tasks drop column reviewer_id; alter table reviews drop column verdict; alter table reviews drop column comments");
       file.exec("delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)");
     });
 

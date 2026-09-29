@@ -97,6 +97,7 @@ export interface TaskView {
   readonly priority: Priority;
   readonly assigneeId: string | undefined;
   readonly assigneeName: string | undefined;
+  readonly reviewerId: string | undefined;
   readonly minutesTaken: number;
   readonly blocker: Blocker | undefined;
   readonly heldReason: string | undefined;
@@ -301,6 +302,7 @@ export async function loadOffice(
       priority: task.priority,
       assigneeId: task.assigneeId,
       assigneeName: task.assigneeId === undefined ? undefined : nameById.get(task.assigneeId),
+      reviewerId: task.reviewerId,
       minutesTaken: Math.floor(timeTaken(task, now) / 60_000),
       blocker: task.blocker,
       heldReason: task.heldReason,

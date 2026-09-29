@@ -2,6 +2,7 @@ import type { DomainEvent } from "../domain/events";
 import { toEventId, toReviewId, type CompanyId, type EmployeeId, type ReviewId, type TaskId } from "../domain/ids";
 import { expertiseOf } from "../domain/memory";
 import * as reviewDomain from "../domain/review";
+import * as taskDomain from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
@@ -57,17 +58,61 @@ export function askForReview(
   });
 }
 
-export function settleReview(ctx: AppContext, reviewId: ReviewId): Promise<ReviewResult<"reviewNotFound" | "reviewNotUnderWay">> {
+export function settleReview(
+  ctx: AppContext,
+  reviewId: ReviewId,
+  outcome: { readonly verdict: reviewDomain.Verdict; readonly comments: string | undefined },
+): Promise<ReviewResult<"reviewNotFound" | "reviewNotUnderWay">> {
   return ctx.withTransaction(async () => {
     const review = await ctx.reviews.findById(reviewId);
     if (review === undefined) return { ok: false, reason: "reviewNotFound" };
     const reviewer = review.reviewerId === undefined ? undefined : await ctx.employees.findById(review.reviewerId);
     if (reviewer === undefined) return { ok: false, reason: "reviewNotUnderWay" };
-    const settled = reviewDomain.settleReview(review, reviewer, toEventId(ctx.newId()), ctx.now());
+    const settled = reviewDomain.settleReview(review, reviewer, outcome, toEventId(ctx.newId()), ctx.now());
     if (!settled.ok) return settled;
     await ctx.reviews.save(settled.review);
     await recordMilestones(ctx, review.companyId, settled.events);
     return { ok: true, value: { review: settled.review }, events: settled.events };
+  });
+}
+
+export type RequestReviewFailure =
+  | "taskNotFound"
+  | "employeeNotFound"
+  | "reviewAlreadyOpen"
+  | "taskNotAwaitingApproval"
+  | reviewDomain.AskFailure
+  | "taskHasNoArea"
+  | "nobodyKnowsArea";
+
+// Finished work goes back to being worked on while the colleague looks at it:
+// straight away if they are free, once they finish if not. Everything is
+// checked before anything is saved.
+export function requestReview(ctx: AppContext, taskId: TaskId, reviewerId: EmployeeId): Promise<ReviewResult<RequestReviewFailure>> {
+  return ctx.withTransaction(async () => {
+    const task = await ctx.tasks.findById(taskId);
+    if (task === undefined) return { ok: false, reason: "taskNotFound" };
+    const reviewer = await ctx.employees.findById(reviewerId);
+    if (reviewer === undefined || reviewer.companyId !== task.companyId) return { ok: false, reason: "employeeNotFound" };
+    const [tasks, reviews, memories] = await Promise.all([
+      ctx.tasks.findByCompany(task.companyId),
+      ctx.reviews.findByCompany(task.companyId),
+      ctx.memories.findByCompany(task.companyId),
+    ]);
+    if (reviews.some((r) => r.taskId === task.id && reviewDomain.isOpen(r))) return { ok: false, reason: "reviewAlreadyOpen" };
+
+    const reopened = taskDomain.reopenForReview(task);
+    if (!reopened.ok) return reopened;
+    const now = ctx.now();
+    const suggested = reviewDomain.suggestReview({ id: toReviewId(ctx.newId()), task: reopened.task, othersWhoKnow: 1 }, toEventId(ctx.newId()), now);
+    if (!suggested.ok) return suggested;
+    const busy = reviewDomain.statusOf(reviewer, tasks, reviews) !== "available";
+    const asked = reviewDomain.askReviewer(suggested.review, reopened.task, reviewer, expertiseOf(reviewer.id, memories), busy, toEventId(ctx.newId()), now);
+    if (!asked.ok) return asked;
+
+    await ctx.tasks.save(reopened.task);
+    await ctx.reviews.save(asked.review);
+    return { ok: true, value: { review: asked.review }, events: [...suggested.events, ...asked.events] };
   });
 }
 

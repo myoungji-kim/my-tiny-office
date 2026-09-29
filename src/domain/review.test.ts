@@ -56,6 +56,7 @@ const task = (id: string, extra: Partial<Task> = {}): Task => ({
   heldFrom: undefined,
   heldWithProject: false,
   changesRequested: undefined,
+  reviewerId: undefined,
   createdAt: t0,
   startedAt: t0,
   workedFor: 0,
@@ -103,7 +104,7 @@ describe("review", () => {
     assert(started.ok);
     expect(started.review).toMatchObject({ state: "reviewing", startedAt: t0 + 9 });
 
-    const settled = settleReview(started.review, person("pip"), e, t0 + 20);
+    const settled = settleReview(started.review, person("pip"), { verdict: "changes", comments: "retry 나눠 주세요" }, e, t0 + 20);
     assert(settled.ok);
     expect(settled.review).toMatchObject({ state: "settled", settledAt: t0 + 20 });
   });
