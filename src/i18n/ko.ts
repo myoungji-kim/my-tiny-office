@@ -490,6 +490,7 @@ export const ko: Dictionary = {
       decideTitle: (n: string) => withParticle(n, "이", "가") + " 작업을 마쳤어요",
       decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.",
       seeChanges: "바뀐 것 보기",
+      decideAfterChanges: (n: string) => withParticle(n, "이", "가") + " 마지막 검토에서 보완을 요청했어요. 반영하기 전에 대화에서 해결됐는지 확인해 주세요.",
       desc: "업무 설명",
       notStarted: "아직 아무도 시작하지 않았어요.",
       mem: (n: number) => "들고 갈 기억 " + n + "개",

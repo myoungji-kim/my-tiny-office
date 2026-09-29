@@ -384,7 +384,7 @@ describe("the work supervisor", () => {
     expect(launched).toHaveLength(2);
   });
 
-  it("hands work the review asks to change back to whoever did it, in their session, once", async () => {
+  it("hands work the review asks to change back to whoever did it, and the reviewer looks at the fix", async () => {
     const { id } = await taskWithReviewer(true);
     await finishFirst();
     // named on the task, the reviewer looks as soon as the work is first finished
@@ -399,8 +399,13 @@ describe("the work supervisor", () => {
     launched[2].exit();
     await settle();
 
+    expect(launched[3].input.readOnly).toBe(true);
+    launched[3].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "좋아요.\nVerdict: approve" });
+    launched[3].exit();
+    await settle();
+
     expect(await statusOf(id)).toMatchObject({ status: "approval" });
-    expect(launched).toHaveLength(3);
+    expect(launched).toHaveLength(4);
   });
 
   it("gives the work back as it was when a review does not conclude", async () => {

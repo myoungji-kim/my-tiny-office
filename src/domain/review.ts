@@ -126,6 +126,20 @@ export const holdsTheWork = (review: Review): boolean => review.state === "queue
 
 export const isOpen = (review: Review): boolean => review.state !== "settled" && review.state !== "withdrawn";
 
+// Rounds of review a task gets on its own before what is left is the user's call.
+export const MAX_REVIEW_ROUNDS = 3;
+
+// Who looks at work that was just finished, without anyone asking: the
+// reviewer named on the task the first time, and whoever last asked for
+// changes after that, so a fix is looked at by who asked for it.
+export function reviewerToAsk(task: Pick<Task, "id" | "reviewerId">, reviews: readonly Review[]): EmployeeId | undefined {
+  const settled = reviews.filter((r) => r.taskId === task.id && r.state === "settled").sort((a, b) => (a.settledAt ?? 0) - (b.settledAt ?? 0));
+  const last = settled.at(-1);
+  if (last === undefined) return task.reviewerId;
+  if (settled.length >= MAX_REVIEW_ROUNDS || last.verdict !== "changes") return undefined;
+  return last.reviewerId;
+}
+
 // A review lives inside `working`: once the work is finished, held or handed
 // back, whatever was still open about it ends.
 export function withdrawReview(review: Review, eventId: EventId, now: Timestamp): Transition<ReviewWithdrawn, "reviewNotOpen"> {

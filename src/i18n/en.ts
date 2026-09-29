@@ -488,6 +488,7 @@ export const en = {
       decideTitle: (n: string) => n + " finished the work",
       decideWhy: "Look over what changed and decide whether to apply it.",
       seeChanges: "See what changed",
+      decideAfterChanges: (n: string) => n + " asked for changes in the last review. Check in the conversation that they were settled before applying it.",
       desc: "About this task",
       notStarted: "Nobody has started it yet.",
       mem: (n: number) => n + " memories carried",

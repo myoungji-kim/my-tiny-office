@@ -808,7 +808,7 @@
         talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완 요청", talkReply: "답", talkRequest: "보완 요청", you: "나",
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
         splitLabel: "세부 정보 폭 조절", widthLabel: "화면 폭", widths: { normal: "보통", wide: "넓게", full: "전체" }, talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
-        decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
+        decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기", decideAfterChanges: (n) => n + subjectParticle(n) + " 마지막 검토에서 보완을 요청했어요. 반영하기 전에 대화에서 해결됐는지 확인해 주세요.",
         noReviewer: "없음",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
@@ -942,7 +942,7 @@
         talkReport: "Report", talkNow: "while working", talkBefore: "before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
         splitLabel: "Resize the details", widthLabel: "Width", widths: { normal: "Normal", wide: "Wide", full: "Full" }, talkOpen: "Open", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
-        decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
+        decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed", decideAfterChanges: (n) => n + " asked for changes in the last review. Check in the conversation that they were settled before applying it.",
         noReviewer: "None",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
@@ -1056,6 +1056,7 @@
   const daysBetween = (a, b) => Math.round((dayOf(b) - dayOf(a)) / 86400000) + 1;
 
   const icon = {
+    alert: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>',
     clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.6"/><path d="M8 5v3.2l2 1.3"/></svg>',
     eye: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg>',
     back: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6.5 3.5L3 7l3.5 3.5M3 7h6.5a3.5 3.5 0 0 1 0 7H7"/></svg>',
@@ -1289,10 +1290,13 @@
     renderTaskActions(p, task);
 
     const off = RUNTIME.off ? " disabled" : "";
-    // What the user has to decide leads the page, and only when there is something.
+    // What the user has to decide leads the page, and only when there is something;
+    // a last review that asked for changes is said there, not left in the conversation.
+    const lastReview = (task.talk ?? []).findLast((m) => m.kind === "review");
+    const askedBy = lastReview?.verdict === "changes" ? byId.get(lastReview.by) : null;
     const now = !task.blocked || task.status !== "working"
       ? task.status === "approval" && who
-        ? `<div class="notice tk-now"><span class="n-ic">${TASK_ICON.used}</span><span class="n-tx"><b>${k.decideTitle(who.name)}</b><span>${k.decideWhy}</span></span>
+        ? `<div class="notice${askedBy ? " notice-warn" : ""} tk-now"><span class="n-ic">${askedBy ? icon.alert : TASK_ICON.used}</span><span class="n-tx"><b>${k.decideTitle(who.name)}</b><span>${askedBy ? k.decideAfterChanges(askedBy.name) : k.decideWhy}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tab-go="changes">${k.seeChanges}</button></span></div>`
         : ""
       : task.blocked.kind === "command"

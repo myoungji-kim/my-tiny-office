@@ -343,11 +343,10 @@ export function createWorkSupervisor(deps: {
       return block(ctx, task.id, end.kind === "denied" ? { kind: "commandNotAllowed", command: end.command } : end.kind === "budgetReached" ? { kind: "budgetReached" } : { kind: "disconnected" });
     }
     await finish(ctx, task.id);
-    // a reviewer named when the task was written looks at its first finished work, once
-    const reviewed = (await ctx.reviews.findByCompany(task.companyId)).some((r) => r.taskId === task.id && r.state === "settled");
-    if (task.reviewerId !== undefined && !reviewed) {
-      const asked = await requestReview(ctx, task.id, task.reviewerId);
-      if (!asked.ok) deps.onError?.(new Error(`The review named on the task was not asked for: ${asked.reason}`));
+    const reviewer = reviewDomain.reviewerToAsk(task, await ctx.reviews.findByCompany(task.companyId));
+    if (reviewer !== undefined) {
+      const asked = await requestReview(ctx, task.id, reviewer);
+      if (!asked.ok) deps.onError?.(new Error(`The review was not asked for: ${asked.reason}`));
     }
   }
 

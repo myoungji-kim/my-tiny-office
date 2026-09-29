@@ -133,6 +133,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         ),
     };
   };
+  const lastReview = (work?.talk ?? []).findLast((m) => m.kind === "review");
   const talk = (work?.talk ?? []).map(view).filter((m) => m !== undefined);
 
   // What is going on now closes the conversation: the step they are on, or the colleague looking.
@@ -333,7 +334,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         talk={talk}
         live={live}
         now={now}
-        decide={task.status === "approval" ? who?.name : undefined}
+        decide={task.status === "approval" && who !== undefined ? { by: who.name, changesAskedBy: lastReview?.verdict === "changes" ? person(lastReview.by)?.name : undefined } : undefined}
         changes={changes}
         did={did}
         side={side}

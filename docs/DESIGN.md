@@ -254,7 +254,9 @@ the tab's content                             │ ▸ 들고 간 기억
 
 **지금 할 일** leads, and only when there is something to decide: a stop with
 its reason and the way on, or finished work — "모카가 작업을 마쳤어요" with 바뀐 것
-보기. The header keeps every action, as page buttons.
+보기. When the last review asked for changes, the notice turns to a warning and
+says so, since the fix reached approval without that reviewer agreeing. The
+header keeps every action, as page buttons.
 
 **The tabs keep their place whatever the status**, so nothing moves around:
 

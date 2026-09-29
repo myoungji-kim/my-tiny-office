@@ -401,8 +401,10 @@ the prompt and their own memory in the system prompt, in their own session. The
 report's last line is the verdict (`readVerdict`): approve finishes the task,
 changes sends it back with the review as the request
 (`reviewAskedForChanges`), and no verdict withdraws the review and finishes
-the task as it was. A reviewer named on the task (`Task.reviewerId`) is asked
-when its work is first finished (`requestReview`), and only then.
+the task as it was. Who looks at finished work without being asked is
+`reviewerToAsk` (`src/domain/review.ts`): the reviewer named on the task
+(`Task.reviewerId`) the first time, then whoever last asked for changes, up
+to `MAX_REVIEW_ROUNDS` reviews.
 
 ### Changing a task that is already running
 

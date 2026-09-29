@@ -172,17 +172,19 @@ looks once they finish. They sit in the meeting room until it is done.
 A review is asked for in one of two ways:
 
 - **Named on the task.** Written into the task, the reviewer looks at its work
-  as soon as it is first finished, before it reaches approval. Once: work
-  corrected after their review goes to approval.
+  as soon as it is first finished, before it reaches approval.
 - **Asked for from approval.** Finished work goes back to being worked on while
   the colleague looks.
 
 The reviewer is a real agent that only reads (SECURITY.md §2), handed the
 task's diff, and ends with a verdict. **Approve** sends the work to approval as
 it is; **changes** sends it back to whoever did it, who picks their own session
-up with the review as the request; a review that does not conclude is
-withdrawn and the work returns to approval as it was. What the reviewer said
-stays on the task's page.
+up with the review as the request, and whoever asked for the changes looks at
+the fix before it reaches approval. After three reviews on a task (`MAX_REVIEW_ROUNDS`)
+no more are asked for on their own, so two agents never go round without the
+user; a last review that asked for changes is said on the approval notice. A
+review that does not conclude is withdrawn and the work returns to approval as
+it was. What the reviewer said stays on the task's page.
 
 What the user decides is the last step, not the verdict: whether the finished
 work may be applied. Sending it back takes a reason, which the card carries,

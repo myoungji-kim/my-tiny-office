@@ -168,8 +168,8 @@ export function TaskView({
   readonly live: ReactNode;
   // what stops the work, when something does
   readonly now: ReactNode;
-  // who finished, when the work waits for the user
-  readonly decide: string | undefined;
+  // who finished, when the work waits for the user, and who last asked for changes to it
+  readonly decide: { readonly by: string; readonly changesAskedBy: string | undefined } | undefined;
   readonly changes: ReactNode;
   readonly did: ReactNode;
   readonly side: ReactNode;
@@ -219,11 +219,11 @@ export function TaskView({
     <>
       {now}
       {decide !== undefined && (
-        <div className="notice tk-now">
-          <span className="n-ic">{Icon.yes}</span>
+        <div className={decide.changesAskedBy === undefined ? "notice tk-now" : "notice notice-warn tk-now"}>
+          <span className="n-ic">{decide.changesAskedBy === undefined ? Icon.yes : Icon.alert}</span>
           <span className="n-tx">
-            <b>{w.decideTitle(decide)}</b>
-            <span>{w.decideWhy}</span>
+            <b>{w.decideTitle(decide.by)}</b>
+            <span>{decide.changesAskedBy === undefined ? w.decideWhy : w.decideAfterChanges(decide.changesAskedBy)}</span>
           </span>
           <span className="n-acts">
             <button className="btn btn-secondary btn-sm" type="button" onClick={() => setTab("changes")}>

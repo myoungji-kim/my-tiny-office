@@ -4,7 +4,7 @@ import type { Employee } from "./employee";
 import { toAreaId, toCompanyId, toEmployeeId, toEventId, toProjectId, toReviewId, toRoleId, toTaskId } from "./ids";
 import { pickUps, reviewsToStart } from "./pick-up";
 import type { Project } from "./project";
-import { askReviewer, liveReviews, releaseReview, settleReview, startQueuedReview, statusOf, suggestReview, withdrawReview, type Review } from "./review";
+import { askReviewer, liveReviews, releaseReview, reviewerToAsk, settleReview, startQueuedReview, statusOf, suggestReview, withdrawReview, type Review } from "./review";
 import type { Task } from "./task";
 
 const t0 = 1_700_000_000_000;
@@ -157,5 +157,37 @@ describe("a review that the work moved on from", () => {
     const released = releaseReview(queued.review, e, t0);
     assert(released.ok);
     expect(released.review).toMatchObject({ state: "suggested", reviewerId: undefined });
+  });
+});
+
+describe("who looks at finished work without being asked", () => {
+  const bori = toEmployeeId("bori");
+  const latte = toEmployeeId("latte");
+  const done = (n: number, verdict: "approve" | "changes", by = bori): Review => ({
+    id: toReviewId("r" + n),
+    companyId,
+    taskId: webhook.id,
+    reviewerId: by,
+    state: "settled",
+    createdAt: t0 + n,
+    startedAt: t0 + n,
+    settledAt: t0 + n,
+    verdict,
+    comments: undefined,
+  });
+
+  it("is the reviewer named on the task, the first time", () => {
+    expect(reviewerToAsk({ ...webhook, reviewerId: bori }, [])).toBe(bori);
+    expect(reviewerToAsk(webhook, [])).toBeUndefined();
+  });
+
+  it("is whoever last asked for changes, to look at the fix", () => {
+    expect(reviewerToAsk(webhook, [done(1, "changes", latte)])).toBe(latte);
+    expect(reviewerToAsk({ ...webhook, reviewerId: bori }, [done(1, "changes"), done(2, "approve")])).toBeUndefined();
+  });
+
+  it("leaves it to the user after the last round", () => {
+    expect(reviewerToAsk(webhook, [done(1, "changes"), done(2, "changes")])).toBe(bori);
+    expect(reviewerToAsk(webhook, [done(1, "changes"), done(2, "changes"), done(3, "changes")])).toBeUndefined();
   });
 });
