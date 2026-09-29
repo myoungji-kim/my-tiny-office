@@ -27,7 +27,9 @@
 
   .ext-tx b { font-size: 15px; font-weight: 600; }
 
-  .ext-tx span { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .ext-tx { min-width: 0; }
+
+  .ext-tx span { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   #moved:empty { display: none; }
 
@@ -87,22 +89,18 @@
         </span>
         <div class="head-right"></div>
       </div>
-    </div>
-
-    <div class="head" id="guideHead" hidden>
-      <a class="crumb" href="#"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg><span data-t="title">설정</span></a>
-      <div class="head-row">
-        <span>
-          <h1 data-t="guideTitle">안전 범위</h1>
-          <span class="sub" data-t="guideSub">직원이 이 컴퓨터에서 하는 일과 하지 않는 일</span>
-        </span>
-        <div class="head-right"></div>
+      <div class="tabs" role="tablist" id="setTabs">
+        <a class="tab" role="tab" href="#claude" data-set-tab="claude"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5L2 8l2.5 3M11.5 5L14 8l-2.5 3M9.2 3.5L6.8 12.5"/></svg><span>Claude Code</span></a>
+        <a class="tab" role="tab" href="#skills" data-set-tab="skills"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8 1 4.1L8 10.8 4.3 13l1-4.1-3.2-2.8 4.2-.4z"/></svg><span data-t="tabSkills">스킬과 플러그인</span></a>
+        <a class="tab" role="tab" href="#general" data-set-tab="general"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="5.5" cy="4.5" r="1.3" fill="var(--surface)"/><circle cx="10.5" cy="8" r="1.3" fill="var(--surface)"/><circle cx="6.5" cy="11.5" r="1.3" fill="var(--surface)"/></svg><span data-t="tabGeneral">일반</span></a>
+        <a class="tab" role="tab" href="#safety" data-set-tab="safety"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 1.8l5 2v4c0 3-2.2 5.2-5 6.4-2.8-1.2-5-3.4-5-6.4v-4z"/></svg><span data-t="tabSafety">안전 범위</span></a>
+        <a class="tab" role="tab" href="#data" data-set-tab="data"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg><span data-t="tabData">데이터</span></a>
       </div>
     </div>
 
     <div class="body">
       <div class="set-list" id="setList">
-        <div class="panel">
+        <div class="panel" data-tab="claude">
           <div class="panel-hd">
             <h2>Claude Code</h2>
             <p data-t="claudeWhy">직원은 모두 이걸로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.</p>
@@ -113,18 +111,17 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="safety">
           <div class="panel-hd">
             <h2 data-t="scopeTitle">직원이 할 수 있는 일</h2>
             <p data-t="scopeWhy">모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.</p>
           </div>
           <div class="panel-bd">
             <div class="scope" id="scopeBrief"></div>
-            <div class="scope-acts"><a class="btn btn-secondary btn-sm" href="#safety" data-t="guideOpen">안내 보기</a></div>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="claude">
           <div class="panel-hd">
             <h2 data-t="toolsTitle">연결된 도구</h2>
             <p data-t="toolsWhy">Claude 계정에 연결해 둔 커넥터예요. 확인하면 이 컴퓨터의 계정에 맞는 이름으로 써요. 직원이 쓰는 건 프로젝트에서 켠 Atlassian뿐이에요.</p>
@@ -136,7 +133,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="skills">
           <div class="panel-hd">
             <h2 data-t="extTitle">스킬과 플러그인</h2>
             <p data-t="extWhy">이 컴퓨터의 Claude Code에 설치해 둔 것 중 직원에게 줄 것을 골라요. 고른 것만 업무에 들고 가요.</p>
@@ -147,7 +144,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="general">
           <div class="panel-hd">
             <h2 data-t="workTitle">업무 시작</h2>
             <p data-t="workWhy">켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.</p>
@@ -157,7 +154,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="general">
           <div class="panel-hd">
             <h2 data-t="widthTitle">화면 폭</h2>
             <p data-t="widthWhy">모든 화면에 같은 폭이 적용돼요. 업무 상세에서도 바로 바꿀 수 있어요. 이 브라우저에만 기억돼요.</p>
@@ -167,7 +164,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="general">
           <div class="panel-hd">
             <h2 data-t="langTitle">언어</h2>
             <p data-t="langWhy">화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.</p>
@@ -177,7 +174,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="data">
           <div class="panel-hd">
             <h2 data-t="dataTitle">이 회사의 데이터</h2>
             <p data-t="dataWhy">직원, 기억, 프로젝트, 업무가 모두 이 파일 하나에 있어요. 회사마다 파일이 따로라 서로 섞이지 않아요.</p>
@@ -198,7 +195,7 @@
           </div>
         </div>
 
-        <div class="panel panel-danger" id="dangerPanel">
+        <div class="panel panel-danger" id="dangerPanel" data-tab="data">
           <div class="panel-hd"><h2 data-t="deleteTitle">이 회사 삭제</h2></div>
           <div class="panel-bd">
             <div class="danger-row">
@@ -208,14 +205,14 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-tab="data">
           <div class="panel-bd">
             <div class="kv"><span data-t="version">버전</span><b>v0.1.0</b></div>
           </div>
         </div>
       </div>
 
-      <div class="set-list guide" id="guide" hidden></div>
+      <div class="set-list guide" id="guide" data-tab="safety" hidden></div>
     </div>
   </div>
 </div>
@@ -229,7 +226,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      title: "설정", headSub: "이 컴퓨터에서 My Tiny Office가 쓰는 것들",
+      title: "설정", headSub: "이 컴퓨터에서 My Tiny Office가 쓰는 것들", tabSkills: "스킬과 플러그인", tabGeneral: "일반", tabSafety: "안전 범위", tabData: "데이터",
       claudeWhy: "직원은 모두 이걸로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
       installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요", loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", recheck: "다시 확인", checkedNow: "방금 확인했어요", copy: "복사", copied: "복사했어요",
       extTitle: "스킬과 플러그인", extWhy: "이 컴퓨터의 Claude Code에 설치해 둔 것 중 직원에게 줄 것을 골라요. 고른 것만 업무에 들고 가요.",
@@ -242,7 +239,6 @@
       toolsCheck: "확인하기", toolsRecheck: "다시 확인", toolsChecking: "확인하는 중…",
       toolsWhen: (at) => "마지막 확인 " + at + " · 확인할 때 Claude 사용량이 조금 들어요(약 $0.1).", toolsCost: "확인할 때 Claude 사용량이 조금 들어요(약 $0.1).",
       scopeTitle: "직원이 할 수 있는 일", scopeWhy: "모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.",
-      guideOpen: "안내 보기", guideTitle: "안전 범위", guideSub: "직원이 이 컴퓨터에서 하는 일과 하지 않는 일",
       brief: {
         yes: ["프로젝트 폴더 안, 업무마다 따로 만든 작업 폴더에서 파일을 읽고 고쳐요", "프로젝트에서 허용한 명령만 실행해요"],
         no: ["폴더 밖의 파일, 인터넷, push는 건드리지 않아요"],
@@ -301,7 +297,7 @@
     },
     en: {
       ...WORDS.en,
-      title: "Settings", headSub: "What My Tiny Office uses on this computer",
+      title: "Settings", headSub: "What My Tiny Office uses on this computer", tabSkills: "Skills and plugins", tabGeneral: "General", tabSafety: "Safety", tabData: "Data",
       claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed", loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", checkedNow: "Checked just now", copy: "Copy", copied: "Copied",
       extTitle: "Skills and plugins", extWhy: "Of what this computer's Claude Code has installed, choose what employees get. Only what is chosen goes into their work.",
@@ -314,7 +310,6 @@
       toolsCheck: "Check", toolsRecheck: "Check again", toolsChecking: "Checking…",
       toolsWhen: (at) => "Last checked " + at + " · A check uses a little Claude usage (about $0.1).", toolsCost: "A check uses a little Claude usage (about $0.1).",
       scopeTitle: "What employees may do", scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
-      guideOpen: "Read the guide", guideTitle: "What is safe", guideSub: "What employees do on this computer, and what they never do",
       brief: {
         yes: ["Read and edit files in a folder of each task's own, inside the project's folder", "Run only the commands the project allows"],
         no: ["Nothing outside the folder, no internet, no push"],
@@ -421,12 +416,13 @@
       <div class="panel-hd"><h2>${g.title}</h2></div>
       <div class="panel-bd"><div class="scope">${g.rows.map((r) => scopeRow(g.kind, r)).join("")}</div></div>
     </div>`).join("");
+  // One tab at a time, named in the address so a link can open it; Claude Code
+  // is the one that matters most, so it comes first.
+  const TABS = ["claude", "skills", "general", "safety", "data"];
   const showView = () => {
-    const guide = location.hash === "#safety";
-    document.querySelector(".head").hidden = guide;
-    document.getElementById("setList").hidden = guide;
-    document.getElementById("guideHead").hidden = !guide;
-    document.getElementById("guide").hidden = !guide;
+    const tab = TABS.find((x) => location.hash === "#" + x) ?? "claude";
+    for (const el of document.querySelectorAll("[data-tab]")) el.hidden = el.dataset.tab !== tab;
+    for (const a of document.querySelectorAll("[data-set-tab]")) a.setAttribute("aria-selected", String(a.dataset.setTab === tab));
     scrollTo(0, 0);
   };
   addEventListener("hashchange", showView);
@@ -495,7 +491,7 @@
     ],
   };
   const renderExts = () => {
-    const group = (title, items) => items.length ? `<div class="ext-group"><b>${title}</b>${items.map((x) => `<label class="ext"><input type="checkbox" data-ext="${x.id}"${x.on ? " checked" : ""} /><span class="ext-tx"><b>${x.name}</b><span>${x.about[lang]}</span></span></label>`).join("")}</div>` : "";
+    const group = (title, items) => items.length ? `<div class="ext-group"><b>${title}</b>${items.map((x) => `<label class="ext"><input type="checkbox" data-ext="${x.id}"${x.on ? " checked" : ""} /><span class="ext-tx"><b>${x.name}</b><span title="${x.about[lang]}">${x.about[lang]}</span></span></label>`).join("")}</div>` : "";
     const all = [...SAMPLE_EXTS.plugins, ...SAMPLE_EXTS.skills];
     document.getElementById("exts").innerHTML = all.length
       ? group(t().extPlugins, SAMPLE_EXTS.plugins) + group(t().extSkills, SAMPLE_EXTS.skills)

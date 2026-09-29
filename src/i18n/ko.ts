@@ -588,9 +588,10 @@ export const ko: Dictionary = {
     toolsCost: "확인할 때 Claude 사용량이 조금 들어요(약 $0.1).",
     scopeTitle: "직원이 할 수 있는 일",
     scopeWhy: "모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.",
-    guideOpen: "안내 보기",
-    guideTitle: "안전 범위",
-    guideSub: "직원이 이 컴퓨터에서 하는 일과 하지 않는 일",
+    tabSkills: "스킬과 플러그인",
+    tabGeneral: "일반",
+    tabSafety: "안전 범위",
+    tabData: "데이터",
     brief: {
       yes: ["프로젝트 폴더 안, 업무마다 따로 만든 작업 폴더에서 파일을 읽고 고쳐요", "프로젝트에서 허용한 명령만 실행해요"],
       no: ["폴더 밖의 파일, 인터넷, push는 건드리지 않아요"],

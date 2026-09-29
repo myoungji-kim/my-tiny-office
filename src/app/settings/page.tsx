@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { isReady } from "../../application/runtime-status";
 import { CheckRows, ClaudeChecks, type Row } from "../../components/claude-checks";
@@ -52,211 +52,226 @@ function connectorRows(servers: readonly string[] | undefined, w: Dictionary["se
   }));
 }
 
+// One tab at a time, named in the address so a link can open it; Claude Code
+// is the one that matters most, so it comes first.
+const TABS = ["claude", "skills", "general", "safety", "data"] as const;
+type Tab = (typeof TABS)[number];
+
+const TAB_ICON: Readonly<Record<Tab, ReactNode>> = {
+  claude: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 5L2 8l2.5 3M11.5 5L14 8l-2.5 3M9.2 3.5L6.8 12.5" />
+    </svg>
+  ),
+  skills: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+      <path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8 1 4.1L8 10.8 4.3 13l1-4.1-3.2-2.8 4.2-.4z" />
+    </svg>
+  ),
+  general: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />
+      <circle cx="5.5" cy="4.5" r="1.3" fill="var(--surface)" />
+      <circle cx="10.5" cy="8" r="1.3" fill="var(--surface)" />
+      <circle cx="6.5" cy="11.5" r="1.3" fill="var(--surface)" />
+    </svg>
+  ),
+  safety: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+      <path d="M8 1.8l5 2v4c0 3-2.2 5.2-5 6.4-2.8-1.2-5-3.4-5-6.4v-4z" />
+    </svg>
+  ),
+  data: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <ellipse cx="8" cy="4" rx="5" ry="2" />
+      <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2" />
+    </svg>
+  ),
+};
+
+const panel = (title: string, why: string | undefined, body: ReactNode, className = "panel") => (
+  <div className={className}>
+    <div className="panel-hd">
+      <h2>{title}</h2>
+      {why !== undefined && <p>{why}</p>}
+    </div>
+    <div className="panel-bd">{body}</div>
+  </div>
+);
+
 export default async function SettingsPage({ searchParams }: { searchParams: SearchParams }) {
   const { locale, office, status, company } = await companyScreen();
   const t = getDictionary(locale);
   const w = t.settings;
-  const guide = (await param(searchParams, "view")) === "safety";
+  const asked = await param(searchParams, "tab");
+  const tab: Tab = TABS.find((x) => x === asked) ?? "claude";
   const path = getCompanyFiles().pathOf(toCompanyId(company.id));
   const connectors = checkedConnectors();
-  const installed = installedExtensions();
   const chosen = chosenExtensions();
+  const installed = tab === "skills" ? installedExtensions() : undefined;
+  const names: Readonly<Record<Tab, string>> = { claude: "Claude Code", skills: w.tabSkills, general: w.tabGeneral, safety: w.tabSafety, data: w.tabData };
 
-  const shell = (head: ReactNode, body: ReactNode) => (
-    <Shell locale={locale} status={status} companies={office.companies} company={company} employees={office.employees} screen="settings" head={head}>
-      {body}
-    </Shell>
-  );
+  return (
+    <Shell
+      locale={locale}
+      status={status}
+      companies={office.companies}
+      company={company}
+      employees={office.employees}
+      screen="settings"
+      head={
+        <Head
+          title={w.title}
+          sub={w.headSub}
+          tabs={TABS.map((x) => (
+            <Link key={x} className="tab" role="tab" aria-selected={x === tab} href={x === "claude" ? "/settings" : `/settings?tab=${x}`}>
+              {TAB_ICON[x]}
+              <span>{names[x]}</span>
+            </Link>
+          ))}
+        />
+      }
+    >
+      <div className="set-list">
+        {tab === "claude" && (
+          <>
+            {panel(
+              "Claude Code",
+              w.claudeWhy,
+              <>
+                <ClaudeChecks status={status} words={t.claude} />
+                <div className="recheck">
+                  <RecheckButton label={t.claude.recheck} busyLabel={t.claude.checking} doneLabel={t.claude.checkedNow} />
+                </div>
+              </>,
+            )}
+            {panel(
+              w.toolsTitle,
+              w.toolsWhy,
+              <>
+                <CheckRows rows={connectorRows(connectors?.servers, w)} words={t.claude} />
+                <div className="recheck">
+                  <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} doneLabel={t.claude.checkedNow} failed={w.toolsFailed} disabled={!isReady(status)} />
+                </div>
+                <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
+              </>,
+            )}
+          </>
+        )}
 
-  if (guide) {
-    return shell(
-      <div className="head">
-        <Link className="crumb" href="/settings">
-          {Icon.back}
-          <span>{w.title}</span>
-        </Link>
-        <div className="head-row">
-          <span>
-            <h1>{w.guideTitle}</h1>
-            <span className="sub">{w.guideSub}</span>
-          </span>
-        </div>
-      </div>,
-      <div className="set-list guide">
-        {w.guide.map((section) => (
-          <div key={section.title} className="panel">
-            <div className="panel-hd">
-              <h2>{section.title}</h2>
-            </div>
-            <div className="panel-bd">
+        {tab === "skills" &&
+          installed !== undefined &&
+          panel(
+            w.extTitle,
+            w.extWhy,
+            <>
+              {installed.plugins.length + installed.skills.length === 0 ? (
+                <p className="col-empty" style={{ margin: 0 }}>
+                  {w.extNone}
+                </p>
+              ) : (
+                <ExtensionPicker
+                  groups={[
+                    { kind: "plugins", title: w.extPlugins, rows: installed.plugins.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.plugins.includes(x.id) === true })) },
+                    { kind: "skills", title: w.extSkills, rows: installed.skills.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.skills.includes(x.id) === true })) },
+                  ]}
+                />
+              )}
+              <p className="hint">{w.extHint}</p>
+            </>,
+          )}
+
+        {tab === "general" && (
+          <>
+            {panel(w.workTitle, w.workWhy, <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />)}
+            {panel(w.widthTitle, w.widthWhy, <WidthPicker label={w.widthTitle} names={w.widthsLong} look="opts" />)}
+            {panel(w.langTitle, w.langWhy, <LanguagePicker locale={locale} label={w.langTitle} names={w.langNames} />)}
+          </>
+        )}
+
+        {tab === "safety" && (
+          <>
+            {panel(
+              w.scopeTitle,
+              w.scopeWhy,
               <div className="scope">
-                {section.rows.map((row) => (
-                  <ScopeRow key={row} kind={section.kind} text={row} />
+                {w.brief.yes.map((row) => (
+                  <ScopeRow key={row} kind="yes" text={row} />
                 ))}
+                {w.brief.no.map((row) => (
+                  <ScopeRow key={row} kind="no" text={row} />
+                ))}
+              </div>,
+            )}
+            <div className="set-list guide">
+              {w.guide.map((section) => (
+                <Fragment key={section.title}>
+                  {panel(
+                    section.title,
+                    undefined,
+                    <div className="scope">
+                      {section.rows.map((row) => (
+                        <ScopeRow key={row} kind={section.kind} text={row} />
+                      ))}
+                    </div>,
+                  )}
+                </Fragment>
+              ))}
+            </div>
+          </>
+        )}
+
+        {tab === "data" && (
+          <>
+            {panel(
+              w.dataTitle,
+              w.dataWhy,
+              <>
+                <div className="folder">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+                    <path d="M3 1.8h6.4L13 5.4v8.8H3z" />
+                    <path d="M9.2 1.8v3.8H13" />
+                  </svg>
+                  <span className="path">{path}</span>
+                  <CopyButton text={path} copy={w.copy} copied={w.copied} />
+                </div>
+                <span className="hint">{w.dataHint}</span>
+                <DataActions locale={locale} companyId={company.id} />
+                <span className="hint">{w.moveHint}</span>
+              </>,
+            )}
+            {panel(
+              w.deleteTitle,
+              undefined,
+              <div className="danger-row">
+                <p>{w.deleteWhy}</p>
+                <DeleteCompany
+                  companyId={company.id}
+                  name={company.name}
+                  errors={t.errors}
+                  words={{
+                    deleteButton: w.deleteButton,
+                    deleteAsk: w.deleteAsk(company.name),
+                    deleteLoses: w.deleteLoses(office.employees.length, office.memories.length),
+                    deleteKeep: w.deleteKeep,
+                    deleteType: w.deleteType,
+                    cancel: w.cancel,
+                  }}
+                />
+              </div>,
+              "panel panel-danger",
+            )}
+            <div className="panel">
+              <div className="panel-bd">
+                <div className="kv">
+                  <span>{w.version}</span>
+                  <b>v{pkg.version}</b>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>,
-    );
-  }
-
-  return shell(
-    <Head title={w.title} sub={w.headSub} />,
-    <div className="set-list">
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>Claude Code</h2>
-          <p>{w.claudeWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <ClaudeChecks status={status} words={t.claude} />
-          <div className="recheck">
-            <RecheckButton label={t.claude.recheck} busyLabel={t.claude.checking} doneLabel={t.claude.checkedNow} />
-          </div>
-        </div>
+          </>
+        )}
       </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.scopeTitle}</h2>
-          <p>{w.scopeWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <div className="scope">
-            {w.brief.yes.map((row) => (
-              <ScopeRow key={row} kind="yes" text={row} />
-            ))}
-            {w.brief.no.map((row) => (
-              <ScopeRow key={row} kind="no" text={row} />
-            ))}
-          </div>
-          <div className="scope-acts">
-            <Link className="btn btn-secondary btn-sm" href="/settings?view=safety">
-              {w.guideOpen}
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.toolsTitle}</h2>
-          <p>{w.toolsWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <CheckRows rows={connectorRows(connectors?.servers, w)} words={t.claude} />
-          <div className="recheck">
-            <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} doneLabel={t.claude.checkedNow} failed={w.toolsFailed} disabled={!isReady(status)} />
-          </div>
-          <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.extTitle}</h2>
-          <p>{w.extWhy}</p>
-        </div>
-        <div className="panel-bd">
-          {installed.plugins.length + installed.skills.length === 0 ? (
-            <p className="col-empty" style={{ margin: 0 }}>
-              {w.extNone}
-            </p>
-          ) : (
-            <ExtensionPicker
-              groups={[
-                { kind: "plugins", title: w.extPlugins, rows: installed.plugins.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.plugins.includes(x.id) === true })) },
-                { kind: "skills", title: w.extSkills, rows: installed.skills.map((x) => ({ id: x.id, name: x.name, about: x.about, on: chosen?.skills.includes(x.id) === true })) },
-              ]}
-            />
-          )}
-          <p className="hint">{w.extHint}</p>
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.workTitle}</h2>
-          <p>{w.workWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.widthTitle}</h2>
-          <p>{w.widthWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <WidthPicker label={w.widthTitle} names={w.widthsLong} look="opts" />
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.langTitle}</h2>
-          <p>{w.langWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <LanguagePicker locale={locale} label={w.langTitle} names={w.langNames} />
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-hd">
-          <h2>{w.dataTitle}</h2>
-          <p>{w.dataWhy}</p>
-        </div>
-        <div className="panel-bd">
-          <div className="folder">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
-              <path d="M3 1.8h6.4L13 5.4v8.8H3z" />
-              <path d="M9.2 1.8v3.8H13" />
-            </svg>
-            <span className="path">{path}</span>
-            <CopyButton text={path} copy={w.copy} copied={w.copied} />
-          </div>
-          <span className="hint">{w.dataHint}</span>
-          <DataActions locale={locale} companyId={company.id} />
-          <span className="hint">{w.moveHint}</span>
-        </div>
-      </div>
-
-      <div className="panel panel-danger">
-        <div className="panel-hd">
-          <h2>{w.deleteTitle}</h2>
-        </div>
-        <div className="panel-bd">
-          <div className="danger-row">
-            <p>{w.deleteWhy}</p>
-            <DeleteCompany
-              companyId={company.id}
-              name={company.name}
-              errors={t.errors}
-              words={{
-                deleteButton: w.deleteButton,
-                deleteAsk: w.deleteAsk(company.name),
-                deleteLoses: w.deleteLoses(office.employees.length, office.memories.length),
-                deleteKeep: w.deleteKeep,
-                deleteType: w.deleteType,
-                cancel: w.cancel,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-bd">
-          <div className="kv">
-            <span>{w.version}</span>
-            <b>v{pkg.version}</b>
-          </div>
-        </div>
-      </div>
-    </div>,
+    </Shell>
   );
 }

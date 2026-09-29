@@ -51,7 +51,7 @@ export function ExtensionPicker({ groups }: { readonly groups: readonly { readon
             <input type="checkbox" checked={row.on} disabled={pending} onChange={(e) => start(() => setExtensionAction(g.kind, row.id, e.target.checked))} />
             <span className="ext-tx">
               <b>{row.name}</b>
-              {row.about !== undefined && <span>{row.about}</span>}
+              {row.about !== undefined && <span title={row.about}>{row.about}</span>}
             </span>
           </label>
         ))}

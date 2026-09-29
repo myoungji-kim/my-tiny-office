@@ -586,9 +586,10 @@ export const en = {
     toolsCost: "A check uses a little Claude usage (about $0.1).",
     scopeTitle: "What employees may do",
     scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
-    guideOpen: "Read the guide",
-    guideTitle: "What is safe",
-    guideSub: "What employees do on this computer, and what they never do",
+    tabSkills: "Skills and plugins",
+    tabGeneral: "General",
+    tabSafety: "Safety",
+    tabData: "Data",
     brief: {
       yes: ["Read and edit files in a folder of each task's own, inside the project's folder", "Run only the commands the project allows"],
       no: ["Nothing outside the folder, no internet, no push"],

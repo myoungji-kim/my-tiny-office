@@ -230,7 +230,7 @@ export function ProjectDialog({
             )}
             <span className="hint">
               {folder === undefined ? w.noFolderHint : w.folderHint}{" "}
-              {folder !== undefined && <Link href="/settings?view=safety">{w.scopeMore}</Link>}
+              {folder !== undefined && <Link href="/settings?tab=safety">{w.scopeMore}</Link>}
             </span>
           </div>
 
