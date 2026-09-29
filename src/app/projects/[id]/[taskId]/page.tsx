@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { isReady } from "../../../../application/runtime-status";
 import { ActButton } from "../../../../components/act-button";
@@ -13,11 +13,9 @@ import { Shell } from "../../../../components/shell";
 import { CopyButton } from "../../../../components/settings-parts";
 import { Suggestions } from "../../../../components/suggestions";
 import { TaskActions } from "../../../../components/task-actions";
-import { Markdown } from "../../../../components/markdown";
-import { SaidPanel } from "../../../../components/said-panel";
-import { Sprite } from "../../../../components/sprite";
 import { TaskChanges } from "../../../../components/task-changes";
-import { loadTaskWork } from "../../../../server/task-work";
+import { TaskView, type TalkView } from "../../../../components/task-view";
+import { loadTaskWork, type TalkMessage } from "../../../../server/task-work";
 import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
@@ -28,6 +26,8 @@ import { companyScreen, param, type SearchParams } from "../../../screen-data";
 export const dynamic = "force-dynamic";
 
 const timeText = (locale: string, at: number) => new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(at);
+const whenText = (locale: string, at: number) =>
+  new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(at);
 
 const STEP_ICON: Readonly<Record<"read" | "edit" | "run", ReactNode>> = {
   read: (
@@ -56,13 +56,23 @@ const RUN = (
   </svg>
 );
 
-const panel = (title: string, body: ReactNode) => (
-  <div className="panel">
+const panel = (title: string, body: ReactNode, className = "panel") => (
+  <div className={className}>
     <div className="panel-hd">
       <h2>{title}</h2>
     </div>
     <div className="panel-bd">{body}</div>
   </div>
+);
+
+const fold = (title: string, body: ReactNode) => (
+  <details className="panel fold">
+    <summary className="panel-hd">
+      <h2>{title}</h2>
+      <span className="fold-ic">{Icon.chevron}</span>
+    </summary>
+    <div className="panel-bd">{body}</div>
+  </details>
 );
 
 export default async function TaskPage({ params, searchParams }: { params: Promise<{ id: string; taskId: string }>; searchParams: SearchParams }) {
@@ -84,11 +94,13 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   const running = task.status === "working" && blocker === undefined;
   const allowable = blocker?.kind === "commandNotAllowed" && isAllowableCommand(blocker.command);
   const work = await loadTaskWork(company.id, task.id);
-  const actions = (work?.steps ?? []).flatMap((s) => (s.kind === "say" ? [] : [{ ...s, kind: s.kind }]));
-  const said = work?.steps.find((s) => s.kind === "say");
+  const person = (id: string | undefined) => office.employees.find((e) => e.id === id);
+  const review = work?.review;
+  const reviewer = person(review?.reviewerId);
+  const actions = work?.steps ?? [];
 
-  const stepRow = (s: (typeof actions)[number], latest: boolean, key: number) => (
-    <div key={key} className={latest ? "step latest" : "step"}>
+  const stepRow = (s: (typeof actions)[number], key: number) => (
+    <div key={key} className="step">
       <span className="step-at">{timeText(locale, s.at)}</span>
       <span className="step-ic">{STEP_ICON[s.kind]}</span>
       <span className="step-tx">
@@ -96,90 +108,167 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       </span>
     </div>
   );
-  // What they did is there to look into, not to read through: while they work
-  // the step they are on shows, and the rest opens on request.
-  const now = running && actions.length > 0 ? <Fragment key="now">{panel(w.tk.now, stepRow(actions[0], true, 0))}</Fragment> : undefined;
-  const steps =
-    actions.length === 0 ? undefined : (
-      <details key="steps" className="panel fold">
-        <summary className="panel-hd">
-          <h2>
-            {w.tk.did}
-            <span className="kn">{actions.length}</span>
-          </h2>
-          <span className="fold-ic">{Icon.chevron}</span>
-        </summary>
-        <div className="panel-bd">{actions.map((s, i) => stepRow(s, false, i))}</div>
-      </details>
-    );
-  const saidPanel =
-    said === undefined || who === undefined ? undefined : (
-      <SaidPanel locale={locale} name={who.name} species={who.species} text={said.detail} when={work?.saidWhen} />
-    );
-  const changes =
-    task.status === "backlog" || work === undefined ? undefined : (
-      <Fragment key="changes">
-        {panel(
-          w.tk.changed,
+
+  const view = (m: TalkMessage): TalkView | undefined => {
+    const at = whenText(locale, m.at);
+    if (m.kind === "request") return { id: m.id, name: w.tk.you, species: undefined, label: w.tk.talkRequest, tone: "changes", at, text: m.text, suggestions: undefined };
+    const by = person(m.by);
+    if (by === undefined) return undefined;
+    if (m.kind === "review") {
+      const approve = m.verdict === "approve";
+      const label = w.tk.talkReview + " · " + (approve ? w.tk.talkApprove : w.tk.talkChanges);
+      return { id: m.id, name: by.name, species: by.species, label, tone: approve ? "approve" : "changes", at, text: m.text, suggestions: undefined };
+    }
+    return {
+      id: m.id,
+      name: by.name,
+      species: by.species,
+      label: m.when === "live" ? w.tk.talkNow : m.when === "stopped" ? w.tk.talkBefore : w.tk.talkReport,
+      tone: undefined,
+      at,
+      text: m.text,
+      suggestions:
+        m.suggestions.length === 0 ? undefined : (
+          <Suggestions locale={locale} companyId={company.id} person={by} task={{ id: task.id, title: task.title }} suggestions={m.suggestions} memories={office.memories} areas={office.areas} />
+        ),
+    };
+  };
+  const talk = (work?.talk ?? []).map(view).filter((m) => m !== undefined);
+
+  // What is going on now closes the conversation: the step they are on, or the colleague looking.
+  const live =
+    running && actions.length > 0 ? (
+      <div className="talk-live">
+        <span className="dot working" />
+        {w.tk.liveNow} · {w.tk.steps[actions[0].kind]} <code>{actions[0].detail}</code>
+      </div>
+    ) : reviewer !== undefined && (review?.state === "queued" || review?.state === "reviewing") ? (
+      <div className="talk-live">
+        <span className="dot reviewing" />
+        {review.state === "queued" ? w.tk.rvQueued(reviewer.name) : w.tk.rvReviewing(reviewer.name)}
+      </div>
+    ) : reviewer !== undefined && review?.state === "withdrawn" ? (
+      <div className="talk-live">{w.tk.rvWithdrawn(reviewer.name)}</div>
+    ) : undefined;
+
+  const changes = (
+    <>
+      {work !== undefined && work.changes.length > 0 ? (
+        <TaskChanges companyId={company.id} taskId={task.id} changes={work.changes} />
+      ) : (
+        task.status !== "done" && <p className="col-empty talk-empty">{w.tk.noChanges}</p>
+      )}
+      {work !== undefined && task.status === "approval" && <span className="tk-apply">{withCode(w.tk.applyWhat, work.branch)}</span>}
+      {work !== undefined && task.status === "done" && <span className="tk-apply">{withCode(w.tk.applied, work.branch)}</span>}
+    </>
+  );
+  const did = actions.length > 0 ? actions.map(stepRow) : <p className="col-empty talk-empty">{w.tk.noChanges}</p>;
+
+  const kv = (label: string, value: ReactNode) => (
+    <div className="kv">
+      <span>{label}</span>
+      <b>{value}</b>
+    </div>
+  );
+  const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
+  const side = (
+    <>
+      {panel(
+        w.tk.details,
+        <>
+          {kv(w.tk.fStatus, <span className={"chip " + CHIP[task.status]}>{w.columns[task.status]}</span>)}
+          {kv(w.tk.fWho, who?.name ?? w.unassigned)}
+          {kv(w.tk.fReviewer, person(task.reviewerId ?? review?.reviewerId)?.name ?? w.tk.noReviewer)}
+          {area !== undefined && kv(w.tk.fArea, areaName(area, t.areas))}
+          {kv(w.tk.fPrio, t.priority[task.priority])}
+          {time !== undefined && kv(w.tk.fTime, time)}
+          {kv(w.tk.created, dateText(locale, task.createdAt))}
+        </>,
+        "panel side-kv",
+      )}
+      {about !== undefined && panel(w.tk.desc, <span style={{ fontSize: 15 }}>{about}</span>)}
+      {task.status === "held" && task.heldReason !== undefined && panel(w.heldBecause, <span style={{ fontSize: 15 }}>{task.heldReason}</span>)}
+      {fold(
+        who === undefined ? w.tk.memAhead : w.tk.mem(carried.length),
+        who === undefined ? (
+          <p className="col-empty" style={{ margin: 0 }}>
+            {w.tk.memNobody}
+          </p>
+        ) : carried.length === 0 ? (
+          <p className="col-empty" style={{ margin: 0 }}>
+            {t.people.noMemory}
+          </p>
+        ) : (
           <>
-            {work.changes.length > 0 ? (
-              <TaskChanges companyId={company.id} taskId={task.id} changes={work.changes} />
-            ) : task.status === "done" ? undefined : (
-              <p className="col-empty" style={{ margin: 0 }}>
-                {w.tk.noChanges}
-              </p>
-            )}
-            {task.status === "approval" && <span className="tk-apply">{withCode(w.tk.applyWhat, work.branch)}</span>}
-            {task.status === "done" && <span className="tk-apply">{withCode(w.tk.applied, work.branch)}</span>}
-          </>,
-        )}
-      </Fragment>
-    );
-  const reviewer = office.employees.find((e) => e.id === work?.review?.reviewerId);
-  const reviewNote = (() => {
-    const r = work?.review;
-    if (r === undefined || reviewer === undefined) return undefined;
-    if (r.state === "queued") return { cls: "peer", icon: Icon.eye, text: w.tk.rvQueued(reviewer.name) };
-    if (r.state === "reviewing") return { cls: "peer", icon: Icon.eye, text: w.tk.rvReviewing(reviewer.name) };
-    if (r.state === "withdrawn") return { cls: "blocked", icon: Icon.alert, text: w.tk.rvWithdrawn(reviewer.name) };
-    return r.verdict === "changes"
-      ? { cls: "changes", icon: Icon.back, text: w.tk.rvChanges(reviewer.name) }
-      : { cls: "settled", icon: Icon.yes, text: w.tk.rvApproved(reviewer.name) };
-  })();
-  const reviewPanel =
-    reviewNote === undefined || reviewer === undefined ? undefined : (
-      <Fragment key="review">
-        {panel(
-          w.tk.review,
+            {carried.map((m) => {
+              const used = work?.memoriesUsed.includes(m.id) === true;
+              return (
+                <div key={m.id} className={used ? "tk-mem used" : "tk-mem"}>
+                  {used ? Icon.yes : <svg viewBox="0 0 16 16" />}
+                  <span>{m.text}</span>
+                </div>
+              );
+            })}
+            {actions.length > 0 && <span className="hint">{w.tk.memHow}</span>}
+          </>
+        ),
+      )}
+      {work?.sessionId !== undefined &&
+        fold(
+          w.tk.session,
           <>
-            <span className={`r-line ${reviewNote.cls}`}>
-              {reviewNote.icon}
-              <span className="r-tx">{reviewNote.text}</span>
-            </span>
-            {work?.review?.comments !== undefined && (
-              <div className="msg" style={{ marginTop: 8 }}>
-                <span className="w-av">
-                  <Sprite species={reviewer.species} size={20} />
-                </span>
-                <span>
-                  <b>{reviewer.name}</b>
-                  <Markdown text={work.review.comments} />
-                </span>
+            {work.worktree !== undefined && (
+              <div className="kv">
+                <span>{w.tk.folder}</span>
+                <b className="mono">{work.worktree}</b>
               </div>
             )}
+            <div className="kv">
+              <span>{w.tk.branch}</span>
+              <b className="mono">{work.branch}</b>
+            </div>
+            <span className="hint">{w.tk.resumeHint}</span>
+            <div className="cmd">
+              <pre>
+                <span className="p">$</span> claude --resume {work.sessionId}
+              </pre>
+              <CopyButton text={"claude --resume " + work.sessionId} copy={t.claude.copy} copied={t.claude.copied} />
+            </div>
           </>,
         )}
-      </Fragment>
-    );
-  const main = (task.status === "approval" || task.status === "done" ? [changes, reviewPanel, steps] : [now, reviewPanel, changes, steps]).filter((x) => x !== undefined);
+    </>
+  );
 
-  const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
-  const side: ReactNode[] = [
-    about === undefined ? undefined : <Fragment key="desc">{panel(w.tk.desc, <span style={{ fontSize: 15 }}>{about}</span>)}</Fragment>,
-    task.status === "held" && task.heldReason !== undefined ? (
-      <Fragment key="held">{panel(w.heldBecause, <span style={{ fontSize: 15 }}>{task.heldReason}</span>)}</Fragment>
-    ) : undefined,
-  ].filter((x) => x !== undefined);
+  const now = blocker !== undefined && (
+      <div className="notice notice-bad tk-now">
+        <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : Icon.plug}</span>
+        <span className="n-tx">
+          <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
+          {blocker.kind === "commandNotAllowed" ? (
+            who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
+          ) : (
+            <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
+          )}
+        </span>
+        <span className="n-acts">
+          {blocker.kind === "commandNotAllowed" ? (
+            <>
+              <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutRun} disabled={!ready} errors={t.errors} />
+              {allowable && (
+                <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
+              )}
+            </>
+          ) : (
+            <ActButton
+              action={carryOnAction.bind(null, company.id, task.id)}
+              label={blocker.kind === "disconnected" ? w.reconnect : blocker.kind === "budgetReached" ? w.carryOn : w.retry}
+              disabled={!ready}
+              errors={t.errors}
+            />
+          )}
+        </span>
+      </div>
+  );
 
   const sub: ReactNode[] = [
     area === undefined ? undefined : (
@@ -239,117 +328,17 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         </div>
       }
     >
-      <div>
-        {blocker !== undefined && (
-          <div className="notice notice-bad">
-            <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : Icon.plug}</span>
-            <span className="n-tx">
-              <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
-              {blocker.kind === "commandNotAllowed" ? (
-                who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
-              ) : (
-                <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
-              )}
-            </span>
-            <span className="n-acts">
-              {blocker.kind === "commandNotAllowed" ? (
-                <>
-                  <ActButton action={carryOnAction.bind(null, company.id, task.id)} label={w.withoutRun} disabled={!ready} errors={t.errors} />
-                  {allowable && (
-                    <ActButton action={allowCommandAction.bind(null, company.id, project.id, blocker.command)} label={w.allowRun} disabled={!ready} errors={t.errors} />
-                  )}
-                </>
-              ) : (
-                <ActButton
-                  action={carryOnAction.bind(null, company.id, task.id)}
-                  label={blocker.kind === "disconnected" ? w.reconnect : blocker.kind === "budgetReached" ? w.carryOn : w.retry}
-                  disabled={!ready}
-                  errors={t.errors}
-                />
-              )}
-            </span>
-          </div>
-        )}
-        {saidPanel !== undefined && <div style={blocker !== undefined ? { marginTop: 16 } : undefined}>{saidPanel}</div>}
-      {who !== undefined && work !== undefined && work.suggestions.length > 0 && (
-        <Suggestions
-          locale={locale}
-          companyId={company.id}
-          person={who}
-          task={{ id: task.id, title: task.title }}
-          suggestions={work.suggestions}
-          memories={office.memories}
-          areas={office.areas}
-        />
-      )}
-        <div className="tk-grid" style={{ ...(main.length === 0 ? { gridTemplateColumns: "minmax(0, 1fr)" } : {}), ...(blocker !== undefined && saidPanel === undefined ? { marginTop: 16 } : {}) }}>
-          {main.length > 0 && <div className="tk-col">{main}</div>}
-          <div className="tk-col">
-            {side}
-            {panel(
-              who === undefined ? w.tk.memAhead : w.tk.mem(carried.length),
-              who === undefined ? (
-                <p className="col-empty" style={{ margin: 0 }}>
-                  {w.tk.memNobody}
-                </p>
-              ) : carried.length === 0 ? (
-                <p className="col-empty" style={{ margin: 0 }}>
-                  {t.people.noMemory}
-                </p>
-              ) : (
-                <>
-                  {carried.map((m) => {
-                    const used = work?.memoriesUsed.includes(m.id) === true;
-                    return (
-                      <div key={m.id} className={used ? "tk-mem used" : "tk-mem"}>
-                        {used ? Icon.yes : <svg viewBox="0 0 16 16" />}
-                        <span>{m.text}</span>
-                      </div>
-                    );
-                  })}
-                  {work !== undefined && work.steps.length > 0 && <span className="hint">{w.tk.memHow}</span>}
-                </>
-              ),
-            )}
-            {panel(
-              w.tk.record,
-              <>
-                <div className="kv">
-                  <span>{w.tk.created}</span>
-                  <b style={{ fontWeight: 500 }}>{dateText(locale, task.createdAt)}</b>
-                </div>
-                <div className="kv">
-                  <span>{w.tk.assignee}</span>
-                  <b style={{ fontWeight: 500 }}>{who?.name ?? w.unassigned}</b>
-                </div>
-              </>,
-            )}
-            {work?.sessionId !== undefined &&
-              panel(
-                w.tk.session,
-                <>
-                  {work.worktree !== undefined && (
-                    <div className="kv">
-                      <span>{w.tk.folder}</span>
-                      <b className="mono">{work.worktree}</b>
-                    </div>
-                  )}
-                  <div className="kv">
-                    <span>{w.tk.branch}</span>
-                    <b className="mono">{work.branch}</b>
-                  </div>
-                  <span className="hint">{w.tk.resumeHint}</span>
-                  <div className="cmd">
-                    <pre>
-                      <span className="p">$</span> claude --resume {work.sessionId}
-                    </pre>
-                    <CopyButton text={"claude --resume " + work.sessionId} copy={t.claude.copy} copied={t.claude.copied} />
-                  </div>
-                </>,
-              )}
-          </div>
-        </div>
-      </div>
+      <TaskView
+        locale={locale}
+        talk={talk}
+        live={live}
+        now={now}
+        decide={task.status === "approval" ? who?.name : undefined}
+        changes={changes}
+        did={did}
+        side={side}
+        counts={{ changes: work?.changes.length ?? 0, did: actions.length }}
+      />
     </Shell>
   );
 }

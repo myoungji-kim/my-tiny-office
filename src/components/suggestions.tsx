@@ -39,24 +39,19 @@ export function Suggestions({
   const settle = (s: Suggestion) => settleSuggestionAction(companyId, s.runId, s.text);
 
   return (
-    <div className="panel sug-card">
-      <div className="panel-hd">
-        <h2>{w.suggestTitle}</h2>
-        <p>{w.suggestWhy(person.name)}</p>
-      </div>
-      <div className="panel-bd">
-        {suggestions.map((s) => (
-          <div key={s.runId + s.text} className="sug">
-            <span className="sug-tx">{s.text}</span>
-            <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={() => start(async () => void (await settle(s)))}>
-              {w.passIt}
-            </button>
-            <button className="btn btn-primary btn-sm" type="button" disabled={pending} onClick={() => setTeaching(s)}>
-              {w.teachIt}
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="talk-sug">
+      <b>{w.suggestTitle}</b>
+      {suggestions.map((s) => (
+        <div key={s.runId + s.text} className="sug">
+          <span className="sug-tx">{s.text}</span>
+          <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={() => start(async () => void (await settle(s)))}>
+            {w.passIt}
+          </button>
+          <button className="btn btn-primary btn-sm" type="button" disabled={pending} onClick={() => setTeaching(s)}>
+            {w.teachIt}
+          </button>
+        </div>
+      ))}
       {teaching !== undefined && (
         <TeachDialog
           locale={locale}

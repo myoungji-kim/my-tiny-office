@@ -7,6 +7,7 @@ import { Icon } from "../../components/icons";
 import { RecheckButton } from "../../components/recheck-button";
 import { CopyButton, DataActions, DeleteCompany, LanguagePicker, WorkPicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
+import { WidthPicker } from "../../components/width-picker";
 import { toCompanyId } from "../../domain/ids";
 import { getDictionary } from "../../i18n";
 import { getCompanyFiles } from "../../infrastructure/persistence/company-files";
@@ -122,6 +123,16 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         </div>
         <div className="panel-bd">
           <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-hd">
+          <h2>{w.widthTitle}</h2>
+          <p>{w.widthWhy}</p>
+        </div>
+        <div className="panel-bd">
+          <WidthPicker label={w.widthTitle} names={w.widthsLong} look="opts" />
         </div>
       </div>
 

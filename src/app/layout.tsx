@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
+
+import { appWidthScript } from "../components/app-width";
 
 import { currentLocale } from "./screen-data";
 
@@ -25,8 +28,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await currentLocale();
   return (
-    <html lang={locale} className={sans.variable}>
-      <body>{children}</body>
+    // the width script sets a style on <html> before React sees it
+    <html lang={locale} className={sans.variable} suppressHydrationWarning>
+      <body>
+        {children}
+        <Script id="app-width" strategy="beforeInteractive">
+          {appWidthScript}
+        </Script>
+      </body>
     </html>
   );
 }

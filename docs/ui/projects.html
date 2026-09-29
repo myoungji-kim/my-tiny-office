@@ -38,10 +38,6 @@
 
   /* ═══ a task's page ═══ */
 
-  .tk-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-
-  .tk-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-
   .step { display: grid; grid-template-columns: 44px 16px minmax(0, 1fr); gap: 10px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 
   .step:last-child { border-bottom: none; }
@@ -73,10 +69,6 @@
   .diff .d-add { color: var(--ok-ink); }
 
   .diff .d-del { color: var(--bad-ink); }
-
-  .msg { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 9px; padding: 7px 0; font-size: 15px; }
-
-  .msg b { display: block; font-size: 14px; }
 
   .tk-mem { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; font-size: 15px; color: var(--muted); }
 
@@ -120,14 +112,6 @@
 
   .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
 
-  .said-card { margin-bottom: 16px; }
-
-  .said-hd { display: flex; align-items: center; gap: 10px; }
-
-  .said-hd h2 { margin-right: auto; }
-
-  .said-av { width: 32px; height: 32px; border-radius: 8px; background: var(--subtle); display: grid; place-items: center; flex: none; }
-
   .view-sw { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--surface); }
 
   .view-sw button { width: 30px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--muted); cursor: pointer; }
@@ -140,10 +124,6 @@
 
   .view-sw button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
-  .said-bd { position: relative; padding: 18px 58px 22px 22px; }
-
-  .said-text { max-width: 60rem; }
-
   .copy-ic { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
 
   .copy-ic svg { width: 15px; height: 15px; }
@@ -152,13 +132,9 @@
 
   .copy-ic.done { color: var(--ok); opacity: 1; }
 
-  .said-bd:hover .copy-ic, .copy-ic:focus-visible { opacity: 1; }
-
   .copy-ic:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   @media (hover: none) { .copy-ic { opacity: 1; } }
-
-  .sug-card { margin-bottom: 16px; }
 
   .sug { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 
@@ -203,8 +179,6 @@
   .md td:first-child { white-space: nowrap; }
 
   .md th { background: var(--sunk); color: var(--muted); font-size: 14px; font-weight: 600; }
-
-  @media (max-width: 900px) { .tk-grid { grid-template-columns: 1fr; } }
 
   /* ═══ a task's page: what to decide, the conversation, the details ═══ */
 
