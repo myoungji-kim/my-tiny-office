@@ -307,14 +307,17 @@ denied. Gmail, Drive and the rest cannot be allowed from any project.
 **Which server is Atlassian differs by account.** A connector's tools are
 `mcp__<server>__<tool>`, and the server is the account's own name for it.
 설정 › 연결된 도구 › 확인하기 finds it with a session that can only look:
-`--tools ToolSearch --allowedTools ToolSearch`, `dontAsk`, `--max-budget-usd
-0.5`, in an empty temporary folder, with the same isolation as §2 but for
+`--tools Glob,ToolSearch --allowedTools "Glob(./**) ToolSearch"`, `dontAsk`,
+`--max-budget-usd 0.5`, in an empty temporary folder, with the same isolation as §2 but for
 `--strict-mcp-config`. It loads one tool of each connector with `select:`,
 and the app keeps the servers that ToolSearch's own `tool_reference` results
 name — never the model's words — in this computer's `settings.json`. Atlassian
 is the server whose name says so; until a check has run, the measured one
 (`claude_ai_Atlassian_Rovo`). Measured: five servers confirmed, 7 turns,
-$0.09. A denied write is read as Atlassian's under any server named so.
+$0.09. ToolSearch exists only once the connectors have arrived, after a turn:
+a session asked to search first sometimes had none and found nothing, so the
+check's first turn globs its empty folder, and a check that never searched
+counts as failed rather than as an account with no connectors. A denied write is read as Atlassian's under any server named so.
 
 **Skills and plugins.** The user's Claude Code keeps plugins in
 `~/.claude/plugins` (`installed_plugins.json`, user scope) and skills in
