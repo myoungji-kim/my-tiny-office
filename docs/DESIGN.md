@@ -267,6 +267,9 @@ its reason and the way on, or finished work — "모카가 작업을 마쳤어�
 **A long conversation stays readable.** Reports run to forty lines and there
 are several of them, so:
 
+- it reads oldest first, as the exchange it was — a review, the request it led
+  to, the report that answered it — and opening the page scrolls to the latest
+  message only when it is below the fold, so 지금 할 일 stays in view otherwise;
 - the latest two messages are open; older ones fold to one line — who, what,
   when and their first sentence, never a heading — and open when clicked;
 - an open message taller than about a screen is cut off under a fade, with

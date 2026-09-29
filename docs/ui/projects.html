@@ -1296,7 +1296,8 @@
   let taskTab = "talk";
   let tabOf = null;
   function renderTask(p, task) {
-    if (tabOf !== task.id) { taskTab = "talk"; tabOf = task.id; }
+    const opening = tabOf !== task.id;
+    if (opening) { taskTab = "talk"; tabOf = task.id; }
     const who = task.who ? byId.get(task.who) : null;
     const k = t().tk;
     document.getElementById("tkCrumb").href = "#" + p.id;
@@ -1454,6 +1455,12 @@
         more.addEventListener("click", () => { const cut = bd.classList.toggle("clip"); more.textContent = cut ? k.talkAll : k.talkLess; });
         bd.after(more);
       }
+    }
+    // Oldest first reads as the exchange it was; opening the page brings the
+    // latest message into view when it is below the fold, and leaves it be when not.
+    const latest = [...view.querySelectorAll(".talk")].at(-1);
+    if (opening && taskTab === "talk" && latest && latest.getBoundingClientRect().top > innerHeight * 0.75) {
+      latest.scrollIntoView({ block: "start" });
     }
     for (const b of view.querySelectorAll("[data-unfold]")) b.addEventListener("click", () => {
       b.closest(".talk").classList.remove("folded");
