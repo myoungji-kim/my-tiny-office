@@ -277,7 +277,8 @@ are several of them, so:
 **The widths are the user's.** The split between the conversation and the
 details drags, 220 to 560 px for the details, and a double click puts it back;
 arrow keys move it too. The whole app is 보통, 넓게 or 전체 — 1400 px, 1760 px or
-the window — chosen beside the tabs and kept for every screen. Both are kept in
+the window — set in Settings' 화면 폭 and kept for every screen; a task's page
+has the same choice beside its tabs, as a shortcut to the same setting. Both are kept in
 this browser only.
 
 **세부 정보** is fixed: status, who, reviewer, area, priority, time. 업무 설명
@@ -511,6 +512,7 @@ to earn their place.
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
 | 직원이 할 수 있는 일 | The boundary in three lines, with 안내 보기 to 안전 범위, the guide in full. The commands are not here: they are per project |
 | 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
+| 화면 폭 | 보통 · 넓게 · 전체, for every screen, kept in this browser; a task's page changes the same setting |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 이 회사 삭제 | Set apart in red, last before the version |

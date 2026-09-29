@@ -124,6 +124,16 @@
 
         <div class="panel">
           <div class="panel-hd">
+            <h2 data-t="widthTitle">화면 폭</h2>
+            <p data-t="widthWhy">모든 화면에 같은 폭이 적용돼요. 업무 상세에서도 바로 바꿀 수 있어요. 이 브라우저에만 기억돼요.</p>
+          </div>
+          <div class="panel-bd">
+            <div class="opts" role="radiogroup" id="widths" data-a="widthTitle" aria-label="화면 폭"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
             <h2 data-t="langTitle">언어</h2>
             <p data-t="langWhy">화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.</p>
           </div>
@@ -220,6 +230,8 @@
       ],
       workTitle: "업무 시작", workWhy: "켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.",
       workAuto: "자동으로", workPaused: "멈춤",
+      widthTitle: "화면 폭", widthWhy: "모든 화면에 같은 폭이 적용돼요. 업무 상세에서도 바로 바꿀 수 있어요. 이 브라우저에만 기억돼요.",
+      widths: { normal: "보통 · 1400px", wide: "넓게 · 1760px", full: "전체 · 창 너비" },
       langTitle: "언어", langWhy: "화면의 글이 바뀌어요. 직원 이름이나 프로젝트 이름처럼 직접 쓴 글은 그대로예요.",
       dataTitle: "이 회사의 데이터", dataWhy: "직원, 기억, 프로젝트, 업무가 모두 이 파일 하나에 있어요. 회사마다 파일이 따로라 서로 섞이지 않아요.",
       dataHint: "코드 폴더와 따로 있어서 브랜치를 바꾸거나 저장소를 지워도 회사는 남아요.",
@@ -278,6 +290,8 @@
       ],
       workTitle: "Starting work", workWhy: "When on, whoever is free takes the next task from the backlog. When paused, new work only queues, and work in progress carries on.",
       workAuto: "Automatically", workPaused: "Paused",
+      widthTitle: "Width", widthWhy: "Every screen takes the same width. A task's page can change it too. Kept in this browser only.",
+      widths: { normal: "Normal · 1400px", wide: "Wide · 1760px", full: "Full · the window" },
       langTitle: "Language", langWhy: "Changes the words on screen. What you wrote yourself, like names, stays as written.",
       dataTitle: "This company's data", dataWhy: "Its people, memory, projects and work all live in this one file. Each company has its own, so nothing mixes.",
       dataHint: "It lives apart from the code, so switching branches or deleting the checkout leaves the company alone.",
@@ -377,6 +391,23 @@
     }
   };
   renderWork();
+
+  /* ── how wide the app is ─────────────────────────────────────── */
+  const widths = document.getElementById("widths");
+  const renderWidths = () => {
+    widths.replaceChildren();
+    for (const key of Object.keys(APP_WIDTHS)) {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", String(key === appWidth()));
+      b.textContent = t().widths[key];
+      b.addEventListener("click", () => { setAppWidth(key); renderWidths(); });
+      widths.appendChild(b);
+    }
+  };
+  renderWidths();
 
   /* ── language ────────────────────────────────────────────────── */
   const langs = document.getElementById("langs");
