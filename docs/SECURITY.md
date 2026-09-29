@@ -31,7 +31,7 @@ no shell:
 claude -p
   --output-format stream-json --verbose
   --permission-mode dontAsk
-  --setting-sources project
+  --setting-sources project                   ("" in a project using a connector, §8)
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
   --disable-slash-commands                     (not when plugins are chosen, §8)
   --strict-mcp-config                          (not in a project using a connector)
@@ -275,8 +275,21 @@ Measured on `2.1.284`, a run without `--strict-mcp-config` and with
   its input (the issue, the comment's text).
 - Five tool calls cost $0.26, against $0.05 for a run that used none.
 
-So a project using the connector launches without `--strict-mcp-config`,
-adds `ToolSearch` to `--tools`, and adds to `--allowedTools`:
+**Without `--strict-mcp-config`, a folder's `.mcp.json` starts.** Measured: a
+worktree `.mcp.json` naming a server started its process — the command ran,
+with the user's rights, before the session did anything — even with no
+settings file approving it, and even with `enableAllProjectMcpServers: false`
+in `--settings`. A repository can carry that file and an agent can write it.
+`--setting-sources ""` — no settings source at all — keeps it from starting,
+keeps the user's own MCP servers out too, and still brings the account's
+connectors (measured: no process, Atlassian tools answered). It also stops
+the folder's `CLAUDE.md` loading, so such a session is told to read it. A
+chosen plugin's MCP server starts the same way without the flag, so a
+connector project is given the chosen skills but no plugin.
+
+So a project using the connector launches without `--strict-mcp-config` and
+with `--setting-sources ""`, adds `ToolSearch` to `--tools`, and adds to
+`--allowedTools`:
 
 - **Atlassian's read tools**, by name, from the list the app keeps
   (`src/infrastructure/runtime/connectors.ts`), measured against the tools
@@ -341,6 +354,10 @@ worktree and a file outside it, launch §2 with a prompt that attempts each of:
 and check that the init event lists no MCP servers, no skills, no hooks and
 only the listed tools, and that after several turns the agent is still told of
 no connector: they arrive late, so the init event alone does not show them.
+
+For a connector launch, check that a worktree `.mcp.json` whose server writes
+a file does not start (`--setting-sources ""`), and that the connector still
+answers.
 
 Also check that a `.claude/settings.json` in the worktree allowing bare
 `Bash`, with `defaultMode: bypassPermissions`, changes nothing: a command

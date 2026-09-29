@@ -87,7 +87,19 @@ function skills(home: string): Extension[] {
   });
 }
 
-export function installedExtensions(home: string = homedir()): { readonly plugins: readonly Extension[]; readonly skills: readonly Extension[] } {
+type Installed = { readonly plugins: readonly Extension[]; readonly skills: readonly Extension[] };
+
+// What changes only when the user installs something, kept a minute.
+const FRESH_MS = 60_000;
+let last: { readonly home: string; readonly at: number; readonly found: Installed } | undefined;
+
+export function installedExtensions(home: string = homedir()): Installed {
+  if (last !== undefined && last.home === home && Date.now() - last.at < FRESH_MS) return last.found;
+  last = { home, at: Date.now(), found: scan(home) };
+  return last.found;
+}
+
+function scan(home: string): Installed {
   const byName = (a: Extension, b: Extension) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
   return { plugins: plugins(home).sort(byName), skills: skills(home).sort(byName) };
 }
@@ -96,10 +108,10 @@ const WRAPPER = "my-tiny-office-skills";
 
 // The plugin folders a run is given: each chosen plugin as installed, and the
 // chosen skills carried in one plugin of the app's own, made in the run's folder.
-export function pluginDirs(chosen: Chosen | undefined, runFolder: string, home: string = homedir()): string[] {
+export function pluginDirs(chosen: Chosen | undefined, runFolder: string, give: { readonly plugins: boolean }, home: string = homedir()): string[] {
   if (chosen === undefined) return [];
   const found = installedExtensions(home);
-  const dirs = found.plugins.filter((p) => chosen.plugins.includes(p.id)).map((p) => p.path);
+  const dirs = give.plugins ? found.plugins.filter((p) => chosen.plugins.includes(p.id)).map((p) => p.path) : [];
   const carried = found.skills.filter((s) => chosen.skills.includes(s.id));
   if (carried.length > 0) {
     const wrapper = join(runFolder, WRAPPER);

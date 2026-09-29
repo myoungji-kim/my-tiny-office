@@ -55,11 +55,13 @@ describe("the user's plugins and skills", () => {
   });
 
   it("gives a run each chosen plugin, and the chosen skills in one plugin of the app's own", () => {
-    const dirs = pluginDirs({ plugins: ["ponytail@ponytail", "elsewhere@x"], skills: ["minimalist-ui"] }, run, home);
+    const dirs = pluginDirs({ plugins: ["ponytail@ponytail", "elsewhere@x"], skills: ["minimalist-ui"] }, run, { plugins: true }, home);
 
     expect(dirs).toEqual([join(home, ".claude", "plugins", "cache", "ponytail", "4.10.0"), join(run, "my-tiny-office-skills")]);
     expect(JSON.parse(readFileSync(join(run, "my-tiny-office-skills", ".claude-plugin", "plugin.json"), "utf8"))).toMatchObject({ name: "my-tiny-office-skills" });
     expect(existsSync(join(run, "my-tiny-office-skills", "skills", "minimalist-ui", "notes.md"))).toBe(true);
-    expect(pluginDirs(undefined, run, home)).toEqual([]);
+    expect(pluginDirs(undefined, run, { plugins: true }, home)).toEqual([]);
+    // a connector project would start a plugin's MCP servers, so it gets the skills alone
+    expect(pluginDirs({ plugins: ["ponytail@ponytail"], skills: ["minimalist-ui"] }, run, { plugins: false }, home)).toEqual([join(run, "my-tiny-office-skills")]);
   });
 });

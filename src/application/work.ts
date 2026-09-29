@@ -28,6 +28,7 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], project: Pick<
     ...(project.atlassian
       ? [
           "You can read this project's Jira issues and Confluence pages with the Atlassian tools; load them with ToolSearch. No other connector is yours to use.",
+          "If this folder has a CLAUDE.md, read it first and follow it.",
           "A write to Jira or Confluence the project has not allowed stops the task the first time: make it once, as you mean it, and the user decides.",
         ]
       : []),

@@ -43,6 +43,8 @@ describe("launchArgs", () => {
     const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false });
     const allowed = args[args.indexOf("--allowedTools") + 1].split(" ");
     expect(args).not.toContain("--strict-mcp-config");
+    // and reads no settings source, so a folder's .mcp.json never starts
+    expect(args[args.indexOf("--setting-sources") + 1]).toBe("");
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash,PowerShell,ToolSearch");
     expect(allowed).toContain("mcp__claude_ai_Atlassian_Rovo__searchJiraIssuesUsingJql");
     expect(allowed).toContain("mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue");

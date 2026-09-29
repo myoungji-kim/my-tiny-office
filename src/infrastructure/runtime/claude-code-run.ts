@@ -31,7 +31,7 @@ export function launchArgs(input: {
   // connector tools arrive deferred, and ToolSearch is what loads them
   const connector = input.readOnly ? undefined : input.atlassian;
   // skills only with the user's choice, and never for a reviewer
-  const plugins = input.readOnly ? [] : input.plugins;
+  const plugins = input.readOnly ? [] : input.plugins.filter((dir) => dir !== "");
   const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch") + (plugins.length === 0 ? "" : ",Skill");
   const allowed = input.readOnly
     ? ["Read(./**)"]
@@ -43,8 +43,10 @@ export function launchArgs(input: {
     "--verbose",
     "--permission-mode",
     "dontAsk",
+    // Without --strict-mcp-config a folder's own .mcp.json would start its servers;
+    // reading no settings source keeps them, and the user's, out (SECURITY.md §8).
     "--setting-sources",
-    "project",
+    connector === undefined ? "project" : "",
     "--settings",
     JSON.stringify({ autoMemoryEnabled: false, disableAllHooks: true }),
     // skills come only through the chosen plugins, which bring the built-in ones along (SECURITY.md §8)
@@ -122,7 +124,8 @@ export function readLine(line: string, calls: Map<string, { tool: string; comman
       }
       if (block.type === "tool_use" && isObject(block.input)) {
         const tool = text(block.name);
-        calls.set(text(block.id), { tool, command: text(block.input.command).trim(), input: block.input });
+        // a call's input is kept only for what a denial shows of it: the command, or a connector's write
+        calls.set(text(block.id), { tool, command: text(block.input.command).trim(), input: writeOf(tool) === undefined ? {} : block.input });
         const step = TOOL_STEP[tool];
         if (step !== undefined) out.push({ kind: "step", step, detail: stepDetail(subject(block.input, cwd)) });
       }
@@ -151,14 +154,18 @@ export const claudeCodeRuntime: AgentRuntime = {
     const cleanUp = () => rmSync(folder, { recursive: true, force: true });
     const memoryFile = join(folder, "memory.md");
     const settings = readSettings(resolveDataDirectory());
+    let plugins: string[];
     try {
       writeFileSync(memoryFile, input.memory);
+      // a connector project runs its MCP servers, so it gets the chosen skills but no plugin
+      plugins = input.readOnly ? [] : pluginDirs(settings.extensions, folder, { plugins: input.atlassian === undefined });
     } catch (error) {
       cleanUp();
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string; input: Json }>();
-    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian && { ...input.atlassian, server: atlassianServer(settings.connectors?.servers) }, plugins: input.readOnly ? [] : pluginDirs(settings.extensions, folder), memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    const atlassian = input.atlassian && { ...input.atlassian, server: atlassianServer(settings.connectors?.servers) };
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian, plugins, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {
