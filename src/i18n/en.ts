@@ -346,7 +346,7 @@ export const en = {
     finishYes: "Finish",
     cannotFinish: (n: number) => n + " task" + (n === 1 ? " is" : "s are") + " in progress or waiting on you.",
     columns: { backlog: "Backlog", working: "In progress", approval: "Waiting on you", done: "Done", held: "Held" },
-    unassigned: "Free to pick up",
+    unassigned: "Whoever is free picks it up",
     addTask: "Add a task",
     empty: "Nothing here",
     spent: (m: number) => m + " min so far",
