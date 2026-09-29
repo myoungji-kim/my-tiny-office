@@ -26,16 +26,18 @@ export function launchArgs(input: {
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
-}): string[] {
+}, platform: NodeJS.Platform = process.platform): string[] {
   // a reviewer's session has only the tools that read, confined to the worktree
   // connector tools arrive deferred, and ToolSearch is what loads them
   const connector = input.readOnly ? undefined : input.atlassian;
   // skills only with the user's choice, and never for a reviewer
   const plugins = input.readOnly ? [] : input.plugins.filter((dir) => dir !== "");
-  const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch") + (plugins.length === 0 ? "" : ",Skill");
+  // Claude Code runs commands through PowerShell only on Windows
+  const shells = platform === "win32" ? ["Bash", "PowerShell"] : ["Bash"];
+  const tools = input.readOnly ? "Read,Glob,Grep" : ["Read", "Edit", "Write", "Glob", "Grep", ...shells].join(",") + (connector === undefined ? "" : ",ToolSearch") + (plugins.length === 0 ? "" : ",Skill");
   const allowed = input.readOnly
     ? ["Read(./**)"]
-    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes, connector.server)]), ...(plugins.length === 0 ? [] : ["Skill"])];
+    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => shells.map((shell) => `${shell}(${c})`)), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes, connector.server)]), ...(plugins.length === 0 ? [] : ["Skill"])];
   const args = [
     "-p",
     "--output-format",

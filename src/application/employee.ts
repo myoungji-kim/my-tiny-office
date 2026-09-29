@@ -133,7 +133,11 @@ export function letGo(ctx: AppContext, employeeId: EmployeeId): Promise<Employee
         await ctx.tasks.save(back.task);
         if (task.status === "working") returned.push(task.id);
         events.push(...back.events);
-      } else if (unnamed !== task) await ctx.tasks.save(unnamed);
+      } else {
+        // work waiting on them goes to whoever picks it up next
+        const freed = task.assigneeId === employee.id && task.status !== "done" ? { ...unnamed, assigneeId: undefined } : unnamed;
+        if (freed !== task) await ctx.tasks.save(freed);
+      }
     }
     events.push(...(await withdrawReviewsOn(ctx, employee.companyId, returned)));
     for (const review of await ctx.reviews.findByCompany(employee.companyId)) {

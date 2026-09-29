@@ -62,8 +62,15 @@ function reviewerPrompt(reviewer: Employee, own: readonly Memory[]): string {
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
 function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">, revised: boolean): string {
+  const why = resumePrompt(task, continuing, begun, lastEnd, project);
+  if (!continuing || !revised) return why;
+  return `The task was changed while you were working on it. It now reads:\n\n${brief(task)}\n\n${why === CARRY_ON ? "Carry on with it as it is now." : why}`;
+}
+
+const CARRY_ON = "Carry on with the task where you left off.";
+
+function resumePrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">): string {
   const { commands } = project;
-  if (continuing && revised) return `The task was changed while you were working on it. It now reads:\n\n${brief(task)}\n\nCarry on with it as it is now.`;
   if (task.changesRequested !== undefined) {
     return continuing
       ? `Your work was sent back with this request:\n\n${task.changesRequested}\n\nMake the changes.`
@@ -80,7 +87,7 @@ function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, 
       ? "The write you tried is allowed now. Make it again, and carry on with the task."
       : "The user did not allow the write you tried. Carry on with the task without it, and say in your final message what you would have written.";
   }
-  return "Carry on with the task where you left off.";
+  return CARRY_ON;
 }
 
 const reviewPrompt = (task: taskDomain.Task, author: string, diff: string, again: boolean): string =>
@@ -109,6 +116,8 @@ interface LiveRun {
   // the review this run is, when it is a colleague's rather than the work itself
   readonly reviewId: ReviewId | undefined;
   readonly startedAt: number;
+  // the project folder the run's worktree is in
+  readonly folder: string;
   readonly ctx: AppContext;
   handle: RunningAgent;
   stopping: boolean;
@@ -193,7 +202,7 @@ export function createWorkSupervisor(deps: {
       const task = await ctx.tasks.findById(entry.taskId);
       const wanted =
         entry.reviewId === undefined
-          ? wantsRun(task, entry.employeeId) && !heldForReview(entry.taskId, now) && !(task.revisedAt !== undefined && entry.startedAt < task.revisedAt)
+          ? wantsRun(task, entry.employeeId) && !heldForReview(entry.taskId, now) && !(task.revisedAt !== undefined && entry.startedAt <= task.revisedAt)
           : task?.status === "working" && now.some((r) => r.id === entry.reviewId && r.state === "reviewing");
       if (!wanted) stop(entry);
     }
@@ -215,13 +224,14 @@ export function createWorkSupervisor(deps: {
     }
   }
 
-  const entryFor = (ctx: AppContext, run: { readonly id: RunId }, task: taskDomain.Task, employee: Employee, reviewId: ReviewId | undefined, carried: readonly Memory[]): LiveRun => ({
+  const entryFor = (ctx: AppContext, run: { readonly id: RunId }, task: taskDomain.Task, employee: Employee, reviewId: ReviewId | undefined, carried: readonly Memory[], folder: string): LiveRun => ({
     runId: run.id,
     companyId: task.companyId,
     taskId: task.id,
     employeeId: employee.id,
     reviewId,
     startedAt: ctx.now(),
+    folder,
     ctx,
     handle: { stop: () => undefined },
     stopping: false,
@@ -237,10 +247,13 @@ export function createWorkSupervisor(deps: {
     const project = await ctx.projects.findById(task.projectId);
     const employee = task.assigneeId === undefined ? undefined : await ctx.employees.findById(task.assigneeId);
     if (employee === undefined) return;
-    const prepared = project?.folder !== undefined && project.folderConfirmed ? await deps.workspace.prepare(project.folder, task.id) : { ok: false as const };
-    if (!prepared.ok || project === undefined) return block(ctx, task.id, { kind: "workspaceUnavailable" });
-    // preparing takes a while, and the task may have been held or handed over meanwhile
+    if (project?.folder === undefined || !project.folderConfirmed) return block(ctx, task.id, { kind: "workspaceUnavailable" });
+    const { folder } = project;
+    const prepared = await deps.workspace.prepare(folder, task.id);
+    if (!prepared.ok) return block(ctx, task.id, { kind: "workspaceUnavailable" });
+    // preparing takes a while, and the task may have been held, handed over or deleted meanwhile
     const current = await ctx.tasks.findById(task.id);
+    if (current === undefined) return deps.workspace.discard(folder, task.id);
     if (!wantsRun(current, employee.id) || heldForReview(task.id, await ctx.reviews.findByCompany(task.companyId))) return;
 
     const agent = await agentOf(ctx, employee);
@@ -253,13 +266,13 @@ export function createWorkSupervisor(deps: {
     await ctx.runs.save(run);
 
     const carried = carriedBy(employee.id, await ctx.memories.findByCompany(task.companyId));
-    const entry = entryFor(ctx, run, task, employee, undefined, carried);
+    const entry = entryFor(ctx, run, task, employee, undefined, carried, folder);
     track(entry, () =>
       deps.runtime.launch(
         {
           cwd: prepared.path,
           // the last run stopped for a change made after it started
-          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project, current.revisedAt !== undefined && last !== undefined && last.startedAt < current.revisedAt),
+          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project, current.revisedAt !== undefined && last !== undefined && last.startedAt <= current.revisedAt),
           memory: memoryPrompt(employee, carried, project),
           commands: project.commands,
           atlassian: project.atlassian ? { writes: project.writes } : undefined,
@@ -288,7 +301,7 @@ export function createWorkSupervisor(deps: {
     await ctx.runs.save(run);
 
     const carried = carriedBy(reviewer.id, await ctx.memories.findByCompany(task.companyId));
-    const entry = entryFor(ctx, run, task, reviewer, review.id, carried);
+    const entry = entryFor(ctx, run, task, reviewer, review.id, carried, project.folder);
     track(entry, () =>
       deps.runtime.launch(
         {
@@ -308,6 +321,7 @@ export function createWorkSupervisor(deps: {
 
   async function onEvent(entry: LiveRun, event: AgentEvent): Promise<void> {
     const { ctx } = entry;
+    if (entry.stopping) return;
     // the task was deleted while it ran
     if ((await ctx.tasks.findById(entry.taskId)) === undefined) return stop(entry);
     if (event.kind === "session") {
@@ -366,6 +380,8 @@ export function createWorkSupervisor(deps: {
     const run = await ctx.runs.findById(entry.runId);
     if (run !== undefined) await ctx.runs.save(endRun(reported(run, { used: entry.used, suggestions: entry.suggestions }), end, entry.result?.costUsd ?? 0, ctx.now()));
     kick();
+    // deleted while it ran: its worktree could not go while the agent was in it
+    if ((await ctx.tasks.findById(entry.taskId)) === undefined) return deps.workspace.discard(entry.folder, entry.taskId);
     if (end.kind === "stopped") return;
     if (entry.reviewId !== undefined) return reviewEnded(entry, entry.reviewId, end);
 

@@ -295,6 +295,35 @@ describe("the work supervisor", () => {
     expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "The task was changed while you were working on it. It now reads:\n\nTask: Paginate by cursor\n\nKeyset, not offset.\n\nCarry on with it as it is now." });
   });
 
+  it("still says the command is allowed when the task also changed while it was stopped", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    launched[0].emit({ kind: "denied", command: "npm run e2e" });
+    await settle();
+    const task = await statusOf(id);
+    assert(task !== undefined);
+
+    ctx = { ...ctx, now: () => task.createdAt + 60_000 };
+    assert((await editTask(ctx, id, { projectId: task.projectId, title: "Paginate by cursor", description: undefined, area: task.area, priority: task.priority, assigneeId: task.assigneeId, reviewerId: undefined })).ok);
+    assert((await allowCommand(ctx, task.projectId, "npm run e2e")).ok);
+    await settle();
+
+    expect(launched[1].input.prompt).toBe("The task was changed while you were working on it. It now reads:\n\nTask: Paginate by cursor\n\n`npm run e2e` is allowed now. Carry on with the task.");
+  });
+
+  it("withdraws a review asked for when the work changes", async () => {
+    const { id, reviewer } = await taskWithReviewer(false);
+    await finishFirst();
+    assert((await requestReview(ctx, id, reviewer)).ok);
+    const task = await statusOf(id);
+    assert(task !== undefined);
+
+    assert((await editTask(ctx, id, { projectId: task.projectId, title: "Paginate by cursor", description: undefined, area: task.area, priority: task.priority, assigneeId: task.assigneeId, reviewerId: undefined })).ok);
+
+    expect((await ctx.reviews.findByCompany(companyId)).map((r) => r.state)).toEqual(["withdrawn"]);
+  });
+
   it("stops a run whose task was deleted, throws its work away, and writes nothing more for it", async () => {
     const id = await oneTask();
     await settle();
@@ -306,7 +335,8 @@ describe("the work supervisor", () => {
     await settle();
 
     expect(launched[0].stopped).toBe(true);
-    expect(discarded).toEqual([id]);
+    // once when deleted, and again once the agent has left the folder
+    expect(discarded).toEqual([id, id]);
     await expect(ctx.runSteps.findByTask(companyId, id, 10)).resolves.toEqual([]);
     await expect(ctx.runs.findByCompany(companyId)).resolves.toEqual([]);
   });

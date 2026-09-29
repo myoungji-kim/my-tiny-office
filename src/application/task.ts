@@ -99,7 +99,9 @@ export function editTask(
     const edited = taskDomain.editTask(task, details, assignee, ctx.now());
     if (!edited.ok) return edited;
     await ctx.tasks.save(edited.task);
-    return { ok: true, value: { task: edited.task }, events: [] };
+    // a review asked for is of the work as it was
+    const events = task.status === "working" ? await withdrawReviewsOn(ctx, task.companyId, [task.id]) : [];
+    return { ok: true, value: { task: edited.task }, events };
   });
 }
 

@@ -7,7 +7,7 @@ const CWD = "C:\\code\\pay\\.worktrees\\t1";
 
 describe("launchArgs", () => {
   it("is the launch SECURITY.md measured, with each allowed command for both shells", () => {
-    expect(launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false })).toEqual([
+    expect(launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32")).toEqual([
       "-p",
       "--output-format",
       "stream-json",
@@ -31,6 +31,12 @@ describe("launchArgs", () => {
     ]);
   });
 
+  it("gives commands only to Bash on macOS and Linux", () => {
+    const args = launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "darwin");
+    expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash");
+    expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**) Edit(./**) Write(./**) Bash(npm test)");
+  });
+
   it("gives a reviewer only the tools that read, whatever the project allows", () => {
     const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: true });
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Glob,Grep");
@@ -40,7 +46,7 @@ describe("launchArgs", () => {
   });
 
   it("lets the Atlassian connector in by name only, in a project that uses it", () => {
-    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false });
+    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
     const allowed = args[args.indexOf("--allowedTools") + 1].split(" ");
     expect(args).not.toContain("--strict-mcp-config");
     // and reads no settings source, so a folder's .mcp.json never starts
@@ -53,7 +59,7 @@ describe("launchArgs", () => {
   });
 
   it("gives the chosen plugins and their skills to the work, never to a reviewer", () => {
-    const args = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail", "C:/run/my-tiny-office-skills"], memoryFile: "m.md", resume: undefined, readOnly: false });
+    const args = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail", "C:/run/my-tiny-office-skills"], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
     expect(args).not.toContain("--disable-slash-commands");
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash,PowerShell,Skill");
     expect(args[args.indexOf("--allowedTools") + 1].split(" ")).toContain("Skill");

@@ -96,4 +96,18 @@ describe("letGo", () => {
     assert((await pickUpWork(ctx, companyId)).ok);
     await expect(ctx.tasks.findById(work.value.task.id)).resolves.toMatchObject({ status: "backlog" });
   });
+
+  it("frees work of theirs that waits for approval, so it does not wait for them", async () => {
+    const mocha = await hireEmployee(ctx, { companyId, name: "모카", species: "cat", roleId: await firstRole(ctx, companyId) });
+    assert(mocha.ok);
+    const project = await createProject(ctx, { companyId, name: "pay", priority: "normal", folder: "/code/pay" });
+    assert(project.ok && (await startProject(ctx, project.value.project.id)).ok);
+    const work = await createTask(ctx, { companyId, projectId: project.value.project.id, title: "Paginate", priority: "normal", assigneeId: mocha.value.employee.id });
+    assert(work.ok);
+    await ctx.tasks.save({ ...work.value.task, status: "approval" });
+
+    assert((await letGo(ctx, mocha.value.employee.id)).ok);
+
+    await expect(ctx.tasks.findById(work.value.task.id)).resolves.toMatchObject({ status: "approval", assigneeId: undefined });
+  });
 });
