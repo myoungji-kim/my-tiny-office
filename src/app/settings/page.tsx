@@ -1,18 +1,20 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ClaudeChecks } from "../../components/claude-checks";
+import { isReady } from "../../application/runtime-status";
+import { CheckRows, ClaudeChecks, type Row } from "../../components/claude-checks";
 import { Head } from "../../components/head";
 import { Icon } from "../../components/icons";
-import { RecheckButton } from "../../components/recheck-button";
+import { ConnectorCheckButton, RecheckButton } from "../../components/recheck-button";
 import { CopyButton, DataActions, DeleteCompany, LanguagePicker, WorkPicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
 import { WidthPicker } from "../../components/width-picker";
 import { toCompanyId } from "../../domain/ids";
-import { getDictionary } from "../../i18n";
+import { getDictionary, type Dictionary } from "../../i18n";
 import { getCompanyFiles } from "../../infrastructure/persistence/company-files";
+import { isAtlassianServer } from "../../infrastructure/runtime/connectors";
 import pkg from "../../../package.json";
-import { companyScreen, param, workPaused, type SearchParams } from "../screen-data";
+import { checkedConnectors, companyScreen, param, workPaused, type SearchParams } from "../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +34,30 @@ function ScopeRow({ kind, text }: { readonly kind: string; readonly text: string
   );
 }
 
+const whenText = (locale: string, at: number) =>
+  new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(at);
+
+// a connector as the account names it, without the prefix every claude.ai one has
+const serverName = (server: string) => server.replace(/^claude_ai_/, "").replace(/_/g, " ");
+
+// Only Atlassian is used; the rest are named so the user sees what the account has.
+function connectorRows(servers: readonly string[] | undefined, w: Dictionary["settings"]): Row[] {
+  if (servers === undefined) return [{ icon: "wait", title: w.toolsUnchecked, detail: w.toolsUncheckedWhy }];
+  if (servers.length === 0) return [{ icon: "wait", title: w.toolsNone, detail: w.toolsNoneWhy }];
+  return servers.map((s) => ({
+    icon: isAtlassianServer(s) ? "ok" : "wait",
+    title: serverName(s),
+    detail: isAtlassianServer(s) ? w.toolUse : /github/i.test(s) ? w.toolLater : w.toolUnused,
+  }));
+}
+
 export default async function SettingsPage({ searchParams }: { searchParams: SearchParams }) {
   const { locale, office, status, company } = await companyScreen();
   const t = getDictionary(locale);
   const w = t.settings;
   const guide = (await param(searchParams, "view")) === "safety";
   const path = getCompanyFiles().pathOf(toCompanyId(company.id));
+  const connectors = checkedConnectors();
 
   const shell = (head: ReactNode, body: ReactNode) => (
     <Shell locale={locale} status={status} companies={office.companies} company={company} employees={office.employees} screen="settings" head={head}>
@@ -113,6 +133,20 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
               {w.guideOpen}
             </Link>
           </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-hd">
+          <h2>{w.toolsTitle}</h2>
+          <p>{w.toolsWhy}</p>
+        </div>
+        <div className="panel-bd">
+          <CheckRows rows={connectorRows(connectors?.servers, w)} words={t.claude} />
+          <div className="recheck">
+            <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} failed={w.toolsFailed} disabled={!isReady(status)} />
+          </div>
+          <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
         </div>
       </div>
 

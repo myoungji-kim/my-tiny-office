@@ -26,7 +26,7 @@ export interface ClaudeWords {
   readonly stoppedWhy: string;
 }
 
-interface Row {
+export interface Row {
   readonly icon: "ok" | "bad" | "wait";
   readonly title: string;
   readonly detail?: string;
@@ -84,9 +84,13 @@ function Command({ command, w }: { readonly command: string; readonly w: ClaudeW
 }
 
 export function ClaudeChecks({ status, words }: { readonly status: ClaudeCodeStatus; readonly words: ClaudeWords }) {
+  return <CheckRows rows={rowsFor(status, words)} words={words} />;
+}
+
+export function CheckRows({ rows, words }: { readonly rows: readonly Row[]; readonly words: ClaudeWords }) {
   return (
     <div>
-      {rowsFor(status, words).map((row) => (
+      {rows.map((row) => (
         <div key={row.title}>
           <div className="check">
             <span className={`c-ic ${row.icon}`}>

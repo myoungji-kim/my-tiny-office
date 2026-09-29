@@ -7,7 +7,7 @@ import type { Locale } from "../i18n";
 import { Icon } from "./icons";
 import { ProjectDialog } from "./project-dialog";
 
-export function NewProjectButton({ locale, companyId, label }: { readonly locale: Locale; readonly companyId: string; readonly label: string }) {
+export function NewProjectButton({ locale, companyId, label, atlassianMissing }: { readonly locale: Locale; readonly companyId: string; readonly label: string; readonly atlassianMissing: boolean }) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   return (
@@ -16,7 +16,7 @@ export function NewProjectButton({ locale, companyId, label }: { readonly locale
         {Icon.plus}
         <span>{label}</span>
       </button>
-      {open && <ProjectDialog locale={locale} companyId={companyId} onClose={close} />}
+      {open && <ProjectDialog locale={locale} companyId={companyId} atlassianMissing={atlassianMissing} onClose={close} />}
     </>
   );
 }

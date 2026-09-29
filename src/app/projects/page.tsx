@@ -8,7 +8,7 @@ import { Prio, ProjectMark } from "../../components/project-marks";
 import { Shell } from "../../components/shell";
 import { PRIORITY_RANK, type ProjectStatus } from "../../domain/project";
 import { getDictionary } from "../../i18n";
-import { companyScreen, param, type SearchParams } from "../screen-data";
+import { atlassianMissing, companyScreen, param, type SearchParams } from "../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +43,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Sea
         <Head
           title={w.title}
           sub={w.headSub(office.projects.filter((p) => p.status === "active").length, office.tasks.filter((x) => x.status === "approval").length)}
-          right={<NewProjectButton locale={locale} companyId={company.id} label={w.newProject} />}
+          right={<NewProjectButton locale={locale} companyId={company.id} label={w.newProject} atlassianMissing={atlassianMissing()} />}
           tabs={FILTERS.map((f) => (
             <Link key={f} className="tab" role="tab" aria-selected={f === filter} href={`/projects?filter=${f}`}>
               <ProjectMark status={f} />

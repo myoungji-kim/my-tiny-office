@@ -1,9 +1,15 @@
 import { isAtlassianWrite, type AtlassianWrite } from "../../domain/project";
 
 // The Atlassian connector of the user's Claude account, as Claude Code names
-// its tools. Measured against the tools it offers (SECURITY.md §8): a tool on
+// its tools: mcp__<server>__<tool>. The server is this account's, as the
+// connector check found it, or the one measured until a check has run. The
+// tools were measured against what it offers (SECURITY.md §8): a tool on
 // neither list is never allowed.
-const ATLASSIAN = "mcp__claude_ai_Atlassian_Rovo__";
+const MEASURED_SERVER = "claude_ai_Atlassian_Rovo";
+const TOOL = /^mcp__([A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)__([A-Za-z0-9_]+)$/;
+
+export const isAtlassianServer = (server: string): boolean => /atlassian/i.test(server);
+export const atlassianServer = (servers: readonly string[] | undefined): string => servers?.find(isAtlassianServer) ?? MEASURED_SERVER;
 
 const READS = [
   "atlassianUserInfo",
@@ -43,11 +49,12 @@ const WRITES: Readonly<Record<AtlassianWrite, readonly string[]>> = {
 };
 
 // The tools a connector project's session may use: every read, and the writes it allows.
-export const atlassianTools = (writes: readonly AtlassianWrite[]): string[] => [...READS, ...writes.flatMap((w) => WRITES[w])].map((t) => ATLASSIAN + t);
+export const atlassianTools = (writes: readonly AtlassianWrite[], server: string): string[] =>
+  [...READS, ...writes.flatMap((w) => WRITES[w])].map((t) => `mcp__${server}__${t}`);
 
 export function writeOf(tool: string): AtlassianWrite | undefined {
-  if (!tool.startsWith(ATLASSIAN)) return undefined;
-  const name = tool.slice(ATLASSIAN.length);
+  const [, server, name] = TOOL.exec(tool) ?? [];
+  if (server === undefined || !isAtlassianServer(server)) return undefined;
   const found = Object.entries(WRITES).find(([, tools]) => tools.includes(name))?.[0];
   return isAtlassianWrite(found) ? found : undefined;
 }

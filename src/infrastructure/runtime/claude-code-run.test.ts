@@ -32,7 +32,7 @@ describe("launchArgs", () => {
   });
 
   it("gives a reviewer only the tools that read, whatever the project allows", () => {
-    const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"] }, memoryFile: "m.md", resume: undefined, readOnly: true });
+    const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, memoryFile: "m.md", resume: undefined, readOnly: true });
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Glob,Grep");
     expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**)");
     // and no connector, even in a project that uses one
@@ -40,7 +40,7 @@ describe("launchArgs", () => {
   });
 
   it("lets the Atlassian connector in by name only, in a project that uses it", () => {
-    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"] }, memoryFile: "m.md", resume: undefined, readOnly: false });
+    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, memoryFile: "m.md", resume: undefined, readOnly: false });
     const allowed = args[args.indexOf("--allowedTools") + 1].split(" ");
     expect(args).not.toContain("--strict-mcp-config");
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash,PowerShell,ToolSearch");

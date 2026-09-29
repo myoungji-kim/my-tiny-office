@@ -27,6 +27,7 @@ export function ProjectControls({
   memories,
   ready,
   editFirst,
+  atlassianMissing,
 }: {
   readonly locale: Locale;
   readonly companyId: string;
@@ -39,6 +40,7 @@ export function ProjectControls({
   readonly ready: boolean;
   // the notice's 폴더 고르기 arrives with the dialog open
   readonly editFirst: boolean;
+  readonly atlassianMissing: boolean;
 }) {
   const t = getDictionary(locale);
   const w = t.projects;
@@ -90,7 +92,7 @@ export function ProjectControls({
         </button>
       )}
 
-      {open === "edit" && <ProjectDialog locale={locale} companyId={companyId} edit={project} onClose={close} />}
+      {open === "edit" && <ProjectDialog locale={locale} companyId={companyId} edit={project} atlassianMissing={atlassianMissing} onClose={close} />}
       {open === "hold" && (
         <StepDialog
           heading={w.holdTitle}

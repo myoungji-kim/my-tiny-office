@@ -5,8 +5,10 @@ import { join } from "node:path";
 import type { AgentEvent, AgentRuntime, LaunchInput } from "../../application/agent-runtime";
 import type { AtlassianWrite } from "../../domain/project";
 import { stepDetail, type StepKind } from "../../domain/run";
+import { resolveDataDirectory } from "../persistence/data-directory";
+import { readSettings } from "../persistence/settings";
 import { findExecutable, startProcess } from "../process/run";
-import { atlassianTools, writeOf, writeShown } from "./connectors";
+import { atlassianServer, atlassianTools, writeOf, writeShown } from "./connectors";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
 const MAX_BUDGET_USD = "2";
@@ -17,7 +19,7 @@ const isSessionId = (value: unknown): value is string => typeof value === "strin
 // Exactly the launch SECURITY.md measured; anything added here is measured first.
 export function launchArgs(input: {
   readonly commands: readonly string[];
-  readonly atlassian: { readonly writes: readonly AtlassianWrite[] } | undefined;
+  readonly atlassian: { readonly writes: readonly AtlassianWrite[]; readonly server: string } | undefined;
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
@@ -28,7 +30,7 @@ export function launchArgs(input: {
   const tools = input.readOnly ? "Read,Glob,Grep" : "Read,Edit,Write,Glob,Grep,Bash,PowerShell" + (connector === undefined ? "" : ",ToolSearch");
   const allowed = input.readOnly
     ? ["Read(./**)"]
-    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes)])];
+    : ["Read(./**)", "Edit(./**)", "Write(./**)", ...input.commands.flatMap((c) => [`Bash(${c})`, `PowerShell(${c})`]), ...(connector === undefined ? [] : ["ToolSearch", ...atlassianTools(connector.writes, connector.server)])];
   const args = [
     "-p",
     "--output-format",
@@ -148,7 +150,7 @@ export const claudeCodeRuntime: AgentRuntime = {
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string; input: Json }>();
-    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian: input.atlassian && { ...input.atlassian, server: atlassianServer(readSettings(resolveDataDirectory()).connectors?.servers) }, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

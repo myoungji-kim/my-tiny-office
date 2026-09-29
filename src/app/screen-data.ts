@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { resolveLocale, type Locale } from "../i18n";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
+import { isAtlassianServer } from "../infrastructure/runtime/connectors";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 import { loadOffice } from "../server/view-model";
 
@@ -13,6 +14,15 @@ export async function currentLocale(): Promise<Locale> {
 }
 
 export const workPaused = (): boolean => readSettings(getCompanyFiles().directory).workPaused === true;
+
+// What the last connector check found here, if one has run.
+export const checkedConnectors = () => readSettings(getCompanyFiles().directory).connectors;
+
+// A project can turn Atlassian on either way; this says the account was checked and has none.
+export const atlassianMissing = (): boolean => {
+  const checked = checkedConnectors();
+  return checked !== undefined && !checked.servers.some(isAtlassianServer);
+};
 
 export async function screenData() {
   const locale = await currentLocale();

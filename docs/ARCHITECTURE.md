@@ -497,7 +497,10 @@ project and resumes the run. SECURITY.md §3.
 A project that uses the Atlassian connector (`Project.atlassian`) launches
 without `--strict-mcp-config`, with `ToolSearch`, and allows the connector's
 read tools and the writes the project allows by name
-(`src/infrastructure/runtime/connectors.ts`). The domain knows writes by kind
+(`src/infrastructure/runtime/connectors.ts`), under the Atlassian server the
+connector check found for this computer's account
+(`src/infrastructure/runtime/connector-check.ts`, kept in `settings.json`).
+The domain knows writes by kind
 (`AtlassianWrite`), never by tool name. A write it does not allow is denied
 the same way, read from the call as where it goes and what it says, and blocks
 the task as `writeNotAllowed`; allowing it (`allowWrite`) adds the kind to the

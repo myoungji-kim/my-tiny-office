@@ -1,43 +1,56 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
-import { recheckClaudeCodeAction } from "../app/actions";
+import { checkConnectorsAction, recheckClaudeCodeAction } from "../app/actions";
 import type { ClaudeCodeStatus } from "../application/runtime-status";
 
-// 다시 확인 asks Claude Code again and re-renders with the answer.
-export function RecheckButton({
-  label,
-  busyLabel,
-  size = "sm",
-  onChecked,
-}: {
-  readonly label: string;
-  readonly busyLabel: string;
-  readonly size?: "sm";
-  readonly onChecked?: (status: ClaudeCodeStatus) => void;
-}) {
+const REFRESH = (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M13.2 7A5.2 5.2 0 1 0 12 11.2" />
+    <path d="M13.4 3.4v3.8h-3.8" />
+  </svg>
+);
+
+// Asks again rather than trusting the last answer, and re-renders with it.
+function RefreshButton({ label, busyLabel, disabled = false, act }: { readonly label: string; readonly busyLabel: string; readonly disabled?: boolean; readonly act: () => Promise<void> }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
     <button
-      className={`btn btn-secondary btn-${size}`}
+      className="btn btn-secondary btn-sm"
       type="button"
-      disabled={pending}
+      disabled={disabled || pending}
       onClick={() =>
         start(async () => {
-          const status = await recheckClaudeCodeAction();
-          onChecked?.(status);
+          await act();
           router.refresh();
         })
       }
     >
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13.2 7A5.2 5.2 0 1 0 12 11.2" />
-        <path d="M13.4 3.4v3.8h-3.8" />
-      </svg>
+      {REFRESH}
       <span>{pending ? busyLabel : label}</span>
     </button>
+  );
+}
+
+// 다시 확인 asks Claude Code again.
+export function RecheckButton({ label, busyLabel, onChecked }: { readonly label: string; readonly busyLabel: string; readonly onChecked?: (status: ClaudeCodeStatus) => void }) {
+  return <RefreshButton label={label} busyLabel={busyLabel} act={async () => onChecked?.(await recheckClaudeCodeAction())} />;
+}
+
+// Asks the account which connectors it has; it takes a short Claude session.
+export function ConnectorCheckButton({ label, busyLabel, failed, disabled }: { readonly label: string; readonly busyLabel: string; readonly failed: string; readonly disabled: boolean }) {
+  const [error, setError] = useState<string | undefined>(undefined);
+  return (
+    <>
+      <RefreshButton label={label} busyLabel={busyLabel} disabled={disabled} act={async () => setError((await checkConnectorsAction()).ok ? undefined : failed)} />
+      {error !== undefined && (
+        <span className="hint" role="alert" style={{ margin: 0 }}>
+          {error}
+        </span>
+      )}
+    </>
   );
 }

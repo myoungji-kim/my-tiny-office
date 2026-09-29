@@ -114,6 +114,18 @@
 
         <div class="panel">
           <div class="panel-hd">
+            <h2 data-t="toolsTitle">연결된 도구</h2>
+            <p data-t="toolsWhy">Claude 계정에 연결해 둔 커넥터예요. 확인하면 이 컴퓨터의 계정에 맞는 이름으로 써요. 직원이 쓰는 건 프로젝트에서 켠 Atlassian뿐이에요.</p>
+          </div>
+          <div class="panel-bd">
+            <div id="tools"></div>
+            <div class="recheck"><button class="btn btn-secondary btn-sm" type="button" id="toolsCheck"></button></div>
+            <p class="hint" id="toolsWhen"></p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
             <h2 data-t="workTitle">업무 시작</h2>
             <p data-t="workWhy">켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.</p>
           </div>
@@ -197,6 +209,12 @@
       title: "설정", headSub: "이 컴퓨터에서 My Tiny Office가 쓰는 것들",
       claudeWhy: "직원은 모두 이걸로 일해요. 로그인은 Claude Code에서 하고, 이 앱은 확인만 해요.",
       installed: "Claude Code 설치됨", loggedIn: "로그인됨", loggedOut: "로그인이 필요해요", loggedOutWhy: "터미널에서 한 번 로그인해요. 브라우저가 열려요.", recheck: "다시 확인", checkedNow: "방금 확인했어요", copy: "복사", copied: "복사했어요",
+      toolsTitle: "연결된 도구", toolsWhy: "Claude 계정에 연결해 둔 커넥터예요. 확인하면 이 컴퓨터의 계정에 맞는 이름으로 써요. 직원이 쓰는 건 프로젝트에서 켠 Atlassian뿐이에요.",
+      toolsUnchecked: "아직 확인하지 않았어요", toolsUncheckedWhy: "확인하면 이 컴퓨터의 Claude 계정에 연결된 커넥터를 찾아요. 그전에는 Atlassian을 기본 이름으로 써요.",
+      toolsNone: "연결된 커넥터가 없어요", toolsNoneWhy: "claude.ai의 설정 › 커넥터에서 연결한 뒤 다시 확인해 주세요.",
+      toolUse: "Jira · Confluence · 프로젝트에서 켜면 써요", toolLater: "연결돼 있어요 · 아직 쓰지 않아요", toolUnused: "쓰지 않아요",
+      toolsCheck: "확인하기", toolsRecheck: "다시 확인", toolsChecking: "확인하는 중…",
+      toolsWhen: (at) => "마지막 확인 " + at + " · 확인할 때 Claude 사용량이 조금 들어요(약 $0.1).", toolsCost: "확인할 때 Claude 사용량이 조금 들어요(약 $0.1).",
       scopeTitle: "직원이 할 수 있는 일", scopeWhy: "모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.",
       guideOpen: "안내 보기", guideTitle: "안전 범위", guideSub: "직원이 이 컴퓨터에서 하는 일과 하지 않는 일",
       brief: {
@@ -260,6 +278,12 @@
       title: "Settings", headSub: "What My Tiny Office uses on this computer",
       claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed", loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", checkedNow: "Checked just now", copy: "Copy", copied: "Copied",
+      toolsTitle: "Connected tools", toolsWhy: "The connectors your Claude account has. Checking lets the app use this account's names for them. Employees use only Atlassian, in a project that turns it on.",
+      toolsUnchecked: "Not checked yet", toolsUncheckedWhy: "Checking finds the connectors this computer's Claude account has. Until then Atlassian is used by its usual name.",
+      toolsNone: "No connectors", toolsNoneWhy: "Connect one in claude.ai under Settings › Connectors, then check again.",
+      toolUse: "Jira · Confluence · used where a project turns it on", toolLater: "Connected · not used yet", toolUnused: "Not used",
+      toolsCheck: "Check", toolsRecheck: "Check again", toolsChecking: "Checking…",
+      toolsWhen: (at) => "Last checked " + at + " · A check uses a little Claude usage (about $0.1).", toolsCost: "A check uses a little Claude usage (about $0.1).",
       scopeTitle: "What employees may do", scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
       guideOpen: "Read the guide", guideTitle: "What is safe", guideSub: "What employees do on this computer, and what they never do",
       brief: {
@@ -397,6 +421,35 @@
     }
   };
   renderWork();
+
+  /* ── connected tools ─────────────────────────────────────────── */
+  // What the account's connectors are, as a short Claude session confirmed
+  // them. settings.html?connectors=unchecked shows the page before any check,
+  // ?connectors=noatlassian an account without Atlassian.
+  const SAMPLE_SERVERS = ["claude_ai_Atlassian_Rovo", "claude_ai_GitHub", "claude_ai_Gmail", "claude_ai_Google_Drive", "claude_ai_Google_Calendar", "claude_ai_Claude_Docs"];
+  const toolsState = new URLSearchParams(location.search).get("connectors");
+  let servers = toolsState === "unchecked" ? null : toolsState === "noatlassian" ? SAMPLE_SERVERS.filter((s) => !/atlassian/i.test(s)) : SAMPLE_SERVERS;
+  const serverName = (s) => s.replace(/^claude_ai_/, "").replace(/_/g, " ");
+  const renderTools = () => {
+    const rows = servers === null
+      ? [{ icon: "wait", title: t().toolsUnchecked, detail: t().toolsUncheckedWhy }]
+      : servers.length === 0
+        ? [{ icon: "wait", title: t().toolsNone, detail: t().toolsNoneWhy }]
+        : servers.map((s) => ({ icon: /atlassian/i.test(s) ? "ok" : "wait", title: serverName(s), detail: /atlassian/i.test(s) ? t().toolUse : /github/i.test(s) ? t().toolLater : t().toolUnused }));
+    document.getElementById("tools").innerHTML = rows.map((c) => checkRow(c, t().copy)).join("");
+    const button = document.getElementById("toolsCheck");
+    button.innerHTML = REFRESH + (servers === null ? t().toolsCheck : t().toolsRecheck);
+    button.disabled = RUNTIME.off;
+    document.getElementById("toolsWhen").textContent = servers === null ? t().toolsCost : t().toolsWhen(lang === "en" ? "Sep 30, 01:12" : "9월 30일 01:12");
+  };
+  renderTools();
+  document.addEventListener("runtimeback", renderTools);
+  document.getElementById("toolsCheck").addEventListener("click", (e) => {
+    const button = e.currentTarget;
+    button.disabled = true;
+    button.innerHTML = REFRESH + t().toolsChecking;
+    setTimeout(() => { servers = servers ?? SAMPLE_SERVERS; renderTools(); }, 900);
+  });
 
   /* ── how wide the app is ─────────────────────────────────────── */
   const widths = document.getElementById("widths");

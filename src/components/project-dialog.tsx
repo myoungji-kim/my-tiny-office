@@ -26,11 +26,14 @@ export function ProjectDialog({
   locale,
   companyId,
   edit,
+  atlassianMissing,
   onClose,
 }: {
   readonly locale: Locale;
   readonly companyId: string;
   readonly edit?: ProjectView;
+  // the connector check ran here and found no Atlassian
+  readonly atlassianMissing: boolean;
   readonly onClose: () => void;
 }) {
   const t = getDictionary(locale);
@@ -279,6 +282,15 @@ export function ProjectDialog({
                 </button>
               </div>
               <span className="hint">{w.toolsHint}</span>
+              {atlassian && atlassianMissing && (
+                <div className="notice notice-warn" style={{ marginTop: 10 }}>
+                  <span className="n-ic">{Icon.alert}</span>
+                  <span className="n-tx">
+                    <b>{w.toolsMissing}</b>
+                    <span>{w.toolsMissingWhy}</span>
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

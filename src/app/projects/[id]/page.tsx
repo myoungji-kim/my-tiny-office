@@ -12,7 +12,7 @@ import { CHECK, PAUSE, Prio, PROJECT_CHIP, ProjectMark } from "../../../componen
 import { Shell } from "../../../components/shell";
 import { getDictionary } from "../../../i18n";
 import { reopenProjectAction, resumeProjectAction, startProjectAction } from "../../project-actions";
-import { companyScreen, param, type SearchParams } from "../../screen-data";
+import { atlassianMissing, companyScreen, param, type SearchParams } from "../../screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +91,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
             </span>
             <div className="head-right">
               <ProjectControls
+                atlassianMissing={atlassianMissing()}
                 key={chooseFolder ? "folder" : "board"}
                 locale={locale}
                 companyId={company.id}

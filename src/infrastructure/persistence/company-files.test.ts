@@ -81,6 +81,13 @@ describe("settings", () => {
     expect(readSettings(directory)).toEqual({});
   });
 
+  it("keeps what the connector check found, and only names a connector could have", () => {
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ connectors: { checkedAt: 5, servers: ["claude_ai_Atlassian_Rovo", "bad name", "a__b", 3] } }));
+    expect(readSettings(directory)).toEqual({ connectors: { checkedAt: 5, servers: ["claude_ai_Atlassian_Rovo"] } });
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ connectors: { servers: [] } }));
+    expect(readSettings(directory)).toEqual({});
+  });
+
   it("round-trips what it writes", () => {
     const lastCompanyId = randomUUID();
     writeSettings(directory, { lastCompanyId, locale: "en" });

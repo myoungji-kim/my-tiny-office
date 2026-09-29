@@ -14,6 +14,7 @@ import { checkName } from "../domain/name";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
+import { checkConnectors } from "../infrastructure/runtime/connector-check";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 import { getWork } from "../infrastructure/work";
 
@@ -75,6 +76,16 @@ export async function setWorkPausedAction(paused: boolean): Promise<void> {
   writeSettings(files.directory, { ...readSettings(files.directory), workPaused: paused === true || undefined });
   void getWork().kick();
   revalidatePath("/", "layout");
+}
+
+// 연결된 도구 › 확인하기: what the account's connectors are, as ToolSearch answered.
+export async function checkConnectorsAction(): Promise<{ readonly ok: boolean }> {
+  const checked = await checkConnectors();
+  if (!checked.ok) return { ok: false };
+  const files = getCompanyFiles();
+  writeSettings(files.directory, { ...readSettings(files.directory), connectors: { checkedAt: Date.now(), servers: checked.servers } });
+  revalidatePath("/", "layout");
+  return { ok: true };
 }
 
 // 다시 확인: asks Claude Code again rather than trusting the last answer.

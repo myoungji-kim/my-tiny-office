@@ -290,6 +290,18 @@ adds `ToolSearch` to `--tools`, and adds to `--allowedTools`:
 Every other connector the account has is seen by the agent, by name, and
 denied. Gmail, Drive and the rest cannot be allowed from any project.
 
+**Which server is Atlassian differs by account.** A connector's tools are
+`mcp__<server>__<tool>`, and the server is the account's own name for it.
+설정 › 연결된 도구 › 확인하기 finds it with a session that can only look:
+`--tools ToolSearch --allowedTools ToolSearch`, `dontAsk`, `--max-budget-usd
+0.5`, in an empty temporary folder, with the same isolation as §2 but for
+`--strict-mcp-config`. It loads one tool of each connector with `select:`,
+and the app keeps the servers that ToolSearch's own `tool_reference` results
+name — never the model's words — in this computer's `settings.json`. Atlassian
+is the server whose name says so; until a check has run, the measured one
+(`claude_ai_Atlassian_Rovo`). Measured: five servers confirmed, 7 turns,
+$0.09. A denied write is read as Atlassian's under any server named so.
+
 Prompt injection (§5) is the risk this adds: an issue or a page can carry
 instructions, and the connector is a way out of the folder. Reads go to the
 user's own Atlassian organisation; writes stop for the user until allowed, so
