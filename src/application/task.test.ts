@@ -174,6 +174,14 @@ describe("approval", () => {
     expect(picked.value.started).toMatchObject([{ id: done.id, assigneeId: mocha.id, changesRequested: "split the retryable failures" }]);
   });
 
+  it("keeps the request it was sent back with, for its conversation", async () => {
+    const { task: done } = await waitingForApproval();
+
+    assert((await sendBack(ctx, done.id, "  split the retryable failures ")).ok);
+
+    await expect(ctx.requests.findByTask(companyId, done.id)).resolves.toEqual([{ companyId, taskId: done.id, at: now, text: "split the retryable failures" }]);
+  });
+
   it("holds and resumes it as finished work", async () => {
     const { task: done } = await waitingForApproval();
 

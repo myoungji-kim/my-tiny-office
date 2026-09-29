@@ -7,7 +7,7 @@ import type { Area, Memory } from "../domain/memory";
 import type { Role, Team } from "../domain/organisation";
 import type { Project } from "../domain/project";
 import type { Agent, Run, RunStep } from "../domain/run";
-import type { Task } from "../domain/task";
+import type { Task, TaskRequest } from "../domain/task";
 
 import type { TransactionRunner } from "./context";
 import type {
@@ -23,6 +23,7 @@ import type {
   RunRepository,
   RunStepRepository,
   TaskRepository,
+  TaskRequestRepository,
   TeamRepository,
 } from "./repositories";
 
@@ -112,6 +113,18 @@ export function createInMemoryRunRepository(): RunRepository {
     },
     async save(run) {
       runs.set(run.id, run);
+    },
+  };
+}
+
+export function createInMemoryTaskRequestRepository(): TaskRequestRepository {
+  const requests: TaskRequest[] = [];
+  return {
+    async add(request) {
+      requests.push(request);
+    },
+    async findByTask(companyId, taskId) {
+      return requests.filter((r) => r.companyId === companyId && r.taskId === taskId).sort((a, b) => a.at - b.at);
     },
   };
 }

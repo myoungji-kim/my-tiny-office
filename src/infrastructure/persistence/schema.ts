@@ -324,6 +324,23 @@ export const runs = sqliteTable(
   ],
 );
 
+// What the user asked of the work when they sent it back, kept as said.
+export const taskRequests = sqliteTable(
+  "task_requests",
+  {
+    id: text("id").primaryKey().notNull(),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id),
+    at: integer("at").notNull(),
+    text: text("text").notNull(),
+  },
+  (table) => [index("idx_task_requests_task").on(table.taskId, table.at)],
+);
+
 export const runSteps = sqliteTable(
   "run_steps",
   {

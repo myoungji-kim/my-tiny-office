@@ -56,6 +56,14 @@ export interface Task {
   readonly appliedAt: Timestamp | undefined;
 }
 
+// What the user asked for when they sent the work back, as they wrote it.
+export interface TaskRequest {
+  readonly companyId: CompanyId;
+  readonly taskId: TaskId;
+  readonly at: Timestamp;
+  readonly text: string;
+}
+
 type Transition<TEvent, TFailure extends string> =
   | { readonly ok: true; readonly task: Task; readonly events: readonly [TEvent] }
   | { readonly ok: false; readonly reason: TFailure };

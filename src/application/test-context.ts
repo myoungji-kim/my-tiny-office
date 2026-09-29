@@ -14,6 +14,7 @@ import {
   createInMemoryRunRepository,
   createInMemoryRunStepRepository,
   createInMemoryTaskRepository,
+  createInMemoryTaskRequestRepository,
   createInMemoryTeamRepository,
   withoutTransaction,
 } from "./in-memory-repositories";
@@ -36,6 +37,7 @@ export function createTestContext(clock: () => number = () => 1_700_000_000_000)
     agents: createInMemoryAgentRepository(),
     runs: createInMemoryRunRepository(),
     runSteps: createInMemoryRunStepRepository(),
+    requests: createInMemoryTaskRequestRepository(),
     now: clock,
     newId: () => `id-${(counter += 1)}`,
     withTransaction: withoutTransaction,

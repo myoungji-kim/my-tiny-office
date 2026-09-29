@@ -1,11 +1,11 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 
-import type { AgentRepository, RunRepository, RunStepRepository } from "../../application/repositories";
+import type { AgentRepository, RunRepository, RunStepRepository, TaskRequestRepository } from "../../application/repositories";
 import { toAgentId, toCompanyId, toEmployeeId, toMemoryId, toRunId, toTaskId } from "../../domain/ids";
 import type { Agent, Run, RunEnd, RunStep } from "../../domain/run";
 
 import type { AppDatabase } from "./database";
-import { agents, runs, runSteps } from "./schema";
+import { agents, runs, runSteps, taskRequests } from "./schema";
 
 export function createSqliteAgentRepository(db: AppDatabase): AgentRepository {
   return {
@@ -118,6 +118,23 @@ export function createSqliteRunStepRepository(db: AppDatabase, newId: () => stri
             detail: row.detail,
           }),
         );
+    },
+  };
+}
+
+export function createSqliteTaskRequestRepository(db: AppDatabase, newId: () => string): TaskRequestRepository {
+  return {
+    async add(request) {
+      db.insert(taskRequests).values({ id: newId(), ...request }).run();
+    },
+    async findByTask(companyId, taskId) {
+      return db
+        .select()
+        .from(taskRequests)
+        .where(and(eq(taskRequests.companyId, companyId), eq(taskRequests.taskId, taskId)))
+        .orderBy(asc(taskRequests.at), asc(taskRequests.id))
+        .all()
+        .map((row) => ({ companyId: toCompanyId(row.companyId), taskId: toTaskId(row.taskId), at: row.at, text: row.text }));
     },
   };
 }

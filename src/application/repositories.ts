@@ -7,7 +7,7 @@ import type { Role, Team } from "../domain/organisation";
 import type { Review } from "../domain/review";
 import type { Project } from "../domain/project";
 import type { Agent, Run, RunStep } from "../domain/run";
-import type { Task } from "../domain/task";
+import type { Task, TaskRequest } from "../domain/task";
 
 export interface CompanyRepository {
   findById(id: CompanyId): Promise<Company | undefined>;
@@ -77,6 +77,12 @@ export interface RunRepository {
   findById(id: RunId): Promise<Run | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Run[]>;
   save(run: Run): Promise<void>;
+}
+
+// A task's requests are only ever added to, and read oldest first.
+export interface TaskRequestRepository {
+  add(request: TaskRequest): Promise<void>;
+  findByTask(companyId: CompanyId, taskId: TaskId): Promise<readonly TaskRequest[]>;
 }
 
 // What a run reported is only ever added to; a task's page reads the newest.

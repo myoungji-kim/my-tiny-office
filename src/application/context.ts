@@ -13,6 +13,7 @@ import type {
   RoleRepository,
   RunRepository,
   RunStepRepository,
+  TaskRequestRepository,
   TaskRepository,
   TeamRepository,
 } from "./repositories";
@@ -33,6 +34,7 @@ export interface AppContext {
   readonly agents: AgentRepository;
   readonly runs: RunRepository;
   readonly runSteps: RunStepRepository;
+  readonly requests: TaskRequestRepository;
   readonly now: () => Timestamp;
   readonly newId: () => string;
   readonly withTransaction: TransactionRunner;

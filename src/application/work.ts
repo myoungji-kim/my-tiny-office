@@ -25,6 +25,7 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], commands: read
     "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
     "You cannot delete files, and no command is there for it. To remove one, end your final message with a line `Remove: <path from this folder>` for each; they are removed when you finish.",
     "",
+    "Begin your final message with one sentence that sums up what you did; the rest follows it.",
     "If this task showed you something about this project that later tasks should know — a convention, a command, a pitfall — end your final message with at most two lines, each `Worth remembering: <one sentence>`, written in the language the task is written in. Leave them out when nothing stands out.",
     ...taught(own),
   ];

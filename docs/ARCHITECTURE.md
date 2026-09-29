@@ -216,6 +216,7 @@ Run                one launch of an agent on a task
 └── endedAt?
 
 RunStep            what a run reported doing: read · edit · run · say
+TaskRequest        what the user asked for when sending the work back, as written
 
 Area          the company's own list; seven to start, named by the dictionary
 Memory        expertise (an area) · style · company (no employee)
@@ -384,7 +385,14 @@ everything it has been taught, numbered.
 
 Approving commits the worktree to the task's branch and removes the worktree
 (`approveTask`); sending back queues the task for the same person, whose next
-run resumes the session with the request.
+run resumes the session with the request, and keeps the request as written
+(`task_requests`).
+
+A task's conversation (`src/server/task-work.ts`) is put together when the
+page is read, oldest first: each run's last `say` is its report, each settled
+review its comments, each request the user's words. The prompt asks a report
+to open with one sentence that sums it up, which is what a folded message
+shows.
 
 A review is a run too. While a review is queued or under way nobody runs on
 the task's work (`holdsTheWork`); when it is under way the supervisor

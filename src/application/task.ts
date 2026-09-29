@@ -169,7 +169,15 @@ export async function settleSuggestion(ctx: AppContext, runId: RunId, text: stri
 }
 
 export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
-  changeTask(ctx, taskId, (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()));
+  changeTask(
+    ctx,
+    taskId,
+    (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()),
+    async (task) => {
+      await ctx.requests.add({ companyId: task.companyId, taskId: task.id, at: ctx.now(), text: reason.trim() });
+      return [];
+    },
+  );
 
 // Work that stops being in progress takes its open review with it.
 export const holdTask = (ctx: AppContext, taskId: TaskId, reason: string) =>
