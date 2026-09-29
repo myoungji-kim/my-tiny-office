@@ -252,9 +252,10 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
 
   // A write shows where it would go and what it would say, as it would be posted.
   const write = blocker?.kind === "writeNotAllowed" ? blocker : undefined;
+  // keyed, since which notice leads changes as the work moves on
   const now =
     task.status === "done" && task.publishedUrl === undefined && project.folder !== undefined ? (
-      <div className="notice tk-now">
+      <div key="publish" className="notice tk-now">
         <span className="n-ic">{Icon.yes}</span>
         <span className="n-tx">
           <b>{w.tk.publishNowTitle}</b>
@@ -265,7 +266,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         </span>
       </div>
     ) : write !== undefined ? (
-      <div className="notice notice-bad tk-now">
+      <div key="write" className="notice notice-bad tk-now">
         <span className="n-ic">{Icon.pen}</span>
         <span className="n-tx">
           <b>{w.writeStopped(w.writes[write.write])}</b>
@@ -285,7 +286,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         </span>
       </div>
     ) : blocker !== undefined && (
-      <div className="notice notice-bad tk-now">
+      <div key="blocker" className="notice notice-bad tk-now">
         <span className="n-ic">{blocker.kind === "commandNotAllowed" ? RUN : Icon.plug}</span>
         <span className="n-tx">
           <b>{blocker.kind === "commandNotAllowed" ? withCode(w.runStopped, blocker.command) : blockerText(task, w)}</b>
