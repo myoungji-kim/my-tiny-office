@@ -18,7 +18,8 @@ export function withCode(template: string, code: string): ReactNode {
 export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNode {
   const b = task.blocker;
   if (b === undefined) return undefined;
-  if (b.kind === "commandNotAllowed") return withCode(w.commandBlocked, b.command);
+  // the card names the reason; the command itself is on the task's page
+  if (b.kind === "commandNotAllowed") return w.commandBlocked;
   return b.kind === "disconnected" ? w.agentLost : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
 }
 

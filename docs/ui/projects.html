@@ -684,7 +684,7 @@
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
       lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.", reconnect: "다시 연결", copy: "복사",
-      runBlocked: (c) => "허용되지 않은 명령 · <code>" + c + "</code>",
+      runBlocked: "허용되지 않은 명령",
       runStopped: (c) => c + " 실행 전에 멈췄어요",
       runWhy: (n) => "이 프로젝트에서 허용한 명령이 아니에요. 허용하면 이 프로젝트의 업무는 앞으로 이 명령을 쓸 수 있고, " + n + subjectParticle(n) + " 이어서 해요.",
       allowRun: "허용하고 이어서",
@@ -694,7 +694,7 @@
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
         resumeHint: "멈춘 뒤에는 터미널에서 이 세션을 이어 볼 수 있어요.", noReview: "아직 검토가 없어요.", noChanges: "아직 바뀐 것이 없어요.",
         suggestTitle: "기억해 둘 만한 것", suggestWhy: (n) => n + subjectParticle(n) + " 이번 업무에서 알게 된 거예요. 기억시키면 다음 업무부터 들고 가요.", teachIt: "기억시키기", passIt: "넘기기",
-        said: (n) => n + "의 말", saidAs: "보는 방식", formatted: "서식", plain: "텍스트", notStarted: "아직 아무도 시작하지 않았어요.",
+        said: (n) => n + "의 말", saidNow: (n) => n + subjectParticle(n) + " 지금 하는 말", saidBefore: (n) => n + subjectParticle(n) + " 멈추기 전에 한 말", saidAs: "보는 방식", formatted: "서식", plain: "텍스트", notStarted: "아직 아무도 시작하지 않았어요.",
         applyWhat: (b) => "승인하면 <code>" + b + "</code> 브랜치에 커밋해요. push는 하지 않아요.",
         applied: (b, c) => "<code>" + b + "</code> 브랜치에 커밋했어요 · <code>" + c + "</code>",
         steps: { read: "읽는 중", edit: "수정", run: "실행" },
@@ -812,7 +812,7 @@
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
       lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.", reconnect: "Reconnect", copy: "Copy",
-      runBlocked: (c) => "Command not allowed · <code>" + c + "</code>",
+      runBlocked: "Command not allowed",
       runStopped: (c) => "Stopped before running " + c,
       runWhy: (n) => "This project does not allow it. Allowing it lets every task here run it, and " + n + " carries on.",
       allowRun: "Allow and carry on",
@@ -822,7 +822,7 @@
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
         resumeHint: "Once it stops, you can open this session in a terminal.", noReview: "No review yet.", noChanges: "Nothing has changed yet.",
         suggestTitle: "Worth remembering", suggestWhy: (n) => n + " noticed this on the task. Teach it and they carry it from the next task on.", teachIt: "Teach this", passIt: "Pass",
-        said: (n) => n + " says", saidAs: "How to show it", formatted: "Formatted", plain: "Plain text", notStarted: "Nobody has started it yet.",
+        said: (n) => n + " says", saidNow: (n) => n + ", while working", saidBefore: (n) => n + ", before stopping", saidAs: "How to show it", formatted: "Formatted", plain: "Plain text", notStarted: "Nobody has started it yet.",
         applyWhat: (b) => "Approving commits to the <code>" + b + "</code> branch. Nothing is pushed.",
         applied: (b, c) => "Committed to <code>" + b + "</code> · <code>" + c + "</code>",
         steps: { read: "Reading", edit: "Edited", run: "Ran" },
@@ -943,7 +943,8 @@
 
   // What the card says under the title, if anything: an agent that stopped,
   // a colleague looking at it, or a suggestion that one should.
-  const blockedText = (task) => (task.blocked.kind === "command" ? t().runBlocked(task.blocked.run) : t().agentLost);
+  // a card names the reason; the command itself is on the task's page
+  const blockedText = (task) => (task.blocked.kind === "command" ? t().runBlocked : t().agentLost);
 
   function noteFor(task) {
     if (task.blocked) return { cls: "blocked", svg: icon.none, text: blockedText(task) };
@@ -1082,7 +1083,7 @@
       : "";
     const now = working && task.steps?.length ? panel(k.now, stepRow(task.steps[0], true)) : "";
     // What they said reads formatted; the plain text is one choice away, and copyable.
-    const said = task.said && who ? `<div class="panel said-card"><div class="panel-hd said-hd"><span class="said-av" data-av="${who.id}" data-av-size="32"></span><h2>${k.said(who.name)}</h2>
+    const said = task.said && who ? `<div class="panel said-card"><div class="panel-hd said-hd"><span class="said-av" data-av="${who.id}" data-av-size="32"></span><h2>${task.blocked ? k.saidBefore(who.name) : task.status === "working" ? k.saidNow(who.name) : k.said(who.name)}</h2>
           <div class="view-sw" role="radiogroup" aria-label="${k.saidAs}"><button type="button" role="radio" aria-checked="true" data-said="md" aria-label="${k.formatted}" title="${k.formatted}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.6 8s2.4-4 6.4-4 6.4 4 6.4 4-2.4 4-6.4 4-6.4-4-6.4-4z"/><circle cx="8" cy="8" r="1.7"/></svg></button><button type="button" role="radio" aria-checked="false" data-said="raw" aria-label="${k.plain}" title="${k.plain}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></svg></button></div></div>
         <div class="panel-bd said-bd"><button class="copy-ic" type="button" data-copy-said aria-label="${t().copy}" title="${t().copy}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.2V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.2"/></svg></button><div class="said-text"><div class="md"><p>${tx(task.said)}</p></div><pre class="said-raw" hidden>${tx(task.said)}</pre></div></div></div>` : "";
 

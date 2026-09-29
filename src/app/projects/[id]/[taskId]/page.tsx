@@ -114,7 +114,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
     );
   const saidPanel =
     said === undefined || who === undefined ? undefined : (
-      <SaidPanel locale={locale} name={who.name} species={who.species} text={said.detail} />
+      <SaidPanel locale={locale} name={who.name} species={who.species} text={said.detail} when={work?.saidWhen} />
     );
   const changes =
     task.status === "backlog" || work === undefined ? undefined : (

@@ -32,7 +32,20 @@ const COPIED_MS = 1_500;
 
 // What the employee said at the end, read like a reply: across the page,
 // formatted or as the text they wrote, a click away from the clipboard.
-export function SaidPanel({ locale, name, species, text }: { readonly locale: Locale; readonly name: string; readonly species: string; readonly text: string }) {
+export function SaidPanel({
+  locale,
+  name,
+  species,
+  text,
+  when,
+}: {
+  readonly locale: Locale;
+  readonly name: string;
+  readonly species: string;
+  readonly text: string;
+  // a run's closing report, words while it runs, or the last before it stopped
+  readonly when: "final" | "live" | "stopped" | undefined;
+}) {
   const t = getDictionary(locale);
   const w = t.projects.tk;
   const [plain, setPlain] = useState(false);
@@ -50,7 +63,7 @@ export function SaidPanel({ locale, name, species, text }: { readonly locale: Lo
         <span className="said-av">
           <Sprite species={species} size={32} />
         </span>
-        <h2>{w.said(name)}</h2>
+        <h2>{when === "live" ? w.saidNow(name) : when === "stopped" ? w.saidBefore(name) : w.said(name)}</h2>
         <div className="view-sw" role="radiogroup" aria-label={w.saidAs}>
           <button type="button" role="radio" aria-checked={!plain} aria-label={w.formatted} title={w.formatted} onClick={() => setPlain(false)}>
             {PREVIEW}

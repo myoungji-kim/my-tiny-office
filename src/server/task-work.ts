@@ -2,13 +2,15 @@ import { existsSync } from "node:fs";
 
 import { toCompanyId, toTaskId } from "../domain/ids";
 import type { ReviewState, Verdict } from "../domain/review";
-import type { StepKind } from "../domain/run";
+import type { Run, StepKind } from "../domain/run";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { branchOf, changesIn, diffOf, worktreePath, type FileChange } from "../infrastructure/workspace/git";
 
 export interface TaskWork {
   readonly steps: readonly { readonly at: number; readonly kind: StepKind; readonly detail: string }[];
+  // whether the last thing said closed a finished run, is being said now, or came before a stop
+  readonly saidWhen: "final" | "live" | "stopped" | undefined;
   readonly changes: readonly FileChange[];
   readonly sessionId: string | undefined;
   // every memory a run of this task said it drew on
@@ -22,6 +24,12 @@ export interface TaskWork {
 }
 
 const STEPS_SHOWN = 40;
+
+const saidWhen = (runId: string | undefined, runs: readonly Run[]): TaskWork["saidWhen"] => {
+  const run = runs.find((r) => r.id === runId);
+  if (run === undefined) return undefined;
+  return run.state !== "ended" ? "live" : run.end?.kind === "finished" ? "final" : "stopped";
+};
 
 // What a task's runs did and what its worktree now holds. Read from the task's
 // own records and folder only; nothing here comes from the browser but ids.
@@ -51,6 +59,7 @@ export async function loadTaskWork(companyId: string, taskId: string): Promise<T
 
   return {
     steps: steps.map((s) => ({ at: s.at, kind: s.kind, detail: s.detail })),
+    saidWhen: saidWhen(steps.find((s) => s.kind === "say")?.runId, runs),
     changes: present && folder !== undefined ? await changesIn(folder, task.id) : [],
     sessionId,
     review: review && { state: review.state, reviewerId: review.reviewerId, verdict: review.verdict, comments: review.comments },
