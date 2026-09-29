@@ -55,6 +55,8 @@ export function ProjectDialog({
   const [writes, setWrites] = useState<readonly AtlassianWrite[]>(edit?.writes ?? []);
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
+  // the folder dialog waits on the user, so it says so apart from saving
+  const [picking, startPicking] = useTransition();
   const first = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export function ProjectDialog({
     if (result.folder !== edit?.folder) setRuns(result.scripts);
   };
 
-  const pick = () => start(async () => accept(await pickFolderAction()));
+  const pick = () => startPicking(async () => accept(await pickFolderAction()));
 
   const check = () =>
     start(async () => {
@@ -162,8 +164,8 @@ export function ProjectDialog({
               <span className={folder === undefined ? "path empty" : "path"} title={folder}>
                 {folder ?? w.noFolder}
               </span>
-              <button className="btn btn-secondary btn-sm" type="button" disabled={pending} onClick={pick}>
-                {pending ? w.choosing : folder === undefined || !chosen ? w.choose : w.change}
+              <button className="btn btn-secondary btn-sm" type="button" disabled={pending || picking} onClick={pick}>
+                {picking ? w.choosing : folder === undefined || !chosen ? w.choose : w.change}
               </button>
             </div>
             {typing ? (
@@ -331,7 +333,7 @@ export function ProjectDialog({
           <button className="btn btn-secondary btn-md" type="button" onClick={onClose}>
             {w.cancel}
           </button>
-          <button className="btn btn-primary btn-md" type="button" disabled={pending || name.trim() === "" || (folder !== undefined && !chosen)} onClick={save}>
+          <button className="btn btn-primary btn-md" type="button" disabled={pending || picking || name.trim() === "" || (folder !== undefined && !chosen)} onClick={save}>
             {edit === undefined ? w.createProject : w.save}
           </button>
         </div>
