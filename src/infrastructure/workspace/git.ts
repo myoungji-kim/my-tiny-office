@@ -168,6 +168,24 @@ export async function originOf(folder: string): Promise<string | undefined> {
   return result?.code === 0 ? result.stdout.trim() : undefined;
 }
 
+export async function hasBranch(folder: string, taskId: string): Promise<boolean> {
+  const result = await git(["-C", folder, "rev-parse", "--verify", "--quiet", `refs/heads/${branchOf(taskId)}`]);
+  return result?.code === 0;
+}
+
+// The branches origin had when this repository last heard from it, read
+// locally, and the one origin itself points at, which comes chosen.
+export async function originBranches(folder: string): Promise<{ readonly branches: readonly string[]; readonly base: string | undefined }> {
+  const refs = await git(["-C", folder, "for-each-ref", "--format=%(refname)", "refs/remotes/origin"]);
+  const branches = (refs?.code === 0 ? refs.stdout.split("\n") : [])
+    .map((line) => line.trim().replace(/^refs\/remotes\/origin\//, ""))
+    .filter((name) => name !== "" && name !== "HEAD" && !name.startsWith("mto/"));
+  const head = await git(["-C", folder, "symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]);
+  const pointed = head?.code === 0 ? head.stdout.trim().replace(/^refs\/remotes\/origin\//, "") : undefined;
+  const base = pointed !== undefined && branches.includes(pointed) ? pointed : ["main", "master", "develop"].find((b) => branches.includes(b)) ?? branches[0];
+  return { branches, base };
+}
+
 // Only ever the task's own branch, to a branch of the same name, and only when the user asks.
 export async function pushBranch(folder: string, taskId: string): Promise<boolean> {
   const branch = branchOf(taskId);

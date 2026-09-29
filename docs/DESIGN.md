@@ -254,7 +254,11 @@ the tab's content                             │ ▸ 들고 간 기억
 
 **지금 할 일** leads, and only when there is something to decide: a stop with
 its reason and the way on, or finished work — "모카가 작업을 마쳤어요" with 바뀐 것
-보기. When the last review asked for changes, the notice turns to a warning and
+보기 — or applied work not yet sent up — 반영했어요 with PR 올리기. That opens the
+PR window: the task's branch, the branch it goes into (origin's branches, the
+one origin points at chosen), the remote, and the title and body, written from
+the task and its last report and editable. What stops it — no origin, not
+GitHub, the branch gone — is said at its top, and 올리기 stays off. When the last review asked for changes, the notice turns to a warning and
 says so, since the fix reached approval without that reviewer agreeing. The
 header keeps every action, as page buttons.
 
@@ -286,9 +290,9 @@ the window — set in Settings' 화면 폭 and kept for every screen; a task's p
 has the same choice beside its tabs, as a shortcut to the same setting. Both are kept in
 this browser only.
 
-**세부 정보** is fixed: status, who, reviewer, area, priority, time — and once
-the work is applied, PR: PR 올리기, then PR 열기, or GitHub에서 PR 만들기 when
-this computer has no signed-in GitHub CLI and GitHub's own page finishes it. 업무 설명
+**세부 정보** is fixed: status, who, reviewer, area, priority, time — and, once
+the work has gone up, PR: PR 열기, or GitHub에서 PR 만들기 when this computer has
+no signed-in GitHub CLI and GitHub's own page finishes it. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
 report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.
 

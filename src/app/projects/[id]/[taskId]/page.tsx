@@ -9,6 +9,7 @@ import { Icon } from "../../../../components/icons";
 import { areaName } from "../../../../components/names";
 import { blockerText, timeLine, withCode } from "../../../../components/task-lines";
 import { Prio } from "../../../../components/project-marks";
+import { PublishButton } from "../../../../components/publish-dialog";
 import { Shell } from "../../../../components/shell";
 import { CopyButton } from "../../../../components/settings-parts";
 import { Suggestions } from "../../../../components/suggestions";
@@ -20,7 +21,7 @@ import { carriedBy } from "../../../../domain/memory";
 import { isAllowableCommand } from "../../../../domain/project";
 import type { TaskStatus } from "../../../../domain/task";
 import { getDictionary } from "../../../../i18n";
-import { allowCommandAction, allowWriteAction, carryOnAction, publishTaskAction } from "../../../project-actions";
+import { allowCommandAction, allowWriteAction, carryOnAction } from "../../../project-actions";
 import { companyScreen, param, type SearchParams } from "../../../screen-data";
 
 export const dynamic = "force-dynamic";
@@ -162,7 +163,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       )}
       {work !== undefined && task.status === "approval" && <span className="tk-apply">{withCode(w.tk.applyWhat, work.branch)}</span>}
       {work !== undefined && task.status === "done" && <span className="tk-apply">{withCode(w.tk.applied, work.branch)}</span>}
-      {work !== undefined && task.status === "done" && !opened && <span className="hint">{task.publishedUrl === undefined ? w.tk.publishHint : w.tk.makePrHint}</span>}
+      {work !== undefined && task.status === "done" && task.publishedUrl !== undefined && !opened && <span className="hint">{w.tk.makePrHint}</span>}
     </>
   );
   const did = actions.length > 0 ? actions.map(stepRow) : <p className="col-empty talk-empty">{w.tk.noChanges}</p>;
@@ -175,14 +176,11 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   );
   const about = task.description ?? (task.status === "backlog" ? w.tk.notStarted : undefined);
   // the user sends applied work up; a pull request's page, or GitHub's page for opening one
-  const pullRequest =
-    task.publishedUrl === undefined ? (
-      <ActButton action={publishTaskAction.bind(null, company.id, task.id)} label={w.tk.publish} errors={t.errors} />
-    ) : (
-      <a className="btn btn-secondary btn-sm" href={task.publishedUrl} target="_blank" rel="noreferrer" title={opened ? undefined : w.tk.makePrHint}>
-        {opened ? w.tk.openPr : w.tk.makePr}
-      </a>
-    );
+  const pullRequest = task.publishedUrl !== undefined && (
+    <a className="btn btn-secondary btn-sm" href={task.publishedUrl} target="_blank" rel="noreferrer" title={opened ? undefined : w.tk.makePrHint}>
+      {opened ? w.tk.openPr : w.tk.makePr}
+    </a>
+  );
   const side = (
     <>
       {panel(
@@ -195,7 +193,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           {kv(w.tk.fPrio, t.priority[task.priority])}
           {time !== undefined && kv(w.tk.fTime, time)}
           {kv(w.tk.created, dateText(locale, task.createdAt))}
-          {task.status === "done" && project.folder !== undefined && kv(w.tk.fPr, pullRequest)}
+          {task.publishedUrl !== undefined && kv(w.tk.fPr, pullRequest)}
         </>,
         "panel side-kv",
       )}
@@ -255,7 +253,18 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
   // A write shows where it would go and what it would say, as it would be posted.
   const write = blocker?.kind === "writeNotAllowed" ? blocker : undefined;
   const now =
-    write !== undefined ? (
+    task.status === "done" && task.publishedUrl === undefined && project.folder !== undefined ? (
+      <div className="notice tk-now">
+        <span className="n-ic">{Icon.yes}</span>
+        <span className="n-tx">
+          <b>{w.tk.publishNowTitle}</b>
+          <span>{w.tk.publishNowWhy}</span>
+        </span>
+        <span className="n-acts">
+          <PublishButton locale={locale} companyId={company.id} taskId={task.id} />
+        </span>
+      </div>
+    ) : write !== undefined ? (
       <div className="notice notice-bad tk-now">
         <span className="n-ic">{Icon.pen}</span>
         <span className="n-tx">

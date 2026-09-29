@@ -386,8 +386,11 @@ everything it has been taught, numbered.
 Applied work goes up only when the user asks (`publishTask` through the
 `Publisher` port, `src/infrastructure/workspace/github.ts`): the task's branch
 is pushed to `origin`, and its pull request is opened with GitHub CLI when it is
-signed in to the remote's host, or the task keeps GitHub's page for opening one,
-filled in with the task and its last report. Setups differ from person to
+signed in to the remote's host, or the task keeps GitHub's page for opening one.
+`draftPublish` fills the PR window from `Publisher.look` — the remote, whether
+the branch exists, origin's branches and the one it points at, all read
+locally — and from the task and its last report; `publishTask` takes the
+user's base, title and body. Setups differ from person to
 person, so nothing is assumed beyond `git` itself.
 
 Approving commits the worktree to the task's branch and removes the worktree

@@ -213,10 +213,13 @@ agents, so it is a target in its own right.
   --no-verify origin refs/heads/mto/<task>:refs/heads/mto/<task>`, with the
   same hook and monitor settings as every git the app runs, and the user's own
   git credentials — the app never sees them. `origin` must read as a GitHub
-  repository (`github.com` or a `github.` host, a plain owner and name). The
+  repository (`github.com` or a `github.` host, a plain owner and name), the
+  task's branch must exist, and the branch it goes into must be one of
+  origin's, as this repository last fetched them (read locally), checked
+  again when it is sent: what the browser sends is only a choice among them. The
   pull request is opened with `gh` only when it is on `PATH` and `gh auth
   status --hostname <host>` exits 0 — its output is not read — as `gh pr create
-  --head <branch> --title <task> --body-file -`; otherwise the task keeps a link
+  --head <branch> --base <base> --title <title> --body-file -`; otherwise the task keeps a link
   to GitHub's own page for it. Only an `https://` address is kept and linked.
 - **Sessions.** A session id is checked to be a UUID before it becomes
   `--resume <id>`, so nothing stored can turn into a flag.

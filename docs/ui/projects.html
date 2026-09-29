@@ -533,8 +533,10 @@
   const TODAY = "2026. 9. 26.";
   const PROJECTS = [
     { id: "pay", status: "active", priority: "high", since: "2026. 9. 2.", name: { ko: "결제 개편", en: "Payments rework" }, folder: "~/Projects/tinysoft", runs: ["npm test", "npm run lint", "npm run build"], atlassian: true, writes: ["addCommentToJiraIssue"],
+      remote: "https://github.com/tinysoft/tinysoft", branches: ["main", "develop", "release/2.4"], head: "main",
       desc: { ko: "결제 흐름을 정리하고 웹훅을 믿을 수 있게 만들어요.", en: "Tidy the payment flow and make the webhooks trustworthy." } },
     { id: "order", status: "active", priority: "normal", since: "2026. 9. 20.", name: { ko: "주문 v2", en: "Orders v2" }, folder: "~/Projects/orders", runs: ["npm test", "npm run lint"], atlassian: true, writes: [],
+      remote: "git@github.com:tinysoft/orders.git", branches: ["develop", "main"], head: "develop",
       desc: { ko: "주문 상태를 하나의 흐름으로 다시 세워요.", en: "Rebuild the order states as one flow." } },
     { id: "settle", status: "planned", priority: "normal", name: { ko: "정산 리포트", en: "Settlement reports" }, folder: "~/Projects/settle", runs: ["npm test"],
       desc: { ko: "가맹점이 월별 정산 내역을 내려받아요.", en: "Merchants download their monthly settlements." } },
@@ -825,7 +827,11 @@
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
         splitLabel: "세부 정보 폭 조절", widthLabel: "화면 폭", widths: { normal: "보통", wide: "넓게", full: "전체" }, talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
         decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
-        fPr: "PR", publish: "PR 올리기", publishHint: "이 컴퓨터의 git 로그인으로 브랜치를 origin에 올리고 PR을 열어요.", openPr: "PR 열기", makePr: "GitHub에서 PR 만들기", makePrHint: "브랜치는 올려 뒀어요. 열리는 페이지에서 Create pull request를 누르면 만들어져요.", decideAfterChanges: (n) => n + subjectParticle(n) + " 마지막 검토에서 보완을 요청했어요. 반영하기 전에 대화에서 해결됐는지 확인해 주세요.",
+        prTitle: "PR 올리기", prHead: "올릴 브랜치", prHeadHint: "승인할 때 이 업무의 작업이 커밋된 브랜치예요.", prBase: "합칠 브랜치",
+        prBaseHint: (b) => "origin의 기본 브랜치(" + b + ")가 먼저 골라져 있어요.", prRemote: "원격", prName: "제목", prBody: "본문",
+        prHow: "GitHub CLI(gh)에 로그인돼 있으면 바로 만들고, 아니면 채워진 GitHub 페이지를 열어 드려요. 이 컴퓨터의 git 로그인으로 올려요.", prSend: "올리기",
+        prGone: "이 업무의 브랜치가 없어요", prGoneWhy: (b) => b + " 브랜치가 이 저장소에 없어요. 지워졌거나 이름이 바뀌었어요.",
+        fPr: "PR", publish: "PR 올리기", publishNowTitle: "반영했어요", publishNowWhy: "이 업무의 브랜치에 커밋돼 있어요. 올릴 준비가 되면 PR로 올려요.", openPr: "PR 열기", makePr: "GitHub에서 PR 만들기", makePrHint: "브랜치는 올려 뒀어요. 열리는 페이지에서 Create pull request를 누르면 만들어져요.", decideAfterChanges: (n) => n + subjectParticle(n) + " 마지막 검토에서 보완을 요청했어요. 반영하기 전에 대화에서 해결됐는지 확인해 주세요.",
         noReviewer: "없음",
         mem: (n) => "들고 간 기억 " + n + "개", memAhead: "들고 갈 기억", memHow: "✓는 이번에 참고한 기억이에요. 에이전트가 스스로 알려줘요.",
         memNobody: "맡는 사람이 가진 기억을 모두 들고 가요.", log: "기록", session: "세션", folder: "이 업무의 작업 폴더",
@@ -968,7 +974,11 @@
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
         splitLabel: "Resize the details", widthLabel: "Width", widths: { normal: "Normal", wide: "Wide", full: "Full" }, talkOpen: "Open", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
         decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
-        fPr: "PR", publish: "Open a PR", publishHint: "Pushes the branch to origin with this computer's git sign-in, and opens a PR.", openPr: "Open the PR", makePr: "Create the PR on GitHub", makePrHint: "The branch is pushed. Press Create pull request on the page that opens.", decideAfterChanges: (n) => n + " asked for changes in the last review. Check in the conversation that they were settled before applying it.",
+        prTitle: "Open a PR", prHead: "Branch", prHeadHint: "Where approving committed this task's work.", prBase: "Into",
+        prBaseHint: (b) => "origin's default branch (" + b + ") comes chosen.", prRemote: "Remote", prName: "Title", prBody: "Body",
+        prHow: "With GitHub CLI (gh) signed in it is opened for you; otherwise GitHub's page opens, filled in. It is pushed with this computer's git sign-in.", prSend: "Open it",
+        prGone: "This task's branch is gone", prGoneWhy: (b) => b + " is not in this repository. It was deleted or renamed.",
+        fPr: "PR", publish: "Open a PR", publishNowTitle: "Applied", publishNowWhy: "It is committed to this task's branch. Open a PR when it is ready to go up.", openPr: "Open the PR", makePr: "Create the PR on GitHub", makePrHint: "The branch is pushed. Press Create pull request on the page that opens.", decideAfterChanges: (n) => n + " asked for changes in the last review. Check in the conversation that they were settled before applying it.",
         noReviewer: "None",
         mem: (n) => n + " memories carried", memAhead: "What they will carry", memHow: "✓ marks what was drawn on this time, as the agent reports it.",
         memNobody: "Whoever takes it carries everything they have been taught.", log: "History", session: "Session", folder: "This task's own folder",
@@ -1322,7 +1332,10 @@
     const lastReview = (task.talk ?? []).findLast((m) => m.kind === "review");
     const askedBy = lastReview?.verdict === "changes" ? byId.get(lastReview.by) : null;
     const now = !task.blocked || task.status !== "working"
-      ? task.status === "approval" && who
+      ? task.status === "done" && !task.pr
+        ? `<div class="notice tk-now"><span class="n-ic">${TASK_ICON.used}</span><span class="n-tx"><b>${k.publishNowTitle}</b><span>${k.publishNowWhy}</span></span>
+            <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-publish>${k.publish}</button></span></div>`
+      : task.status === "approval" && who
         ? `<div class="notice${askedBy ? " notice-warn" : ""} tk-now"><span class="n-ic">${askedBy ? icon.alert : TASK_ICON.used}</span><span class="n-tx"><b>${k.decideTitle(who.name)}</b><span>${askedBy ? k.decideAfterChanges(askedBy.name) : k.decideWhy}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-tab-go="changes">${k.seeChanges}</button></span></div>`
         : ""
@@ -1392,7 +1405,7 @@
         : `<p class="col-empty talk-empty">${k.noChanges}</p>`)
       + (task.status === "approval" ? `<span class="tk-apply">${k.applyWhat(branchOf(task))}</span>` : "")
       + (task.status === "done" && task.commit ? `<span class="tk-apply">${k.applied(branchOf(task), task.commit)}</span>` : "")
-      + (task.status === "done" && task.pr !== "opened" ? `<span class="hint">${task.pr ? k.makePrHint : k.publishHint}</span>` : "");
+      + (task.status === "done" && task.pr && task.pr !== "opened" ? `<span class="hint">${k.makePrHint}</span>` : "");
 
     const tabsHtml = [["talk", k.tabTalk, talk.length], ["changes", k.changed, task.files?.length ?? 0], ["did", k.did, task.steps?.length ?? 0]]
       .map(([id, label, n]) => `<button class="tab" type="button" role="tab" data-tab="${id}" aria-selected="${id === taskTab}"><span>${label}</span><span class="n">${n}</span></button>`).join("");
@@ -1410,7 +1423,7 @@
         <div class="kv"><span>${k.fArea}</span><b>${areaLabel(task.area)}</b></div>
         <div class="kv"><span>${k.fPrio}</span><b>${t().priority[task.priority]}</b></div>
         ${task.spent !== undefined ? `<div class="kv"><span>${k.fTime}</span><b>${task.status === "working" ? t().spent(task.spent) : k.took(task.spent)}</b></div>` : ""}
-        ${task.status === "done" ? `<div class="kv"><span>${k.fPr}</span><b>${task.pr ? `<a class="btn btn-secondary btn-sm" href="#"${task.pr === "opened" ? "" : ` title="${k.makePrHint}"`}>${task.pr === "opened" ? k.openPr : k.makePr}</a>` : `<button class="btn btn-secondary btn-sm" type="button" data-publish>${k.publish}</button>`}</b></div>` : ""}
+        ${task.status === "done" && task.pr ? `<div class="kv"><span>${k.fPr}</span><b><a class="btn btn-secondary btn-sm" href="#"${task.pr === "opened" ? "" : ` title="${k.makePrHint}"`}>${task.pr === "opened" ? k.openPr : k.makePr}</a></b></div>` : ""}
       </div></div>`;
     const fold = (title, n, bodyHtml) => `<details class="panel fold"><summary class="panel-hd"><h2>${title}${n === undefined ? "" : `<span class="kn">${n}</span>`}</h2><span class="fold-ic">${chevron}</span></summary><div class="panel-bd">${bodyHtml}</div></details>`;
     const mine = who ? who.memories : [];
@@ -1481,10 +1494,7 @@
       b.classList.add("done");
       b.innerHTML = TASK_ICON.used;
     });
-    view.querySelector("[data-publish]")?.addEventListener("click", () => {
-      task.pr = "page";
-      render();
-    });
+    view.querySelector("[data-publish]")?.addEventListener("click", () => openPublish(p, task));
     view.querySelector("[data-allow-write]")?.addEventListener("click", () => {
       p.writes = [...(p.writes ?? []), task.blocked.tool];
       task.blocked = undefined;
@@ -2457,6 +2467,64 @@
       PROJECTS.splice(PROJECTS.indexOf(p), 1);
       filter = p.status;
       location.hash = "";
+    });
+  }
+
+  /* ── sending applied work up ────────────────────────────────── */
+  // What goes where, read before anything leaves the computer: the task's
+  // branch, the branch it would go into, the remote, and the words of the PR.
+  // projects.html?branch=gone shows a task whose branch is no longer there.
+  const BRANCH_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="4.5" cy="3.5" r="1.6"/><circle cx="4.5" cy="12.5" r="1.6"/><circle cx="11.5" cy="5.5" r="1.6"/><path d="M4.5 5.1v5.8M11.5 7.1c0 2.4-2.2 3-7 3.6"/></svg>';
+  function openPublish(p, task) {
+    const k = t().tk;
+    const gone = new URLSearchParams(location.search).get("branch") === "gone";
+    const branch = branchOf(task);
+    const body = [task.desc ? tx(task.desc) : "", task.talk?.findLast((m) => m.kind === "report") ? tx(task.talk.findLast((m) => m.kind === "report").text) : task.said ? tx(task.said) : ""].filter(Boolean).join("\n\n---\n\n");
+    openModal(() => {
+      dialog.setAttribute("aria-label", k.prTitle);
+      dialog.innerHTML = `
+        <div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${k.prTitle}</span></span></div>
+        <div class="m-sec">
+          ${gone ? `<div class="notice notice-bad" style="margin-bottom:14px"><span class="n-ic">${icon.none}</span><span class="n-tx"><b>${k.prGone}</b><span>${k.prGoneWhy("<code>" + branch + "</code>")}</span></span></div>` : ""}
+          <div class="field" style="margin-top:0">
+            <span class="label">${k.prHead}</span>
+            <div class="folder">${BRANCH_ICON}<span class="path">${branch}</span></div>
+            <span class="hint">${k.prHeadHint}</span>
+          </div>
+          <div class="field">
+            <label class="label" for="prBase">${k.prBase}</label>
+            <span class="select-wrap">
+              <select class="select" id="prBase">${p.branches.map((b) => `<option${b === p.head ? " selected" : ""}>${b}</option>`).join("")}</select>
+              ${chevron}
+            </span>
+            <span class="hint">${k.prBaseHint(p.head)}</span>
+          </div>
+          <div class="field">
+            <span class="label">${k.prRemote}</span>
+            <div class="folder">${icon.folder}<span class="path">origin · ${p.remote}</span></div>
+          </div>
+          <div class="field">
+            <label class="label" for="prName">${k.prName}</label>
+            <input class="input" id="prName" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="label" for="prBody">${k.prBody}</label>
+            <textarea class="textarea" id="prBody" rows="8"></textarea>
+            <span class="hint">${k.prHow}</span>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
+          <button class="btn btn-primary btn-md" data-send${gone || RUNTIME.off ? " disabled" : ""}>${k.prSend}</button>
+        </div>`;
+      dialog.querySelector("#prName").value = tx(task.title);
+      dialog.querySelector("#prBody").value = body;
+      dialog.querySelector("[data-close]").addEventListener("click", closeModal);
+      dialog.querySelector("[data-send]").addEventListener("click", () => {
+        task.pr = "page";
+        closeModal();
+        render();
+      });
     });
   }
 

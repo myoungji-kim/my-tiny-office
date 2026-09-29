@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { afterEach, assert, beforeEach, describe, expect, it } from "vitest";
 
-import { branchOf, changesIn, commitAll, diffOf, prepareWorktree, removeFiles, removeWorktree, worktreePath } from "./git";
+import { branchOf, changesIn, commitAll, diffOf, hasBranch, originBranches, prepareWorktree, pushBranch, removeFiles, removeWorktree, worktreePath } from "./git";
 
 const TASK = "11111111-2222-4333-8444-555555555555";
 let repo: string;
@@ -150,5 +150,32 @@ describe("a task's worktree", () => {
 
     expect(existsSync(made.path)).toBe(false);
     expect(run("branch", "--list", branchOf(TASK))).toContain(branchOf(TASK));
+  });
+});
+
+describe("sending a task up", () => {
+  it("reads origin's branches locally, the one it points at first, and pushes only the task's branch", async () => {
+    const origin = realpathSync.native(mkdtempSync(join(tmpdir(), "mto-origin-")));
+    try {
+      execFileSync("git", ["init", "-q", "--bare", "-b", "main", origin]);
+      run("remote", "add", "origin", origin);
+      run("branch", "develop");
+      run("push", "-q", "origin", "main", "develop");
+      run("remote", "set-head", "origin", "main");
+
+      await expect(originBranches(repo)).resolves.toEqual({ branches: ["develop", "main"], base: "main" });
+      await expect(hasBranch(repo, TASK)).resolves.toBe(false);
+      await expect(pushBranch(repo, TASK)).resolves.toBe(false);
+
+      assert((await prepareWorktree(repo, TASK)).ok);
+      await expect(hasBranch(repo, TASK)).resolves.toBe(true);
+      await expect(pushBranch(repo, TASK)).resolves.toBe(true);
+      expect(execFileSync("git", ["-C", origin, "branch", "--list"], { encoding: "utf8" })).toContain(branchOf(TASK));
+      // its own branch is never offered as where it goes
+      run("fetch", "-q", "origin");
+      await expect(originBranches(repo)).resolves.toMatchObject({ branches: ["develop", "main"] });
+    } finally {
+      rmSync(origin, { recursive: true, force: true });
+    }
   });
 });
