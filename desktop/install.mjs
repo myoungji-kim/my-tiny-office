@@ -2,6 +2,7 @@
 // ~/Applications on macOS, the Start menu on Windows. Run it again to update.
 
 import { spawnSync } from "node:child_process";
+import http from "node:http";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -20,6 +21,17 @@ const run = (file, args, options = {}) => {
   const result = spawnSync(file, args, { stdio: "inherit", cwd: root, ...options });
   if (result.status !== 0) throw new Error(`${file} ${args.join(" ")} failed`);
 };
+
+// Building over the files an open app serves breaks it, and Windows keeps its exe in use.
+const open = await new Promise((settle) => {
+  const request = http.get("http://127.0.0.1:4317/", (response) => (response.resume(), settle(true)));
+  request.on("error", () => settle(false));
+  request.setTimeout(2_000, () => request.destroy());
+});
+if (open) {
+  console.error("My Tiny Office is open. Quit it first, then run this again.");
+  process.exit(1);
+}
 
 console.log("Building the app…");
 run(process.execPath, [join(root, "node_modules", "next", "dist", "bin", "next"), "build"]);

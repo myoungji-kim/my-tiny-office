@@ -102,6 +102,7 @@ const answers = (url) =>
   });
 
 let server;
+let quitting = false;
 
 function startServer(node, path, port) {
   const logs = app.getPath("logs");
@@ -113,12 +114,14 @@ function startServer(node, path, port) {
     env: { ...process.env, PATH: path, NODE_ENV: "production" },
     stdio: ["ignore", out, out],
     windowsHide: true,
-    // its own process group, so quitting also stops the agents it started
+    // its own process group, so a signal on quit reaches the server and not this app
     detached: process.platform !== "win32",
   });
   return logFile;
 }
 
+// The server stops the agents it started as it exits. SIGTERM lets it; on
+// Windows there is no such signal, so the tree is ended outright.
 function stopServer() {
   if (server === undefined || server.exitCode !== null) return;
   if (process.platform === "win32") {
@@ -185,6 +188,7 @@ async function start() {
 
   openWindow();
   const fail = (message) => {
+    if (quitting) return;
     dialog.showErrorBox("My Tiny Office", message);
     app.quit();
   };
@@ -196,6 +200,11 @@ async function start() {
 
   const port = await choosePort();
   const logFile = startServer(node, path, port);
+  // the server going away, before the office opens or after, ends the app with where to look
+  server.once("error", () => fail(`${words().failed}
+${logFile}`));
+  server.once("exit", () => fail(`${words().failed}
+${logFile}`));
   const url = `http://127.0.0.1:${port}`;
   if (!(await waitForServer(url))) return fail(`${words().failed}\n${logFile}`);
   origin = url;
@@ -220,5 +229,6 @@ if (!app.requestSingleInstanceLock()) {
   app.on("activate", () => {
     if (window === undefined && origin !== undefined) openWindow();
   });
+  app.on("before-quit", () => (quitting = true));
   app.on("will-quit", stopServer);
 }

@@ -194,7 +194,8 @@ Employee
 ├── species        picks the sprite
 ├── roleId
 ├── teamId?
-└── availability   available | onLeave | left, and since when for leave
+├── availability   available | onLeave | left, and since when for leave
+└── career?        the session a hire came from: its id, folder and dates
 
 Agent              made the first time its employee is given work
 ├── id
@@ -625,11 +626,12 @@ Do not import arbitrary sessions.
 
 ### Candidates, not agents
 
-The plaza is the one place the machine's sessions are listed (DESIGN.md › The
+The plaza, and the hire dialog's 경력 가져오기, are the only places the
+machine's sessions are listed (DESIGN.md › The
 plaza). It reads, from Claude Code's session files, only each session's
 metadata and first user message.
-- It leaves out the app's own runs: sessions in `.worktrees/` and in the
-  app's temporary folders.
+- It leaves out the app's own runs: sessions in a registered project's
+  `.worktrees/`, and in the app's temporary folders.
 - A listed session is a candidate, outside the company, and never becomes an
   Agent or a source of runs.
 - Hiring one runs a single read-only Claude session over its transcript:
@@ -638,8 +640,9 @@ metadata and first user message.
   - a long transcript is cut to its recent part.
 - That run proposes memories. The user keeps some, and a new Employee is
   created with them.
-- The Employee records the session's id, only so the session leaves the
-  plaza. Its own Agent starts sessions of its own.
+- The Employee's `career` records the session, only so it leaves the plaza
+  and the Record panel can say where they came from. Its own Agent starts
+  sessions of its own.
 
 ## 11. Workspace Model
 

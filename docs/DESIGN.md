@@ -197,8 +197,8 @@ user hires one, and hiring brings in only what the user keeps.
   작업 중.
 - **Refreshing:** the list is read when the office opens and every minute
   while it is open, cached by each file's modification time.
-- **Hiding it:** 설정 › 일반 › 광장 hides the plaza. Hidden, no session file is
-  read at all.
+- **Hiding it:** 설정 › 일반 › 광장 hides the plaza. The hire dialog's 지난
+  세션에서 가져오기 goes with it, and no session file is read at all.
 
 **2. The scene.** Under the floor sits a strip four tiles high:
 
@@ -628,7 +628,8 @@ The dialog's last field, **경력**, reads *신입으로 들어와요.* with **�
    project, the dates and what they bring, with 바꾸기 and 빼기.
 
 What they bring is theirs from the first day:
-- Each memory's source reads *결제 개편 세션에서*.
+- Each memory, and each way of working, it brings reads *tinysoft 세션에서*:
+  the session's folder.
 - The Record panel has an **경력** row with the project and the dates.
 
 The mockup is employees.html → 직원 고용 → 지난 세션에서 가져오기.

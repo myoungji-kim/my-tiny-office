@@ -130,10 +130,12 @@ npm run app:install
 ```
 
 This builds the app and installs **My Tiny Office**: in `~/Applications` on
-macOS, and in the Start menu on Windows (`%LOCALAPPDATA%Programs`). The
-installed app runs this checkout, so to update it you `git pull`, then run
-`npm install` and `npm run app:install` again. `npm run app` opens the
-window straight from the checkout, without installing it.
+macOS, and on Windows in `%LOCALAPPDATA%ProgramsMy Tiny Office` with a Start
+menu entry. On Linux it only builds the app, under `desktop/build/out`. The
+installed app runs this checkout. To update it, quit the app, `git pull`, then
+run `npm install` and `npm run app:install` again; the install refuses to run
+while the app is open. `npm run app` opens the window straight from the
+checkout, without installing it.
 
 Only one server works a data directory at a time. If the desktop app is open,
 a `npm run dev` on the same data shows the office but leaves the work to the
@@ -150,7 +152,7 @@ Ask Claude Code to install it. It follows these steps:
    macOS, if `better-sqlite3` fails to build, install the Xcode Command Line
    Tools with `xcode-select --install`, then run it again.
 3. Run `npm run app:install`.
-4. Open **My Tiny Office** from Applications or the Start menu.
+4. Open **My Tiny Office** from `~/Applications` or the Start menu.
 
 ## Development
 

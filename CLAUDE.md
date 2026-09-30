@@ -66,7 +66,7 @@ Only agents explicitly assigned to the active company may appear in the company.
 
 Do not automatically import any Claude Code session or agent running on the user's machine.
 
-The plaza (docs/DESIGN.md) lists the machine's past Claude Code sessions as candidates, outside the company. Listing one imports nothing, and a candidate never acts. Hiring one creates a new Employee with only the memories the user kept from it. The session is never attached as the Employee's agent.
+The plaza (docs/DESIGN.md) lists the machine's Claude Code sessions as candidates, outside the company. Listing one imports nothing, and a candidate never acts. Hiring one creates a new Employee with only the memories the user kept from it. The session is never attached as the Employee's agent.
 
 Do not make global session discovery the product's source of truth.
 

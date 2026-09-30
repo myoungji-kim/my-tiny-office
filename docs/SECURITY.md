@@ -20,6 +20,7 @@ end of this document) before trusting it again.
 | Uses outside tools | Only the Atlassian connector (Jira, Confluence), in a project that turns it on: its read tools, and each write tool once the user has allowed it (§8). No other connector, MCP server or plugin |
 | Carries the user's personal Claude Code setup (hooks, settings, auto-memory, `~/.claude/CLAUDE.md`) | Never. Of the user's plugins and skills, only those ticked in 설정 › 스킬과 플러그인, with their hooks and MCP servers off (§8) |
 | Reads Claude Code's credentials | Never; nor does the app |
+| Reads the user's other Claude Code sessions | Only the app, for the plaza, and not at all when it is hidden: each session's metadata and first message. A whole transcript only when the user hires from it, for one run with no tools (§8b) |
 | Needs something outside this | Stops, and the task is blocked with the reason |
 
 ## 2. How a task is launched
@@ -188,12 +189,16 @@ agents, so it is a target in its own right.
   - On macOS the login shell is asked for `PATH`, since an app opened from
     the Dock gets a bare one. That runs the user's own shell startup files,
     as a terminal would.
-  - Quitting stops the server's process tree, and the agents with it. Their
-    runs are reconciled as disconnected the next time the app starts.
+  - Quitting stops the server. On macOS and Linux it gets SIGTERM and stops the
+    agents it started as it exits; on Windows its process tree is ended.
+    Either way, runs are reconciled as disconnected the next time it starts.
+  - The server going away while the window is open ends the app with the
+    path of its log.
 - **One worker per data directory.** The server that holds
   `<data dir>/work.pid` runs the work; any other server on the same data
   runs none. Two workers would each take the other's runs for lost ones and
-  start them again. A lock left by a process that is gone is taken over.
+  start them again. The holder touches the file every tick; one untouched for
+  30 seconds is taken over, so a server stopped by force never keeps the lock.
 - **Processes.** `claude` and `git` are started only through
   `src/infrastructure/process/run.ts`: `spawn(file, args)` with `shell: false`,
   found on `PATH` by the app rather than by a shell.
@@ -362,6 +367,43 @@ Prompt injection (§5) is the risk this adds: an issue or a page can carry
 instructions, and the connector is a way out of the folder. Reads go to the
 user's own Atlassian organisation; writes stop for the user until allowed, so
 allowing a write tool is trusting every later use of it in that project.
+
+## 8b. The plaza
+
+The plaza lists this computer's Claude Code sessions as candidates to hire
+(DESIGN.md › The plaza).
+
+- **What is read.** For the current user, only Claude Code's session files,
+  `~/.claude/projects/*/*.jsonl`, read-only. The app never writes, moves or
+  deletes them.
+  - For listing: each file's modification time and size, its dates, its
+    message count, its working folder and its first user message.
+  - Never `~/.claude/.credentials.json`, Claude Code's settings, or anything
+    else under `~/.claude`.
+- **What is shown.** The first message is shown in the app, on this computer
+  only. It is the user's own text, and can hold anything they typed.
+- **Off.** 설정 › 일반 › 광장 set to 숨기기 reads none of it: no plaza and no
+  지난 세션에서 가져오기.
+- **Hiring.** Only then is a whole transcript read, and it goes through one
+  Claude run:
+  - Before sending:
+    - only the user's and the assistant's text is kept; tool calls and tool
+      output are dropped;
+    - lines that look like secrets (tokens, keys, passwords, private keys) are
+      removed and counted;
+    - a long transcript is cut to its most recent part.
+  - The run gets `-p --output-format json`, the same `--settings` and
+    `--permission-mode dontAsk` as §2, `--setting-sources ""`,
+    `--strict-mcp-config`, `--disable-slash-commands` and no tools. It runs in
+    an empty temporary folder, with a budget of $0.50, and the transcript goes
+    in on stdin. These flags are measured (§9) before release, like every
+    launch.
+  - It answers with proposed lines only. Nothing is kept until the user keeps
+    it.
+- **What stays.** The lines the user kept become the employee's memories and
+  ways of working. The employee also records the session's id, folder and
+  dates. All of that is company data, so it goes into an exported company
+  file. The transcript itself is never stored.
 
 ## 9. Re-measuring
 
