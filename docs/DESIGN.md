@@ -201,7 +201,8 @@ to 숨기기 removes it.
   - sessions not written to for ninety days.
 - **In use:** a session written to in the last five minutes is shown as
   작업 중.
-- **Refreshing:** the list is read each time the plaza or 경력 가져오기 opens.
+- **Refreshing:** the list is read each time the plaza or 경력 가져오기 opens,
+  and every 30 seconds while the plaza is open.
   A session's message count is kept until its file changes size or time.
 - **Programs' runs:** a session Claude Code records as run by a program
   (`claude -p`, its entrypoint `sdk-…`) is never a candidate. That covers
@@ -266,10 +267,10 @@ than says it.
 - The candidate's species is picked, and the name is left to the user.
 - 경력 already names the session: the folder, its dates, and *아직 정리하지
   않았어요.* with 경력 정리하기.
-- 경력 가져오기 opens straight at **Read**, then **Keep** (Hiring with
-  experience).
-- Closing it leaves the hire dialog as it was. The user can sum the session
-  up later, or hire without it by 빼기.
+- Summing up is a Claude run, so it waits to be asked: 경력 정리하기 opens 경력
+  가져오기 at **Read**, then **Keep** (Hiring with experience).
+- Hiring without summing up still records the session, so the candidate
+  leaves the plaza.
 - 경력 정리하기 needs Claude Code. When it is not ready, the button waits with
   the reason, and hiring without experience still works.
 - If the run fails, the step says *경력을 정리하지 못했어요* and offers 경력 없이
@@ -651,7 +652,8 @@ The dialog's last field, **경력**, reads *신입으로 들어와요.* with **�
    it. Each shows its first message, its dates and how many messages it has.
    - These are the same sessions the plaza shows (see The plaza).
    - A session in use right now is listed, disabled, and cannot be picked.
-   - From the plaza this step is skipped: the session is already chosen.
+   - From the plaza this step is skipped: the session is already chosen, and
+     경력 정리하기 in the hire dialog starts at Read.
    - The hint says Claude reads the conversation once, and that a long one is
      read from its most recent part.
 2. **Read.** One Claude run reads the conversation, read-only, and sums up

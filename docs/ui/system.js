@@ -971,8 +971,6 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
     });
   }
   renderCareer();
-  // From the plaza the session is already chosen, so reading it is the next step.
-  if (from && career && !RUNTIME.off) queueMicrotask(() => career((picked) => ((state.career = picked), renderCareer()), from));
 
   // A nickname the user did not write is not their employee, so the button
   // waits for both.

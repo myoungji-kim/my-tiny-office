@@ -64,8 +64,8 @@ export function HireDialog({
   const w = t.hire;
   const [chosen, setChosen] = useState<CastMember | undefined>(edit !== undefined ? castMember(edit.species) : from !== undefined ? castMember(from.species) : undefined);
   const [brought, setBrought] = useState<Brought | undefined>(undefined);
-  // from the plaza the session is chosen, so summing it up is the next step
-  const [reading, setReading] = useState<CandidateView | "pick" | undefined>(from !== undefined && career?.ready === true ? from : undefined);
+  // a Claude run costs, so summing a session up waits for the user to ask
+  const [reading, setReading] = useState<CandidateView | "pick" | undefined>(undefined);
   const [name, setName] = useState(edit?.name ?? "");
   const [role, setRole] = useState(edit?.roleId ?? roles[0]?.id ?? "");
   const [teamId, setTeamId] = useState(edit === undefined ? (team ?? "") : (edit.teamId ?? ""));
