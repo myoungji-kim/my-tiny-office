@@ -16,8 +16,8 @@ const MAX_LINES = 12;
 
 // Lines that look like a secret never leave the computer in a prompt.
 const SECRET = [
-  /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
   /\b(sk|pk|rk)-[A-Za-z0-9_-]{16,}/,
+  /\b(sk|pk|rk)_(live|test)_[A-Za-z0-9]{10,}/,
   /\bgh[pousr]_[A-Za-z0-9]{20,}/,
   /\bgithub_pat_[A-Za-z0-9_]{20,}/,
   /\bxox[abprs]-[A-Za-z0-9-]{10,}/,
@@ -25,8 +25,14 @@ const SECRET = [
   /\bAIza[0-9A-Za-z_-]{30,}/,
   /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\./,
   /\bBearer\s+[A-Za-z0-9._~+/-]{16,}/i,
-  /\b(password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret)\b\s*[:=]\s*\S+/i,
+  // a key's name may run into others: AWS_SECRET_ACCESS_KEY=, db_password:
+  /(password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key)\w*["']?\s*[:=]\s*\S+/i,
+  // credentials in a URL: postgres://user:pass@host
+  /[a-z][a-z0-9+.-]*:\/\/[^\s/:@]+:[^\s/@]+@/i,
 ];
+// every line of a private key, not only its first
+const KEY_BEGIN = /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
+const KEY_END = /-----END [A-Z ]*PRIVATE KEY-----/;
 
 export interface Excerpt {
   readonly text: string;
@@ -41,8 +47,11 @@ export function excerpt(transcript: Buffer): Excerpt {
   let dropped = 0;
   const turns: string[] = [];
   for (const { who, text } of said(transcript)) {
+    let inKey = false;
     const kept = text.split("\n").filter((l) => {
-      const secret = SECRET.some((pattern) => pattern.test(l));
+      if (KEY_BEGIN.test(l)) inKey = true;
+      const secret = inKey || SECRET.some((pattern) => pattern.test(l));
+      if (KEY_END.test(l)) inKey = false;
       if (secret) dropped += 1;
       return !secret;
     });

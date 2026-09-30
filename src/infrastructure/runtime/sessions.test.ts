@@ -54,6 +54,17 @@ describe("listSessions", () => {
     expect(listSessions(root, NOW)).toEqual([]);
   });
 
+  it("finds a long session's first message deep in its file, and never a compacted summary", () => {
+    session(ID, [
+      JSON.stringify({ type: "file-history-snapshot", snapshot: "x".repeat(400_000) }),
+      said("user", "This session is being continued from a previous conversation", { isCompactSummary: true }),
+      said("user", "결제 재시도 로직을 정리하자"),
+      ...talk(6),
+    ]);
+
+    expect(listSessions(root, NOW)[0]).toMatchObject({ id: ID, firstMessage: "결제 재시도 로직을 정리하자", messages: 7 });
+  });
+
   it("says a session written to a minute ago is in use", () => {
     session(ID, talk(8), { ageMs: 60_000 });
     expect(listSessions(root, NOW)[0].inUse).toBe(true);
@@ -71,6 +82,24 @@ describe("excerpt", () => {
     );
 
     expect(cut).toEqual({ text: "User: 배포 스크립트 좀 봐줘\n\nClaude: 토큰은 환경 변수로 옮겨요.", dropped: 1, cut: false });
+  });
+});
+
+describe("excerpt's secrets", () => {
+  const kept = (text: string) => excerpt(Buffer.from(said("user", text))).text;
+
+  it("leaves out every line of a private key, credentials in a URL and keys whose names run on", () => {
+    expect(kept("키는 이거야\n-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA\nabcDEF123\n-----END RSA PRIVATE KEY-----\n끝")).toBe("User: 키는 이거야\n끝");
+    expect(kept("DATABASE_URL=postgres://app:hunter2@db:5432/pay\n연결은 됐어")).toBe("User: 연결은 됐어");
+    expect(kept("AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI\nSTRIPE=sk_live_abcdefghij12\n배포 끝")).toBe("User: 배포 끝");
+  });
+
+  it("keeps ordinary talk about tokens and keys", () => {
+    expect(kept("토큰 만료를 5분으로 줄였어")).toBe("User: 토큰 만료를 5분으로 줄였어");
+  });
+
+  it("leaves out a conversation's compacted summary", () => {
+    expect(excerpt(Buffer.from(said("user", "This session is being continued…", { isCompactSummary: true }))).text).toBe("");
   });
 });
 

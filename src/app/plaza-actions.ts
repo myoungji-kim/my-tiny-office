@@ -98,6 +98,8 @@ export async function hireWithCareerAction(companyId: string, who: WhoInput, bro
   const species = SPECIES.find((s) => s === who?.species);
   if (species === undefined) return { error: "speciesUnknown" };
   const sessionId = optional(brought?.sessionId);
+  // off, no session file is read, for a hire no more than for the plaza
+  if (sessionId !== undefined && plazaOf(getCompanyFiles().directory).off === true) return { error: "plazaOff" };
   const session = sessionId === undefined ? undefined : readSession(sessionId);
   if (sessionId !== undefined && session === undefined) return { error: "sessionNotFound" };
   const company = toCompanyId(companyId);

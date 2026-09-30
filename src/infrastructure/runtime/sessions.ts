@@ -42,7 +42,8 @@ const parse = (raw: string): Line | undefined => {
 
 // What a person wrote, as opposed to a tool's answer or Claude Code's own notes.
 export function spokenText(line: Line): string | undefined {
-  if (line.isMeta === true || line.isSidechain === true) return undefined;
+  // a compacted conversation's summary is Claude Code's, and repeats what came before it
+  if (line.isMeta === true || line.isSidechain === true || line.isCompactSummary === true) return undefined;
   const content = (line.message as Line | undefined)?.content;
   const text =
     typeof content === "string"
@@ -79,7 +80,7 @@ const TOOL_RESULT = Buffer.from('"tool_result"');
 // What was said, by either side, in order. Decoding and parsing are what
 // cost, and tool output is most of a transcript, so lines are looked at as
 // bytes and only one that can be something said is decoded and parsed.
-export function* said(bytes: Buffer): Generator<{ readonly who: "user" | "assistant"; readonly text: string }> {
+export function* said(bytes: Buffer): Generator<{ readonly who: "user" | "assistant"; readonly text: string; readonly line: Line }> {
   for (let start = 0; start < bytes.length; ) {
     const end = bytes.indexOf(NEWLINE, start);
     const stop = end === -1 ? bytes.length : end;
@@ -90,45 +91,64 @@ export function* said(bytes: Buffer): Generator<{ readonly who: "user" | "assist
     const line = parse(raw.toString("utf8"));
     if (line === undefined || (line.type !== "user" && line.type !== "assistant")) continue;
     const text = spokenText(line);
-    if (text !== undefined) yield { who: line.type, text };
+    if (text !== undefined) yield { who: line.type, text, line };
   }
 }
 
-// the count needs the whole file, so it is kept until the file changes
-const counted = new Map<string, { readonly size: number; readonly mtime: number; readonly messages: number }>();
-function messagesIn(path: string, size: number, mtime: number): number {
-  const known = counted.get(path);
-  if (known !== undefined && known.size === size && known.mtime === mtime) return known.messages;
+interface Scan {
+  readonly messages: number;
+  // from the first thing the person said: where, when, and what
+  readonly folder: string | undefined;
+  readonly from: number | undefined;
+  readonly firstMessage: string | undefined;
+  readonly byProgram: boolean;
+}
+
+// The whole file is read, since a long session's first message can be deep in
+// it; what it gives is kept until the file changes.
+const scanned = new Map<string, { readonly size: number; readonly mtime: number; readonly scan: Scan }>();
+function scan(path: string, size: number, mtime: number): Scan {
+  const known = scanned.get(path);
+  if (known !== undefined && known.size === size && known.mtime === mtime) return known.scan;
   let messages = 0;
-  for (const _said of said(readFileSync(path))) messages += 1;
-  counted.set(path, { size, mtime, messages });
-  return messages;
+  let first: Line | undefined;
+  let firstMessage: string | undefined;
+  for (const { who, text, line } of said(readFileSync(path))) {
+    messages += 1;
+    if (first === undefined && who === "user") {
+      first = line;
+      firstMessage = text;
+    }
+  }
+  const result: Scan = {
+    messages,
+    folder: typeof first?.cwd === "string" ? first.cwd : undefined,
+    from: typeof first?.timestamp === "string" ? Date.parse(first.timestamp) || undefined : undefined,
+    firstMessage,
+    byProgram: typeof first?.entrypoint === "string" && first.entrypoint.startsWith("sdk"),
+  };
+  scanned.set(path, { size, mtime, scan: result });
+  return result;
+}
+
+// run by a program (claude -p), not by a person: this app's own agents among
+// them. The head says so cheaply, before a whole file is read.
+function byProgram(path: string): boolean {
+  for (const raw of head(path).split("\n").slice(0, -1)) {
+    if (!raw.includes('"entrypoint"')) continue;
+    const entrypoint = parse(raw)?.entrypoint;
+    if (typeof entrypoint === "string") return entrypoint.startsWith("sdk");
+  }
+  return false;
 }
 
 function read(path: string, now: number): Session | undefined {
   const id = basename(path, ".jsonl");
   if (!isSessionId(id)) return undefined;
   const { size, mtimeMs } = statSync(path);
-  if (now - mtimeMs > MAX_AGE_MS) return undefined;
-
-  let folder: string | undefined;
-  let from: number | undefined;
-  let firstMessage: string | undefined;
-  // the last line of the head may be cut, and is simply not read
-  for (const raw of head(path).split("\n").slice(0, -1)) {
-    const line = parse(raw);
-    if (line === undefined) continue;
-    // run by a program (claude -p), not by a person: this app's own agents among them
-    if (typeof line.entrypoint === "string" && line.entrypoint.startsWith("sdk")) return undefined;
-    if (folder === undefined && typeof line.cwd === "string") folder = line.cwd;
-    if (from === undefined && typeof line.timestamp === "string") from = Date.parse(line.timestamp) || undefined;
-    if (firstMessage === undefined && line.type === "user") firstMessage = spokenText(line);
-    if (folder !== undefined && from !== undefined && firstMessage !== undefined) break;
-  }
-  if (folder === undefined || firstMessage === undefined || OWN_FOLDER.test(folder)) return undefined;
-
-  const messages = messagesIn(path, size, mtimeMs);
-  if (messages < MIN_MESSAGES) return undefined;
+  if (now - mtimeMs > MAX_AGE_MS || byProgram(path)) return undefined;
+  const { messages, folder, from, firstMessage, byProgram: program } = scan(path, size, mtimeMs);
+  if (program || folder === undefined || firstMessage === undefined || OWN_FOLDER.test(folder) || messages < MIN_MESSAGES) return undefined;
   return {
     id,
     folder,

@@ -389,8 +389,9 @@ The plaza lists this computer's Claude Code sessions as candidates to hire
   - Before sending:
     - only the user's and the assistant's text is kept; tool calls and tool
       output are dropped;
-    - lines that look like secrets (tokens, keys, passwords, private keys) are
-      removed and counted;
+    - lines that look like secrets are removed and counted: tokens and API
+      keys, passwords and other values named like secrets, credentials in a
+      URL, and every line of a private key;
     - a long transcript is cut to its most recent part.
   - The run gets `-p --output-format json --model sonnet`, the `--settings` of
     §2 with extended thinking off, `--permission-mode dontAsk`,
