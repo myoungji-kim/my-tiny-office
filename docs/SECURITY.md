@@ -400,6 +400,9 @@ The plaza lists this computer's Claude Code sessions as candidates to hire
     launch.
   - It answers with proposed lines only. Nothing is kept until the user keeps
     it.
+- **Hiding.** Hiding a candidate records only its session id in the app's
+  settings. The session file stays as it is and can still be resumed in
+  Claude Code.
 - **What stays.** The lines the user kept become the employee's memories and
   ways of working. The employee also records the session's id, folder and
   dates. All of that is company data, so it goes into an exported company

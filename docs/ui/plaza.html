@@ -48,7 +48,11 @@
 
   .board-acts { display: flex; align-items: center; gap: 6px; }
 
-  .board-note { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .board-row[data-hidden] canvas, .board-row[data-hidden] .board-tx { opacity: .5; }
+
+  .board-gone { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+
+  .board-gone svg { width: 15px; height: 15px; }
 
   @media (max-width: 960px) {
     .app { grid-template-columns: 1fr; }
@@ -128,7 +132,6 @@
             <div class="opts" role="radiogroup" id="filter"></div>
           </div>
           <div id="list"></div>
-          <p class="board-note" id="note"></p>
         </div>
       </div>
     </div>
@@ -146,18 +149,19 @@
       sub: "회사 밖이에요. 이 컴퓨터의 Claude Code 세션이 구직자로 모여요.",
       count: (n) => "구직자 " + n + "명",
       quiet: "광장이 조용해요. 이 컴퓨터에서 Claude Code로 일하면 구직자가 찾아와요.",
-      allAway: "구직자를 모두 보냈어요. 아래 명단에서 다시 부를 수 있어요.",
+      allHidden: "구직자를 모두 숨겼어요. 명단의 숨김에서 다시 보이게 할 수 있어요.",
       listTitle: "구직자 명단", listSub: "고용하기 전에는 아무것도 가져오지 않아요.",
       cand: {
         free: "쉬는 중", busy: "작업 중", first: "첫 메시지", span: "기간", turns: "메시지", turnsN: (n) => n + "개", last: "마지막 활동",
-        hire: "경력직으로 고용", busyWhy: "지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.", away: "광장에서 보내기",
+        hire: "경력직으로 고용", busyWhy: "지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.", hide: "광장에서 숨기기",
         busyLine: "작업 중 · 끝나면 고용할 수 있어요",
         of: (f, first) => f + " 이력서 · “" + first + "”",
       },
       board: {
-        search: "폴더나 첫 메시지로 찾기", all: "전체", hire: "경력직으로 고용", away: "보내기",
+        search: "폴더나 첫 메시지로 찾기", all: "전체", hire: "경력직으로 고용", hide: "숨기기", hidden: "숨김", show: "다시 보이기",
+        justHidden: "숨겼어요", undo: "되돌리기",
         meta: (c) => c.folder + " · " + c.span + " · 메시지 " + c.turns + "개",
-        none: "찾는 구직자가 없어요.", allAway: "광장에 남은 구직자가 없어요.", sent: (n) => "보낸 구직자 " + n + "명", recall: "다시 부르기",
+        none: "찾는 구직자가 없어요.", allHidden: "모두 숨겼어요. 숨김에서 다시 보이게 할 수 있어요.", noneHidden: "숨긴 구직자가 없어요.",
       },
       arrived: (name) => withParticle(name, "이", "가") + " 입사했어요",
       arrivedWith: (folder, n) => folder + " 세션에서 " + n + "개를 가져왔어요. 사무실에 책상이 생겼어요.",
@@ -170,18 +174,19 @@
       sub: "Outside the company. Claude Code sessions on this computer gather here as candidates.",
       count: (n) => n + (n === 1 ? " candidate" : " candidates"),
       quiet: "The plaza is quiet. Work with Claude Code on this computer and candidates turn up.",
-      allAway: "Everyone was sent away. The list below can call them back.",
+      allHidden: "Everyone is hidden. The list's Hidden can show them again.",
       listTitle: "Candidates", listSub: "Nothing is brought in until you hire.",
       cand: {
         free: "Free", busy: "In use", first: "First message", span: "Dates", turns: "Messages", turnsN: (n) => String(n), last: "Last active",
-        hire: "Hire with experience", busyWhy: "This session is in use in a terminal. It can be hired once it is done.", away: "Send away",
+        hire: "Hire with experience", busyWhy: "This session is in use in a terminal. It can be hired once it is done.", hide: "Hide from the plaza",
         busyLine: "In use · can be hired once it is done",
         of: (f, first) => "Résumé of " + f + " · “" + first + "”",
       },
       board: {
-        search: "Find by folder or first message", all: "All", hire: "Hire with experience", away: "Send away",
+        search: "Find by folder or first message", all: "All", hire: "Hire with experience", hide: "Hide", hidden: "Hidden", show: "Show again",
+        justHidden: "Hidden", undo: "Undo",
         meta: (c) => c.folder + " · " + c.span + " · " + c.turns + " messages",
-        none: "No candidate matches.", allAway: "Nobody is left in the plaza.", sent: (n) => n + " sent away", recall: "Call them back",
+        none: "No candidate matches.", allHidden: "Everyone is hidden. Hidden can show them again.", noneHidden: "Nobody is hidden.",
       },
       arrived: (name) => name + " joined",
       arrivedWith: (folder, n) => "They brought " + n + " from a " + folder + " session, and have a desk in the office.",
@@ -216,8 +221,12 @@
   const ctx = canvas.getContext("2d");
   const overlay = document.getElementById("plazaOverlay");
   const hired = new Set();
-  const sentAway = new Set();
-  const waiting = () => CANDIDATES.filter((c) => !hired.has(c.id) && !sentAway.has(c.id));
+  // hidden only from the plaza: the session itself is never touched
+  const hidden = new Set();
+  // hidden a moment ago, kept in place as a line that can undo it
+  const justHidden = new Set();
+  const everyone = () => CANDIDATES.filter((c) => !hired.has(c.id));
+  const waiting = () => everyone().filter((c) => !hidden.has(c.id));
   const SLOTS = LINES.flatMap((row) => Array.from({ length: Math.floor((W - 2) / SPACING) + 1 }, (_, i) => ({ x: 1 + i * SPACING, row }))).filter((s) => s.x <= W - 2);
 
   function drawAvatar(el, species) {
@@ -248,7 +257,7 @@
     const list = waiting();
     document.getElementById("headCount").textContent = t().count(list.length);
     const quiet = document.getElementById("plazaQuiet");
-    quiet.textContent = sentAway.size ? t().allAway : t().quiet;
+    quiet.textContent = hidden.size ? t().allHidden : t().quiet;
     quiet.hidden = list.length > 0;
     // anyone past the two lines is still in the list below
     list.slice(0, SLOTS.length).forEach((c, i) => {
@@ -292,7 +301,7 @@
   /* ── the résumé ──────────────────────────────────────────────── */
   const ICON = {
     plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>',
-    away: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5l4.5 4.5-4.5 4.5M14 8H4.5"/></svg>',
+    hide: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8s2.2-4 6-4c1.2 0 2.2.4 3.1.9M14 8s-2.2 4-6 4c-1.2 0-2.2-.4-3.1-.9"/><path d="M6.6 9.4a2 2 0 0 1 2.8-2.8"/><path d="M2.5 13.5l11-11"/></svg>',
   };
   const pop = document.getElementById("pop");
   let anchor = null;
@@ -323,7 +332,7 @@
       <div class="p-acts">
         <button class="mrow mrow-key" type="button" data-hire${c.live ? " disabled" : ""}>${ICON.plus}${t().cand.hire}</button>
         ${c.live ? `<p class="p-why">${t().cand.busyWhy}</p>` : ""}
-        <button class="mrow" type="button" data-away>${ICON.away}${t().cand.away}</button>
+        <button class="mrow" type="button" data-hide>${ICON.hide}${t().cand.hide}</button>
       </div>`;
     pop.setAttribute("aria-label", t().cand.of(folderName(c.folder), tx(c.first)));
     drawAvatar(pop.querySelector("canvas"), c.species);
@@ -331,9 +340,9 @@
       close();
       hire(c);
     });
-    pop.querySelector("[data-away]").addEventListener("click", () => {
+    pop.querySelector("[data-hide]").addEventListener("click", () => {
       close();
-      sendAway(c.id);
+      hide(c.id);
     });
     anchor = el;
     pop.setAttribute("data-open", "");
@@ -375,46 +384,61 @@
   const find = document.getElementById("find");
   find.placeholder = t().board.search;
   find.setAttribute("aria-label", t().board.search);
-  find.addEventListener("input", () => fill());
+  find.addEventListener("input", () => (settle(), fill()));
+
+  const settle = () => justHidden.clear();
 
   function fill() {
     const b = t().board;
-    const all = waiting();
+    const all = everyone();
     const q = find.value.trim().toLowerCase();
-    const counts = { all: all.length, free: all.filter((c) => !c.live).length, busy: all.filter((c) => c.live).length };
+    const counts = {
+      all: all.filter((c) => !hidden.has(c.id)).length,
+      free: all.filter((c) => !hidden.has(c.id) && !c.live).length,
+      busy: all.filter((c) => !hidden.has(c.id) && c.live).length,
+      hidden: hidden.size,
+    };
     const box = document.getElementById("filter");
     box.setAttribute("aria-label", b.all);
-    box.innerHTML = ["all", "free", "busy"]
-      .map((k) => `<button class="opt" type="button" role="radio" data-f="${k}" aria-checked="${filter === k}">${k === "all" ? b.all : t().cand[k]} ${counts[k]}</button>`)
+    box.innerHTML = ["all", "free", "busy", "hidden"]
+      .filter((k) => k !== "hidden" || counts.hidden > 0 || filter === "hidden")
+      .map((k) => `<button class="opt" type="button" role="radio" data-f="${k}" aria-checked="${filter === k}">${k === "all" ? b.all : k === "hidden" ? b.hidden : t().cand[k]} ${counts[k]}</button>`)
       .join("");
-    box.querySelectorAll("[data-f]").forEach((x) => x.addEventListener("click", () => ((filter = x.dataset.f), fill())));
-    const shown = all
-      .filter((c) => filter === "all" || (filter === "busy") === Boolean(c.live))
-      .filter((c) => !q || c.folder.toLowerCase().includes(q) || tx(c.first).toLowerCase().includes(q));
+    box.querySelectorAll("[data-f]").forEach((x) => x.addEventListener("click", () => ((filter = x.dataset.f), settle(), fill())));
+
+    const inFilter = (c) =>
+      filter === "hidden" ? hidden.has(c.id) : (!hidden.has(c.id) || justHidden.has(c.id)) && (filter === "all" || (filter === "busy") === Boolean(c.live));
+    const shown = all.filter(inFilter).filter((c) => !q || c.folder.toLowerCase().includes(q) || tx(c.first).toLowerCase().includes(q));
+    const row = (c) => {
+      if (filter !== "hidden" && justHidden.has(c.id))
+        return `<div class="board-gone">${ICON.hide}<span>${b.justHidden} · ${tx(c.first)}</span><button class="btn btn-ghost btn-sm" type="button" data-show="${c.id}">${b.undo}</button></div>`;
+      const acts = hidden.has(c.id)
+        ? `<button class="btn btn-secondary btn-sm" type="button" data-show="${c.id}">${b.show}</button>`
+        : `<button class="ibtn ibtn-sm" type="button" data-hide="${c.id}" aria-label="${b.hide}" title="${b.hide}">${ICON.hide}</button>
+           <button class="btn btn-secondary btn-sm" type="button" data-hire="${c.id}"${c.live ? " disabled" : ""}>${b.hire}</button>`;
+      return `<div class="board-row"${hidden.has(c.id) ? " data-hidden" : ""}><canvas aria-hidden="true" width="36" height="36" data-av="${c.species}"></canvas>
+        <span class="board-tx"><b>${tx(c.first)}</b><span>${c.live ? t().cand.busyLine + " · " : ""}${b.meta({ folder: c.folder, span: tx(c.span), turns: c.turns })}</span></span>
+        <span class="board-acts">${acts}</span></div>`;
+    };
+    const empty = filter === "hidden" ? b.noneHidden : counts.all === 0 && hidden.size ? b.allHidden : b.none;
     const list = document.getElementById("list");
-    list.innerHTML = shown.length
-      ? shown
-          .map(
-            (c) => `<div class="board-row"><canvas aria-hidden="true" width="36" height="36" data-av="${c.species}"></canvas>
-              <span class="board-tx"><b>${tx(c.first)}</b><span>${c.live ? t().cand.busyLine + " · " : ""}${b.meta({ folder: c.folder, span: tx(c.span), turns: c.turns })}</span></span>
-              <span class="board-acts"><button class="ibtn ibtn-sm" type="button" data-away="${c.id}" aria-label="${b.away}" title="${b.away}">${ICON.away}</button>
-              <button class="btn btn-secondary btn-sm" type="button" data-hire="${c.id}"${c.live ? " disabled" : ""}>${b.hire}</button></span></div>`,
-          )
-          .join("")
-      : `<p class="hint">${all.length === 0 ? b.allAway : b.none}</p>`;
+    list.innerHTML = shown.length ? shown.map(row).join("") : `<p class="hint">${empty}</p>`;
     list.querySelectorAll("[data-av]").forEach((cv) => drawAvatar(cv, cv.dataset.av));
     list.querySelectorAll("[data-hire]").forEach((x) => x.addEventListener("click", () => hire(CANDIDATES.find((c) => c.id === x.dataset.hire))));
-    list.querySelectorAll("[data-away]").forEach((x) => x.addEventListener("click", () => sendAway(x.dataset.away)));
-    const note = document.getElementById("note");
-    note.innerHTML = sentAway.size ? `${b.sent(sentAway.size)} · <button class="btn btn-ghost btn-sm" type="button" data-recall>${b.recall}</button>` : "";
-    note.querySelector("[data-recall]")?.addEventListener("click", () => {
-      sentAway.clear();
-      render();
-    });
+    list.querySelectorAll("[data-hide]").forEach((x) => x.addEventListener("click", () => hide(x.dataset.hide)));
+    list.querySelectorAll("[data-show]").forEach((x) => x.addEventListener("click", () => show(x.dataset.show)));
   }
 
-  function sendAway(id) {
-    sentAway.add(id);
+  function hide(id) {
+    hidden.add(id);
+    justHidden.add(id);
+    render();
+  }
+
+  function show(id) {
+    hidden.delete(id);
+    justHidden.delete(id);
+    if (filter === "hidden" && hidden.size === 0) filter = "all";
     render();
   }
 

@@ -196,7 +196,7 @@ to 숨기기 removes it.
 - **Left out:**
   - the app's own runs: a session in a registered project's `.worktrees/`,
     or in the app's temporary folders;
-  - sessions already hired, and sessions sent away;
+  - sessions already hired; hidden ones are listed only under 숨김;
   - sessions with fewer than six messages;
   - sessions not written to for ninety days.
 - **In use:** a session written to in the last five minutes is shown as
@@ -234,19 +234,29 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
   and 경력직으로 고용 then waits.
 - **경력직으로 고용** is the key row. For a session in use it is disabled, with
   the reason: *지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.*
-- **광장에서 보내기** removes them from the plaza. That can be undone from the
-  list.
+- **광장에서 숨기기** takes them off the paving (see Hiding, below).
 
 **4. The list.** **구직자 명단**, a panel under the scene:
 
 - a search over folders and first messages;
-- 전체 · 쉬는 중 · 작업 중 with counts;
-- one row per candidate: first message, folder · dates · messages, send
-  away, and 경력직으로 고용. A row in use says why in its line: *작업 중 · 끝나면
+- 전체 · 쉬는 중 · 작업 중 with counts, and **숨김 N** once anyone is hidden;
+- one row per candidate: first message, folder · dates · messages, hiding,
+  and 경력직으로 고용. A row in use says why in its line: *작업 중 · 끝나면
   고용할 수 있어요*;
-- with nobody left, *광장에 남은 구직자가 없어요.*; with a search that finds
-  nothing, *찾는 구직자가 없어요.*;
-- *보낸 구직자 N명 · 다시 부르기*, which brings everyone sent away back.
+- with everyone hidden, *모두 숨겼어요. 숨김에서 다시 보이게 할 수 있어요.*; with a
+  search that finds nothing, *찾는 구직자가 없어요.*
+
+**Hiding.** Hiding never deletes anything, and the screen shows that rather
+than says it.
+- The control is a closed eye, **숨기기**. No arrow or bin, which would read
+  as sending something away or deleting it.
+- A row just hidden stays where it was, as a thin line: *숨겼어요 · <first
+  message>* with **되돌리기**. It folds away once the filter or the search
+  changes.
+- **숨김** lists the hidden ones dimmed, each with **다시 보이기**. Showing the
+  last one returns to 전체.
+- The session file is never touched: hiding is only the app's note of the
+  session's id (SECURITY.md §8b).
 
 **5. Hiring.** 경력직으로 고용 opens the hire dialog:
 
@@ -272,8 +282,8 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
   one used up, and the candidate stays.
 - The plaza stays open, with a notice: *보리가 입사했어요 · tinysoft 세션에서
   6개를 가져왔어요. 사무실에 책상이 생겼어요.* and 직원 페이지 보기.
-- Sending everyone away leaves the paving empty with *구직자를 모두 보냈어요.
-  명단에서 다시 부를 수 있어요.*
+- Hiding everyone leaves the paving empty with *구직자를 모두 숨겼어요. 명단의
+  숨김에서 다시 보이게 할 수 있어요.*
 - A desk is added on the floor.
 - 오늘 reads *보리가 경력직으로 입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
 - On their page, the Record panel has 경력, and each memory brought reads
