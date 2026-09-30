@@ -26,6 +26,7 @@ function toMemory(row: typeof memories.$inferSelect): Memory {
     areaId: row.areaId === null ? undefined : toAreaId(row.areaId),
     text: row.text,
     sourceTaskId: row.sourceTaskId === null ? undefined : toTaskId(row.sourceTaskId),
+    broughtIn: row.broughtIn,
     createdAt: row.createdAt,
   };
 }
@@ -58,6 +59,7 @@ export function createSqliteMemoryRepository(db: AppDatabase): MemoryRepository 
         areaId: memory.areaId ?? null,
         text: memory.text,
         sourceTaskId: memory.sourceTaskId ?? null,
+        broughtIn: memory.broughtIn,
         createdAt: memory.createdAt,
       };
       db.insert(memories).values({ id: memory.id, ...row }).onConflictDoUpdate({ target: memories.id, set: row }).run();

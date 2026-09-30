@@ -92,6 +92,11 @@ export const employees = sqliteTable(
     availability: text("availability", { enum: availabilities }).notNull(),
     leaveSince: integer("leave_since"),
     hiredAt: integer("hired_at").notNull(),
+    // the session a hire with experience came from, all four or none
+    careerSession: text("career_session"),
+    careerFolder: text("career_folder"),
+    careerFrom: integer("career_from"),
+    careerTo: integer("career_to"),
   },
   (table) => [
     index("idx_employees_company").on(table.companyId),
@@ -214,6 +219,7 @@ export const memories = sqliteTable(
     text: text("text").notNull(),
     // kept when its task is deleted: where a memory came from outlives the task
     sourceTaskId: text("source_task_id"),
+    broughtIn: integer("brought_in", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
   },
   (table) => [

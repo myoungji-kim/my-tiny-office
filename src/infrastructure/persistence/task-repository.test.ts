@@ -27,6 +27,7 @@ const mocha: Employee = {
   availability: "available",
   leaveSince: undefined,
   hiredAt: t0,
+  career: undefined,
 };
 const pay: Project = {
   id: toProjectId("pay"),

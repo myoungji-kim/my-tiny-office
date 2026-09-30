@@ -31,6 +31,8 @@ export interface Memory {
   readonly text: string;
   // The task it was taught from; none when it was told directly.
   readonly sourceTaskId: TaskId | undefined;
+  // brought from the Claude Code session its employee was hired from
+  readonly broughtIn: boolean;
   readonly createdAt: Timestamp;
 }
 
@@ -85,6 +87,7 @@ export interface TeachInput {
   readonly areaId?: AreaId;
   readonly text: string;
   readonly sourceTaskId?: TaskId;
+  readonly broughtIn?: boolean;
 }
 
 export type TeachFailure = "memoryTextRequired" | "memoryTextTooLong" | "areaRequired" | "areaNotAllowed" | "employeeRequired" | "employeeNotAllowed";
@@ -106,6 +109,7 @@ export function teach(input: TeachInput, eventId: EventId, now: Timestamp): Resu
     areaId: input.areaId,
     text,
     sourceTaskId: input.sourceTaskId,
+    broughtIn: input.broughtIn === true,
     createdAt: now,
   };
   return {

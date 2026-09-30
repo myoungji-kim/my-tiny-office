@@ -22,6 +22,7 @@ const person = (id: string, extra: Partial<Employee> = {}): Employee => ({
   availability: "available",
   leaveSince: undefined,
   hiredAt: t0,
+  career: undefined,
   ...extra,
 });
 

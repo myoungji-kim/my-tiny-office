@@ -20,6 +20,10 @@ function toEmployee(row: EmployeeRow): Employee {
     availability: row.availability,
     leaveSince: row.leaveSince ?? undefined,
     hiredAt: row.hiredAt,
+    career:
+      row.careerSession !== null && row.careerFolder !== null && row.careerFrom !== null && row.careerTo !== null
+        ? { sessionId: row.careerSession, folder: row.careerFolder, from: row.careerFrom, to: row.careerTo }
+        : undefined,
   };
 }
 
@@ -34,6 +38,10 @@ function toRow(employee: Employee): typeof employees.$inferInsert {
     availability: employee.availability,
     leaveSince: employee.leaveSince ?? null,
     hiredAt: employee.hiredAt,
+    careerSession: employee.career?.sessionId ?? null,
+    careerFolder: employee.career?.folder ?? null,
+    careerFrom: employee.career?.from ?? null,
+    careerTo: employee.career?.to ?? null,
   };
 }
 

@@ -28,6 +28,7 @@ const employee: Employee = {
   availability: "available",
   leaveSince: undefined,
   hiredAt,
+  career: undefined,
 };
 
 let database: TestDatabase;

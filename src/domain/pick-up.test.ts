@@ -18,6 +18,7 @@ const person = (id: string, availability: Employee["availability"] = "available"
   availability,
   leaveSince: undefined,
   hiredAt: 0,
+  career: undefined,
 });
 
 const project = (id: string, priority: Priority, status: ProjectStatus = "active"): Project => ({

@@ -15,6 +15,15 @@ export type Species = (typeof SPECIES)[number];
 
 export const MAX_EMPLOYEE_NAME = 20;
 
+// The Claude Code session a hire came from, when they joined with experience
+// from the plaza. It names the session only; it is never their agent.
+export interface Career {
+  readonly sessionId: string;
+  readonly folder: string;
+  readonly from: Timestamp;
+  readonly to: Timestamp;
+}
+
 export interface Employee {
   readonly id: EmployeeId;
   readonly companyId: CompanyId;
@@ -25,6 +34,7 @@ export interface Employee {
   readonly availability: Availability;
   readonly leaveSince: Timestamp | undefined;
   readonly hiredAt: Timestamp;
+  readonly career: Career | undefined;
 }
 
 export interface HireEmployeeInput {
@@ -34,6 +44,7 @@ export interface HireEmployeeInput {
   readonly species: Species;
   readonly roleId: RoleId;
   readonly teamId?: TeamId;
+  readonly career?: Career;
 }
 
 export type HireEmployeeResult =
@@ -60,6 +71,7 @@ export function hireEmployee(
     availability: "available",
     leaveSince: undefined,
     hiredAt: now,
+    career: input.career,
   };
 
   return {

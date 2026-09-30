@@ -1,6 +1,7 @@
 import * as employeeDomain from "../domain/employee";
 import type { DomainEvent } from "../domain/events";
-import { toEmployeeId, toEventId, type CompanyId, type EmployeeId, type RoleId, type TeamId } from "../domain/ids";
+import { toEmployeeId, toEventId, toMemoryId, type AreaId, type CompanyId, type EmployeeId, type RoleId, type TeamId } from "../domain/ids";
+import * as memoryDomain from "../domain/memory";
 import type { NameFailure } from "../domain/name";
 import { releaseReview } from "../domain/review";
 import { returnToBacklog } from "../domain/task";
@@ -15,9 +16,12 @@ export interface HireEmployeeInput {
   readonly species: employeeDomain.Species;
   readonly roleId: RoleId;
   readonly teamId?: TeamId;
+  // with experience: the session, and the lines of it the user kept
+  readonly career?: employeeDomain.Career;
+  readonly brought?: { readonly expertise: readonly { readonly areaId: AreaId; readonly text: string }[]; readonly style: readonly string[] };
 }
 
-export type HireEmployeeFailure = "companyNotFound" | "roleNotFound" | "teamNotFound" | NameFailure;
+export type HireEmployeeFailure = "companyNotFound" | "roleNotFound" | "teamNotFound" | "areaNotFound" | NameFailure | memoryDomain.TeachFailure;
 
 type EmployeeResult<TFailure extends string> = UseCaseResult<{ readonly employee: employeeDomain.Employee }, TFailure>;
 
@@ -31,12 +35,34 @@ export function hireEmployee(ctx: AppContext, input: HireEmployeeInput): Promise
       return { ok: false, reason: "teamNotFound" };
     }
 
+    const brought = input.brought ?? { expertise: [], style: [] };
+    const areas = await ctx.areas.findByCompany(input.companyId);
+    if (brought.expertise.some((m) => !areas.some((a) => a.id === m.areaId))) return { ok: false, reason: "areaNotFound" };
+    const lines = [
+      ...brought.expertise.map((m) => ({ kind: "expertise" as const, areaId: m.areaId, text: m.text.trim() })),
+      ...brought.style.map((text) => ({ kind: "style" as const, areaId: undefined, text: text.trim() })),
+    ];
+    // checked before anyone is hired, so a bad line never leaves half a hire
+    if (lines.some((l) => l.text === "")) return { ok: false, reason: "memoryTextRequired" };
+    if (lines.some((l) => l.text.length > memoryDomain.MAX_MEMORY_TEXT)) return { ok: false, reason: "memoryTextTooLong" };
+
     const hired = employeeDomain.hireEmployee({ ...input, id: toEmployeeId(ctx.newId()) }, toEventId(ctx.newId()), ctx.now());
     if (!hired.ok) return hired;
-
     await ctx.employees.save(hired.employee);
-    await recordMilestones(ctx, input.companyId, hired.events);
-    return { ok: true, value: { employee: hired.employee }, events: hired.events };
+
+    const events: DomainEvent[] = [...hired.events];
+    for (const line of lines) {
+      const taught = memoryDomain.teach(
+        { id: toMemoryId(ctx.newId()), companyId: input.companyId, employeeId: hired.employee.id, broughtIn: true, ...line },
+        toEventId(ctx.newId()),
+        ctx.now(),
+      );
+      if (!taught.ok) return taught;
+      await ctx.memories.save(taught.value);
+      events.push(...taught.events);
+    }
+    await recordMilestones(ctx, input.companyId, events);
+    return { ok: true, value: { employee: hired.employee }, events };
   });
 }
 

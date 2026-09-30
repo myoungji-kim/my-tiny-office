@@ -1,6 +1,6 @@
 import { assert, beforeEach, describe, expect, it } from "vitest";
 
-import { toCompanyId, toRoleId, toTeamId } from "../domain/ids";
+import { toAreaId, toCompanyId, toRoleId, toTeamId } from "../domain/ids";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
@@ -18,6 +18,39 @@ let ctx: AppContext;
 beforeEach(async () => {
   ctx = createTestContext(() => now);
   await createCompany(ctx, { id: companyId, name: "TinySoft" });
+});
+
+describe("hireEmployee with experience", () => {
+  const career = { sessionId: "b477a1ec-4706-4cc4-b017-a887aedc242e", folder: "/code/tinysoft", from: now - 9 * 86_400_000, to: now - 86_400_000 };
+
+  it("brings the lines the user kept as their own memories, and names the session they came from", async () => {
+    const [area] = await ctx.areas.findByCompany(companyId);
+    const hired = await hireEmployee(ctx, {
+      companyId,
+      name: "보리",
+      species: "bunny",
+      roleId: await firstRole(ctx, companyId),
+      career,
+      brought: { expertise: [{ areaId: area.id, text: " Retries share an idempotency key. " }], style: ["Small commits"] },
+    });
+
+    assert(hired.ok);
+    expect(hired.value.employee.career).toEqual(career);
+    const mine = (await ctx.memories.findByCompany(companyId)).filter((m) => m.employeeId === hired.value.employee.id);
+    expect(mine).toMatchObject([
+      { kind: "expertise", areaId: area.id, text: "Retries share an idempotency key.", broughtIn: true },
+      { kind: "style", text: "Small commits", broughtIn: true },
+    ]);
+  });
+
+  it("hires nobody when a line cannot be kept", async () => {
+    const roleId = await firstRole(ctx, companyId);
+    const tooLong = { companyId, name: "보리", species: "bunny" as const, roleId, career, brought: { expertise: [], style: ["x".repeat(201)] } };
+
+    await expect(hireEmployee(ctx, tooLong)).resolves.toEqual({ ok: false, reason: "memoryTextTooLong" });
+    await expect(hireEmployee(ctx, { ...tooLong, brought: { expertise: [{ areaId: toAreaId("elsewhere"), text: "x" }], style: [] } })).resolves.toEqual({ ok: false, reason: "areaNotFound" });
+    await expect(ctx.employees.findByCompany(companyId)).resolves.toEqual([]);
+  });
 });
 
 describe("editEmployee", () => {

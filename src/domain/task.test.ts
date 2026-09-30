@@ -33,6 +33,7 @@ const mocha: Employee = {
   availability: "available",
   leaveSince: undefined,
   hiredAt: t0,
+  career: undefined,
 };
 const tofu: Employee = { ...mocha, id: toEmployeeId("tofu"), name: "두부" };
 

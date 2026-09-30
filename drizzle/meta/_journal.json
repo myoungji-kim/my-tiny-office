@@ -78,6 +78,13 @@
       "when": 1790725535944,
       "tag": "0010_task_revised",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1790779377794,
+      "tag": "0011_employee_career",
+      "breakpoints": true
     }
   ]
 }
