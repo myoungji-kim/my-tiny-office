@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { ClaudeCodeStatus } from "../application/runtime-status";
-import { workPaused } from "../app/screen-data";
+import { workElsewhere, workPaused } from "../app/screen-data";
 import { getDictionary, type Locale } from "../i18n";
 import { plazaShown } from "../server/plaza";
 import type { CompanyOption, EmployeeView } from "../server/view-model";
@@ -27,6 +27,13 @@ const HREF: Readonly<Record<Screen, string>> = {
   settings: "/settings",
   plaza: "/plaza",
 };
+
+const ELSEWHERE = (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+    <rect x="1.8" y="3.2" width="8.4" height="6.6" rx="1.2" />
+    <path d="M5.8 12.8h8.4V6.2" />
+  </svg>
+);
 
 const ICON: Readonly<Record<Screen, ReactNode>> = {
   office: (
@@ -163,6 +170,15 @@ export function Shell({
         {head}
         <div className="body">
           <RuntimeNotice status={status} words={t.claude} />
+          {workElsewhere() && (
+            <div className="notice" role="status">
+              <span className="n-ic">{ELSEWHERE}</span>
+              <span className="n-tx">
+                <b>{t.settings.elsewhereTitle}</b>
+                <span>{t.settings.elsewhereWhy}</span>
+              </span>
+            </div>
+          )}
           {workPaused() && <PausedNotice title={t.settings.pausedTitle} why={t.settings.pausedWhy} resume={t.settings.resumeWork} />}
           {children}
         </div>

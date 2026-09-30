@@ -773,6 +773,8 @@ export const en = {
     plazaShow: "Show",
     plazaHide: "Hide",
     workPaused: "Paused",
+    elsewhereTitle: "Another My Tiny Office on this computer is doing the work",
+    elsewhereWhy: "You can see the office and give work from here too. The work runs over there. Close it, and this one takes over within 30 seconds.",
     pausedTitle: "Starting work is paused",
     pausedWhy: "Nobody free takes work from the backlog. Work in progress carries on.",
     resumeWork: "Turn back on",

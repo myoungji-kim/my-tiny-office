@@ -197,8 +197,14 @@ agents, so it is a target in its own right.
 - **One worker per data directory.** The server that holds
   `<data dir>/work.pid` runs the work; any other server on the same data
   runs none. Two workers would each take the other's runs for lost ones and
-  start them again. The holder touches the file every tick; one untouched for
-  30 seconds is taken over, so a server stopped by force never keeps the lock.
+  start them again. The holder touches the file every tick. A lock whose process is
+  gone is taken over at once; one untouched for 30 seconds is taken over too,
+  so a pid reused by another program never keeps it.
+- **A server left behind.** When the desktop app starts and 127.0.0.1:4317 is
+  taken, it asks the system which process listens there. Only when that
+  process was started from this checkout (its command line holds the checkout
+  path and `next`) is it stopped, and the app starts its own. Any other
+  program keeps the port, and the app takes a free one.
 - **Processes.** `claude` and `git` are started only through
   `src/infrastructure/process/run.ts`: `spawn(file, args)` with `shell: false`,
   found on `PATH` by the app rather than by a shell.

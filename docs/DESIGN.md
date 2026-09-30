@@ -202,7 +202,7 @@ to 숨기기 removes it.
 - **In use:** a session written to in the last five minutes is shown as
   작업 중.
 - **Refreshing:** the list is read each time the plaza or 경력 가져오기 opens,
-  and every 30 seconds while the plaza is open.
+  and again whenever the open screen refreshes itself (every five seconds).
   A session's message count is kept until its file changes size or time.
 - **Programs' runs:** a session Claude Code records as run by a program
   (`claude -p`, its entrypoint `sdk-…`) is never a candidate. That covers

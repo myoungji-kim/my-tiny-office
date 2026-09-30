@@ -79,9 +79,51 @@ const portFree = (port) =>
     probe.listen(port, "127.0.0.1", () => probe.close(() => settle(true)));
   });
 
+// The process listening on a local port, and how it was started.
+function listener(port) {
+  if (process.platform === "win32") {
+    const script =
+      "$c = Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort $env:MTO_PORT -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; " +
+      "if ($c) { $p = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $c.OwningProcess); [Console]::Out.Write([string]$c.OwningProcess + \"`n\" + $p.CommandLine) }";
+    const out = spawnSync(join(process.env.SystemRoot ?? "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe"), ["-NoProfile", "-NonInteractive", "-Command", script], {
+      encoding: "utf8",
+      windowsHide: true,
+      env: { ...process.env, MTO_PORT: String(port) },
+    }).stdout;
+    const [pid, ...command] = (out ?? "").split("\n");
+    return Number(pid) > 0 ? { pid: Number(pid), command: command.join("\n") } : undefined;
+  }
+  const pid = Number((spawnSync("/usr/sbin/lsof", ["-nP", `-iTCP@127.0.0.1:${port}`, "-sTCP:LISTEN", "-t"], { encoding: "utf8" }).stdout ?? "").trim().split("\n")[0]);
+  if (!(pid > 0)) return undefined;
+  return { pid, command: spawnSync("/bin/ps", ["-o", "command=", "-p", String(pid)], { encoding: "utf8" }).stdout ?? "" };
+}
+
+// A server this checkout started and a killed app left behind: it is stopped,
+// agents and all, so the port is free again. Anything else is left alone.
+async function stopLeftBehind(port) {
+  const held = listener(port);
+  const command = held?.command.toLowerCase() ?? "";
+  if (held === undefined || !command.includes(ROOT.toLowerCase()) || !command.includes("next")) return false;
+  if (process.platform === "win32") {
+    spawnSync(join(process.env.SystemRoot ?? "C:\\Windows", "System32", "taskkill.exe"), ["/PID", String(held.pid), "/T", "/F"], { windowsHide: true });
+  } else {
+    try {
+      process.kill(held.pid, "SIGTERM");
+    } catch {
+      // gone already
+    }
+  }
+  for (let i = 0; i < 25; i++) {
+    if (await portFree(port)) return true;
+    await new Promise((settle) => setTimeout(settle, 400));
+  }
+  return false;
+}
+
 // The same port each time keeps what the window remembers (its width, the task split).
 async function choosePort() {
   if (await portFree(PORT)) return PORT;
+  if (await stopLeftBehind(PORT)) return PORT;
   return new Promise((settle) => {
     const probe = net.createServer();
     probe.listen(0, "127.0.0.1", () => {

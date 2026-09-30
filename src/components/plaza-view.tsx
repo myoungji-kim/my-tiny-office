@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { hideCandidateAction } from "../app/plaza-actions";
@@ -25,7 +24,6 @@ const W = 18;
 const H = 6;
 const SLOTS = [2, 4].flatMap((row) => Array.from({ length: 6 }, (_, i) => ({ x: 1 + i * 3, row })));
 const GAP = 8;
-const REFRESH_MS = 30_000;
 const EDGE = 12;
 
 const CHECK = (
@@ -87,12 +85,6 @@ export function PlazaView({
   const [openId, setOpenId] = useState<string | undefined>(undefined);
   const [hiring, setHiring] = useState<CandidateView | undefined>(undefined);
   const [arrived, setArrived] = useState<{ readonly id: string; readonly name: string; readonly brought: Brought | undefined } | undefined>(undefined);
-  const router = useRouter();
-  // whether a session is in use changes while the plaza is open
-  useEffect(() => {
-    const timer = setInterval(() => router.refresh(), REFRESH_MS);
-    return () => clearInterval(timer);
-  }, [router]);
   const canvas = useRef<HTMLCanvasElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const anchor = useRef<HTMLElement | null>(null);

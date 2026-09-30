@@ -774,6 +774,8 @@ export const ko: Dictionary = {
     plazaShow: "보이기",
     plazaHide: "숨기기",
     workPaused: "멈춤",
+    elsewhereTitle: "다른 곳에서 켜진 My Tiny Office가 일을 맡고 있어요",
+    elsewhereWhy: "이 창에서도 사무실을 보고 업무를 맡길 수 있어요. 일은 저쪽에서 진행돼요. 저쪽을 끄면 30초 안에 여기서 이어받아요.",
     pausedTitle: "업무 시작을 멈춰 뒀어요",
     pausedWhy: "비는 직원이 대기열의 업무를 가져가지 않아요. 하던 일은 마저 해요.",
     resumeWork: "다시 켜기",
