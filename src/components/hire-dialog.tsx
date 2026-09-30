@@ -10,7 +10,7 @@ import type { CandidateView } from "../server/plaza";
 import type { AreaView } from "../server/view-model";
 import { CAST, castMember, type CastMember } from "../ui/paint";
 
-import { CareerDialog, type Brought } from "./career-dialog";
+import { CareerDialog, type Brought, type Summed } from "./career-dialog";
 import { spanOf } from "./dates";
 import { Sprite } from "./sprite";
 import { useLatest } from "./use-latest";
@@ -73,6 +73,7 @@ export function HireDialog({
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   const first = useRef<HTMLButtonElement>(null);
+  const [reads] = useState(() => new Map<string, Summed>());
 
   const latestClose = useLatest(onClose);
   useEffect(() => {
@@ -113,7 +114,7 @@ export function HireDialog({
     });
 
   return (
-    <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && brought === undefined && onClose()}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="hire-title">
         <div className="m-hd">
           <span className="m-av">{chosen !== undefined && <Sprite species={chosen.key} size={32} />}</span>
@@ -262,6 +263,7 @@ export function HireDialog({
           areas={career.areas}
           ready={career.ready}
           session={reading === "pick" ? undefined : reading}
+          reads={reads}
           onDone={(next) => {
             setBrought(next ?? undefined);
             setReading(undefined);

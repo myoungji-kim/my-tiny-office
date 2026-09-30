@@ -19,7 +19,7 @@ export interface Brought {
 }
 
 type Line = { areaId?: string; text: string; on: boolean; known: boolean };
-type Summed = { readonly knows: Line[]; readonly style: Line[]; readonly dropped: number; readonly cut: boolean };
+export type Summed = { readonly knows: Line[]; readonly style: Line[]; readonly dropped: number; readonly cut: boolean };
 type Step = "pick" | "reading" | "keep" | "failed" | "empty";
 
 const Chevron = () => (
@@ -36,6 +36,7 @@ export function CareerDialog({
   areas,
   ready,
   session,
+  reads,
   onDone,
   onClose,
 }: {
@@ -44,6 +45,8 @@ export function CareerDialog({
   readonly areas: readonly AreaView[];
   readonly ready: boolean;
   readonly session?: CandidateView;
+  // what earlier openings read, kept by whoever opens this, so a read is paid for once
+  readonly reads?: Map<string, Summed>;
   // null: hire without it
   readonly onDone: (brought: Brought | null) => void;
   readonly onClose: () => void;
@@ -58,7 +61,7 @@ export function CareerDialog({
   // why a reading did not happen, when it was not the run itself that failed
   const [why, setWhy] = useState<string | undefined>(undefined);
   // what a session summed up to, so going back and forth does not read it again
-  const cache = useRef(new Map<string, Summed>());
+  const cache = useRef(reads ?? new Map<string, Summed>());
   const modal = useRef<HTMLDivElement>(null);
 
   const latestClose = useLatest(onClose);
@@ -80,11 +83,13 @@ export function CareerDialog({
 
   useEffect(() => {
     if (pool !== undefined) return;
-    void candidatesAction(companyId).then((found) => {
-      const usable = found.filter((c) => !c.hidden);
-      setPool(usable);
-      setFolder((f) => f ?? usable[0]?.folder);
-    });
+    void candidatesAction(companyId)
+      .then((found) => {
+        const usable = found.filter((c) => !c.hidden);
+        setPool(usable);
+        setFolder((f) => f ?? usable[0]?.folder);
+      })
+      .catch(() => setPool([]));
   }, [companyId, pool]);
 
   const read = (s: CandidateView) => {
@@ -94,7 +99,9 @@ export function CareerDialog({
       return setStep(known.knows.length + known.style.length === 0 ? "empty" : "keep");
     }
     setStep("reading");
-    void readCareerAction(companyId, s.id).then((result: CareerRead) => {
+    void readCareerAction(companyId, s.id)
+      .catch((): CareerRead => ({ error: "careerReadFailed" }))
+      .then((result: CareerRead) => {
       if ("error" in result) {
         setWhy(result.error === "careerReadFailed" ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
         return setStep("failed");
@@ -147,6 +154,8 @@ export function CareerDialog({
 
   const take = () => {
     if (summed === undefined || chosen === undefined) return;
+    // the lines as edited come back if the user opens this again
+    cache.current.set(chosen.id, summed);
     if (kept === 0) return onDone(null);
     const on = (l: Line) => l.on && l.text.trim() !== "";
     onDone({

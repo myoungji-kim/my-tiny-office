@@ -109,8 +109,9 @@ export function todayOf(facts: TodayFacts, now: number): TodayItem[] {
     if (e.availability === "left") continue;
     if (e.availability === "onLeave" && today(e.leaveSince)) items.push({ ...blank, at: e.leaveSince, kind: "leave", who: e.id });
     if (today(e.hiredAt)) {
+      // a session kept without anything taken from it is a new hire, as the plaza says
       const lines = facts.memories.filter((m) => m.employeeId === e.id && m.broughtIn).length;
-      items.push({ ...blank, at: e.hiredAt, kind: "hired", who: e.id, brought: e.career === undefined ? undefined : { folder: folderName(e.career.folder), lines } });
+      items.push({ ...blank, at: e.hiredAt, kind: "hired", who: e.id, brought: e.career === undefined || lines === 0 ? undefined : { folder: folderName(e.career.folder), lines } });
     }
   }
 
