@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { reviseMemoryAction, teachAction } from "../app/people-actions";
@@ -172,6 +173,10 @@ export function TeachDialog({
                   </button>
                 ))}
               </div>
+              {/* areas are made in the company's lists, never here */}
+              <p className="hint">
+                {w.areaHint} <Link href="/company?tab=lists">{w.areaHintLink}</Link>
+              </p>
             </>
           )}
           <div className="field">

@@ -346,6 +346,8 @@ export const en = {
     text: "What to remember",
     placeholder: "e.g. The payments table is partitioned by month.",
     hint: "A sentence or two is best.",
+    areaHint: "Not the right area?",
+    areaHintLink: "Add one in Company › Areas & roles",
     source: (x: string) => "Came from " + x,
     gainArea: (name: string, area: string) => area + " becomes one of " + name + "’s areas",
     carried: (a: number, b: number) => "Carried into every task " + a + " → " + b + " chars",

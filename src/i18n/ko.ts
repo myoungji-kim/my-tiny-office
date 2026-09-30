@@ -349,6 +349,8 @@ export const ko: Dictionary = {
     text: "내용",
     placeholder: "예: 결제 테이블은 월 단위로 파티셔닝돼 있어요.",
     hint: "한두 문장이 좋아요.",
+    areaHint: "찾는 분야가 없나요?",
+    areaHintLink: "회사 › 분야·역할에서 추가하기",
     source: (x: string) => "출처: " + x,
     gainArea: (name: string, area: string) => withParticle(area, "이", "가") + " " + name + "의 전문 분야가 돼요",
     carried: (a: number, b: number) => "업무마다 들고 가는 기억 " + a + "자 → " + b + "자",
