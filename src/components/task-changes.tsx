@@ -12,7 +12,7 @@ const hunks = (diff: string) => {
   return start < 0 ? lines : lines.slice(start);
 };
 
-const lineClass =(line: string) => (line.startsWith("+") && !line.startsWith("+++") ? "d-add" : line.startsWith("-") && !line.startsWith("---") ? "d-del" : undefined);
+const lineClass = (line: string) => (line.startsWith("+") && !line.startsWith("+++") ? "d-add" : line.startsWith("-") && !line.startsWith("---") ? "d-del" : undefined);
 
 // Each changed file opens its diff under it; the diff is shown as text, never run.
 export function TaskChanges({ companyId, taskId, changes }: { readonly companyId: string; readonly taskId: string; readonly changes: readonly FileChange[] }) {

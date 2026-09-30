@@ -520,9 +520,9 @@ button; no dialog. The `⋯` is off while it is being done.
   applied task's branch stays, since it holds what approving committed. The
   history keeps its lines.
 - **Letting someone go.** 떠나보내기 in their page's `⋯`, kept with 계속 두기:
-  their task goes back to the backlog, a review they held is given back, a
-  task naming them as reviewer names nobody, and what they were taught leaves
-  with them. They stay only as a name (`availability: left`), on what they
+  their task goes back to the backlog, a review they held is withdrawn and
+  its work waits for approval, a task naming them as reviewer names nobody,
+  and what they were taught leaves with them. They stay only as a name (`availability: left`), on what they
   did and in the history, which adds that they left, and in no list. Someone
   whose agent never ran is removed outright, their hire in the history too,
   and the dialog says so.

@@ -37,15 +37,18 @@ A team is organisation first: its room in the office appears with its first
 person, and no room is built by hand.
 
 **Leave and letting go.** Sending someone on leave returns their task to the
-backlog, with any work that was waiting for them, and gives back any review
-they were asked for; nobody on leave can be given work. Leave has no return date: it
+backlog, with any work that was waiting for them, and withdraws any review
+they were asked for: the finished work it was of waits for the user's
+approval, where another review can be asked. Nobody on leave can be given work. Leave has no return date: it
 shows since when, and ends when the user brings them back.
 
 Letting someone go cannot be undone. Their tasks go back to the backlog; work
 of theirs waiting for approval or held no longer names them, so whoever picks
-it up next takes it. A review they held is given back, a task naming them as
-reviewer names nobody, and what they were taught leaves with them. They stay
-only as a name — on what they did and in the history — and in no list.
+it up next takes it. A review they held is withdrawn the same way, a task
+naming them as reviewer names nobody, and what they were taught leaves with
+them. They stay only as a name — on what they did and in the history, which
+adds that they left — and in no list. Someone whose agent never ran leaves
+no trace at all.
 
 ## Agent
 
