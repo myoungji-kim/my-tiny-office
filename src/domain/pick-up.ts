@@ -1,7 +1,7 @@
 import type { Employee } from "./employee";
 import type { EmployeeId, ProjectId, ReviewId, TaskId } from "./ids";
 import { PRIORITY_RANK, type Project } from "./project";
-import { liveReviews, type Review } from "./review";
+import { holdsTheWork, liveReviews, type Review } from "./review";
 import type { Task } from "./task";
 
 export interface PickUp {
@@ -18,10 +18,13 @@ function occupied(tasks: readonly Task[], reviews: readonly Review[]): Set<Emplo
   ]);
 }
 
-// Queued reviews whose reviewer is now free, the oldest first, one each.
+// Queued reviews whose reviewer is now free, the oldest first, one each. Work
+// that only waits for its own review keeps its author from nothing, or two
+// colleagues reviewing each other would wait on each other for good.
 export function reviewsToStart(tasks: readonly Task[], reviews: readonly Review[], employees: readonly Employee[]): ReviewId[] {
-  const working = new Set(tasks.filter((t) => t.status === "working").map((t) => t.assigneeId));
   const live = liveReviews(tasks, reviews);
+  const waitingOnReview = new Set(live.filter(holdsTheWork).map((r) => r.taskId));
+  const working = new Set(tasks.filter((t) => t.status === "working" && !waitingOnReview.has(t.id)).map((t) => t.assigneeId));
   const reviewing = new Set(live.filter((r) => r.state === "reviewing").map((r) => r.reviewerId));
   const started = new Set<EmployeeId>();
   const result: ReviewId[] = [];

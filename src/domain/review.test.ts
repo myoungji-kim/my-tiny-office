@@ -137,6 +137,18 @@ describe("review", () => {
   });
 });
 
+describe("two colleagues reviewing each other", () => {
+  it("both start, since work waiting on its review keeps its author from nothing", () => {
+    // mocha's webhook waits for pip, and pip's own work waits for mocha
+    const pipsOwn = task("pips-own", { assigneeId: toEmployeeId("pip") });
+    const forPip = askReviewer(suggested(), webhook, person("pip"), knowsSecurity, true, e, t0);
+    const forMocha = askReviewer({ ...suggested(), id: toReviewId("r2"), taskId: pipsOwn.id }, pipsOwn, person("mocha"), knowsSecurity, true, e, t0 + 1);
+    assert(forPip.ok && forMocha.ok);
+
+    expect(reviewsToStart([webhook, pipsOwn], [forPip.review, forMocha.review], [person("pip"), person("mocha")])).toEqual(["r1", "r2"]);
+  });
+});
+
 describe("a review that the work moved on from", () => {
   it("is not offered when nobody else knows the area", () => {
     expect(suggestReview({ id: toReviewId("r"), task: webhook, othersWhoKnow: 0 }, e, t0)).toMatchObject({ reason: "nobodyKnowsArea" });
