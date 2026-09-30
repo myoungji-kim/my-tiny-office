@@ -2,6 +2,8 @@
 
 import { useEffect, type RefObject } from "react";
 
+const FOCUSABLE = "button:not(:disabled), a[href], [tabindex]";
+
 // A popover closes on a press outside it and its anchor, and on Escape, which
 // hands focus back to the anchor.
 export function useDismiss(
@@ -20,7 +22,10 @@ export function useDismiss(
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       close();
-      anchor.current?.focus({ preventScroll: true });
+      // an anchor that is a whole card hands focus to the control inside it
+      const at = anchor.current;
+      const control = at?.matches(FOCUSABLE) === true ? at : (at?.querySelector<HTMLElement>(FOCUSABLE) ?? at);
+      control?.focus({ preventScroll: true });
     };
     document.addEventListener("pointerdown", onPointer);
     document.addEventListener("keydown", onKey);
