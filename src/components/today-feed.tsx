@@ -108,11 +108,11 @@ export function TodayFeed({
             {w.nothing}
           </p>
         )}
-        {shown.map((i, n) => {
+        {shown.map((i) => {
           const parts = line(i);
           const stop = STOPS.has(i.kind);
           return (
-            <div key={n} className={"today-row" + (i.kind === "waiting" ? " you" : stop ? " bad" : "")}>
+            <div key={[i.kind, i.at, i.who, i.task?.id, i.memory].join("|")} className={"today-row" + (i.kind === "waiting" ? " you" : stop ? " bad" : "")}>
               <span className="today-at">{time.format(i.at)}</span>
               <span className="today-ic">{ICON[i.kind]}</span>
               <span className="today-tx" title={text(parts)}>

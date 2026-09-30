@@ -136,8 +136,9 @@ on, work finished and waiting on the user, work applied, someone going on
 leave, someone joining, and work that stopped: a dropped agent, a command or
 a Jira or Confluence write the project does not allow, the spending cap. Each
 row is worded by the dictionary, with its time. It is read from what the
-company keeps (a task's start, finish and apply, a review's start, a run's
-end and the memories it drew on, a hire, a leave), since midnight
+company keeps, since midnight: someone's first run on a task (so a task taken
+over today is started by whoever took it), a task's finish and apply, a
+review's start, a run's end and the memories it drew on, a hire and a leave
 (`src/server/today.ts`). The
 feed follows the room — a team's room, the meeting room and the lounge show
 what happened to the people in them — and shows six before 더 보기. Only what

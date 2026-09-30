@@ -55,8 +55,24 @@ export function todayOf(facts: TodayFacts, now: number): TodayItem[] {
   const blank = { who: undefined, task: undefined, areaId: undefined, memory: undefined, took: undefined, brought: undefined, open: false };
   const items: TodayItem[] = [];
 
+  // Someone starts a task when their agent first runs on it, which a task's
+  // own start (kept once, for whoever held it then) cannot say. A reviewer's
+  // runs are their review, told as such below.
+  const reviewers = new Set(facts.reviews.filter((r) => r.reviewerId !== undefined).map((r) => r.taskId + ":" + r.reviewerId));
+  const firstRun = new Map<string, Run>();
+  for (const run of facts.runs) {
+    const who = agentOwner.get(run.agentId);
+    if (who === undefined || reviewers.has(run.taskId + ":" + who)) continue;
+    const key = run.taskId + ":" + who;
+    const seen = firstRun.get(key);
+    if (seen === undefined || run.startedAt < seen.startedAt) firstRun.set(key, run);
+  }
+  for (const [key, run] of firstRun) {
+    const task = tasks.get(run.taskId);
+    if (task !== undefined && today(run.startedAt)) items.push({ ...blank, at: run.startedAt, kind: "started", who: key.slice(key.indexOf(":") + 1), task: taskOf(task) });
+  }
+
   for (const t of facts.tasks) {
-    if (today(t.startedAt)) items.push({ ...blank, at: t.startedAt, kind: "started", who: t.assigneeId, task: taskOf(t) });
     if (today(t.finishedAt) && t.status === "approval")
       items.push({ ...blank, at: t.finishedAt, kind: "waiting", who: t.assigneeId, task: taskOf(t), took: Math.max(1, Math.round(t.workedFor / 60_000)), open: true });
     if (today(t.appliedAt)) items.push({ ...blank, at: t.appliedAt, kind: "applied", task: taskOf(t) });

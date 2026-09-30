@@ -6,7 +6,7 @@ import { teachMemory } from "../application/memory";
 import { createProject, startProject } from "../application/project";
 import { createTask, pickUpWork } from "../application/task";
 import { createTestContext, firstRole } from "../application/test-context";
-import { toAgentId, toCompanyId, toRunId } from "../domain/ids";
+import { toAgentId, toCompanyId, toReviewId, toRunId } from "../domain/ids";
 import { endRun, startRun } from "../domain/run";
 
 import { todayOf, type TodayFacts } from "./today";
@@ -40,11 +40,38 @@ const factsOf = async (ctx: Awaited<ReturnType<typeof office>>["ctx"]): Promise<
 describe("todayOf", () => {
   it("lists only what happened since midnight, newest first", async () => {
     const clock = { at: yesterday };
-    const { ctx } = await office(clock);
-    clock.at = now - 3_600_000;
-    assert((await pickUpWork(ctx, companyId)).ok);
+    const { ctx, mocha, taskId } = await office(clock);
+    const agent = { id: toAgentId("a"), companyId, employeeId: mocha.id, runtime: "claudeCode" as const, createdAt: yesterday };
+    await ctx.agents.save(agent);
+    await ctx.runs.save(startRun({ id: toRunId("r"), agent, taskId, sessionId: undefined }, now - 3_600_000));
 
     expect(todayOf(await factsOf(ctx), now).map((i) => i.kind)).toEqual(["started"]);
+  });
+
+  it("says who started a task by their own first run, and never counts a review as starting it", async () => {
+    const clock = { at: yesterday };
+    const { ctx, mocha, taskId } = await office(clock);
+    const bori = await hireEmployee(ctx, { companyId, name: "보리", species: "bunny", roleId: await firstRole(ctx, companyId) });
+    const dubu = await hireEmployee(ctx, { companyId, name: "두부", species: "cat", roleId: await firstRole(ctx, companyId) });
+    assert(bori.ok && dubu.ok);
+    const agentOf = async (id: string, employeeId: typeof mocha.id) => {
+      const agent = { id: toAgentId(id), companyId, employeeId, runtime: "claudeCode" as const, createdAt: yesterday };
+      await ctx.agents.save(agent);
+      return agent;
+    };
+    const [a, b, d] = [await agentOf("a", mocha.id), await agentOf("b", bori.value.employee.id), await agentOf("d", dubu.value.employee.id)];
+    // 모카 began it yesterday and carries on today; 보리 took it over today; 두부 reviews it
+    await ctx.runs.save(startRun({ id: toRunId("r1"), agent: a, taskId, sessionId: undefined }, yesterday));
+    await ctx.runs.save(startRun({ id: toRunId("r2"), agent: a, taskId, sessionId: undefined }, now - 7_200_000));
+    await ctx.runs.save(startRun({ id: toRunId("r3"), agent: b, taskId, sessionId: undefined }, now - 3_600_000));
+    await ctx.reviews.save({ id: toReviewId("v"), companyId, taskId, reviewerId: dubu.value.employee.id, state: "reviewing", createdAt: now - 60_000, startedAt: now - 60_000, settledAt: undefined, verdict: undefined, comments: undefined });
+    await ctx.runs.save(startRun({ id: toRunId("r4"), agent: d, taskId, sessionId: undefined }, now - 60_000));
+
+    const items = todayOf(await factsOf(ctx), now).filter((i) => i.kind === "started" || i.kind === "reviewStarted");
+    expect(items.map((i) => [i.kind, i.who])).toEqual([
+      ["reviewStarted", dubu.value.employee.id],
+      ["started", bori.value.employee.id],
+    ]);
   });
 
   it("says a stop waits on the user only while the task is still stopped there", async () => {
