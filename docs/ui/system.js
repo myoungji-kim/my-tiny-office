@@ -538,14 +538,14 @@ const WORDS = {
   ko: {
     nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정", outside: "회사 밖", plaza: "광장" },
     companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
-    agentLost: "에이전트 연결이 끊겼어요", copied: "복사했어요",
+    agentLost: "Claude Code 연결이 끊겼어요", copied: "복사했어요",
     runtime: {
       off: "Claude Code 로그인이 풀렸어요",
       offWhy: "하던 업무와 기억은 그대로예요. 터미널에서 claude auth login을 실행한 뒤 다시 확인해 주세요. 그때까지 새 업무는 시작하지 않아요.",
-      recheck: "다시 확인", cannotStart: "Claude Code가 멈춰서 지금은 새 업무를 시작할 수 없어요.",
+      recheck: "다시 확인", cannotStart: "지금은 Claude Code를 쓸 수 없어서 새 업무를 시작할 수 없어요.",
     },
     elsewhere: {
-      title: "다른 곳에서 켜진 My Tiny Office가 일을 맡고 있어요",
+      title: "이 컴퓨터의 다른 창에서 연 My Tiny Office가 업무를 진행하고 있어요",
       why: "이 창에서도 사무실을 보고 업무를 맡길 수 있어요. 일은 저쪽에서 진행돼요. 저쪽을 끄면 30초 안에 여기서 이어받아요.",
     },
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", leave: "휴가 중" },
@@ -563,10 +563,10 @@ const WORDS = {
     },
     career: {
       title: "경력 가져오기",
-      sub: "이 컴퓨터에서 한 Claude Code 세션을 골라요. 대화는 읽기만 하고, 세션은 그대로 둬요.",
+      sub: "이 컴퓨터에서 썼던 Claude Code 세션을 하나 골라요. 대화는 읽기만 하고, 세션은 건드리지 않아요.",
       folder: "폴더", sessions: "지난 세션",
       turns: (n, span) => span + " · 메시지 " + n + "개",
-      live: "지금 터미널에서 쓰고 있어서 가져올 수 없어요",
+      live: "지금 터미널에서 쓰는 중이에요. 끝나면 가져올 수 있어요",
       none: "이 폴더에는 가져올 만한 세션이 없어요.",
       read: "경력 정리하기",
       cost: "Claude가 대화를 한 번 읽어요. 길면 최근 부분 위주로 읽어요.",
@@ -611,11 +611,11 @@ const WORDS = {
   en: {
     nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings", outside: "Outside the company", plaza: "Plaza" },
     companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
-    agentLost: "The agent disconnected", copied: "Copied",
+    agentLost: "The Claude Code connection dropped", copied: "Copied",
     runtime: {
       off: "Claude Code signed out",
       offWhy: "Tasks in progress and everything remembered are untouched. Run claude auth login in a terminal, then check again. Nothing new starts until then.",
-      recheck: "Check again", cannotStart: "Claude Code has stopped, so nothing new can start right now.",
+      recheck: "Check again", cannotStart: "Claude Code isn't available, so nothing new can start right now.",
     },
     elsewhere: {
       title: "Another My Tiny Office on this computer is doing the work",
@@ -630,7 +630,7 @@ const WORDS = {
       role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
-      career: "Experience", careerNone: "They join new.", careerAdd: "Bring it from a past session",
+      career: "Experience", careerNone: "They start fresh.", careerAdd: "Bring it from a past session",
       careerChange: "Change", careerDrop: "Remove", careerRead: "Sum up the experience", careerUnread: "Not summed up yet.",
       careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "They bring " + m + (m === 1 ? " memory" : " memories") + " and " + s + (s === 1 ? " way of working." : " ways of working."),
     },
@@ -659,7 +659,7 @@ const WORDS = {
       retry: "Try again", without: "Hire without it",
       emptyTitle: "Nothing worth bringing",
       emptyWhy: "This conversation holds no knowledge or way of working that would help with other work.",
-      other: "Pick another session", asNew: "Hire them new",
+      other: "Pick another session", asNew: "Hire them fresh",
     },
     teach: {
       titleTo: (name) => "Teach " + name,
