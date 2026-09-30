@@ -38,7 +38,7 @@ claude -p
   --strict-mcp-config                          (not in a project using a connector)
   --tools Read,Edit,Write,Glob,Grep,Bash[,PowerShell][,ToolSearch][,Skill]   (PowerShell only on Windows)
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>] [Skill]"
-  [--disallowedTools "Skill(<each skill in the worktree's .claude/skills>)"]   (when skills are on, §8)
+  [--disallowedTools "Skill(<each skill written into the worktree>)"]   (when skills are on, §8)
   [--plugin-dir <each chosen plugin, and one carrying the chosen skills>]
   --append-system-prompt-file <memory file>
   --max-budget-usd 2
@@ -374,14 +374,20 @@ Skill tool too. A reviewer is given none. Measured on `2.1.284`:
 given the same way, and only for that project's tasks:
 - its skills are copied from `<project folder>/.claude/skills`, the user's own
   checkout, never from the task's worktree. An agent can edit the worktree's
-  copy, and what it wrote must not come back to it as instructions. Once skills
-  are on, Claude Code loads the worktree's `.claude/skills` itself under
-  `--setting-sources project` (measured on `2.1.284`), so each of those names
-  is denied with `--disallowedTools Skill(<name>)`: a call to one is refused
-  and the run carries on, and the checkout's copy comes as
-  `my-tiny-office-skills:<name>`. `--setting-sources ""` would drop them too,
-  but also the project's `CLAUDE.md`. A skill folder that is a link is not
-  given;
+  copy, and what it wrote must not come back to it as instructions. Once
+  skills are on, Claude Code loads the worktree's `.claude/skills` itself
+  under `--setting-sources project`, so the worktree holds none: when it is
+  prepared, the tracked files there are marked skip-worktree in the worktree's
+  own index and removed, which neither commits nor shows them as deleted, and
+  an agent's edit to one is gone by the next run. A skill the agent writes
+  there under a new name is denied with `--disallowedTools Skill(<name>)`,
+  and the session is told why. That rule also denies a given skill of the same
+  name, so it is not how the checkout's skills are kept apart. The checkout's
+  copy comes as `my-tiny-office-skills:<name>`. `--setting-sources ""` would
+  drop the worktree's skills too, but also the project's `CLAUDE.md`.
+  Measured on `2.1.285` end to end: an unticked skill was not offered, the
+  checkout's edited copy was the one invoked, and the worktree's commit held
+  only the task's file. A skill folder that is a link is not given;
 - its plugins are those `installed_plugins.json` lists in project or local
   scope for that folder, given only once ticked, with their hooks and MCP
   servers off as above.
