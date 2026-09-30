@@ -10,6 +10,138 @@ Create a company, hire employees, give them work, watch it happen, approve what 
 
 Every employee works through a real AI coding agent. Nothing is simulated.
 
+## Install
+
+My Tiny Office installs as a desktop app with its own window, icon and Start
+menu or Dock entry. It is built on your computer from this repository, and the
+installed app runs from the folder you cloned: keep that folder where it is.
+
+You need a Claude account that can use Claude Code. The app never asks for an
+API key; Claude Code handles its own login.
+
+### Let Claude Code install it
+
+If Claude Code is already installed and logged in, open it in the folder where
+you keep your projects and paste this:
+
+```text
+Install My Tiny Office for me as a desktop app.
+
+1. Check what it needs: Node.js 22 or later (node --version), git, and Claude
+   Code logged in (claude auth status). Tell me what is missing and ask before
+   installing anything. If I am not logged in to Claude Code, tell me to run
+   claude auth login myself; do not log in for me.
+2. Clone https://github.com/myoungji-kim/my-tiny-office.git into a folder that
+   will stay (not a temporary one), since the installed app runs from it.
+3. In that folder run npm install, then npm run app:install. On macOS, if
+   better-sqlite3 fails to build, run xcode-select --install and try again.
+4. Tell me where it was installed and how to open it.
+```
+
+<details>
+<summary>The same prompt in Korean</summary>
+
+```text
+My Tiny Office를 데스크톱 앱으로 설치해 줘.
+
+1. 필요한 것부터 확인해 줘: Node.js 22 이상(node --version), git, 그리고
+   Claude Code 로그인 상태(claude auth status). 없는 게 있으면 알려 주고, 설치하기
+   전에 먼저 물어봐 줘. Claude Code에 로그인이 안 돼 있으면 내가 직접
+   claude auth login을 하라고 알려 줘. 대신 로그인하지는 마.
+2. https://github.com/myoungji-kim/my-tiny-office.git 을 계속 둘 폴더(임시 폴더
+   말고)에 clone해 줘. 설치된 앱이 그 폴더에서 실행돼.
+3. 그 폴더에서 npm install, 그다음 npm run app:install을 실행해 줘. macOS에서
+   better-sqlite3 빌드가 실패하면 xcode-select --install 후 다시 해 줘.
+4. 어디에 설치됐고 어떻게 여는지 알려 줘.
+```
+
+</details>
+
+### Windows
+
+1. Install what it needs, in PowerShell:
+
+   ```powershell
+   winget install OpenJS.NodeJS.LTS
+   winget install Git.Git
+   irm https://claude.ai/install.ps1 | iex   # Claude Code
+   ```
+
+   Open a new terminal afterwards, then log in with `claude auth login`.
+   Optional: `winget install GitHub.cli` and `gh auth login`, so approved work
+   opens its pull request directly.
+2. Install the app:
+
+   ```powershell
+   git clone https://github.com/myoungji-kim/my-tiny-office.git
+   cd my-tiny-office
+   npm install
+   npm run app:install
+   ```
+
+3. Open **My Tiny Office** from the Start menu.
+
+It is installed in `%LOCALAPPDATA%\Programs\My Tiny Office`, with a shortcut in
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs`.
+
+### macOS
+
+1. Install what it needs, in Terminal:
+
+   ```bash
+   xcode-select --install                        # git, and what better-sqlite3 builds with
+   brew install node                             # or the LTS installer from nodejs.org
+   curl -fsSL https://claude.ai/install.sh | bash   # Claude Code
+   ```
+
+   Then log in with `claude auth login`. Optional: `brew install gh` and
+   `gh auth login`, so approved work opens its pull request directly.
+2. Install the app:
+
+   ```bash
+   git clone https://github.com/myoungji-kim/my-tiny-office.git
+   cd my-tiny-office
+   npm install
+   npm run app:install
+   ```
+
+3. Open **My Tiny Office** from `~/Applications`, Launchpad or Spotlight.
+   Closing the window keeps the office working; quit it from the Dock.
+
+### Linux
+
+`npm run app:install` only builds the app, under `desktop/build/out`; run it
+from there, or use `npm run app`.
+
+### Updating
+
+Quit the app, then in the cloned folder:
+
+```bash
+git pull
+npm install
+npm run app:install
+```
+
+The install refuses to run while the app is open. Your companies are kept.
+
+### Uninstalling
+
+Delete the app, then the cloned folder. Your companies are kept in their own
+folder (see [Requirements](#requirements)) until you delete that too.
+
+| | App | Companies |
+| --- | --- | --- |
+| Windows | `%LOCALAPPDATA%\Programs\My Tiny Office` and its Start menu shortcut | `%LOCALAPPDATA%\my-tiny-office` |
+| macOS | `~/Applications/My Tiny Office.app` | `~/Library/Application Support/my-tiny-office` |
+
+### Good to know
+
+- `npm run app` opens the window straight from the clone, without installing.
+- Only one server works a data directory at a time. If the desktop app is
+  open, a `npm run dev` on the same data shows the office but leaves the work
+  to the app.
+
 ## Agent Runtime
 
 The MVP integrates with **Claude Code**.
@@ -117,42 +249,6 @@ Companies live outside the repository:
 system picker: `osascript` on macOS, PowerShell on Windows, `zenity` or
 `kdialog` on Linux. Agents run commands through Bash on macOS and Linux, and
 through Bash and PowerShell on Windows (docs/SECURITY.md §2).
-
-## Desktop app
-
-The app runs as a desktop app with its own window and icon. The window
-starts the server with this computer's Node and stops it on quit. On macOS,
-closing the window keeps the office working until you quit from the Dock.
-
-```bash
-npm install
-npm run app:install
-```
-
-This builds the app and installs **My Tiny Office**: in `~/Applications` on
-macOS, and on Windows in `%LOCALAPPDATA%ProgramsMy Tiny Office` with a Start
-menu entry. On Linux it only builds the app, under `desktop/build/out`. The
-installed app runs this checkout. To update it, quit the app, `git pull`, then
-run `npm install` and `npm run app:install` again; the install refuses to run
-while the app is open. `npm run app` opens the window straight from the
-checkout, without installing it.
-
-Only one server works a data directory at a time. If the desktop app is open,
-a `npm run dev` on the same data shows the office but leaves the work to the
-app.
-
-### Installing with Claude Code
-
-Ask Claude Code to install it. It follows these steps:
-
-1. Check the requirements above: `node --version` is 22 or later, and `git`
-   works. Check Claude Code with `claude auth status`. If you are not logged
-   in, you run `claude auth login` yourself; the app never handles the login.
-2. Clone the repository, or use this checkout, and run `npm install`. On
-   macOS, if `better-sqlite3` fails to build, install the Xcode Command Line
-   Tools with `xcode-select --install`, then run it again.
-3. Run `npm run app:install`.
-4. Open **My Tiny Office** from `~/Applications` or the Start menu.
 
 ## Development
 
