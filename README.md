@@ -272,3 +272,7 @@ Keep the office honest: show only work that is really happening.
 Keep agent runtimes behind an adapter boundary.
 
 Never commit secrets or local databases.
+
+## License
+
+[MIT](LICENSE)
