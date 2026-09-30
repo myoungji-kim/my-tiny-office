@@ -240,7 +240,8 @@ Area          the company's own list; seven to start, named by the dictionary
 Memory        expertise (an area) · style · company (no employee)
 Role · Team   the company's lists; a role is required, a team is not
 Review        the in-app PullRequest: suggested · queued · reviewing · settled
-Milestone     the history, only ever added to, names kept as they were
+Milestone     the history, only ever added to, names kept as they were;
+              the one removal is the hire of someone let go who never worked
 ```
 
 `src/domain` has these as plain values and pure transitions; the pick-up
@@ -684,7 +685,7 @@ Company → Employee → Agent → Session
 The domain owns events such as:
 
 - the company: `CompanyCreated`
-- people: `EmployeeHired`, `EmployeeMoved`, `EmployeeWentOnLeave`, `EmployeeReturned`
+- people: `EmployeeHired`, `EmployeeMoved`, `EmployeeWentOnLeave`, `EmployeeReturned`, `EmployeeLeft`
 - projects: `ProjectCreated`, `ProjectStarted`, `ProjectHeld`, `ProjectResumed`,
   `ProjectFinished`, `ProjectReopened`, `ProjectWriteAllowed`, `ProjectCommandAllowed`
 - tasks: `TaskCreated`, `TaskAssigned`, `TaskStarted`, `TaskFinished`, `TaskApplied`,

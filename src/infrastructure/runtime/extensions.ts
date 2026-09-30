@@ -79,8 +79,9 @@ function plugins(home: string, matches: (install: Install) => boolean): Extensio
   });
 }
 
-// Skills in a .claude/skills folder: each a folder with a SKILL.md, never a link out of it.
-function skillsIn(base: string): Extension[] {
+// Skills in a .claude/skills folder: each a folder with a SKILL.md. A project
+// folder's are never a link, which could point out of it.
+function skillsIn(base: string, links: boolean): Extension[] {
   const root = resolve(base, ".claude", "skills");
   let names: string[];
   try {
@@ -90,7 +91,7 @@ function skillsIn(base: string): Extension[] {
   }
   return names.flatMap((id) => {
     const path = join(root, id);
-    if (!EXTENSION_ID.test(id) || lstatSync(path).isSymbolicLink() || !isDirectory(path) || !existsSync(join(path, "SKILL.md"))) return [];
+    if (!EXTENSION_ID.test(id) || (!links && lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink() !== false) || !isDirectory(path) || !existsSync(join(path, "SKILL.md"))) return [];
     const { name, description } = frontmatter(join(path, "SKILL.md"));
     return [{ id, name: name ?? id, about: about(description), path }];
   });
@@ -111,17 +112,17 @@ export function installedExtensions(home: string = homedir()): Installed {
 const byName = (a: Extension, b: Extension) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 
 function scan(home: string): Installed {
-  return { plugins: plugins(home, forUser).sort(byName), skills: skillsIn(home).sort(byName) };
+  return { plugins: plugins(home, forUser).sort(byName), skills: skillsIn(home, true).sort(byName) };
 }
 
 // What a project's own folder carries: its skills, and plugins installed for it alone.
 export function projectExtensions(folder: string, home: string = homedir()): Installed {
-  return { plugins: plugins(home, forFolder(folder)).sort(byName), skills: skillsIn(folder).sort(byName) };
+  return { plugins: plugins(home, forFolder(folder)).sort(byName), skills: skillsIn(folder, false).sort(byName) };
 }
 
 // The skills Claude Code itself finds in a folder's .claude/skills.
 export function skillNamesIn(folder: string): string[] {
-  return skillsIn(folder).map((s) => s.id);
+  return skillsIn(folder, true).map((s) => s.id);
 }
 
 const WRAPPER = "my-tiny-office-skills";

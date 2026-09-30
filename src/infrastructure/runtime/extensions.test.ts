@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -81,6 +81,17 @@ describe("a project's own plugins and skills", () => {
 
     expect(found.plugins.map((p) => p.id)).toEqual(["payments-kit@tinysoft"]);
     expect(found.skills.map((s) => s.id)).toEqual(["minimalist-ui", "release-notes"]);
+  });
+
+  it("takes a linked skill folder from the user's own skills, never from a project's", () => {
+    const elsewhere = mkdtempSync(join(tmpdir(), "mto-linked-"));
+    write(join(elsewhere, "SKILL.md"), "---\nname: linked\n---\n");
+    symlinkSync(elsewhere, join(home, ".claude", "skills", "linked"), "junction");
+    symlinkSync(elsewhere, join(project, ".claude", "skills", "linked"), "junction");
+
+    expect(installedExtensions(home).skills.map((s) => s.id)).toContain("linked");
+    expect(projectExtensions(project, home).skills.map((s) => s.id)).not.toContain("linked");
+    rmSync(elsewhere, { recursive: true, force: true });
   });
 
   it("gives its skills unless turned off, from its folder, and its plugins only once turned on", () => {

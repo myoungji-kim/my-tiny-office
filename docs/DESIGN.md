@@ -894,7 +894,8 @@ The third is **이 프로젝트의 스킬과 플러그인**: what the project's 
 for Claude Code, the way Claude Code itself finds it in a project.
 - **폴더에 있는 스킬:** each `<folder>/.claude/skills/<name>/SKILL.md`, ticked to
   start. They were written for this project, so a task there has them unless
-  one is unticked.
+  one is unticked. They come from the folder itself: a task's own copy of the
+  folder holds none, so a task cannot change them (SECURITY.md §8).
 - **이 프로젝트에 설치한 플러그인:** plugins installed in project or local scope
   for this folder, unticked to start, since a plugin can bring more than
   skills.

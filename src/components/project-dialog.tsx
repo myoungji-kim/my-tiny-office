@@ -92,7 +92,11 @@ export function ProjectDialog({
     setChosen(true);
     setRepository(result.repository);
     setTyping(false);
-    if (result.folder !== edit?.folder) setRuns(result.scripts);
+    if (result.folder !== edit?.folder) {
+      setRuns(result.scripts);
+      setSkillsOff([]);
+      setPluginsOn([]);
+    }
   };
 
   const pick = () => startPicking(async () => accept(await pickFolderAction()));
