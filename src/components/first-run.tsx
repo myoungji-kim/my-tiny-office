@@ -9,6 +9,7 @@ import { getDictionary, type Locale } from "../i18n";
 import { CAST, type CastMember } from "../ui/paint";
 
 import { ClaudeChecks } from "./claude-checks";
+import { Icon } from "./icons";
 import { OfficePeek } from "./office-peek";
 import { RecheckButton } from "./recheck-button";
 import { Sprite } from "./sprite";
@@ -24,12 +25,15 @@ export function FirstRun({
   status: initialStatus,
   roles,
   entry,
+  looked,
 }: {
   readonly locale: Locale;
   readonly status: ClaudeCodeStatus;
   readonly roles: readonly string[];
   // From the sidebar, Claude Code is already checked: a new company starts at its name.
   readonly entry?: "new" | "import";
+  // where companies were looked for, and how many there could not be opened
+  readonly looked?: { readonly directory: string; readonly unreadable: number };
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(initialStatus);
@@ -111,6 +115,15 @@ export function FirstRun({
               {error}
             </p>
           )}
+          {looked !== undefined && looked.unreadable > 0 && (
+            <div className="notice notice-warn">
+              <span className="n-ic">{Icon.alert}</span>
+              <span className="n-tx">
+                <b>{words.unreadableTitle(looked.unreadable)}</b>
+                <span>{words.unreadableBody}</span>
+              </span>
+            </div>
+          )}
           <div className="acts">
             <button className="btn btn-secondary btn-lg" type="button" disabled={!ready || pending} autoFocus={entry === "import"} onClick={() => file.current?.click()}>
               {words.startImport}
@@ -130,6 +143,7 @@ export function FirstRun({
               {words.startNew}
             </button>
           </div>
+          {looked !== undefined && <p className="hint where">{words.where(looked.directory)}</p>}
         </div>
       )}
 

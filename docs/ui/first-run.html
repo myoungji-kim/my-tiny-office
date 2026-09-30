@@ -79,6 +79,10 @@
 
   /* ═══ notice ═══ */
 
+  .notice + .acts { margin-top: 18px; }
+
+  .where { text-align: center; overflow-wrap: anywhere; }
+
   .link { color: var(--muted); font-size: 15px; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0; }
 
   .link:hover { color: var(--ink); }
@@ -117,10 +121,19 @@
       <div class="recheck"><button class="btn btn-secondary btn-sm" id="recheck" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 7A5.2 5.2 0 1 0 12 11.2"/><path d="M13.4 3.4v3.8h-3.8"/></svg><span data-t="recheck">다시 확인</span></button></div>
     </div>
 
+    <div class="notice notice-warn" id="unreadable" hidden>
+      <span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
+      <span class="n-tx">
+        <b id="unreadableTitle">회사 파일 1개를 열지 못했어요</b>
+        <span data-t="unreadableBody">더 새 버전의 앱이 저장했거나 파일이 손상됐을 수 있어요. 앱을 최신으로 받고 다시 시작해 봐요. 파일은 그대로 두었어요.</span>
+      </span>
+    </div>
+
     <div class="acts">
       <button class="btn btn-secondary btn-lg" id="toImport" disabled data-t="startImport">기존 회사 가져오기</button>
       <button class="btn btn-primary btn-lg" style="flex:1" id="toCompany" disabled data-t="startNew">새 회사 만들기</button>
     </div>
+    <p class="hint where" id="where"></p>
   </div>
 
   <!-- ── 2. 회사 ─────────────────────────────────────────────── -->
@@ -307,6 +320,9 @@
       noticeTitle: "업무를 맡기면 바로 일을 시작해요",
       noticeBody: "Claude Code로 일해요. 직원은 프로젝트 폴더 안에서, 허용한 명령만 실행해요.",
       toOffice: "사무실로 가기",
+      unreadableTitle: (n) => "회사 파일 " + n + "개를 열지 못했어요",
+      unreadableBody: "더 새 버전의 앱이 저장했거나 파일이 손상됐을 수 있어요. 앱을 최신으로 받고 다시 시작해 봐요. 파일은 그대로 두었어요.",
+      where: (dir) => "회사는 이 폴더에서 찾아요: " + dir + ". 다른 곳에 두었다면 MY_TINY_OFFICE_DATA_DIR로 알려 줘요.",
       companyFallback: "내 회사",
     },
     en: {
@@ -338,6 +354,9 @@
       noticeTitle: "Give them work and they start",
       noticeBody: "They work through Claude Code, inside the project's folder, running only the commands it allows.",
       toOffice: "Go to the office",
+      unreadableTitle: (n) => (n === 1 ? "One company file could not be opened" : n + " company files could not be opened"),
+      unreadableBody: "A newer version of the app may have saved it, or the file is damaged. Get the latest app and start it again. The file was left as it is.",
+      where: (dir) => "Companies are looked for in " + dir + ". If yours are elsewhere, point MY_TINY_OFFICE_DATA_DIR at them.",
       companyFallback: "My company",
     },
   };
@@ -391,6 +410,15 @@
 
   // From the sidebar, Claude Code is already checked: a new company starts at
   // its name, an import at what arrived.
+  // The folder the app looked in, and what it could not open there (#unreadable).
+  const DATA_DIR = "C:\\Users\\me\\AppData\\Local\\my-tiny-office";
+  function renderWhere() {
+    document.getElementById("where").textContent = t().where(DATA_DIR);
+    document.getElementById("unreadable").hidden = location.hash !== "#unreadable";
+    document.getElementById("unreadableTitle").textContent = t().unreadableTitle(1);
+  }
+  renderWhere();
+
   const entry = { "#new": 2, "#import": 5 }[location.hash];
   if (entry) { signedIn = true; renderChecks(); go(entry); }
   renderChecks();

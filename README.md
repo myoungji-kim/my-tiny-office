@@ -97,7 +97,7 @@ Runs on macOS, Windows and Linux.
 
 - Node.js 22 or later (`better-sqlite3` needs it)
 - git
-- Claude Code, installed and logged in (run `claude` once and sign in); the app never asks for an API key
+- Claude Code, installed and logged in (`claude auth login`); the app never asks for an API key
 - GitHub CLI (`gh`), optional: with it signed in, applied work opens its pull request directly
 
 `npm install` builds `better-sqlite3`. When no prebuilt binary fits, it compiles

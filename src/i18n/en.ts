@@ -83,6 +83,9 @@ export const en = {
     importedTitle: (name: string) => "Imported " + name,
     importedSub: (people: number, projects: number) => people + (people === 1 ? " person · " : " people · ") + projects + (projects === 1 ? " project" : " projects"),
     againTitle: "To do again on this computer",
+    unreadableTitle: (n: number) => (n === 1 ? "One company file could not be opened" : n + " company files could not be opened"),
+    unreadableBody: "A newer version of the app may have saved it, or the file is damaged. Get the latest app and start it again. The file was left as it is.",
+    where: (dir: string) => "Companies are looked for in " + dir + ". If yours are elsewhere, point MY_TINY_OFFICE_DATA_DIR at them.",
     againBody: (n: number) => n + (n === 1 ? " project needs its" : " projects need their") + " folder chosen on this computer. Nobody works in a folder until it is chosen again here.",
   },
   office: {

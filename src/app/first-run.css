@@ -45,6 +45,10 @@ body:has(> .wizard) { min-height: 100vh; padding: 40px 20px; display: flex; flex
 
 .sub + .notice { margin-top: 18px; }
 
+.notice + .acts { margin-top: 18px; }
+
+.where { text-align: center; overflow-wrap: anywhere; }
+
 .hired {
     display: flex; align-items: center; gap: 13px; margin: 18px 0 14px;
     border: 1px solid var(--line); border-radius: var(--r-card); padding: 14px;

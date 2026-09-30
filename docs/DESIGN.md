@@ -616,6 +616,12 @@ First run is what the app shows when this computer has no company; with one,
 the app opens the company opened last, and first run is only reached through
 the switcher's 새 회사 만들기 and 기존 회사 가져오기.
 
+Reached with no company, its first step names the folder companies were
+looked for in, so a company kept elsewhere (`MY_TINY_OFFICE_DATA_DIR`) is not
+mistaken for a lost one. A company file there that could not be opened is
+counted in a warning above the buttons; the file is left as it is. The mockup
+shows the warning at `first-run.html#unreadable`.
+
 It ends at the **first employee**, not at the company. A user dropped into an
 empty office has nothing to look at, and the office is the product. Every field
 says it can be changed later, because a first decision should not feel heavy.

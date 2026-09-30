@@ -10,7 +10,7 @@ import { Shell } from "../components/shell";
 import { STARTING_ROLES } from "../domain/organisation";
 import { getDictionary } from "../i18n";
 
-import { param, screenData, type SearchParams } from "./screen-data";
+import { dataDirectory, param, screenData, type SearchParams } from "./screen-data";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
   const t = getDictionary(locale);
   const { company, companies, employees, teams, roles } = office;
   if (company === undefined) {
-    return <FirstRun locale={locale} status={status} roles={STARTING_ROLES} />;
+    return <FirstRun locale={locale} status={status} roles={STARTING_ROLES} looked={{ directory: dataDirectory(), unreadable: office.unreadable }} />;
   }
 
   const rooms = roomsOf(employees, teams);

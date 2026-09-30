@@ -86,6 +86,9 @@ export const ko: Dictionary = {
     importedTitle: (name: string) => withParticle(name, "을", "를") + " 가져왔어요",
     importedSub: (people: number, projects: number) => "직원 " + people + "명 · 프로젝트 " + projects + "개",
     againTitle: "이 컴퓨터에서 다시 할 것",
+    unreadableTitle: (n: number) => "회사 파일 " + n + "개를 열지 못했어요",
+    unreadableBody: "더 새 버전의 앱이 저장했거나 파일이 손상됐을 수 있어요. 앱을 최신으로 받고 다시 시작해 봐요. 파일은 그대로 두었어요.",
+    where: (dir: string) => "회사는 이 폴더에서 찾아요: " + dir + ". 다른 곳에 두었다면 MY_TINY_OFFICE_DATA_DIR로 알려 줘요.",
     againBody: (n: number) => "프로젝트 " + n + "개의 폴더를 이 컴퓨터에서 다시 골라야 해요. 다시 고르기 전까지 그 폴더에서는 아무도 일하지 않아요.",
   },
   office: {

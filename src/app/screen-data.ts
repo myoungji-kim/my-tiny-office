@@ -13,6 +13,9 @@ export async function currentLocale(): Promise<Locale> {
   return readSettings(getCompanyFiles().directory).locale ?? resolveLocale((await headers()).get("accept-language"));
 }
 
+// where this computer keeps its companies
+export const dataDirectory = (): string => getCompanyFiles().directory;
+
 export const workPaused = (): boolean => readSettings(getCompanyFiles().directory).workPaused === true;
 
 // The user's plugins and skills employees are given on this computer.
