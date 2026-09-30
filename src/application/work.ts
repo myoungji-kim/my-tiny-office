@@ -401,7 +401,9 @@ export function createWorkSupervisor(deps: {
             ? { kind: "writeNotAllowed", write: denied.write, target: denied.target, text: denied.text }
             : end.kind === "budgetReached"
               ? { kind: "budgetReached" }
-              : { kind: "disconnected" },
+              : end.kind === "failed"
+                ? { kind: "runFailed" }
+                : { kind: "disconnected" },
       );
     }
     await finish(ctx, task.id);

@@ -314,7 +314,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           {blocker.kind === "commandNotAllowed" ? (
             who !== undefined && <span>{allowable ? w.runWhy(who.name) : w.runNotAllowable(who.name)}</span>
           ) : (
-            <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
+            <span>{blocker.kind === "disconnected" ? w.lostWhy : blocker.kind === "runFailed" ? w.runFailedWhy : blocker.kind === "budgetReached" ? w.budgetWhy : w.workspaceWhy}</span>
           )}
         </span>
         <span className="n-acts">

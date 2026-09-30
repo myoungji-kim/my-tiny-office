@@ -124,6 +124,13 @@ describe("tasks", () => {
     await expect(repo.findById(blocked.id)).resolves.toEqual(blocked);
   });
 
+  it("keeps a run that ended on an error apart from a lost connection", async () => {
+    const repo = createSqliteTaskRepository(database.handle.db);
+    const failed: Task = { ...backlog, status: "working", assigneeId: mocha.id, startedAt: t0, blocker: { kind: "runFailed" } };
+    await repo.save(failed);
+    await expect(repo.findById(failed.id)).resolves.toMatchObject({ blocker: { kind: "runFailed" } });
+  });
+
   it("keeps where applied work went up, and only a web address", async () => {
     const repo = createSqliteTaskRepository(database.handle.db);
     const done: Task = { ...backlog, status: "done", assigneeId: mocha.id, startedAt: t0, finishedAt: t0, appliedAt: t0, publishedUrl: "https://github.com/o/r/pull/7" };

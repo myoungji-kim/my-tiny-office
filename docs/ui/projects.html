@@ -573,7 +573,8 @@
     // an agent that stopped: blocked is a mark, not a place
     { id: "t1", project: "pay", area: "db", priority: "high", status: "working", who: "p1", spent: 23,
       title: { ko: "결제 내역 페이지네이션", en: "Paginate the payment history" },
-      blocked: { kind: "lost" },
+      // ?run=failed: Claude Code ended the run with an error instead
+      blocked: { kind: new URLSearchParams(location.search).get("run") === "failed" ? "failed" : "lost" },
       desc: { ko: "결제 내역을 한 번에 다 불러오지 않게 페이지로 나눠요.", en: "Stop loading the whole payment history at once; page it." },
       session: "434e0703-5b1c-4f7e-9a2d-8c61f0e2b9a4", usedMem: [0, 2],
       steps: [
@@ -842,6 +843,7 @@
       onLeaveOption: (n) => n + " (휴가 중)",
       whoTakes: "대기열에 올라가고, 먼저 비는 사람이 가져가요.",
       lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.", reconnect: "다시 연결", copy: "복사",
+      runFailed: "작업이 오류로 멈췄어요", runFailedWhy: "Claude Code가 오류를 내고 끝냈어요. 하던 업무와 기억은 그대로예요. 다시 시도하면 하던 세션에서 이어서 해요.", retryRun: "다시 시도",
       runBlocked: "허용되지 않은 명령", writeBlocked: "허용되지 않은 쓰기",
       writeStopped: (w) => w + " 전에 멈췄어요",
       writeWhy: (n) => "이 프로젝트에서 허용한 쓰기가 아니에요. 허용하면 이 프로젝트의 업무는 앞으로 묻지 않고 이 쓰기를 하고, " + n + subjectParticle(n) + " 이어서 해요.",
@@ -996,6 +998,7 @@
       onLeaveOption: (n) => n + " (on leave)",
       whoTakes: "It waits in the backlog until someone is free.",
       lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.", reconnect: "Reconnect", copy: "Copy",
+      runFailed: "The work stopped on an error", runFailedWhy: "Claude Code ended with an error. The task and everything they remember are untouched; trying again carries on from the same session.", retryRun: "Try again",
       runBlocked: "Command not allowed", writeBlocked: "Write not allowed",
       writeStopped: (w) => "Stopped before: " + w,
       writeWhy: (n) => "This project does not allow it. Allowing it lets every task here make this write without asking, and " + n + " carries on.",
@@ -1155,7 +1158,8 @@
   // What the card says under the title, if anything: an agent that stopped,
   // a colleague looking at it, or a suggestion that one should.
   // a card names the reason; the command itself is on the task's page
-  const blockedText = (task) => (task.blocked.kind === "command" ? t().runBlocked : task.blocked.kind === "write" ? t().writeBlocked : t().agentLost);
+  const blockedText = (task) =>
+    task.blocked.kind === "command" ? t().runBlocked : task.blocked.kind === "write" ? t().writeBlocked : task.blocked.kind === "failed" ? t().runFailed : t().agentLost;
 
   function noteFor(task) {
     if (task.blocked) return { cls: "blocked", svg: icon.none, text: blockedText(task) };
@@ -1393,7 +1397,10 @@
       : task.blocked.kind === "command"
         ? `<div class="notice notice-bad tk-now"><span class="n-ic">${TASK_ICON.run}</span><span class="n-tx"><b>${t().runStopped("<code>" + task.blocked.run + "</code>")}</b><span>${t().runWhy(who.name)}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-carry-on${off}>${t().withoutRun}</button><button class="btn btn-secondary btn-sm" type="button" data-allow-run${off}>${t().allowRun}</button></span></div>`
-        : `<div class="notice notice-bad tk-now"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
+        : task.blocked.kind === "failed"
+          ? `<div class="notice notice-bad tk-now"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().runFailed}</b><span>${t().runFailedWhy}</span></span>
+            <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect${off}>${t().retryRun}</button></span></div>`
+          : `<div class="notice notice-bad tk-now"><span class="n-ic">${PLUG}</span><span class="n-tx"><b>${t().agentLost}</b><span>${t().lostWhy}</span></span>
             <span class="n-acts"><button class="btn btn-secondary btn-sm" type="button" data-reconnect${off}>${t().reconnect}</button></span></div>`;
 
     // The conversation: the work's reports, a colleague's review, the user's

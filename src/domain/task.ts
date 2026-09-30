@@ -24,6 +24,8 @@ export type TaskStatus = "backlog" | "working" | "approval" | "done" | "held";
 // Blocked is not a status: a task is blocked out of the one it is in.
 export type Blocker =
   | { readonly kind: "disconnected" }
+  // Claude Code ended the run with an error of its own
+  | { readonly kind: "runFailed" }
   | { readonly kind: "commandNotAllowed"; readonly command: string }
   // a Jira or Confluence write the project does not allow: where it would go and what it would say
   | { readonly kind: "writeNotAllowed"; readonly write: AtlassianWrite; readonly target: string; readonly text: string }

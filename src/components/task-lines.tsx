@@ -21,7 +21,7 @@ export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNod
   // the card names the reason; the command itself is on the task's page
   if (b.kind === "commandNotAllowed") return w.commandBlocked;
   if (b.kind === "writeNotAllowed") return w.writeBlocked;
-  return b.kind === "disconnected" ? w.agentLost : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
+  return b.kind === "disconnected" ? w.agentLost : b.kind === "runFailed" ? w.runFailed : b.kind === "budgetReached" ? w.budgetReached : w.workspaceUnavailable;
 }
 
 // A queued task has not started this round, so it shows its priority instead.

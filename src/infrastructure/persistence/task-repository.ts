@@ -23,6 +23,7 @@ function toBlocker(raw: string | null): Blocker | undefined {
       return { kind: "writeNotAllowed", write: value.write, target: value.target, text: value.text };
     }
     if (value.kind === "budgetReached") return { kind: "budgetReached" };
+    if (value.kind === "runFailed") return { kind: "runFailed" };
     if (value.kind === "workspaceUnavailable") return { kind: "workspaceUnavailable" };
   } catch {
     // fall through

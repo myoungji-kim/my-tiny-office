@@ -539,4 +539,14 @@ describe("the work supervisor", () => {
     expect(await statusOf(id)).toMatchObject({ blocker: { kind: "budgetReached" } });
     expect((await ctx.runs.findByCompany(companyId))[0]).toMatchObject({ end: { kind: "budgetReached" }, costUsd: 2.1 });
   });
+
+  it("tells a run that Claude Code ended on an error from a lost connection", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "result", outcome: "failed", costUsd: 0.1, report: undefined });
+    launched[0].exit();
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ blocker: { kind: "runFailed" } });
+  });
 });

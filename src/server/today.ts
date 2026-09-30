@@ -11,7 +11,7 @@ import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 // what the company already keeps. Only what still waits on the user carries
 // the way to it.
 
-export type TodayKind = "started" | "reviewStarted" | "memoryUsed" | "waiting" | "applied" | "leave" | "lost" | "stopped" | "stoppedAtWrite" | "budget" | "hired";
+export type TodayKind = "started" | "reviewStarted" | "memoryUsed" | "waiting" | "applied" | "leave" | "lost" | "failed" | "stopped" | "stoppedAtWrite" | "budget" | "hired";
 
 export interface TodayItem {
   readonly at: number;
@@ -44,6 +44,15 @@ export function startOfDay(now: number): number {
   day.setHours(0, 0, 0, 0);
   return day.getTime();
 }
+
+// How a run that stopped reads, and the blocker that means it still waits on the user.
+const STOPS: Partial<Record<NonNullable<Run["end"]>["kind"], { readonly kind: TodayKind; readonly blocker: NonNullable<Task["blocker"]>["kind"] }>> = {
+  disconnected: { kind: "lost", blocker: "disconnected" },
+  failed: { kind: "failed", blocker: "runFailed" },
+  denied: { kind: "stopped", blocker: "commandNotAllowed" },
+  writeDenied: { kind: "stoppedAtWrite", blocker: "writeNotAllowed" },
+  budgetReached: { kind: "budget", blocker: "budgetReached" },
+};
 
 export function todayOf(facts: TodayFacts, now: number): TodayItem[] {
   const since = startOfDay(now);
@@ -92,16 +101,8 @@ export function todayOf(facts: TodayFacts, now: number): TodayItem[] {
       if (memory !== undefined) items.push({ ...blank, at: run.endedAt, kind: "memoryUsed", who, task: taskOf(task), memory: memory.text });
     }
     const blocked = task.status === "working" ? task.blocker?.kind : undefined;
-    const stop =
-      run.end?.kind === "disconnected"
-        ? { kind: "lost" as const, open: blocked === "disconnected" }
-        : run.end?.kind === "denied"
-          ? { kind: "stopped" as const, open: blocked === "commandNotAllowed" }
-          : run.end?.kind === "writeDenied"
-            ? { kind: "stoppedAtWrite" as const, open: blocked === "writeNotAllowed" }
-            : run.end?.kind === "budgetReached"
-              ? { kind: "budget" as const, open: blocked === "budgetReached" }
-              : undefined;
+    const stopped = run.end === undefined ? undefined : STOPS[run.end.kind];
+    const stop = stopped === undefined ? undefined : { kind: stopped.kind, open: blocked === stopped.blocker };
     if (stop !== undefined) items.push({ ...blank, at: run.endedAt, who, task: taskOf(task), ...stop });
   }
 

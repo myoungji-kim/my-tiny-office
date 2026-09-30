@@ -38,6 +38,7 @@ const ICON: Readonly<Record<TodayKind, ReactNode>> = {
   ),
   leave: Icon.sun,
   lost: Icon.plug,
+  failed: Icon.plug,
   stopped: (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5" />
@@ -49,7 +50,7 @@ const ICON: Readonly<Record<TodayKind, ReactNode>> = {
 };
 
 // what stopped, as opposed to what only happened
-const STOPS: ReadonlySet<TodayKind> = new Set(["lost", "stopped", "stoppedAtWrite", "budget"]);
+const STOPS: ReadonlySet<TodayKind> = new Set(["lost", "failed", "stopped", "stoppedAtWrite", "budget"]);
 
 type Part = string | { readonly b: string };
 
