@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
-import { resumeTaskAction } from "../app/project-actions";
+import { approveTaskAction, holdTaskAction, resumeTaskAction, sendBackAction } from "../app/project-actions";
 import type { TaskStatus } from "../domain/task";
 import { getDictionary, type Dictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "../server/view-model";
@@ -13,7 +13,8 @@ import { areaName } from "./names";
 import { Prio } from "./project-marks";
 import { Sprite } from "./sprite";
 import { TaskDialog } from "./task-dialog";
-import { blockerText, timeLine } from "./task-lines";
+import { StepDialog } from "./step-dialog";
+import { blockerText, reworkWhyOf, timeLine } from "./task-lines";
 import { TeachDialog } from "./teach-dialog";
 import { useDismiss } from "./use-dismiss";
 
@@ -40,6 +41,31 @@ const NONE = (
   </svg>
 );
 
+const CHECK = (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3.4 8.4l3 3 6.2-6.6" />
+  </svg>
+);
+
+const BACK = (
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+    <path d="M6.5 3.5L3 7l3.5 3.5M3 7h6.5a3.5 3.5 0 0 1 0 7H7" />
+  </svg>
+);
+
+// What else a card says beside its blocker: that it was sent back, or where
+// its review stands, so work waiting on a colleague does not look like its
+// author still at it.
+function note(task: TaskView, area: AreaView | undefined, t: Dictionary): { readonly cls: string; readonly svg: ReactNode; readonly text: string } | undefined {
+  const w = t.projects;
+  if (task.changesRequested !== undefined && task.status !== "approval") return { cls: "changes", svg: BACK, text: w.changesAsked(task.changesRequested) };
+  const review = task.review;
+  if (review === undefined) return undefined;
+  if (review.state === "queued") return { cls: "peer", svg: Icon.eye, text: w.peerQueued(review.reviewerName) };
+  if (review.state === "reviewing") return { cls: "peer", svg: Icon.eye, text: w.peerReviewing(review.reviewerName, area === undefined ? "" : areaName(area, t.areas)) };
+  return { cls: "settled", svg: CHECK, text: w.peerDone(review.reviewerName) };
+}
+
 function Card({
   task,
   who,
@@ -58,6 +84,7 @@ function Card({
   const w = t.projects;
   const blocked = blockerText(task, w);
   const time = timeLine(task, w);
+  const said = blocked === undefined ? note(task, area, t) : undefined;
   const cls = ["work", blocked !== undefined && "is-blocked", task.status === "done" && "is-done", task.status === "held" && "is-held"].filter(Boolean).join(" ");
   return (
     <button className={cls} type="button" data-id={task.id} aria-expanded={open} onClick={(e) => onPick(task, e.currentTarget, e.detail === 0)}>
@@ -74,6 +101,12 @@ function Card({
             <span className="r-tx">{blocked}</span>
           </span>
         </>
+      )}
+      {said !== undefined && (
+        <span className={`r-line ${said.cls}`}>
+          {said.svg}
+          <span className="r-tx">{said.text}</span>
+        </span>
       )}
       <span className="w-foot">
         {who === undefined ? (
@@ -113,7 +146,12 @@ function place(pop: HTMLElement, anchor: HTMLElement) {
   pop.style.top = Math.round(Math.max(EDGE, Math.min(r.top, innerHeight - h - EDGE))) + "px";
 }
 
-type Dialog = { readonly kind: "new" } | { readonly kind: "edit"; readonly task: TaskView; readonly assignee: boolean } | { readonly kind: "teach"; readonly task: TaskView };
+type Dialog =
+  | { readonly kind: "new" }
+  | { readonly kind: "edit"; readonly task: TaskView; readonly assignee: boolean }
+  | { readonly kind: "teach"; readonly task: TaskView }
+  | { readonly kind: "rework"; readonly task: TaskView }
+  | { readonly kind: "hold"; readonly task: TaskView };
 
 export function ProjectBoard({
   locale,
@@ -185,7 +223,7 @@ export function ProjectBoard({
   const choices = projects.some((p) => p.id === project.id) ? projects : [project, ...projects];
 
   // What the popover offers follows from where the task is; `off` rows wait for Claude Code.
-  type Act = { readonly label: string; readonly key?: boolean; readonly off?: boolean; readonly then: Dialog | "resume" };
+  type Act = { readonly label: string; readonly key?: boolean; readonly off?: boolean; readonly then: Dialog | "resume" | "approve" };
   const acts: Act[] = [];
   if (task !== undefined) {
     if (task.status === "backlog" && live) acts.push({ label: w.actions.assign, off: !ready, then: { kind: "edit", task, assignee: true } });
@@ -195,17 +233,24 @@ export function ProjectBoard({
     if ((task.status === "backlog" || task.status === "held") && writable) acts.push({ label: w.actions.edit, then: { kind: "edit", task, assignee: false } });
     // a change to running work restarts the agent
     if (task.status === "working" && writable) acts.push({ label: w.actions.edit, off: !ready, then: { kind: "edit", task, assignee: false } });
+    // the line the work does not cross on its own; a commit needs no agent
+    if (task.status === "approval" && project.status !== "done") {
+      acts.push({ label: w.actions.approve, key: true, then: "approve" });
+      acts.push({ label: w.actions.rework, off: !ready, then: { kind: "rework", task } });
+      acts.push({ label: w.actions.hold, then: { kind: "hold", task } });
+    }
   }
   const gated = acts.some((a) => a.off === true);
 
   const run = (act: Act) => {
-    if (act.then !== "resume") {
+    if (act.then !== "resume" && act.then !== "approve") {
       close();
       return setDialog(act.then);
     }
     if (task === undefined) return;
+    const step = act.then === "resume" ? resumeTaskAction : approveTaskAction;
     start(async () => {
-      const result = await resumeTaskAction(companyId, task.id);
+      const result = await step(companyId, task.id);
       if (result.error !== undefined) setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
       else close();
     });
@@ -303,6 +348,30 @@ export function ProjectBoard({
           memories={memories}
           edit={dialog.task}
           focusAssignee={dialog.assignee}
+          onClose={closeDialog}
+        />
+      )}
+      {dialog?.kind === "rework" && (
+        <StepDialog
+          heading={w.reworkTitle}
+          why={reworkWhyOf(whoOf(dialog.task), w)}
+          yes={w.actions.rework}
+          cancel={w.cancel}
+          field={{ label: w.reworkLabel, placeholder: w.reworkPlaceholder }}
+          errors={t.errors}
+          onYes={(reason) => sendBackAction(companyId, dialog.task.id, reason)}
+          onClose={closeDialog}
+        />
+      )}
+      {dialog?.kind === "hold" && (
+        <StepDialog
+          heading={w.holdTaskTitle}
+          why={w.holdTaskWhy}
+          yes={w.holdYes}
+          cancel={w.cancel}
+          field={{ label: w.holdReason, placeholder: w.holdTaskPlaceholder }}
+          errors={t.errors}
+          onYes={(reason) => holdTaskAction(companyId, dialog.task.id, reason)}
           onClose={closeDialog}
         />
       )}

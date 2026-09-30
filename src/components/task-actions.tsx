@@ -13,6 +13,7 @@ import { ReviewDialog } from "./review-dialog";
 import { RowMenu } from "./row-menu";
 import { StepDialog } from "./step-dialog";
 import { TaskDialog } from "./task-dialog";
+import { reworkWhyOf } from "./task-lines";
 
 // The header carries what the task's popover offers, as page buttons.
 export function TaskActions({
@@ -132,7 +133,7 @@ export function TaskActions({
       {dialog === "rework" && (
         <StepDialog
           heading={w.reworkTitle}
-          why={who === undefined ? w.reworkWhyAnyone : who.status === "onLeave" ? w.reworkWhyLater(who.name) : w.reworkWhy(who.name)}
+          why={reworkWhyOf(who, w)}
           yes={w.actions.rework}
           cancel={w.cancel}
           field={{ label: w.reworkLabel, placeholder: w.reworkPlaceholder }}

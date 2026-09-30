@@ -2,10 +2,10 @@ import type { Company } from "../domain/company";
 import { hasWorked } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import type { AtlassianWrite, Priority, ProjectStatus } from "../domain/project";
-import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
+import { liveReviews, statusOf, type EmployeeStatus, type Review } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
 import type { RecordedMilestone } from "../domain/milestone";
-import { timeTaken, type Blocker, type TaskStatus } from "../domain/task";
+import { timeTaken, type Blocker, type Task, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
@@ -115,6 +115,10 @@ export interface TaskView {
   readonly heldWithProject: boolean;
   readonly createdAt: number;
   readonly publishedUrl: string | undefined;
+  // a colleague asked to look, looking, or done looking at work waiting for approval
+  readonly review: { readonly state: "queued" | "reviewing" | "settled"; readonly reviewerName: string } | undefined;
+  // what the user or a reviewer asked to change when it was sent back
+  readonly changesRequested: string | undefined;
 }
 
 export type MilestoneView = RecordedMilestone;
@@ -192,6 +196,15 @@ async function listCompanies(files: CompanyFiles): Promise<{ companies: Company[
     }
   }
   return { companies: companies.sort((a, b) => a.foundedAt - b.foundedAt || a.id.localeCompare(b.id)), unreadable };
+}
+
+// The review a card tells of: the one under way, or a finished one on work
+// that now waits for the user.
+function reviewOnCard(task: Task, reviews: readonly Review[], nameById: ReadonlyMap<string, string>): TaskView["review"] {
+  const latest = reviews.filter((r) => r.taskId === task.id && r.reviewerId !== undefined).sort((a, b) => b.createdAt - a.createdAt)[0];
+  if (latest === undefined || latest.reviewerId === undefined) return undefined;
+  const state = latest.state === "queued" || latest.state === "reviewing" ? latest.state : latest.state === "settled" && task.status === "approval" ? "settled" : undefined;
+  return state === undefined ? undefined : { state, reviewerName: nameById.get(latest.reviewerId) ?? "" };
 }
 
 export async function loadOffice(
@@ -348,6 +361,8 @@ export async function loadOffice(
       heldWithProject: task.heldWithProject,
       createdAt: task.createdAt,
       publishedUrl: task.publishedUrl,
+      review: reviewOnCard(task, reviews, nameById),
+      changesRequested: task.changesRequested,
     })),
   };
 }

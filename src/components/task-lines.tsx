@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Dictionary } from "../i18n";
-import type { TaskView } from "../server/view-model";
+import type { EmployeeView, TaskView } from "../server/view-model";
 
 // A command or a branch is shown as code wherever the words put {code}.
 export function withCode(template: string, code: string): ReactNode {
@@ -13,6 +13,11 @@ export function withCode(template: string, code: string): ReactNode {
       {after}
     </>
   );
+}
+
+// Who picks sent-back work up: its assignee, once back from leave, or whoever is free.
+export function reworkWhyOf(who: EmployeeView | undefined, w: Dictionary["projects"]): string {
+  return who === undefined ? w.reworkWhyAnyone : who.status === "onLeave" ? w.reworkWhyLater(who.name) : w.reworkWhy(who.name);
 }
 
 export function blockerText(task: TaskView, w: Dictionary["projects"]): ReactNode {
