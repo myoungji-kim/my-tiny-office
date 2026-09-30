@@ -16,6 +16,11 @@ export const ko: Dictionary = {
     create: "새 회사 만들기",
     import: "기존 회사 가져오기",
   },
+  notFound: {
+    title: "찾는 화면이 없어요",
+    body: "지워졌거나 다른 회사의 화면이에요.",
+    back: "사무실로 가기",
+  },
   teams: {
     backend: "백엔드팀",
     frontend: "프론트엔드팀",

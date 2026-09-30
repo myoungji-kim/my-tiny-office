@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useLayoutEffect, useRef, useState, useTransition } from "react";
 
 import { switchCompanyAction } from "../app/actions";
@@ -22,6 +22,7 @@ export function CompanyMenu({
   readonly words: { readonly switch: string; readonly create: string; readonly import: string };
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [, start] = useTransition();
   const anchor = useRef<HTMLButtonElement>(null);
@@ -40,7 +41,13 @@ export function CompanyMenu({
 
   const choose = (id: string) => {
     close();
-    if (id !== currentId) start(() => switchCompanyAction(id));
+    // a person or task of the last company is not in this one: go to its list
+    const section = "/" + (pathname.split("/")[1] ?? "");
+    if (id !== currentId)
+      start(async () => {
+        await switchCompanyAction(id);
+        if (section !== pathname) router.push(section);
+      });
   };
 
   return (

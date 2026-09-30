@@ -13,6 +13,11 @@ export const en = {
     create: "Start a new company",
     import: "Import an existing company",
   },
+  notFound: {
+    title: "Nothing here",
+    body: "It was removed, or it belongs to another company.",
+    back: "Go to the office",
+  },
   teams: {
     backend: "Backend",
     frontend: "Frontend",
