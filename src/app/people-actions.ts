@@ -6,6 +6,7 @@ import { addTeam, moveEmployee, removeTeam, renameTeam } from "../application/or
 import { assignTask, createTask } from "../application/task";
 import { SPECIES } from "../domain/employee";
 import { toAreaId, toEmployeeId, toMemoryId, toProjectId, toRoleId, toTaskId, toTeamId } from "../domain/ids";
+import { SUGGESTED_TEAMS } from "../domain/organisation";
 
 import { inCompany, optional, priorityOf, str, type Outcome } from "./action-context";
 
@@ -64,6 +65,13 @@ export async function moveEmployeeAction(companyId: string, employeeId: string, 
 
 export async function addTeamAction(companyId: string, name: string): Promise<Outcome> {
   return inCompany(companyId, (ctx, id) => addTeam(ctx, id, { name: str(name) }));
+}
+
+// One of the four teams the product suggests, named in both languages until renamed.
+export async function addSuggestedTeamAction(companyId: string, suggested: string): Promise<Outcome> {
+  const key = SUGGESTED_TEAMS.find((k) => k === suggested);
+  if (key === undefined) return { error: "unknown" };
+  return inCompany(companyId, (ctx, id) => addTeam(ctx, id, { suggested: key }));
 }
 
 export async function renameTeamAction(companyId: string, teamId: string, name: string): Promise<Outcome> {

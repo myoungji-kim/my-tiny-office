@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
-import { addTeamAction, moveEmployeeAction, removeTeamAction, renameTeamAction } from "../app/people-actions";
+import { addSuggestedTeamAction, addTeamAction, moveEmployeeAction, removeTeamAction, renameTeamAction } from "../app/people-actions";
 import type { Outcome } from "../app/action-context";
-import { MAX_NAME } from "../domain/organisation";
+import { MAX_NAME, SUGGESTED_TEAMS } from "../domain/organisation";
 import { getDictionary, type Locale } from "../i18n";
 import type { AreaView, EmployeeView, TeamView } from "../server/view-model";
 
@@ -110,6 +110,8 @@ export function OrgChart({
       setError(result.error === undefined ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
     });
 
+  const suggestions = SUGGESTED_TEAMS.filter((key) => !teams.some((team) => team.suggested === key));
+
   const moves = (p: EmployeeView) => [
     ...teams
       .filter((team) => team.id !== p.teamId)
@@ -210,6 +212,19 @@ export function OrgChart({
           {Icon.plus}
           {w.addTeam}
         </button>
+      )}
+      {/* the four the product suggests, until each is made */}
+      {editing !== "new" && suggestions.length > 0 && (
+        <div className="opts" role="group" aria-label={w.suggestTeams} style={{ marginTop: 8, alignItems: "center" }}>
+          <span className="hint" style={{ margin: 0 }}>
+            {w.suggestTeams}
+          </span>
+          {suggestions.map((key) => (
+            <button key={key} className="opt" type="button" onClick={() => act(() => addSuggestedTeamAction(companyId, key))}>
+              {t.teams[key]}
+            </button>
+          ))}
+        </div>
       )}
 
       {removing !== undefined && (

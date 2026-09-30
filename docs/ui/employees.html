@@ -338,7 +338,7 @@
       leaveWhy: (task) => "‘" + task + "’" + (hasBatchim(task) ? "은" : "는") + " 대기열로 돌아가요.",
       dismissWhy: "알려준 기억도 함께 떠나서 되돌릴 수 없어요. 맡은 업무는 대기열로 돌아가고, 연혁에는 합류와 떠난 기록이 남아요.",
       dismissUnused: "아직 한 일이 없어서 흔적 없이 지워져요. 알려준 기억과 연혁의 합류 기록도 함께 사라져요.",
-      noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
+      noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", suggestTeams: "추천 팀", renameTeam: "이름 바꾸기",
       teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
       moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
       removeTeamTitle: (team) => "‘" + team + "’ 지우기", removeTeamSub: (n) => "팀원이 " + n + "명 있어요. 지우기 전에 옮길 팀을 골라요.",
@@ -389,7 +389,7 @@
       leaveWhy: (task) => "‘" + task + "’ goes back to the backlog.",
       dismissWhy: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire and that they left.",
       dismissUnused: "They have not done any work yet, so they go without a trace: what you taught them and their hire in the history go too.",
-      noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
+      noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", suggestTeams: "Suggested", renameTeam: "Rename",
       teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
       moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
       removeTeamTitle: (team) => "Delete ‘" + team + "’", removeTeamSub: (n) => n + (n === 1 ? " person is" : " people are") + " in this team. Choose where they go first.",
@@ -914,6 +914,14 @@
       "beforeend",
       editingTeam === "new" ? `<div class="team-box"><div class="team-box-hd">${teamForm()}</div></div>` : `<button class="mem-add" type="button" data-addteam>${ICON.plus}${t().addTeam}</button>`,
     );
+    // the four the product suggests, until each is made; delete one to see it offered
+    const missing = Object.keys(WORDS.ko.teams).filter((key) => !TEAMS.some((x) => x.key === key));
+    if (editingTeam !== "new" && missing.length) {
+      org.insertAdjacentHTML(
+        "beforeend",
+        `<div class="opts" role="group" aria-label="${t().suggestTeams}" style="margin-top:8px;align-items:center"><span class="hint" style="margin:0">${t().suggestTeams}</span>${missing.map((key) => `<button class="opt" type="button" data-suggest="${key}">${t().teams[key]}</button>`).join("")}</div>`,
+      );
+    }
     wireTeamForm();
   }
 
@@ -994,6 +1002,12 @@
     if (menu) teamMenu(menu);
     const move = e.target.closest("[data-move]");
     if (move) moveMenu(move);
+    const suggest = e.target.closest("[data-suggest]");
+    if (suggest) {
+      TEAMS.push({ key: suggest.dataset.suggest });
+      renderOrg();
+      return;
+    }
     if (e.target.closest("[data-addteam]")) {
       editingTeam = "new";
       renderOrg();

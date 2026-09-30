@@ -306,6 +306,7 @@ export const en = {
     leaveTeam: "Take off the team",
     teamMenu: "Team actions",
     addTeam: "Add a team",
+    suggestTeams: "Suggested",
     renameTeam: "Rename",
     teamName: "Team name",
     teamPlaceholder: "e.g. Payments",

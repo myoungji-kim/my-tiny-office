@@ -309,6 +309,7 @@ export const ko: Dictionary = {
     leaveTeam: "팀에서 빼기",
     teamMenu: "팀 메뉴",
     addTeam: "팀 추가",
+    suggestTeams: "추천 팀",
     renameTeam: "이름 바꾸기",
     teamName: "팀 이름",
     teamPlaceholder: "예: 결제팀",
