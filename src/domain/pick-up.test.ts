@@ -17,6 +17,7 @@ const person = (id: string, availability: Employee["availability"] = "available"
   teamId: undefined,
   availability,
   leaveSince: undefined,
+  returnedAt: undefined,
   hiredAt: 0,
   career: undefined,
 });

@@ -1,0 +1,1 @@
+ALTER TABLE `employees` ADD `returned_at` integer;

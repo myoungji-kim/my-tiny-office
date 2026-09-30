@@ -29,6 +29,7 @@ describe("hireEmployee", () => {
       teamId: undefined,
       availability: "available",
       leaveSince: undefined,
+      returnedAt: undefined,
       hiredAt: now,
     });
     expect(hired().events).toMatchObject([{ type: "EmployeeHired", employeeName: "모카", roleId: "backend", teamId: undefined }]);
@@ -53,7 +54,7 @@ describe("leave", () => {
 
     const back = returnFromLeave(away.employee, toEventId("e"), now + 9);
     assert(back.ok);
-    expect(back.employee).toMatchObject({ availability: "available", leaveSince: undefined });
+    expect(back.employee).toMatchObject({ availability: "available", leaveSince: undefined, returnedAt: now + 9 });
   });
 });
 

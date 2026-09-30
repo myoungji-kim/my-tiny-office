@@ -19,6 +19,7 @@ function toEmployee(row: EmployeeRow): Employee {
     teamId: row.teamId === null ? undefined : toTeamId(row.teamId),
     availability: row.availability,
     leaveSince: row.leaveSince ?? undefined,
+    returnedAt: row.returnedAt ?? undefined,
     hiredAt: row.hiredAt,
     career:
       row.careerSession !== null && row.careerFolder !== null && row.careerFrom !== null && row.careerTo !== null
@@ -37,6 +38,7 @@ function toRow(employee: Employee): typeof employees.$inferInsert {
     teamId: employee.teamId ?? null,
     availability: employee.availability,
     leaveSince: employee.leaveSince ?? null,
+    returnedAt: employee.returnedAt ?? null,
     hiredAt: employee.hiredAt,
     careerSession: employee.career?.sessionId ?? null,
     careerFolder: employee.career?.folder ?? null,

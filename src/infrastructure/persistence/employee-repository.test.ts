@@ -27,6 +27,7 @@ const employee: Employee = {
   teamId: undefined,
   availability: "available",
   leaveSince: undefined,
+  returnedAt: undefined,
   hiredAt,
   career: undefined,
 };

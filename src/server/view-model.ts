@@ -1,9 +1,10 @@
 import type { Company } from "../domain/company";
-import { hasWorked } from "../domain/employee";
+import { hasWorked, type Employee } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import type { AtlassianWrite, Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus, type Review } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
+import type { Agent, Run } from "../domain/run";
 import type { RecordedMilestone } from "../domain/milestone";
 import { timeTaken, type Blocker, type Task, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
@@ -43,6 +44,8 @@ export interface EmployeeView {
   readonly reviewed: number;
   // their agent has run: letting them go keeps their record
   readonly worked: boolean;
+  // back from leave, and not started on anything since
+  readonly justBack: boolean;
   // where a hire with experience came from, and how much of it they brought
   readonly career: { readonly folder: string; readonly from: number; readonly to: number; readonly brought: number } | undefined;
 }
@@ -198,6 +201,13 @@ async function listCompanies(files: CompanyFiles): Promise<{ companies: Company[
   return { companies: companies.sort((a, b) => a.foundedAt - b.foundedAt || a.id.localeCompare(b.id)), unreadable };
 }
 
+function justBack(employee: Employee, agents: readonly Agent[], runs: readonly Run[]): boolean {
+  const back = employee.returnedAt;
+  if (back === undefined || employee.availability !== "available") return false;
+  const theirs = new Set(agents.filter((a) => a.employeeId === employee.id).map((a) => a.id as string));
+  return !runs.some((r) => theirs.has(r.agentId) && r.startedAt >= back);
+}
+
 // The review a card tells of: the one under way, or a finished one on work
 // that now waits for the user.
 function reviewOnCard(task: Task, reviews: readonly Review[], nameById: ReadonlyMap<string, string>): TaskView["review"] {
@@ -288,6 +298,7 @@ export async function loadOffice(
       finished: tasks.filter((task) => task.assigneeId === employee.id && task.status === "done").length,
       reviewed: reviews.filter((review) => review.reviewerId === employee.id && review.state === "settled").length,
       worked: hasWorked(employee.id, agents, runs),
+      justBack: justBack(employee, agents, runs),
       status: statusOf(employee, tasks, reviews),
       agentLost: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "disconnected"),
       leaveSince: employee.leaveSince,

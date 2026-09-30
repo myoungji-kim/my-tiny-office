@@ -126,6 +126,7 @@ describe("loadOffice", () => {
         finished: 0,
         reviewed: 0,
         worked: false,
+        justBack: false,
         status: "available",
         agentLost: false,
         task: undefined,

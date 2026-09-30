@@ -258,6 +258,7 @@ export const en = {
     onLeave: "On leave",
     nothingAssigned: "Nothing assigned",
     justJoined: "Just joined",
+    justBack: "Just back from leave",
     lastFinished: "Last finished",
     joined: "Joined",
     career: "Experience",

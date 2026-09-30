@@ -61,7 +61,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
     ) : (
       <>
         <span className="k">{w.nothingAssigned}</span>
-        <span className="now-note">{person.lastFinished === undefined ? w.justJoined : w.lastFinished + " · " + person.lastFinished}</span>
+        <span className="now-note">{person.justBack ? w.justBack : person.lastFinished === undefined ? w.justJoined : w.lastFinished + " · " + person.lastFinished}</span>
       </>
     );
 

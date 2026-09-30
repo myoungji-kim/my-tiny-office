@@ -92,6 +92,7 @@ export const employees = sqliteTable(
     teamId: text("team_id").references(() => teams.id),
     availability: text("availability", { enum: availabilities }).notNull(),
     leaveSince: integer("leave_since"),
+    returnedAt: integer("returned_at"),
     hiredAt: integer("hired_at").notNull(),
     // the session a hire with experience came from, all four or none
     careerSession: text("career_session"),

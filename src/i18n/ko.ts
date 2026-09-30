@@ -261,6 +261,7 @@ export const ko: Dictionary = {
     onLeave: "휴가",
     nothingAssigned: "맡은 업무가 없어요",
     justJoined: "방금 입사했어요",
+    justBack: "휴가에서 막 돌아왔어요",
     lastFinished: "최근 완료",
     joined: "입사",
     career: "경력",

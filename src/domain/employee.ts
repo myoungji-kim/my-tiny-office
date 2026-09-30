@@ -33,6 +33,8 @@ export interface Employee {
   readonly teamId: TeamId | undefined;
   readonly availability: Availability;
   readonly leaveSince: Timestamp | undefined;
+  // when they last came back from leave
+  readonly returnedAt: Timestamp | undefined;
   readonly hiredAt: Timestamp;
   readonly career: Career | undefined;
 }
@@ -70,6 +72,7 @@ export function hireEmployee(
     teamId: input.teamId,
     availability: "available",
     leaveSince: undefined,
+    returnedAt: undefined,
     hiredAt: now,
     career: input.career,
   };
@@ -151,7 +154,7 @@ export function returnFromLeave(
   if (employee.availability !== "onLeave") return { ok: false, reason: "employeeNotOnLeave" };
   return {
     ok: true,
-    employee: { ...employee, availability: "available", leaveSince: undefined },
+    employee: { ...employee, availability: "available", leaveSince: undefined, returnedAt: now },
     events: [{ eventId, type: "EmployeeReturned", occurredAt: now, companyId: employee.companyId, employeeId: employee.id, employeeName: employee.name }],
   };
 }

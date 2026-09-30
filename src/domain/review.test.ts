@@ -21,6 +21,7 @@ const person = (id: string, extra: Partial<Employee> = {}): Employee => ({
   teamId: undefined,
   availability: "available",
   leaveSince: undefined,
+  returnedAt: undefined,
   hiredAt: t0,
   career: undefined,
   ...extra,
