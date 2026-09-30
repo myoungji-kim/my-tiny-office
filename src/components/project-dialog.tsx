@@ -10,6 +10,7 @@ import { getDictionary, type Locale } from "../i18n";
 import type { ProjectView } from "../server/view-model";
 
 import { Icon } from "./icons";
+import { useLatest } from "./use-latest";
 
 const PRIORITIES = ["low", "normal", "high"] as const;
 
@@ -63,12 +64,13 @@ export function ProjectDialog({
   const [picking, startPicking] = useTransition();
   const first = useRef<HTMLInputElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     first.current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && latestClose.current();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [latestClose]);
 
   useEffect(() => {
     if (folder === undefined || !chosen) return;

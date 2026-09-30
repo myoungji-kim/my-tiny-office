@@ -9,6 +9,7 @@ import type { AreaView, EmployeeView, MemoryView, ProjectView, TaskView } from "
 
 import { Icon } from "./icons";
 import { areaName } from "./names";
+import { useLatest } from "./use-latest";
 
 const PRIORITIES = ["low", "normal", "high"] as const;
 
@@ -52,12 +53,13 @@ export function TaskDialog({
   const titleField = useRef<HTMLInputElement>(null);
   const whoField = useRef<HTMLSelectElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     (focusAssignee ? whoField : titleField).current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && latestClose.current();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose, focusAssignee]);
+  }, [latestClose, focusAssignee]);
 
   const chosen = areas.find((a) => a.id === area);
   const knowing = employees.filter((e) => memories.some((m) => m.kind === "expertise" && m.employeeId === e.id && m.areaId === area));

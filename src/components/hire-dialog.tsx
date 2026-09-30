@@ -13,6 +13,7 @@ import { CAST, castMember, type CastMember } from "../ui/paint";
 import { CareerDialog, type Brought } from "./career-dialog";
 import { spanOf } from "./dates";
 import { Sprite } from "./sprite";
+import { useLatest } from "./use-latest";
 
 export interface Choice {
   readonly id: string;
@@ -73,19 +74,20 @@ export function HireDialog({
   const [pending, start] = useTransition();
   const first = useRef<HTMLButtonElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     const returnTo = document.activeElement as HTMLElement | null;
     first.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       // a window opened over this one closes first
-      if (e.key === "Escape" && document.querySelectorAll(".scrim").length === 1) onClose();
+      if (e.key === "Escape" && document.querySelectorAll(".scrim").length === 1) latestClose.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       returnTo?.focus({ preventScroll: true });
     };
-  }, [onClose]);
+  }, [latestClose]);
 
   const trimmed = name.trim();
   // A nickname the user did not write is not their employee, so the button waits for both.

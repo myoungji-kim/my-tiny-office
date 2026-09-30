@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Choice } from "./hire-dialog";
 import { Icon } from "./icons";
+import { useLatest } from "./use-latest";
 
 // Deleting a row that still holds something asks where it goes first; `none`
 // is the choice of nowhere, where there is one.
@@ -30,12 +31,13 @@ export function MoveDialog({
 }) {
   const [into, setInto] = useState(none === undefined ? (options[0]?.id ?? "") : "");
   const back = useRef<HTMLButtonElement>(null);
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     back.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && latestClose.current();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [latestClose]);
 
   return (
     <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>

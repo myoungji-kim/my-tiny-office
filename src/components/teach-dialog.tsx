@@ -10,6 +10,7 @@ import type { AreaView, EmployeeView, MemoryView } from "../server/view-model";
 import { Icon } from "./icons";
 import { areaName } from "./names";
 import { Sprite } from "./sprite";
+import { useLatest } from "./use-latest";
 
 type Person = Pick<EmployeeView, "id" | "name" | "species" | "status" | "role">;
 
@@ -68,18 +69,19 @@ export function TeachDialog({
   const field = useRef<HTMLTextAreaElement>(null);
   const firstPick = useRef<HTMLButtonElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     const returnTo = document.activeElement as HTMLElement | null;
     (firstPick.current ?? field.current)?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") latestClose.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       returnTo?.focus({ preventScroll: true });
     };
-  }, [onClose]);
+  }, [latestClose]);
 
   // what the one it goes to already carries
   const carried = memories.filter((m) => m.id !== edit?.id && (company ? m.kind === "company" : m.employeeId === picked?.id));

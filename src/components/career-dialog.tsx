@@ -10,6 +10,7 @@ import type { AreaView } from "../server/view-model";
 import { spanOf } from "./dates";
 import { Icon } from "./icons";
 import { areaName } from "./names";
+import { useLatest } from "./use-latest";
 
 export interface Brought {
   readonly session: CandidateView;
@@ -60,17 +61,18 @@ export function CareerDialog({
   const cache = useRef(new Map<string, Summed>());
   const modal = useRef<HTMLDivElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     const returnTo = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && modal.current?.parentElement === [...document.querySelectorAll(".scrim")].at(-1)) onClose();
+      if (e.key === "Escape" && modal.current?.parentElement === [...document.querySelectorAll(".scrim")].at(-1)) latestClose.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       returnTo?.focus({ preventScroll: true });
     };
-  }, [onClose]);
+  }, [latestClose]);
 
   useEffect(() => {
     modal.current?.querySelector<HTMLElement>("select, button.sess:not(:disabled), textarea, [data-forward], [data-close]")?.focus({ preventScroll: true });

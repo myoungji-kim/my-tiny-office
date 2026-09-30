@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import type { Outcome } from "../app/action-context";
 
+import { useLatest } from "./use-latest";
+
 // A step that says what it does before it is taken; `field` asks for a line
 // of text, such as why, before the step can be taken.
 export function StepDialog({
@@ -30,12 +32,13 @@ export function StepDialog({
   const [pending, start] = useTransition();
   const first = useRef<HTMLInputElement & HTMLButtonElement>(null);
 
+  const latestClose = useLatest(onClose);
   useEffect(() => {
     first.current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && latestClose.current();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [latestClose]);
 
   const go = () =>
     start(async () => {
