@@ -99,11 +99,16 @@ export function requestReview(ctx: AppContext, taskId: TaskId, reviewerId: Emplo
       ctx.reviews.findByCompany(task.companyId),
       ctx.memories.findByCompany(task.companyId),
     ]);
-    if (reviews.some((r) => r.taskId === task.id && reviewDomain.isOpen(r))) return { ok: false, reason: "reviewAlreadyOpen" };
-
     const reopened = taskDomain.reopenForReview(task);
     if (!reopened.ok) return reopened;
     const now = ctx.now();
+    const stale: DomainEvent[] = [];
+    for (const review of reviews.filter((r) => r.taskId === task.id && reviewDomain.isOpen(r))) {
+      const withdrawn = reviewDomain.withdrawReview(review, toEventId(ctx.newId()), now);
+      if (!withdrawn.ok) continue;
+      await ctx.reviews.save(withdrawn.review);
+      stale.push(...withdrawn.events);
+    }
     const suggested = reviewDomain.suggestReview({ id: toReviewId(ctx.newId()), task: reopened.task, othersWhoKnow: 1 }, toEventId(ctx.newId()), now);
     if (!suggested.ok) return suggested;
     const busy = reviewDomain.statusOf(reviewer, tasks, reviews) !== "available";
@@ -112,8 +117,28 @@ export function requestReview(ctx: AppContext, taskId: TaskId, reviewerId: Emplo
 
     await ctx.tasks.save(reopened.task);
     await ctx.reviews.save(asked.review);
-    return { ok: true, value: { review: asked.review }, events: [...suggested.events, ...asked.events] };
+    return { ok: true, value: { review: asked.review }, events: [...stale, ...suggested.events, ...asked.events] };
   });
+}
+
+// For use inside another use case's transaction, when a reviewer leaves or
+// goes on leave: work that waited on them goes to the user's approval as it
+// is, rather than back to its author, who had finished it.
+export async function handBackReviews(ctx: AppContext, companyId: CompanyId, reviewerId: EmployeeId): Promise<DomainEvent[]> {
+  const events: DomainEvent[] = [];
+  for (const review of await ctx.reviews.findByCompany(companyId)) {
+    if (review.reviewerId !== reviewerId || !reviewDomain.isOpen(review)) continue;
+    const withdrawn = reviewDomain.withdrawReview(review, toEventId(ctx.newId()), ctx.now());
+    if (!withdrawn.ok) continue;
+    await ctx.reviews.save(withdrawn.review);
+    events.push(...withdrawn.events);
+    const task = reviewDomain.holdsTheWork(review) ? await ctx.tasks.findById(review.taskId) : undefined;
+    const finished = task === undefined ? undefined : taskDomain.finishWork(task, toEventId(ctx.newId()), ctx.now());
+    if (!finished?.ok) continue;
+    await ctx.tasks.save(finished.task);
+    events.push(...finished.events);
+  }
+  return events;
 }
 
 // For use inside another use case's transaction, when work leaves `working`.

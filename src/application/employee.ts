@@ -3,12 +3,11 @@ import type { DomainEvent } from "../domain/events";
 import { toEmployeeId, toEventId, toMemoryId, type AreaId, type CompanyId, type EmployeeId, type RoleId, type TeamId } from "../domain/ids";
 import * as memoryDomain from "../domain/memory";
 import type { NameFailure } from "../domain/name";
-import { releaseReview } from "../domain/review";
 import { returnToBacklog } from "../domain/task";
 
 import type { AppContext, UseCaseResult } from "./context";
 import { recordMilestones } from "./history";
-import { withdrawReviewsOn } from "./review";
+import { handBackReviews, withdrawReviewsOn } from "./review";
 
 export interface HireEmployeeInput {
   readonly companyId: CompanyId;
@@ -124,14 +123,7 @@ export function sendOnLeave(ctx: AppContext, employeeId: EmployeeId): Promise<Em
       events.push(...back.events);
     }
     events.push(...(await withdrawReviewsOn(ctx, employee.companyId, returned)));
-
-    for (const review of await ctx.reviews.findByCompany(employee.companyId)) {
-      if (review.reviewerId !== employee.id) continue;
-      const released = releaseReview(review, toEventId(ctx.newId()), now);
-      if (!released.ok) continue;
-      await ctx.reviews.save(released.review);
-      events.push(...released.events);
-    }
+    events.push(...(await handBackReviews(ctx, employee.companyId, employee.id)));
 
     await ctx.employees.save(away.employee);
     return { ok: true, value: { employee: away.employee }, events };
@@ -167,22 +159,18 @@ export function letGo(ctx: AppContext, employeeId: EmployeeId): Promise<Employee
       }
     }
     events.push(...(await withdrawReviewsOn(ctx, employee.companyId, returned)));
-    for (const review of await ctx.reviews.findByCompany(employee.companyId)) {
-      if (review.reviewerId !== employee.id) continue;
-      const released = releaseReview(review, toEventId(ctx.newId()), now);
-      if (!released.ok) continue;
-      await ctx.reviews.save(released.review);
-      events.push(...released.events);
-    }
+    events.push(...(await handBackReviews(ctx, employee.companyId, employee.id)));
     for (const memory of await ctx.memories.findByCompany(employee.companyId)) {
       if (memory.employeeId === employee.id) await ctx.memories.remove(memory.id);
     }
 
     const worked = employeeDomain.hasWorked(employee.id, await ctx.agents.findByCompany(employee.companyId), await ctx.runs.findByCompany(employee.companyId));
+    const reviews = (await ctx.reviews.findByCompany(employee.companyId)).filter((r) => r.reviewerId === employee.id);
     const named =
       (await ctx.tasks.findByCompany(employee.companyId)).some((t) => t.assigneeId === employee.id || t.reviewerId === employee.id) ||
-      (await ctx.reviews.findByCompany(employee.companyId)).some((r) => r.reviewerId === employee.id);
+      reviews.some((r) => r.state !== "withdrawn");
     if (!worked && !named) {
+      for (const review of reviews) await ctx.reviews.save({ ...review, reviewerId: undefined });
       await ctx.agents.removeByEmployee(employee.id);
       await ctx.milestones.removeJoined(employee.id);
       await ctx.employees.remove(employee.id);

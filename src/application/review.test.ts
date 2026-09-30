@@ -9,7 +9,7 @@ import { hireEmployee, sendOnLeave } from "./employee";
 import { forgetMemory, teachMemory } from "./memory";
 import { addTeam, moveEmployee, removeTeam } from "./organisation";
 import { createProject, finishProject, startProject } from "./project";
-import { askForReview, settleReview, suggestReview } from "./review";
+import { askForReview, requestReview, settleReview, suggestReview } from "./review";
 import { applyTask, createTask, holdTask, pickUpWork } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 
@@ -180,7 +180,7 @@ describe("a review when the work or the reviewer moves on", () => {
     expect(next.value.started.map((t) => t.assigneeId)).toEqual([mocha.id, pip.id]);
   });
 
-  it("goes back to be offered when its reviewer goes on leave", async () => {
+  it("hands the work to the user's approval when its reviewer goes on leave, and a new review can be asked", async () => {
     await hire("모카");
     const pip = await hire("삐약", true);
     const webhook = await workInProgress();
@@ -191,7 +191,10 @@ describe("a review when the work or the reviewer moves on", () => {
 
     assert((await sendOnLeave(ctx, pip.id)).ok);
 
-    await expect(ctx.reviews.findById(suggested.value.review.id)).resolves.toMatchObject({ state: "suggested", reviewerId: undefined });
+    await expect(ctx.reviews.findById(suggested.value.review.id)).resolves.toMatchObject({ state: "withdrawn" });
+    await expect(ctx.tasks.findById(webhook.id)).resolves.toMatchObject({ status: "approval" });
+    const bori = await hire("보리", true);
+    await expect(requestReview(ctx, webhook.id, bori.id)).resolves.toMatchObject({ ok: true });
   });
 });
 
