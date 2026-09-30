@@ -57,6 +57,16 @@ describe("roles", () => {
   });
 });
 
+describe("a role only someone let go held", () => {
+  it("goes without asking where they go, and keeps them on another role", async () => {
+    const mocha = await hire("모카");
+    await ctx.employees.save({ ...mocha, availability: "left" });
+
+    assert((await removeRole(ctx, companyId, mocha.roleId)).ok);
+    await expect(ctx.employees.findById(mocha.id)).resolves.not.toMatchObject({ roleId: mocha.roleId });
+  });
+});
+
 describe("names in the company's lists", () => {
   it("are one each for roles, whatever the case", async () => {
     await expect(addRole(ctx, companyId, "dba")).resolves.toEqual({ ok: false, reason: "nameTaken" });

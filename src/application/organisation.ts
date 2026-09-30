@@ -51,11 +51,14 @@ export function removeRole(
       return { ok: false, reason: "moveTargetNotFound" };
     }
 
-    const holders = (await ctx.employees.findByCompany(companyId)).filter((e) => e.roleId === roleId);
+    // someone let go keeps a role only as a record, which goes with the role
+    const everyone = (await ctx.employees.findByCompany(companyId)).filter((e) => e.roleId === roleId);
+    const holders = everyone.filter((e) => e.availability !== "left");
     const refused = org.canRemoveRole(roles, holders.length, moveTo !== undefined);
     if (refused !== undefined) return { ok: false, reason: refused };
-    if (moveTo !== undefined) {
-      for (const employee of holders) await ctx.employees.save({ ...employee, roleId: moveTo });
+    const target = moveTo ?? roles.find((r) => r.id !== roleId)?.id;
+    if (target !== undefined) {
+      for (const employee of everyone) await ctx.employees.save({ ...employee, roleId: target });
     }
     await ctx.roles.remove(roleId);
     return { ok: true, value: { moved: holders.length }, events: [] };
