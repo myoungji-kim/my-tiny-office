@@ -6,6 +6,7 @@ import { getCompanyFiles } from "./persistence/company-files";
 import { readSettings } from "./persistence/settings";
 import { claudeCodeStatus } from "./runtime/claude-code-status";
 import { claudeCodeRuntime } from "./runtime/claude-code-run";
+import { holdsWork, releaseWork } from "./work-lock";
 import { gitWorkspace } from "./workspace/git";
 
 const TICK_MS = 5_000;
@@ -20,6 +21,8 @@ export function getWork(): WorkSupervisor {
     workspace: gitWorkspace,
     companies: () => {
       const files = getCompanyFiles();
+      // another server on this computer is doing the work
+      if (!holdsWork(files.directory)) return [];
       return files.ids().map((companyId) => ({ companyId, ctx: createAppContext(files.open(companyId)) }));
     },
     ready: async () => isReady(await claudeCodeStatus()),
@@ -34,6 +37,9 @@ export function startWork(): void {
   cache.myTinyOfficeWorkTimer = setInterval(() => void getWork().kick(), TICK_MS);
   cache.myTinyOfficeWorkTimer.unref();
   // A run is a child of the server: when the server goes, so do its agents.
-  process.once("exit", () => getWork().stopAll());
+  process.once("exit", () => {
+    getWork().stopAll();
+    releaseWork(getCompanyFiles().directory);
+  });
   void getWork().kick();
 }

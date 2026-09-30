@@ -53,9 +53,24 @@ filter) is in its query string. The company open is the one `settings.json`
 names, so links never carry it. Two route handlers move files:
 `GET /settings/export` and `POST /settings/import`.
 
-Electron and Tauri are not used in the MVP.
+### Desktop window
 
-Desktop packaging remains a natural long-term fit for local SQLite, local agent runtimes, process management, and workspace access, but it is a separate decision to be revisited when the product actually requires it. Until then, the UI and domain layers must stay usable as a plain web application.
+The desktop app (`desktop/`) is an Electron window onto that same server, not a
+second architecture. Its main process:
+
+1. starts `next start` on `127.0.0.1:4317`, or a free port if that is taken, with
+   the computer's own Node, so `better-sqlite3` is never rebuilt for Electron;
+2. shows the page in a sandboxed window;
+3. stops the server's process tree on quit.
+
+Nothing in `src/` knows about it, and the app stays usable as a plain web
+application.
+
+`npm run app:install` builds the app, packages the window with
+`@electron/packager`, and installs it for this computer: `~/Applications` on
+macOS, ad-hoc signed, and the Start menu on Windows. The installed bundle holds
+only the window and the path of the checkout it runs, so an update is `git pull`
+and the install again. The window's security is in SECURITY.md §6.
 
 ## 3. Time
 
@@ -365,7 +380,10 @@ The exact flags, and why each is there, are in SECURITY.md.
 One supervisor (`createWorkSupervisor` in `src/application/work.ts`) keeps
 the running agents in step with every company's tasks. It starts with the
 server (`src/instrumentation.ts`), ticks every five seconds and after every
-action, and treats the tasks as the truth. Each tick:
+action, and treats the tasks as the truth. Only the server holding the data
+directory's `work.pid` ticks (`src/infrastructure/work-lock.ts`). Another
+server on the same data, such as `npm run dev` beside the desktop app, shows
+the office but does no work. Each tick:
 
 1. ends as disconnected any run the database thinks is going with no process
    behind it — what a restart leaves — and blocks its task;

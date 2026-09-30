@@ -178,6 +178,22 @@ agents, so it is a target in its own right.
   `Origin` equal to the host, and a `Sec-Fetch-Site` that is not `cross-site`;
   otherwise 403. Next.js checks the origin of a server action too, but lets one
   without an `Origin` through, which this does not. No state changes on `GET`.
+- **Desktop window.** `desktop/main.mjs` is only a window onto the local
+  server it starts, `next start` on `127.0.0.1`, run with the computer's own
+  Node.
+  - The page runs sandboxed, with context isolation and no Node.
+  - The window never leaves the server's origin. Any other `http(s)` link
+    opens in the user's browser; everything else is dropped.
+  - Every permission request is refused except writing to the clipboard.
+  - On macOS the login shell is asked for `PATH`, since an app opened from
+    the Dock gets a bare one. That runs the user's own shell startup files,
+    as a terminal would.
+  - Quitting stops the server's process tree, and the agents with it. Their
+    runs are reconciled as disconnected the next time the app starts.
+- **One worker per data directory.** The server that holds
+  `<data dir>/work.pid` runs the work; any other server on the same data
+  runs none. Two workers would each take the other's runs for lost ones and
+  start them again. A lock left by a process that is gone is taken over.
 - **Processes.** `claude` and `git` are started only through
   `src/infrastructure/process/run.ts`: `spawn(file, args)` with `shell: false`,
   found on `PATH` by the app rather than by a shell.

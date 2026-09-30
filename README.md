@@ -71,6 +71,7 @@ my-tiny-office/
 │   ├── STYLE-GUIDE.md
 │   ├── SECURITY.md          what an agent may do, and how it is enforced
 │   └── ui/                  the UI standard: open index.html
+├── desktop/                 the desktop window and its installer
 ├── drizzle/                 the migrations, generated from the schema
 ├── .github/
 │   ├── pull_request_template.md
@@ -116,6 +117,40 @@ Companies live outside the repository:
 system picker: `osascript` on macOS, PowerShell on Windows, `zenity` or
 `kdialog` on Linux. Agents run commands through Bash on macOS and Linux, and
 through Bash and PowerShell on Windows (docs/SECURITY.md §2).
+
+## Desktop app
+
+The app runs as a desktop app with its own window and icon. The window
+starts the server with this computer's Node and stops it on quit. On macOS,
+closing the window keeps the office working until you quit from the Dock.
+
+```bash
+npm install
+npm run app:install
+```
+
+This builds the app and installs **My Tiny Office**: in `~/Applications` on
+macOS, and in the Start menu on Windows (`%LOCALAPPDATA%Programs`). The
+installed app runs this checkout, so to update it you `git pull`, then run
+`npm install` and `npm run app:install` again. `npm run app` opens the
+window straight from the checkout, without installing it.
+
+Only one server works a data directory at a time. If the desktop app is open,
+a `npm run dev` on the same data shows the office but leaves the work to the
+app.
+
+### Installing with Claude Code
+
+Ask Claude Code to install it. It follows these steps:
+
+1. Check the requirements above: `node --version` is 22 or later, and `git`
+   works. Check Claude Code with `claude auth status`. If you are not logged
+   in, you run `claude auth login` yourself; the app never handles the login.
+2. Clone the repository, or use this checkout, and run `npm install`. On
+   macOS, if `better-sqlite3` fails to build, install the Xcode Command Line
+   Tools with `xcode-select --install`, then run it again.
+3. Run `npm run app:install`.
+4. Open **My Tiny Office** from Applications or the Start menu.
 
 ## Development
 
