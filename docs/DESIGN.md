@@ -244,9 +244,11 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
   up later, or hire without it by 빼기.
 - 경력 정리하기 needs Claude Code. When it is not ready, the button waits with
   the reason, and hiring without experience still works.
-- If the run fails, the step says *경력을 정리하지 못했어요* with 다시 시도, and
-  the hire goes on without it. If nothing worth bringing was found, it says
-  so and the hire goes on as new.
+- If the run fails, the step says *경력을 정리하지 못했어요* and offers 경력 없이
+  고용 or 다시 시도.
+- If nothing worth bringing was found, it says *가져올 만한 게 없었어요* and
+  offers 다른 세션 고르기 or 신입으로 고용.
+- Either way the hire itself goes on.
 
 **6. After the hire.**
 
@@ -259,7 +261,12 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
   agent starts sessions of its own.
 
 The mockup is office.html's whole floor. The toggle is in settings.html's
-general tab.
+general tab. Its samples show every state:
+- `~/Projects/tinysoft` (the webhook one) is in use.
+- `~/Projects/design-system` fails its first reading, then succeeds on 다시
+  시도.
+- `~/dotfiles` has nothing worth bringing.
+- The bar's Claude Code toggle shows summing up waiting for it.
 
 ## Projects
 

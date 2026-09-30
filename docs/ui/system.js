@@ -574,6 +574,13 @@ const WORDS = {
       back: "뒤로", cancel: "취소",
       take: (n) => (n ? n + "개 가져오기" : "가져오기"),
       from: (folder) => folder + " 세션",
+      needClaude: "Claude Code가 준비되면 정리할 수 있어요.",
+      failTitle: "경력을 정리하지 못했어요",
+      failWhy: "Claude Code가 대화를 끝까지 읽지 못했어요. 다시 시도하거나, 경력 없이 고용할 수 있어요.",
+      retry: "다시 시도", without: "경력 없이 고용",
+      emptyTitle: "가져올 만한 게 없었어요",
+      emptyWhy: "이 대화에는 다른 업무에도 쓸 만한 지식이나 일하는 방식이 보이지 않았어요.",
+      other: "다른 세션 고르기", asNew: "신입으로 고용",
     },
     teach: {
       titleTo: (name) => name + "에게 알려주기",
@@ -634,6 +641,13 @@ const WORDS = {
       back: "Back", cancel: "Cancel",
       take: (n) => (n ? "Bring " + n : "Bring them"),
       from: (folder) => "a " + folder + " session",
+      needClaude: "This can be summed up once Claude Code is ready.",
+      failTitle: "The experience could not be summed up",
+      failWhy: "Claude Code did not get through the conversation. Try again, or hire them without it.",
+      retry: "Try again", without: "Hire without it",
+      emptyTitle: "Nothing worth bringing",
+      emptyWhy: "This conversation holds no knowledge or way of working that would help with other work.",
+      other: "Pick another session", asNew: "Hire them new",
     },
     teach: {
       titleTo: (name) => "Teach " + name,
@@ -933,8 +947,8 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
     const c = state.career;
     const pending = !c && from;
     box.innerHTML = pending
-      ? `<span class="career-tx"><b>${w.careerLine({ project: folderName(from.folder), span: local(from.span) })}</b><span>${w.careerUnread}</span></span>
-         <button class="btn btn-secondary btn-sm" type="button" data-career-read>${w.careerRead}</button>`
+      ? `<span class="career-tx"><b>${w.careerLine({ project: folderName(from.folder), span: local(from.span) })}</b><span>${RUNTIME.off ? WORDS[lang].career.needClaude : w.careerUnread}</span></span>
+         <button class="btn btn-secondary btn-sm" type="button" data-career-read${RUNTIME.off ? " disabled" : ""}>${w.careerRead}</button>`
       : c
       ? `<span class="career-tx"><b>${w.careerLine(c)}</b><span>${w.careerCarries(c.memories.length, c.style.length)}</span></span>
          <button class="btn btn-secondary btn-sm" type="button" data-career-add>${w.careerChange}</button>
@@ -954,7 +968,7 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
   }
   renderCareer();
   // From the plaza the session is already chosen, so reading it is the next step.
-  if (from && career) queueMicrotask(() => career((picked) => ((state.career = picked), renderCareer()), from));
+  if (from && career && !RUNTIME.off) queueMicrotask(() => career((picked) => ((state.career = picked), renderCareer()), from));
 
   // A nickname the user did not write is not their employee, so the button
   // waits for both.
@@ -998,7 +1012,8 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
 // Claude Code sessions held on this computer, as the app lists them: the
 // app's own runs, short or old ones, hired and sent-away ones are left out.
 // `last` is how long ago the session was last written to; one written to in
-// the last five minutes is in use in a terminal.
+// the last five minutes is in use in a terminal. `failsOnce` and `empty` show
+// a reading that fails the first time, and one that finds nothing.
 
 const CANDIDATES = [
   { id: "s1", folder: "~/Projects/tinysoft", first: { ko: "결제 재시도 로직을 정리하자", en: "Let's sort out the payment retry logic" }, span: { ko: "9월 12일 – 9월 24일", en: "Sep 12 – Sep 24" }, turns: 214, last: { ko: "2일 전", en: "2 days ago" }, long: true },
@@ -1008,8 +1023,8 @@ const CANDIDATES = [
   { id: "s5", folder: "~/blog", first: { ko: "블로그에 다크 모드 넣어줘", en: "Add a dark mode to the blog" }, span: { ko: "9월 23일 – 9월 24일", en: "Sep 23 – Sep 24" }, turns: 44, last: { ko: "2일 전", en: "2 days ago" } },
   { id: "s6", folder: "~/Projects/infra", first: { ko: "테라폼 모듈을 환경별로 쪼개자", en: "Split the Terraform modules by environment" }, span: { ko: "9월 15일 – 9월 22일", en: "Sep 15 – Sep 22" }, turns: 132, last: { ko: "4일 전", en: "4 days ago" }, long: true },
   { id: "s7", folder: "~/Projects/app-mobile", first: { ko: "푸시 알림 딥링크가 안 열려", en: "Push notification deep links don't open" }, span: { ko: "9월 21일", en: "Sep 21" }, turns: 88, last: { ko: "5일 전", en: "5 days ago" } },
-  { id: "s8", folder: "~/dotfiles", first: { ko: "zsh 설정 좀 정리해줘", en: "Tidy up my zsh config" }, span: { ko: "9월 19일", en: "Sep 19" }, turns: 19, last: { ko: "1주 전", en: "1 week ago" } },
-  { id: "s9", folder: "~/Projects/design-system", first: { ko: "버튼 variant를 정리하자", en: "Let's clean up the button variants" }, span: { ko: "9월 8일 – 9월 12일", en: "Sep 8 – Sep 12" }, turns: 53, last: { ko: "2주 전", en: "2 weeks ago" } },
+  { id: "s8", folder: "~/dotfiles", first: { ko: "zsh 설정 좀 정리해줘", en: "Tidy up my zsh config" }, span: { ko: "9월 19일", en: "Sep 19" }, turns: 19, last: { ko: "1주 전", en: "1 week ago" }, empty: true },
+  { id: "s9", folder: "~/Projects/design-system", first: { ko: "버튼 variant를 정리하자", en: "Let's clean up the button variants" }, span: { ko: "9월 8일 – 9월 12일", en: "Sep 8 – Sep 12" }, turns: 53, last: { ko: "2주 전", en: "2 weeks ago" }, failsOnce: true },
   { id: "s10", folder: "~/Projects/tinysoft", first: { ko: "환불 API가 멱등한지 확인해줘", en: "Check the refund API is idempotent" }, span: { ko: "9월 18일", en: "Sep 18" }, turns: 36, last: { ko: "8일 전", en: "8 days ago" } },
   { id: "s11", folder: "~/Projects/admin", first: { ko: "관리자 권한 체크를 미들웨어로 옮기자", en: "Move the admin permission check into middleware" }, span: { ko: "9월 10일 – 9월 11일", en: "Sep 10 – Sep 11" }, turns: 71, last: { ko: "2주 전", en: "2 weeks ago" } },
 ].map((c, i) => ({ ...c, species: CAST[(i * 7 + 3) % CAST.length].key }));
@@ -1083,12 +1098,12 @@ function openCareer(done, session = null, hired = new Set()) {
                   .join("")}</div>`
               : `<p class="hint">${w.none}</p>`
           }
-          <span class="hint">${w.cost}</span>
+          <span class="hint">${RUNTIME.off ? w.needClaude : w.cost}</span>
         </div>
       </div>
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
-        <button class="btn btn-primary btn-md" type="button" data-read${state.session ? "" : " disabled"}>${w.read}</button>
+        <button class="btn btn-primary btn-md" type="button" data-read${state.session && !RUNTIME.off ? "" : " disabled"}>${w.read}</button>
       </div>`;
     bind();
     modal.querySelector("#careerFolder").addEventListener("change", (e) => {
@@ -1113,11 +1128,36 @@ function openCareer(done, session = null, hired = new Set()) {
     bind();
     setTimeout(() => {
       if (!scrim.isConnected) return;
+      if (state.session.failsOnce && !state.tried) {
+        state.tried = true;
+        return failed();
+      }
+      if (state.session.empty) return nothing();
       state.knows = SUMMED.knows.map((m) => ({ area: m.area, text: local(m.text), on: true }));
       state.style = SUMMED.style.map((x) => ({ text: local(x), on: true }));
       review();
     }, 1200);
   }
+
+  // Either way the hire goes on; it only brings nothing.
+  function ended(kind, title, why, back, forward) {
+    modal.innerHTML = `${head}
+      <div class="m-sec"><div class="notice ${kind}"><span class="n-ic">${ALERT}</span><span class="n-tx"><b>${title}</b><span>${why}</span></span></div></div>
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-back>${back.label}</button>
+        <button class="btn btn-primary btn-md" type="button" data-forward>${forward.label}</button>
+      </div>`;
+    bind();
+    modal.querySelector("[data-back]").addEventListener("click", back.run);
+    modal.querySelector("[data-forward]").addEventListener("click", forward.run);
+  }
+  const withoutIt = () => {
+    close();
+    done(null);
+  };
+  const failed = () => ended("notice-bad", w.failTitle, w.failWhy, { label: w.without, run: withoutIt }, { label: w.retry, run: read });
+  const nothing = () =>
+    ended("notice-warn", w.emptyTitle, w.emptyWhy, { label: w.other, run: () => ((state.session = null), pick()) }, { label: w.asNew, run: withoutIt });
 
   function review() {
     const kept = () => state.knows.filter((m) => m.on && m.text.trim()).length + state.style.filter((x) => x.on && x.text.trim()).length;
