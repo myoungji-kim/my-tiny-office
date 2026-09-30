@@ -143,7 +143,8 @@ export default async function CompanyPage({ searchParams }: { searchParams: Sear
               <div className="proj">
                 {finished.map((p) => {
                   const done = office.tasks.filter((x) => x.projectId === p.id && x.status === "done");
-                  const crew = employees.filter((e) => done.some((x) => x.assigneeId === e.id));
+                  // the people who did it, those who have left since included
+                  const crew = [...employees, ...office.former].filter((e) => done.some((x) => x.assigneeId === e.id));
                   const from = p.startedAt ?? p.finishedAt!;
                   return (
                     <div key={p.id} className="proj-row">
