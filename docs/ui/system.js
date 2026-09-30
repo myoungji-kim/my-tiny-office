@@ -548,7 +548,7 @@ const WORDS = {
       title: "이 컴퓨터의 다른 창에서 연 My Tiny Office가 업무를 진행하고 있어요",
       why: "이 창에서도 사무실을 보고 업무를 맡길 수 있어요. 일은 저쪽에서 진행돼요. 저쪽을 끄면 30초 안에 여기서 이어받아요.",
     },
-    status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", leave: "휴가 중" },
+    status: { working: "업무 중", reviewing: "검토 중", available: "일 없음", leave: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
     hire: {

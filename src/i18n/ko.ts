@@ -197,7 +197,7 @@ export const ko: Dictionary = {
     noTask: "맡은 업무 없음",
     away: "자리 비움",
     spent: (m: number) => m + "분째",
-    waiting: "대기",
+    waiting: "일 없음",
     onLeave: "휴가",
     deskFree: "지금은 비어 있어요",
     inProgress: "진행 중",
@@ -857,7 +857,7 @@ export const ko: Dictionary = {
     version: "버전",
   },
   employeeStatus: {
-    available: "대기 중",
+    available: "일 없음",
     working: "업무 중",
     reviewing: "검토 중",
     onLeave: "휴가 중",
