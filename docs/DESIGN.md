@@ -219,7 +219,11 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 **3. The résumé.** Clicking a candidate opens the popover the desks use.
 
 - **Head:** the folder's name, its path, and 쉬는 중 or 작업 중.
-- **Body:** 첫 메시지 as a quote, then 기간, 대화 N번 and 마지막 활동.
+- **Body:** 첫 메시지 as a quote, then 기간, 메시지 N개 and 마지막 활동.
+- Several candidates can share a folder, so each one's label and tooltip
+  carry its first message and dates.
+- A session that comes into use while its résumé is open updates in place,
+  and 경력직으로 고용 then waits.
 - **경력직으로 고용** is the key row. For a session in use it is disabled, with
   the reason: *지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.*
 - **광장에서 보내기** removes them from the plaza. That can be undone from the
@@ -230,7 +234,10 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 - a search over folders and first messages;
 - 전체 · 쉬는 중 · 작업 중 with counts;
 - one row per candidate: first message, folder · dates · messages, send
-  away, and 고용;
+  away, and 경력직으로 고용. A row in use says why in its line: *작업 중 · 끝나면
+  고용할 수 있어요*;
+- with nobody left, *광장에 남은 구직자가 없어요.*; with a search that finds
+  nothing, *찾는 구직자가 없어요.*;
 - *보낸 구직자 N명 · 다시 부르기*, which brings everyone sent away back.
 
 **5. Hiring.** 경력직으로 고용 opens the hire dialog:
@@ -252,7 +259,13 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 
 **6. After the hire.**
 
-- The candidate leaves the plaza; that session never comes back to it.
+- The candidate leaves the plaza; that session never comes back to it. If the
+  user chose a different session in 경력 가져오기 instead, that session is the
+  one used up, and the candidate stays.
+- The office stays open: the new desk shows them. Their page is one click
+  away, unlike a hire from the people screen, which opens it.
+- Sending everyone away leaves the paving empty with *구직자를 모두 보냈어요.
+  명단에서 다시 부를 수 있어요.*
 - A desk is added on the floor.
 - 오늘 reads *보리가 경력직으로 입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
 - On their page, the Record panel has 경력, and each memory brought reads
@@ -621,15 +634,30 @@ The dialog's last field, **경력**, reads *신입으로 들어와요.* with **�
      read from its most recent part.
 2. **Read.** One Claude run reads the conversation, read-only, and sums up
    what they know, by area, and how they work.
-3. **Keep.** Every line starts ticked and can be unticked or reworded; an area
-   can be changed. A warning says how many lines that looked like passwords or
-   tokens were left out, and when the beginning of a long conversation was
-   skipped. **N개 가져오기** returns to the hire dialog. It then shows the
-   project, the dates and what they bring, with 바꾸기 and 빼기.
+3. **Keep.** The session being read is named at the top of Read and Keep.
+   - Lines to keep:
+     - Every line starts ticked and can be unticked or reworded. Each
+       checkbox's label is the line itself.
+     - A line the company or the hire already knows is marked *이미 아는 내용*
+       and starts unticked.
+     - An area can be changed. The run is given the company's own areas and
+       answers only with those.
+   - A warning appears only when there is something to say: how many lines
+     that looked like passwords or tokens were left out, and that the
+     beginning of a long conversation was skipped.
+   - **N개 가져오기** returns to the hire dialog. It then shows the project,
+     the dates and what they bring, with 바꾸기 and 빼기. With every line
+     unticked, the button reads **신입으로 고용**.
+   - 뒤로 goes to Pick. What a session summed up to is kept, so choosing it
+     again does not read it again.
+   - Focus moves into the window at each step, and back to the hire dialog
+     when it closes.
 
 What they bring is theirs from the first day:
 - Each memory, and each way of working, it brings reads *tinysoft 세션에서*:
   the session's folder.
+- The Record panel's 경력 row reads the folder, the dates and how many lines
+  came: *tinysoft · 9월 12일 – 9월 24일 · 6개 가져옴*.
 - The Record panel has an **경력** row with the project and the dates.
 
 The mockup is employees.html → 직원 고용 → 지난 세션에서 가져오기.

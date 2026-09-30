@@ -561,12 +561,14 @@ const WORDS = {
       title: "경력 가져오기",
       sub: "이 컴퓨터에서 한 Claude Code 세션을 골라요. 대화는 읽기만 하고, 세션은 그대로 둬요.",
       folder: "폴더", sessions: "지난 세션",
-      turns: (n, span) => span + " · 대화 " + n + "번",
+      turns: (n, span) => span + " · 메시지 " + n + "개",
       live: "지금 터미널에서 쓰고 있어서 가져올 수 없어요",
       none: "이 폴더에는 가져올 만한 세션이 없어요.",
       read: "경력 정리하기",
       cost: "Claude가 대화를 한 번 읽어요. 길면 최근 부분 위주로 읽어요.",
+      readSub: "이 대화를 한 번 읽어 알게 된 것과 일하는 방식을 추려요. 세션은 그대로 둬요.",
       reading: "대화를 읽는 중이에요", readingWhy: "알게 된 것과 일하는 방식을 추리고 있어요.",
+      known: "이미 아는 내용",
       knows: "분야 지식", style: "일하는 방식", area: "분야", keep: "가져가기",
       dropped: (n) => "비밀번호나 토큰처럼 보이는 " + n + "줄은 뺐어요.",
       skipped: "대화가 길어서 앞부분은 건너뛰고 최근 부분을 읽었어요.",
@@ -621,7 +623,7 @@ const WORDS = {
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
       career: "Experience", careerNone: "They join new.", careerAdd: "Bring it from a past session",
-      careerChange: "Change", careerDrop: "Remove", careerRead: "Sum it up", careerUnread: "Not summed up yet.",
+      careerChange: "Change", careerDrop: "Remove", careerRead: "Sum up the experience", careerUnread: "Not summed up yet.",
       careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "They bring " + m + (m === 1 ? " memory" : " memories") + " and " + s + (s === 1 ? " way of working." : " ways of working."),
     },
     career: {
@@ -633,7 +635,9 @@ const WORDS = {
       none: "No session in this folder is worth bringing in.",
       read: "Sum up the experience",
       cost: "Claude reads the conversation once. A long one is read from its most recent part.",
+      readSub: "The conversation is read once to pick out what they learned and how they work. The session stays as it is.",
       reading: "Reading the conversation", readingWhy: "Picking out what they learned and how they work.",
+      known: "Already known",
       knows: "What they know", style: "How they work", area: "Area", keep: "Bring this",
       dropped: (n) => n + (n === 1 ? " line that looked like a password or token was left out." : " lines that looked like passwords or tokens were left out."),
       skipped: "The conversation was long, so its beginning was skipped and the recent part was read.",
@@ -1038,6 +1042,7 @@ const SUMMED = {
     { area: "arch", text: { ko: "PG사 응답은 어댑터에서만 해석하고, 도메인에는 결과만 넘겨요.", en: "Only the adapter reads the gateway's reply; the domain gets the outcome." } },
     { area: "security", text: { ko: "웹훅은 서명을 먼저 검증하고, 실패하면 본문을 읽지 않아요.", en: "A webhook's signature is checked first; the body is not read if it fails." } },
     { area: "quality", text: { ko: "재시도 테스트는 시계를 주입해서 돌려요.", en: "Retry tests run with an injected clock." } },
+    { area: "arch", text: { ko: "도메인 레이어에서 Date.now()를 쓰지 않아요.", en: "No Date.now() in the domain layer." }, known: true },
   ],
   style: [
     { ko: "바꾸기 전에 관련 테스트부터 돌려 봐요", en: "Run the related tests before changing anything" },
@@ -1066,21 +1071,28 @@ function openCareer(done, session = null, hired = new Set()) {
   scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="${w.title}"></div>`;
   document.body.append(scrim);
   const modal = scrim.firstElementChild;
-  const state = { folder: session?.folder ?? folders[0], session, knows: [], style: [] };
+  // what a session summed up to, kept so going back and forth does not read it again
+  const state = { folder: session?.folder ?? folders[0], session, knows: [], style: [], read: new Map() };
+  const returnTo = document.activeElement;
   const close = () => {
     scrim.remove();
     document.removeEventListener("keydown", onKey);
+    returnTo?.focus?.({ preventScroll: true });
   };
+  const focusFirst = () => modal.querySelector("select, button.sess:not(:disabled), textarea, [data-forward], [data-take], [data-close]")?.focus({ preventScroll: true });
   const onKey = (e) => e.key === "Escape" && scrim === [...document.querySelectorAll(".scrim")].at(-1) && close();
   document.addEventListener("keydown", onKey);
   scrim.addEventListener("pointerdown", (e) => e.target === scrim && close());
-  const head = `<div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${w.title}</span><span class="m-s">${w.sub}</span></span>
+  const head = (sub = w.readSub) => `<div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${w.title}</span><span class="m-s">${sub}</span></span>
     <button class="ibtn" type="button" data-close aria-label="${w.cancel}">${X}</button></div>`;
+  // the session being read, so it is never a mystery which one it is
+  const which = () =>
+    `<div class="sess" aria-disabled="true" style="cursor:default"><span class="sess-tx"><b>${local(state.session.first)}</b><span>${state.session.folder} · ${w.turns(state.session.turns, local(state.session.span))}</span></span></div>`;
   const bind = () => modal.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", close));
 
   function pick() {
     const list = pool.filter((c) => c.folder === state.folder);
-    modal.innerHTML = `${head}
+    modal.innerHTML = `${head(w.sub)}
       <div class="m-sec">
         <div class="field" style="margin-top:0">
           <label class="label" for="careerFolder">${w.folder}</label>
@@ -1118,14 +1130,18 @@ function openCareer(done, session = null, hired = new Set()) {
       }),
     );
     modal.querySelector("[data-read]").addEventListener("click", read);
+    focusFirst();
   }
 
   // The sample stands in for the one Claude run that reads the session.
   function read() {
-    modal.innerHTML = `${head}
-      <div class="m-sec"><div class="reading" role="status"><b>${w.reading}</b><span>${w.readingWhy}</span></div></div>
+    const done = state.read.get(state.session.id);
+    if (done) return Object.assign(state, done), review();
+    modal.innerHTML = `${head()}
+      <div class="m-sec">${which()}<div class="reading" role="status"><b>${w.reading}</b><span>${w.readingWhy}</span></div><p class="hint" style="margin:0">${w.cost}</p></div>
       <div class="m-foot"><button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button></div>`;
     bind();
+    focusFirst();
     setTimeout(() => {
       if (!scrim.isConnected) return;
       if (state.session.failsOnce && !state.tried) {
@@ -1133,16 +1149,17 @@ function openCareer(done, session = null, hired = new Set()) {
         return failed();
       }
       if (state.session.empty) return nothing();
-      state.knows = SUMMED.knows.map((m) => ({ area: m.area, text: local(m.text), on: true }));
+      state.knows = SUMMED.knows.map((m) => ({ area: m.area, text: local(m.text), on: !m.known, known: Boolean(m.known) }));
       state.style = SUMMED.style.map((x) => ({ text: local(x), on: true }));
+      state.read.set(state.session.id, { knows: state.knows, style: state.style });
       review();
     }, 1200);
   }
 
   // Either way the hire goes on; it only brings nothing.
   function ended(kind, title, why, back, forward) {
-    modal.innerHTML = `${head}
-      <div class="m-sec"><div class="notice ${kind}"><span class="n-ic">${ALERT}</span><span class="n-tx"><b>${title}</b><span>${why}</span></span></div></div>
+    modal.innerHTML = `${head()}
+      <div class="m-sec">${which()}<div class="notice ${kind}" style="margin-top:10px"><span class="n-ic">${ALERT}</span><span class="n-tx"><b>${title}</b><span>${why}</span></span></div></div>
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" type="button" data-back>${back.label}</button>
         <button class="btn btn-primary btn-md" type="button" data-forward>${forward.label}</button>
@@ -1150,6 +1167,7 @@ function openCareer(done, session = null, hired = new Set()) {
     bind();
     modal.querySelector("[data-back]").addEventListener("click", back.run);
     modal.querySelector("[data-forward]").addEventListener("click", forward.run);
+    focusFirst();
   }
   const withoutIt = () => {
     close();
@@ -1164,19 +1182,21 @@ function openCareer(done, session = null, hired = new Set()) {
     const areaSelect = (m, i) =>
       `<span class="select-wrap"><select class="select" data-area="${i}" aria-label="${w.area}">${Object.keys(areas).map((a) => `<option value="${a}"${a === m.area ? " selected" : ""}>${areas[a]}</option>`).join("")}</select>${CHEVRON}</span>`;
     const row = (kind, x, i, extra = "") =>
-      `<div class="cand"${x.on ? "" : " data-off"}><input type="checkbox" data-on="${kind}:${i}" aria-label="${w.keep}"${x.on ? " checked" : ""} />
-        <span class="cand-body">${extra}<textarea class="textarea" rows="2" data-text="${kind}:${i}" maxlength="200" aria-label="${kind === "knows" ? w.knows : w.style}">${x.text.replace(/</g, "&lt;")}</textarea></span></div>`;
-    modal.innerHTML = `${head}
+      `<div class="cand"${x.on ? "" : " data-off"}><input type="checkbox" data-on="${kind}:${i}" aria-label="${w.keep}: ${x.text.replace(/"/g, "&quot;")}"${x.on ? " checked" : ""} />
+        <span class="cand-body">${extra}${x.known ? `<span class="hint" style="margin:0">${w.known}</span>` : ""}<textarea class="textarea" rows="2" data-text="${kind}:${i}" maxlength="200" aria-label="${kind === "knows" ? w.knows : w.style}">${x.text.replace(/</g, "&lt;")}</textarea></span></div>`;
+    const warned = [SUMMED.dropped ? w.dropped(SUMMED.dropped) : "", state.session.long ? w.skipped : ""].filter(Boolean);
+    modal.innerHTML = `${head()}
       <div class="m-sec">
-        <div class="notice notice-warn" style="margin-bottom:14px"><span class="n-ic">${ALERT}</span>
-          <span class="n-tx"><b>${w.dropped(SUMMED.dropped)}</b>${state.session.long ? `<span>${w.skipped}</span>` : ""}</span></div>
+        ${which()}
+        ${warned.length ? `<div class="notice notice-warn" style="margin:10px 0 14px"><span class="n-ic">${ALERT}</span>
+          <span class="n-tx"><b>${warned[0]}</b>${warned[1] ? `<span>${warned[1]}</span>` : ""}</span></div>` : ""}
         <p class="hint" style="margin:0 0 4px">${w.pick}</p>
         <div class="cand-group"><span class="label">${w.knows}</span>${state.knows.map((m, i) => row("knows", m, i, areaSelect(m, i))).join("")}</div>
         <div class="cand-group"><span class="label">${w.style}</span>${state.style.map((x, i) => row("style", x, i)).join("")}</div>
       </div>
       <div class="m-foot">
         <button class="btn btn-secondary btn-md" type="button" data-back>${w.back}</button>
-        <button class="btn btn-primary btn-md" type="button" data-take${kept() ? "" : " disabled"}>${w.take(kept())}</button>
+        <button class="btn btn-primary btn-md" type="button" data-take>${kept() ? w.take(kept()) : w.asNew}</button>
       </div>`;
     bind();
     const item = (key) => {
@@ -1185,8 +1205,7 @@ function openCareer(done, session = null, hired = new Set()) {
     };
     const sync = () => {
       const b = modal.querySelector("[data-take]");
-      b.textContent = w.take(kept());
-      b.disabled = kept() === 0;
+      b.textContent = kept() ? w.take(kept()) : w.asNew;
     };
     modal.querySelectorAll("[data-on]").forEach((c) =>
       c.addEventListener("change", () => {
@@ -1199,6 +1218,7 @@ function openCareer(done, session = null, hired = new Set()) {
     modal.querySelectorAll("[data-area]").forEach((sel) => sel.addEventListener("change", () => (state.knows[Number(sel.dataset.area)].area = sel.value)));
     modal.querySelector("[data-back]").addEventListener("click", pick);
     modal.querySelector("[data-take]").addEventListener("click", () => {
+      if (kept() === 0) return withoutIt();
       const from = w.from(folderName(state.session.folder));
       close();
       done({
@@ -1206,7 +1226,7 @@ function openCareer(done, session = null, hired = new Set()) {
         project: folderName(state.session.folder),
         span: local(state.session.span),
         memories: state.knows.filter((m) => m.on && m.text.trim()).map((m) => ({ area: m.area, text: m.text.trim(), from, used: 0 })),
-        style: state.style.filter((x) => x.on && x.text.trim()).map((x) => x.text.trim()),
+        style: state.style.filter((x) => x.on && x.text.trim()).map((x) => ({ text: x.text.trim(), from })),
       });
     });
   }

@@ -20,7 +20,7 @@
 
   /* ═══ the plaza outside the door ═══ */
 
-  .plaza { margin-top: 14px; }
+  .plaza { margin-top: -6px; }
 
   .plaza-hd { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 
@@ -186,9 +186,11 @@
           <canvas class="room" aria-hidden="true" id="room" width="864" height="384"></canvas>
           <div class="overlay" id="overlay"></div>
         </div>
-        <div class="room-wrap plaza" id="plaza">
-          <div class="plaza-hd"><h2 id="plazaTitle"></h2><span class="n" id="plazaN"></span><button class="btn btn-secondary btn-sm" type="button" id="plazaBoard"></button></div>
-          <div class="plaza-scene">
+      </div>
+      <div class="plaza" id="plaza">
+        <div class="plaza-hd"><h2 id="plazaTitle"></h2><span class="n" id="plazaN"></span><button class="btn btn-secondary btn-sm" type="button" id="plazaBoard"></button></div>
+        <div class="stage">
+          <div class="room-wrap plaza-scene">
             <canvas class="room" aria-hidden="true" id="plazaCanvas"></canvas>
             <div class="overlay" id="plazaOverlay"></div>
             <p class="plaza-quiet" id="plazaQuiet" hidden></p>
@@ -268,16 +270,18 @@
       justBack: "휴가에서 막 돌아왔어요",
       plaza: "광장", plazaCount: (n) => "구직자 " + n + "명", plazaBoard: "명단 보기", plazaMore: (n) => "+" + n + "명",
       plazaQuiet: "광장이 조용해요. 이 컴퓨터에서 Claude Code로 일하면 구직자가 찾아와요.",
+      plazaAllAway: "구직자를 모두 보냈어요. 명단에서 다시 부를 수 있어요.",
       cand: {
-        free: "쉬는 중", busy: "작업 중", first: "첫 메시지", span: "기간", turns: "대화", turnsN: (n) => n + "번", last: "마지막 활동",
+        free: "쉬는 중", busy: "작업 중", first: "첫 메시지", span: "기간", turns: "메시지", turnsN: (n) => n + "개", last: "마지막 활동",
         hire: "경력직으로 고용", busyWhy: "지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.", away: "광장에서 보내기",
-        of: (f) => f + " 이력서",
+        busyLine: "작업 중 · 끝나면 고용할 수 있어요",
+        of: (f, first) => f + " 이력서 · “" + first + "”",
       },
       board: {
         title: "구직자 명단", sub: "이 컴퓨터에서 한 Claude Code 세션이에요. 고용하기 전에는 아무것도 가져오지 않아요.",
-        search: "폴더나 첫 메시지로 찾기", all: "전체", hire: "고용", away: "보내기",
-        meta: (c) => c.folder + " · " + c.span + " · 대화 " + c.turns + "번",
-        none: "찾는 구직자가 없어요.", sent: (n) => "보낸 구직자 " + n + "명", recall: "다시 부르기", close: "닫기",
+        search: "폴더나 첫 메시지로 찾기", all: "전체", hire: "경력직으로 고용", away: "보내기",
+        meta: (c) => c.folder + " · " + c.span + " · 메시지 " + c.turns + "개",
+        none: "찾는 구직자가 없어요.", allAway: "광장에 남은 구직자가 없어요.", sent: (n) => "보낸 구직자 " + n + "명", recall: "다시 부르기", close: "닫기",
       },
     },
     en: {
@@ -320,16 +324,18 @@
       justBack: "Just back from leave",
       plaza: "Plaza", plazaCount: (n) => n + (n === 1 ? " candidate" : " candidates"), plazaBoard: "See the list", plazaMore: (n) => "+" + n,
       plazaQuiet: "The plaza is quiet. Work with Claude Code on this computer and candidates turn up.",
+      plazaAllAway: "Everyone was sent away. The list can call them back.",
       cand: {
         free: "Free", busy: "In use", first: "First message", span: "Dates", turns: "Messages", turnsN: (n) => String(n), last: "Last active",
         hire: "Hire with experience", busyWhy: "This session is in use in a terminal. It can be hired once it is done.", away: "Send away",
-        of: (f) => "Résumé of " + f,
+        busyLine: "In use · can be hired once it is done",
+        of: (f, first) => "Résumé of " + f + " · “" + first + "”",
       },
       board: {
         title: "Candidates", sub: "Claude Code sessions held on this computer. Nothing is brought in until you hire.",
-        search: "Find by folder or first message", all: "All", hire: "Hire", away: "Send away",
+        search: "Find by folder or first message", all: "All", hire: "Hire with experience", away: "Send away",
         meta: (c) => c.folder + " · " + c.span + " · " + c.turns + " messages",
-        none: "No candidate matches.", sent: (n) => n + " sent away", recall: "Call them back", close: "Close",
+        none: "No candidate matches.", allAway: "Nobody is left in the plaza.", sent: (n) => n + " sent away", recall: "Call them back", close: "Close",
       },
     },
   };
@@ -687,7 +693,8 @@
       career,
       // A hire brings their own desk.
       onSave: ({ career: brought, ...h }) => {
-        if (from) hired.add(from.id);
+        // the candidate walked in unless another session came instead
+        if (from && (!brought || brought.session === from.id)) hired.add(from.id);
         if (brought) hired.add(brought.session);
         const base = {
           ...h, id: "p" + (STAFF.length + 1), status: "available", done: 0, reviews: 0,
@@ -746,7 +753,7 @@
     board.textContent = t().plazaBoard;
     board.hidden = list.length === 0 && sentAway.size === 0;
     const quiet = document.getElementById("plazaQuiet");
-    quiet.textContent = t().plazaQuiet;
+    quiet.textContent = sentAway.size ? t().plazaAllAway : t().plazaQuiet;
     quiet.hidden = list.length > 0;
 
     const slots = [];
@@ -778,7 +785,8 @@
     btn.style.top = 2 * T - 4 + "px";
     btn.style.width = T + 8 + "px";
     btn.style.height = T + 8 + "px";
-    btn.setAttribute("aria-label", t().cand.of(folderName(c.folder)));
+    btn.setAttribute("aria-label", t().cand.of(folderName(c.folder), tx(c.first)));
+    btn.title = tx(c.first) + " · " + tx(c.span);
     btn.setAttribute("aria-haspopup", "dialog");
     btn.setAttribute("aria-expanded", "false");
     btn.addEventListener("click", (e) => openCandidate(c, btn, e.detail === 0));
@@ -827,7 +835,7 @@
         ${c.live ? `<p class="p-why">${t().cand.busyWhy}</p>` : ""}
         <button class="mrow" type="button" data-away>${I.away}${t().cand.away}</button>
       </div>`;
-    pop.setAttribute("aria-label", t().cand.of(folderName(c.folder)));
+    pop.setAttribute("aria-label", t().cand.of(folderName(c.folder), tx(c.first)));
     drawAvatar(pop.querySelector("canvas"), c.species);
     pop.querySelector("[data-hire]").addEventListener("click", () => {
       close();
@@ -886,12 +894,12 @@
         ? list
             .map(
               (c) => `<div class="board-row"><canvas aria-hidden="true" width="36" height="36" data-av="${c.species}"></canvas>
-                <span class="board-tx"><b>${tx(c.first)}</b><span>${c.live ? t().cand.busy + " · " : ""}${b.meta({ folder: c.folder, span: tx(c.span), turns: c.turns })}</span></span>
+                <span class="board-tx"><b>${tx(c.first)}</b><span>${c.live ? t().cand.busyLine + " · " : ""}${b.meta({ folder: c.folder, span: tx(c.span), turns: c.turns })}</span></span>
                 <span class="board-acts"><button class="ibtn ibtn-sm" type="button" data-away="${c.id}" aria-label="${b.away}" title="${b.away}">${I.away}</button>
-                <button class="btn btn-secondary btn-sm" type="button" data-hire="${c.id}"${c.live ? ` disabled title="${t().cand.busyWhy}"` : ""}>${b.hire}</button></span></div>`,
+                <button class="btn btn-secondary btn-sm" type="button" data-hire="${c.id}"${c.live ? ` disabled` : ""}>${b.hire}</button></span></div>`,
             )
             .join("")
-        : `<p class="hint">${b.none}</p>`;
+        : `<p class="hint">${all.length === 0 ? b.allAway : b.none}</p>`;
       $("[data-list]").querySelectorAll("[data-av]").forEach((cv) => drawAvatar(cv, cv.dataset.av));
       $("[data-list]").querySelectorAll("[data-hire]").forEach((x) =>
         x.addEventListener("click", () => {

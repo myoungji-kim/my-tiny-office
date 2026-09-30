@@ -363,7 +363,7 @@
       coldWhy: " — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.",
       review: "확인하기",
       career: "경력",
-      careerKv: (c) => c.project + " · " + c.span,
+      careerKv: (c) => c.project + " · " + c.span + " · " + c.n + "개 가져옴",
     },
     en: {
       ...WORDS.en,
@@ -413,7 +413,7 @@
       coldWhy: " — either no task has needed it yet, or it went to the wrong person.",
       review: "Take a look",
       career: "Experience",
-      careerKv: (c) => c.project + " · " + c.span,
+      careerKv: (c) => c.project + " · " + c.span + " · brought " + c.n,
     },
   };
 
@@ -680,6 +680,9 @@
       </div>`;
   }
 
+  // a way of working brought from a session carries where it came from
+  const styleText = (x) => x.text ?? tx(x);
+
   // editing: null, "new", or the index of the rule being corrected.
   function renderStyle(p, editing = null) {
     const panel = document.getElementById("stylePanel");
@@ -691,7 +694,7 @@
     const line = (x, i) =>
       editing === i
         ? form(" in-place")
-        : `<div class="style-line">${ICON.hand}<span>${tx(x)}</span><button class="ibtn ibtn-sm line-menu" type="button" data-style="${i}" aria-label="${t().styleMenu}" aria-expanded="false">${ICON.more}</button></div>`;
+        : `<div class="style-line">${ICON.hand}<span>${styleText(x)}${x.from ? `<span class="src">${t().fromWhere(x.from)}</span>` : ""}</span><button class="ibtn ibtn-sm line-menu" type="button" data-style="${i}" aria-label="${t().styleMenu}" aria-expanded="false">${ICON.more}</button></div>`;
     panel.innerHTML = `
       <div class="panel-hd"><h2>${t().howTheyWork}</h2><p>${t().styleSub}</p></div>
       <div class="panel-bd">
@@ -702,7 +705,7 @@
     const f = panel.querySelector("[data-styleform]");
     if (!f) return;
     const input = f.querySelector("input");
-    if (editing !== "new") input.value = tx(p.style[editing]);
+    if (editing !== "new") input.value = styleText(p.style[editing]);
     input.focus();
     f.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -1008,7 +1011,7 @@
         const p = {
           ...h, id: "p" + (people.length + 1), status: "available", joined: TODAY,
           done: 0, reviews: 0, style: career?.style ?? [], memories: career?.memories ?? [],
-          career: career && { project: career.project, span: career.span },
+          career: career && { project: career.project, span: career.span, n: career.memories.length + career.style.length },
         };
         people.push(p);
         renderCounts();
