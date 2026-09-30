@@ -543,6 +543,9 @@ const WORDS = {
       role: "역할", team: "팀", noTeam: "팀 없음", cancel: "취소",
       editTitle: "정보 바꾸기", editSub: "외형과 이름, 역할, 팀을 바꿔요.", save: "저장",
       hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
+      career: "경력", careerNone: "신입으로 들어와요.", careerAdd: "지난 세션에서 가져오기",
+      careerChange: "바꾸기", careerDrop: "빼기",
+      careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "기억 " + m + "개와 일하는 방식 " + s + "개를 들고 와요.",
     },
     teach: {
       titleTo: (name) => name + "에게 알려주기",
@@ -582,6 +585,9 @@ const WORDS = {
       role: "Role", team: "Team", noTeam: "No team", cancel: "Cancel",
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
+      career: "Experience", careerNone: "They join new.", careerAdd: "Bring it from a past session",
+      careerChange: "Change", careerDrop: "Remove",
+      careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "They bring " + m + (m === 1 ? " memory" : " memories") + " and " + s + (s === 1 ? " way of working." : " ways of working."),
     },
     teach: {
       titleTo: (name) => "Teach " + name,
@@ -797,11 +803,12 @@ function spriteCanvas(species, px) {
 
 // `teams` is the company's list as [{ key, label }] when the caller holds it.
 // `roles` likewise, as titles.
-function openHire({ team = null, teams = null, roles = null, edit = null, onSave }) {
+// `career`, when given, opens where past experience is brought in and calls back with it.
+function openHire({ team = null, teams = null, roles = null, edit = null, career = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].hire;
   const local = (v) => (v && typeof v === "object" ? v[lang] : v);
-  const state = { species: edit ? SPECIES.get(edit.species) : null };
+  const state = { species: edit ? SPECIES.get(edit.species) : null, career: null };
 
   const scrim = document.createElement("div");
   scrim.className = "scrim";
@@ -828,6 +835,7 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
         <label class="label" for="hireTeam">${w.team}</label>
         <span class="select-wrap"><select class="select" id="hireTeam"></select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
       </div>
+      ${career && !edit ? `<div class="field"><span class="label">${w.career}</span><div class="career" data-career></div></div>` : ""}
     </div>
     <div class="m-foot">
       <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
@@ -872,6 +880,29 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
     $("[data-av]").replaceChildren(spriteCanvas(edit.species, 32));
   }
 
+  function renderCareer() {
+    const box = $("[data-career]");
+    if (!box) return;
+    const c = state.career;
+    box.innerHTML = c
+      ? `<span class="career-tx"><b>${w.careerLine(c)}</b><span>${w.careerCarries(c.memories.length, c.style.length)}</span></span>
+         <button class="btn btn-secondary btn-sm" type="button" data-career-add>${w.careerChange}</button>
+         <button class="btn btn-secondary btn-sm" type="button" data-career-drop>${w.careerDrop}</button>`
+      : `<span class="career-tx"><span>${w.careerNone}</span></span>
+         <button class="btn btn-secondary btn-sm" type="button" data-career-add>${w.careerAdd}</button>`;
+    box.querySelector("[data-career-add]").addEventListener("click", () =>
+      career((picked) => {
+        state.career = picked;
+        renderCareer();
+      }),
+    );
+    box.querySelector("[data-career-drop]")?.addEventListener("click", () => {
+      state.career = null;
+      renderCareer();
+    });
+  }
+  renderCareer();
+
   // A nickname the user did not write is not their employee, so the button
   // waits for both.
   function sync() {
@@ -886,7 +917,8 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
     returnTo?.focus?.({ preventScroll: true });
   }
   function onKey(e) {
-    if (e.key === "Escape") close();
+    // a window opened over this one closes first
+    if (e.key === "Escape" && scrim === [...document.querySelectorAll(".scrim")].at(-1)) close();
   }
 
   sync();
@@ -895,7 +927,7 @@ function openHire({ team = null, teams = null, roles = null, edit = null, onSave
   for (const b of scrim.querySelectorAll("[data-close]")) b.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
   $("[data-ok]").addEventListener("click", () => {
-    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value || null };
+    const hired = { name: name.value.trim(), species: state.species.key, role: $("#hireRole").value, team: $("#hireTeam").value || null, career: state.career };
     close();
     onSave(hired);
   });

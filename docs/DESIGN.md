@@ -508,6 +508,38 @@ name the user wrote, and says who it hires (*호두 고용하기*).
 
 Their page opens next, where the first thing to do is teach them.
 
+#### Hiring with experience
+
+A hire can bring experience from a past Claude Code session. The session is
+not attached to them. What they learned there arrives as memories the user
+can read and correct, like anything taught; the employee is the one who knows
+it, not the session.
+
+The dialog's last field, **경력**, reads *신입으로 들어와요.* with **지난 세션에서
+가져오기**. That opens **경력 가져오기** over it, in three steps:
+
+1. **Pick.** A project of the company, and one of the past sessions held in
+   its folder. Each shows its first message, its dates and how many messages
+   it has.
+   - Only the company's project folders are looked in, never the whole
+     computer.
+   - A session in use right now is listed, disabled, and cannot be picked.
+   - The hint says Claude reads the conversation once, and that a long one is
+     read from its most recent part.
+2. **Read.** One Claude run reads the conversation, read-only, and sums up
+   what they know, by area, and how they work.
+3. **Keep.** Every line starts ticked and can be unticked or reworded; an area
+   can be changed. A warning says how many lines that looked like passwords or
+   tokens were left out, and when the beginning of a long conversation was
+   skipped. **N개 가져오기** returns to the hire dialog. It then shows the
+   project, the dates and what they bring, with 바꾸기 and 빼기.
+
+What they bring is theirs from the first day:
+- Each memory's source reads *결제 개편 세션에서*.
+- The Record panel has an **경력** row with the project and the dates.
+
+The mockup is employees.html → 직원 고용 → 지난 세션에서 가져오기.
+
 ## Company
 
 The office shows what is happening now; the company shows what has happened
