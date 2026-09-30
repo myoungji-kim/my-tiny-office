@@ -369,6 +369,15 @@ Skill tool too. A reviewer is given none. Measured on `2.1.284`:
   the settings panel says they come.
 - `--disable-slash-commands` with a plugin leaves no Skill tool at all.
 
+**A project's own skills and plugins** (DESIGN.md › the project dialog) are
+given the same way, and only for that project's tasks:
+- its skills are read from `<project folder>/.claude/skills`, the user's own
+  checkout, never from the task's worktree. An agent can edit the worktree's
+  copy, and what it wrote must not come back to it as instructions;
+- its plugins are those `installed_plugins.json` lists in project or local
+  scope for that folder, given only once ticked, with their hooks and MCP
+  servers off as above.
+
 Prompt injection (§5) is the risk this adds: an issue or a page can carry
 instructions, and the connector is a way out of the folder. Reads go to the
 user's own Atlassian organisation; writes stop for the user until allowed, so

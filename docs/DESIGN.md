@@ -744,7 +744,7 @@ version).
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
 | 연결된 도구 | The connectors this computer's Claude account has, as the last check found them: Atlassian — used where a project turns it on — and the rest named, not used. 확인하기 / 다시 확인 runs the check, which says what it costs; before one, a single row says so. While Claude Code is not ready the check is off and the hint says it can be checked once it is. A project dialog turning Atlassian on warns when the check found none (`settings.html?connectors=unchecked`, `?connectors=noatlassian`; `projects.html?connectors=noatlassian`) |
-| 스킬과 플러그인 | What this computer's Claude Code has in user scope — plugins, then skills — each with its own words and a tick, none ticked to start. What is ticked goes into every task's work; the hint says hooks and MCP servers stay off and that Claude Code's built-in skills come along (`settings.html?exts=none` for a computer with none) |
+| 스킬과 플러그인 | What this computer's Claude Code has in user scope — plugins, then skills — each with its own words and a tick, none ticked to start. What is ticked goes into every task's work, in every project; a project's own are in its dialog; the hint says hooks and MCP servers stay off and that Claude Code's built-in skills come along (`settings.html?exts=none` for a computer with none) |
 | 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
 | 화면 폭 | 보통 · 넓게 · 전체, for every screen, kept in this browser; a task's page changes the same setting |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
@@ -879,6 +879,19 @@ commands, Jira · Confluence is 쓰지 않음 or Atlassian 커넥터로; turned 
 boundary's last line names Atlassian as the one way out, and 허용한 쓰기 lists
 the kinds of write the project's tasks make without asking, each removable. 안전 범위 in
 settings is the same promise in full, and the dialog links to it.
+
+Last comes **이 프로젝트의 스킬과 플러그인**: what the project's folder carries
+for Claude Code, the way Claude Code itself finds it in a project.
+- **폴더에 있는 스킬:** each `<folder>/.claude/skills/<name>/SKILL.md`, ticked to
+  start. They were written for this project, so a task there has them unless
+  one is unticked.
+- **이 프로젝트에 설치한 플러그인:** plugins installed in project or local scope
+  for this folder, unticked to start, since a plugin can bring more than
+  skills.
+- A folder with neither says so. The hint says only the folder's own are
+  listed, and links to 설정 › 스킬과 플러그인 for what every project gets.
+- The mockup's `~/Projects/tinysoft` has two skills and a plugin;
+  `~/Projects/orders` has none.
 
 When work needs more than it was allowed it stops and asks, on the task's page
 and in today's feed: a command the project does not allow (허용하고 이어서), a
