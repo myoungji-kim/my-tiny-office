@@ -174,6 +174,93 @@ state because it is not a transition: it changes what someone knows, not what
 they are doing. Taught to someone on leave, the dialog says they carry it from
 the first task after they are back.
 
+### The plaza
+
+Outside the office door, on the whole-floor tab, is **광장**: Claude Code
+sessions held on this computer, standing as candidates. They are real
+sessions, not a decoration. None of them is part of the company until the
+user hires one, and hiring brings in only what the user keeps.
+
+**1. Who comes.** The app lists Claude Code's own session files
+(`~/.claude/projects/<folder>/<session>.jsonl`) across the whole computer.
+
+- **Read:** for each file, its folder, first and last dates, message count,
+  and first user message.
+- **Never read:** Claude Code's credentials or settings.
+- **Left out:**
+  - the app's own runs: a session in a registered project's `.worktrees/`,
+    or in the app's temporary folders;
+  - sessions already hired, and sessions sent away;
+  - sessions with fewer than six messages;
+  - sessions not written to for ninety days.
+- **In use:** a session written to in the last five minutes is shown as
+  작업 중.
+- **Refreshing:** the list is read when the office opens and every minute
+  while it is open, cached by each file's modification time.
+- **Hiding it:** 설정 › 일반 › 광장 hides the plaza. Hidden, no session file is
+  read at all.
+
+**2. The scene.** Under the floor sits a strip four tiles high:
+
+- the building's front wall, with windows and the door in the middle;
+- two rows of paving, with a lamp at each end and a bench beside the door;
+- grass along the bottom, with a tree at each end.
+
+The head reads **광장 · 구직자 N명** with **명단 보기**.
+
+Candidates stand on the paving, one every three tiles, most recently active
+first. A candidate's species follows from their session, so the same one
+always looks the same. Their tag is the folder's name. One in use carries a
+**작업 중** bubble. When more are waiting than there is room for, the last
+place is a **+N명** chip that opens the list. With nobody waiting, the paving
+is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Code로 일하면
+구직자가 찾아와요.*
+
+**3. The résumé.** Clicking a candidate opens the popover the desks use.
+
+- **Head:** the folder's name, its path, and 쉬는 중 or 작업 중.
+- **Body:** 첫 메시지 as a quote, then 기간, 대화 N번 and 마지막 활동.
+- **경력직으로 고용** is the key row. For a session in use it is disabled, with
+  the reason: *지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.*
+- **광장에서 보내기** removes them from the plaza. That can be undone from the
+  list.
+
+**4. The list.** 명단 보기, or +N명, opens **구직자 명단**:
+
+- a search over folders and first messages;
+- 전체 · 쉬는 중 · 작업 중 with counts;
+- one row per candidate: first message, folder · dates · messages, send
+  away, and 고용;
+- *보낸 구직자 N명 · 다시 부르기*, which brings everyone sent away back.
+
+**5. Hiring.** 경력직으로 고용 opens the hire dialog:
+
+- The candidate's species is picked, and the name is left to the user.
+- 경력 already names the session: the folder, its dates, and *아직 정리하지
+  않았어요.* with 경력 정리하기.
+- 경력 가져오기 opens straight at **Read**, then **Keep** (Hiring with
+  experience).
+- Closing it leaves the hire dialog as it was. The user can sum the session
+  up later, or hire without it by 빼기.
+- 경력 정리하기 needs Claude Code. When it is not ready, the button waits with
+  the reason, and hiring without experience still works.
+- If the run fails, the step says *경력을 정리하지 못했어요* with 다시 시도, and
+  the hire goes on without it. If nothing worth bringing was found, it says
+  so and the hire goes on as new.
+
+**6. After the hire.**
+
+- The candidate leaves the plaza; that session never comes back to it.
+- A desk is added on the floor.
+- 오늘 reads *보리가 경력직으로 입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
+- On their page, the Record panel has 경력, and each memory brought reads
+  *tinysoft 세션에서*.
+- The session itself is untouched and never attached: the employee's own
+  agent starts sessions of its own.
+
+The mockup is office.html's whole floor. The toggle is in settings.html's
+general tab.
+
 ## Projects
 
 The projects screen is a list, like people: 대기 · 진행 중 · 보류 · 완료 tabs, and
@@ -518,12 +605,11 @@ it, not the session.
 The dialog's last field, **경력**, reads *신입으로 들어와요.* with **지난 세션에서
 가져오기**. That opens **경력 가져오기** over it, in three steps:
 
-1. **Pick.** A project of the company, and one of the past sessions held in
-   its folder. Each shows its first message, its dates and how many messages
-   it has.
-   - Only the company's project folders are looked in, never the whole
-     computer.
+1. **Pick.** A folder on this computer, then one of the past sessions held in
+   it. Each shows its first message, its dates and how many messages it has.
+   - These are the same sessions the plaza shows (see The plaza).
    - A session in use right now is listed, disabled, and cannot be picked.
+   - From the plaza this step is skipped: the session is already chosen.
    - The hint says Claude reads the conversation once, and that a long one is
      read from its most recent part.
 2. **Read.** One Claude run reads the conversation, read-only, and sums up

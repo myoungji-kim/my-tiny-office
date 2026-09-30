@@ -623,6 +623,24 @@ If session discovery is required for recovery after restart, discovery must be s
 
 Do not import arbitrary sessions.
 
+### Candidates, not agents
+
+The plaza is the one place the machine's sessions are listed (DESIGN.md › The
+plaza). It reads, from Claude Code's session files, only each session's
+metadata and first user message.
+- It leaves out the app's own runs: sessions in `.worktrees/` and in the
+  app's temporary folders.
+- A listed session is a candidate, outside the company, and never becomes an
+  Agent or a source of runs.
+- Hiring one runs a single read-only Claude session over its transcript:
+  - no tools, an empty folder, and a small budget;
+  - tool output and secret-looking lines are dropped before it is sent;
+  - a long transcript is cut to its recent part.
+- That run proposes memories. The user keeps some, and a new Employee is
+  created with them.
+- The Employee records the session's id, only so the session leaves the
+  plaza. Its own Agent starts sessions of its own.
+
 ## 11. Workspace Model
 
 Each project has one workspace, its folder, and every task in it a worktree of

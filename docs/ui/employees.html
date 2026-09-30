@@ -8,42 +8,6 @@
 <link rel="stylesheet" href="system.css" />
 <script src="system.js"></script>
 <style>
-  /* ═══ bringing experience in ═══ */
-
-  .sessions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-
-  .sess { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); text-align: left; cursor: pointer; font: inherit; color: inherit; }
-
-  .sess[aria-checked="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-
-  .sess:disabled { cursor: default; background: var(--subtle); }
-
-  .sess-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-
-  .sess-tx b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .sess-tx span { font-size: 14px; color: var(--muted); }
-
-  .sess:disabled .sess-tx b { color: var(--muted); }
-
-  .reading { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 0; text-align: center; color: var(--muted); font-size: 15px; }
-
-  .reading b { color: var(--ink); font-size: 16px; font-weight: 600; }
-
-  .cand-group + .cand-group { margin-top: 16px; }
-
-  .cand { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: start; gap: 6px 10px; margin-top: 10px; }
-
-  .cand input[type="checkbox"] { width: 16px; height: 16px; margin-top: 12px; accent-color: var(--ink); }
-
-  .cand-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-  .cand .textarea { min-height: 0; field-sizing: content; resize: none; }
-
-  .cand .select-wrap { align-self: flex-start; width: 160px; }
-
-  .cand[data-off] .textarea, .cand[data-off] .select { color: var(--faint); }
-
   /* ═══ list ═══ */
 
   #roster .row-item { grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.6fr) 84px; }
@@ -399,26 +363,6 @@
       coldWhy: " — 이 분야 업무가 아직 없었거나, 이 직원에게는 필요 없는 기억일 수 있어요.",
       review: "확인하기",
       career: "경력",
-      careerTitle: "경력 가져오기",
-      careerSub: "이 회사 프로젝트 폴더에서 했던 Claude Code 세션을 골라요. 대화는 읽기만 하고, 세션은 그대로 둬요.",
-      careerProject: "프로젝트",
-      careerSessions: "지난 세션",
-      careerTurns: (n, span) => span + " · 대화 " + n + "번",
-      careerLive: "지금 쓰고 있는 세션이라 가져올 수 없어요",
-      careerNoSessions: "이 폴더에서 한 Claude Code 세션이 없어요.",
-      careerRead: "경력 정리하기",
-      careerCost: "Claude가 대화를 한 번 읽어요. 길면 최근 부분 위주로 읽어요.",
-      careerReading: "대화를 읽는 중이에요",
-      careerReadingWhy: "알게 된 것과 일하는 방식을 추리고 있어요.",
-      careerKnows: "분야 지식",
-      careerStyle: "일하는 방식",
-      careerDropped: (n) => "비밀번호나 토큰처럼 보이는 " + n + "줄은 뺐어요.",
-      careerSkipped: "대화가 길어서 앞부분은 건너뛰고 최근 부분을 읽었어요.",
-      careerPick: "가져갈 것만 남겨요. 문장은 고칠 수 있어요.",
-      careerBack: "뒤로",
-      careerKeep: "가져가기",
-      careerTake: (n) => (n ? n + "개 가져오기" : "가져오기"),
-      careerFrom: (project) => project + " 세션",
       careerKv: (c) => c.project + " · " + c.span,
     },
     en: {
@@ -469,26 +413,6 @@
       coldWhy: " — either no task has needed it yet, or it went to the wrong person.",
       review: "Take a look",
       career: "Experience",
-      careerTitle: "Bring in experience",
-      careerSub: "Pick a Claude Code session from one of this company's project folders. The conversation is only read; the session stays as it is.",
-      careerProject: "Project",
-      careerSessions: "Past sessions",
-      careerTurns: (n, span) => span + " · " + n + " messages",
-      careerLive: "In use right now, so it cannot be brought in",
-      careerNoSessions: "No Claude Code session was held in this folder.",
-      careerRead: "Sum up the experience",
-      careerCost: "Claude reads the conversation once. A long one is read from its most recent part.",
-      careerReading: "Reading the conversation",
-      careerReadingWhy: "Picking out what they learned and how they work.",
-      careerKnows: "What they know",
-      careerStyle: "How they work",
-      careerDropped: (n) => n + (n === 1 ? " line that looked like a password or token was left out." : " lines that looked like passwords or tokens were left out."),
-      careerSkipped: "The conversation was long, so its beginning was skipped and the recent part was read.",
-      careerPick: "Keep only what they should bring. You can reword any line.",
-      careerBack: "Back",
-      careerKeep: "Bring this",
-      careerTake: (n) => (n ? "Bring " + n : "Bring them"),
-      careerFrom: (project) => "a " + project + " session",
       careerKv: (c) => c.project + " · " + c.span,
     },
   };
@@ -510,161 +434,7 @@
 
   /* ── data ────────────────────────────────────────────────────── */
 
-  // Past Claude Code sessions held in each project's folder, as the app would
-  // list them: never the whole computer, and one in use cannot be picked.
-  const SESSIONS = {
-    pay: [
-      { id: "s1", first: { ko: "결제 재시도 로직을 정리하자", en: "Let's sort out the payment retry logic" }, span: { ko: "9월 12일 – 9월 26일", en: "Sep 12 – Sep 26" }, turns: 214, long: true },
-      { id: "s2", first: { ko: "웹훅 서명 검증이 가끔 실패해", en: "The webhook signature check fails now and then" }, span: { ko: "9월 29일", en: "Sep 29" }, turns: 38, live: true },
-      { id: "s3", first: { ko: "정산 배치가 느린 이유 찾아줘", en: "Find out why the settlement batch is slow" }, span: { ko: "8월 30일 – 9월 2일", en: "Aug 30 – Sep 2" }, turns: 61 },
-    ],
-    order: [{ id: "s4", first: { ko: "주문 상태 타입을 좁혀 보자", en: "Let's narrow the order status type" }, span: { ko: "9월 20일", en: "Sep 20" }, turns: 27 }],
-    settle: [],
-  };
 
-  // What reading a session sums up, before the user keeps or drops each line.
-  const SUMMED = {
-    knows: [
-      { area: "db", text: { ko: "결제 재시도는 멱등키로 묶어요. 같은 키는 한 번만 처리돼요.", en: "Payment retries share an idempotency key; one key is handled once." } },
-      { area: "arch", text: { ko: "PG사 응답은 어댑터에서만 해석하고, 도메인에는 결과만 넘겨요.", en: "Only the adapter reads the gateway's reply; the domain gets the outcome." } },
-      { area: "security", text: { ko: "웹훅은 서명을 먼저 검증하고, 실패하면 본문을 읽지 않아요.", en: "A webhook's signature is checked first; the body is not read if it fails." } },
-      { area: "quality", text: { ko: "재시도 테스트는 시계를 주입해서 돌려요.", en: "Retry tests run with an injected clock." } },
-    ],
-    style: [
-      { ko: "바꾸기 전에 관련 테스트부터 돌려 봐요", en: "Run the related tests before changing anything" },
-      { ko: "커밋은 작게, 이유를 적어서", en: "Small commits, each saying why" },
-    ],
-    dropped: 2,
-  };
-
-  function openCareer(done) {
-    const scrim = document.createElement("div");
-    scrim.className = "scrim";
-    scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="${t().careerTitle}"></div>`;
-    document.body.append(scrim);
-    const modal = scrim.firstElementChild;
-    const state = { project: PROJECTS[0].id, session: null, knows: [], style: [] };
-    const close = () => {
-      scrim.remove();
-      document.removeEventListener("keydown", onKey);
-    };
-    const onKey = (e) => e.key === "Escape" && scrim === [...document.querySelectorAll(".scrim")].at(-1) && close();
-    document.addEventListener("keydown", onKey);
-    scrim.addEventListener("pointerdown", (e) => e.target === scrim && close());
-    const head = `<div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${t().careerTitle}</span><span class="m-s">${t().careerSub}</span></span>
-      <button class="ibtn" type="button" data-close aria-label="${t().cancel}">${ICON.x}</button></div>`;
-    const bind = () => modal.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", close));
-    const projectName = () => tx(PROJECTS.find((x) => x.id === state.project).name);
-
-    function pick() {
-      const list = SESSIONS[state.project];
-      modal.innerHTML = `${head}
-        <div class="m-sec">
-          <div class="field" style="margin-top:0">
-            <label class="label" for="careerProject">${t().careerProject}</label>
-            <span class="select-wrap"><select class="select" id="careerProject">${PROJECTS.map((x) => `<option value="${x.id}"${x.id === state.project ? " selected" : ""}>${tx(x.name)}</option>`).join("")}</select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>
-          </div>
-          <div class="field">
-            <span class="label">${t().careerSessions}</span>
-            ${
-              list.length
-                ? `<div class="sessions" role="radiogroup" aria-label="${t().careerSessions}">${list
-                    .map(
-                      (x) => `<button class="sess" type="button" role="radio" data-sess="${x.id}" aria-checked="${state.session?.id === x.id}"${x.live ? " disabled" : ""}>
-                        <span class="sess-tx"><b>${tx(x.first)}</b><span>${x.live ? t().careerLive : t().careerTurns(x.turns, tx(x.span))}</span></span></button>`,
-                    )
-                    .join("")}</div>`
-                : `<p class="hint">${t().careerNoSessions}</p>`
-            }
-            <span class="hint">${t().careerCost}</span>
-          </div>
-        </div>
-        <div class="m-foot">
-          <button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button>
-          <button class="btn btn-primary btn-md" type="button" data-read${state.session ? "" : " disabled"}>${t().careerRead}</button>
-        </div>`;
-      bind();
-      modal.querySelector("#careerProject").addEventListener("change", (e) => {
-        state.project = e.target.value;
-        state.session = null;
-        pick();
-      });
-      modal.querySelectorAll("[data-sess]").forEach((b) =>
-        b.addEventListener("click", () => {
-          state.session = list.find((x) => x.id === b.dataset.sess);
-          pick();
-        }),
-      );
-      modal.querySelector("[data-read]").addEventListener("click", read);
-    }
-
-    // The sample stands in for the one Claude run that reads the session.
-    function read() {
-      modal.innerHTML = `${head}
-        <div class="m-sec"><div class="reading" role="status"><b>${t().careerReading}</b><span>${t().careerReadingWhy}</span></div></div>
-        <div class="m-foot"><button class="btn btn-secondary btn-md" type="button" data-close>${t().cancel}</button></div>`;
-      bind();
-      setTimeout(() => {
-        if (!scrim.isConnected) return;
-        state.knows = SUMMED.knows.map((m) => ({ area: m.area, text: tx(m.text), on: true }));
-        state.style = SUMMED.style.map((x) => ({ text: tx(x), on: true }));
-        review();
-      }, 1200);
-    }
-
-    function review() {
-      const kept = () => state.knows.filter((m) => m.on && m.text.trim()).length + state.style.filter((x) => x.on && x.text.trim()).length;
-      const areaSelect = (m, i) =>
-        `<span class="select-wrap"><select class="select" data-area="${i}" aria-label="${t().areaFilter}">${AREA_KEYS.map((a) => `<option value="${a}"${a === m.area ? " selected" : ""}>${t().areas[a]}</option>`).join("")}</select><svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg></span>`;
-      const row = (kind, x, i, extra = "") =>
-        `<div class="cand"${x.on ? "" : " data-off"}><input type="checkbox" data-on="${kind}:${i}" aria-label="${t().careerKeep}"${x.on ? " checked" : ""} />
-          <span class="cand-body">${extra}<textarea class="textarea" rows="2" data-text="${kind}:${i}" maxlength="200" aria-label="${kind === "knows" ? t().careerKnows : t().careerStyle}">${x.text.replace(/</g, "&lt;")}</textarea></span></div>`;
-      modal.innerHTML = `${head}
-        <div class="m-sec">
-          <div class="notice notice-warn" style="margin-bottom:14px"><span class="n-ic">${ICON.alert}</span>
-            <span class="n-tx"><b>${t().careerDropped(SUMMED.dropped)}</b>${state.session.long ? `<span>${t().careerSkipped}</span>` : ""}</span></div>
-          <p class="hint" style="margin:0 0 4px">${t().careerPick}</p>
-          <div class="cand-group"><span class="label">${t().careerKnows}</span>${state.knows.map((m, i) => row("knows", m, i, areaSelect(m, i))).join("")}</div>
-          <div class="cand-group"><span class="label">${t().careerStyle}</span>${state.style.map((x, i) => row("style", x, i)).join("")}</div>
-        </div>
-        <div class="m-foot">
-          <button class="btn btn-secondary btn-md" type="button" data-back>${t().careerBack}</button>
-          <button class="btn btn-primary btn-md" type="button" data-take${kept() ? "" : " disabled"}>${t().careerTake(kept())}</button>
-        </div>`;
-      bind();
-      const item = (key) => {
-        const [kind, i] = key.split(":");
-        return state[kind][Number(i)];
-      };
-      const sync = () => {
-        const b = modal.querySelector("[data-take]");
-        b.textContent = t().careerTake(kept());
-        b.disabled = kept() === 0;
-      };
-      modal.querySelectorAll("[data-on]").forEach((c) =>
-        c.addEventListener("change", () => {
-          item(c.dataset.on).on = c.checked;
-          c.closest(".cand").toggleAttribute("data-off", !c.checked);
-          sync();
-        }),
-      );
-      modal.querySelectorAll("[data-text]").forEach((input) => input.addEventListener("input", () => ((item(input.dataset.text).text = input.value), sync())));
-      modal.querySelectorAll("[data-area]").forEach((sel) => sel.addEventListener("change", () => (state.knows[Number(sel.dataset.area)].area = sel.value)));
-      modal.querySelector("[data-back]").addEventListener("click", pick);
-      modal.querySelector("[data-take]").addEventListener("click", () => {
-        const from = t().careerFrom(projectName());
-        close();
-        done({
-          project: projectName(),
-          span: tx(state.session.span),
-          memories: state.knows.filter((m) => m.on && m.text.trim()).map((m) => ({ area: m.area, text: m.text.trim(), from, used: 0 })),
-          style: state.style.filter((x) => x.on && x.text.trim()).map((x) => x.text.trim()),
-        });
-      });
-    }
-
-    pick();
-  }
 
   // The company's lists, in its order.
   const AREA_KEYS = Object.keys(WORDS.ko.areas);

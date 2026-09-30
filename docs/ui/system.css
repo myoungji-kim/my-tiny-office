@@ -763,6 +763,42 @@ section > h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
 
 .career-tx b { color: var(--ink); font-weight: 600; }
 
+/* Bringing experience in: the sessions to pick from, and the lines to keep. */
+
+.sessions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+.sess { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); text-align: left; cursor: pointer; font: inherit; color: inherit; }
+
+.sess[aria-checked="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+
+.sess:disabled { cursor: default; background: var(--subtle); }
+
+.sess-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.sess-tx b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sess-tx span { font-size: 14px; color: var(--muted); }
+
+.sess:disabled .sess-tx b { color: var(--muted); }
+
+.reading { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 0; text-align: center; color: var(--muted); font-size: 15px; }
+
+.reading b { color: var(--ink); font-size: 16px; font-weight: 600; }
+
+.cand-group + .cand-group { margin-top: 16px; }
+
+.cand { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: start; gap: 6px 10px; margin-top: 10px; }
+
+.cand input[type="checkbox"] { width: 16px; height: 16px; margin-top: 12px; accent-color: var(--ink); }
+
+.cand-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.cand .textarea { min-height: 0; field-sizing: content; resize: none; }
+
+.cand .select-wrap { align-self: flex-start; width: 160px; }
+
+.cand[data-off] .textarea, .cand[data-off] .select { color: var(--faint); }
+
 /* ═══ confirm dialogs ═══ */
 
 .dlg {

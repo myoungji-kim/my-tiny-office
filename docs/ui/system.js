@@ -16,6 +16,7 @@ const P = {
   c: "#5d6480", C: "#767ea0",
   p: "#b5674a", n: "#4f8f55", N: "#6fae6e",
   f: "#8a6240", r: "#d8574f", u: "#5b8de0", v: "#e0a93c",
+  q: "#d9d2c3", Q: "#e8e2d5", x: "#b8ae9b",
 };
 
 
@@ -34,6 +35,15 @@ const TILES = {
   sofaL: ["wwKKKKKKKKKKKKKK","wwKCCKcccccccccc","wwKCCKcccccccccc","wwKCCKcccccccccc","wwKCCKcccccccccc","wwKKKKKKKKKKKKKK","wwwKKwwwwwwwwwww","wwwKKwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw"],
   sofaR: ["KKKKKKKKKKKKKKww","ccccccccccKCCKww","ccccccccccKCCKww","ccccccccccKCCKww","ccccccccccKCCKww","KKKKKKKKKKKKKKww","wwwwwwwwwwwKKwww","wwwwwwwwwwwKKwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw"],
   table: ["wwwwwwwwwwwwwwww","wWWWWWWWWWWWWWWw","wwwwwwwwwwwwwwww","dddddddddddddddd","wwwwwwwwwwwwwwww","wwwKKKKKKKKKKwww","wwKSSSSSSSSSSKww","wwKSssssssssSKww","wwKKKKKKKKKKKKww","wwwwwwKttKwwwwww","wwwwwwKttKwwwwww","wwwwwKKttKKwwwww","wwwwKttttttKwwww","wwwwKKKKKKKKwwww","dddddddddddddddd","wwwwwwwwwwwwwwww"],
+  // outside the door: the plaza where Claude Code sessions wait to be hired
+  pave: ["qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qQqqqqqxqQqqqqqx","qqqqqqqxqqqqqqqx","xxxxxxxxxxxxxxxx","qqqxqqqqqqqxqqqq","QQqxqQQQQQqxqQQQ","qqqxqQqqqqqxqQqq","qqqxqqqqqqqxqqqq","xxxxxxxxxxxxxxxx","qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qQqqqqqxqQqqqqqx","qqqqqqqxqqqqqqqx","xxxxxxxxxxxxxxxx","qqqxqqqqqqqxqqqq"],
+  grass: ["nnnnnnnnnnnnnnnn","nnNnnnnnnnnNnnnn","nnnnnnnNnnnnnnnn","nnnnnnnnnnnnnNnn","nNnnnnnnnnnnnnnn","nnnnnNnnnnnnnnnn","nnnnnnnnnnNnnnnn","nnnNnnnnnnnnnnnn","nnnnnnnnnnnnnnNn","nnnnnnnnNnnnnnnn","nNnnnnnnnnnnnnnn","nnnnnnNnnnnnnnnn","nnnnnnnnnnnnNnnn","nnnNnnnnnnnnnnnn","nnnnnnnnnNnnnnnn","nnnnnnnnnnnnnnnn"],
+  tree: ["nnnnnKKKKKKnnnnn","nnnKKNNNNNNKKnnn","nnKNNNnNNNNNNKnn","nKNNnNNNNNnNNNKn","nKNNNNNNNNNNNNKn","nKNnNNNNnNNNNNKn","nKNNNNNNNNNNnNKn","nnKNNNnNNNNNNKnn","nnnKKNNNNNNKKnnn","nnnnnKKffKKnnnnn","nnnnnnKffKnnnnnn","nnnnnnKffKnnnnnn","nnnnnnKffKnnnnnn","nnnnnKKffKKnnnnn","nnnnnnnnnnnnnnnn","nnnnnnnnnnnnnnnn"],
+  lamp: ["qqqqqKKKKKKqqqqx","qQQQKvvvvvvKQQqx","qQqqKvvvvvvKqqqx","qqqqqKKKKKKqqqqx","xxxxxxxKKxxxxxxx","qqqxqqqKKqqxqqqq","QQqxqQQKKQqxqQQQ","qqqxqQqKKqqxqQqq","qqqxqqqKKqqxqqqq","xxxxxxxKKxxxxxxx","qqqqqqqKKqqqqqqx","qQQQQQqKKQQQQQqx","qQqqqqKKKKqqqqqx","qqqqqKKKKKKqqqqx","xxxxxxxxxxxxxxxx","qqqxqqqqqqqxqqqq"],
+  bench: ["qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qKKKKKKKKKKKKKKx","qKSSSSSSSSSSSSKx","qKttttttttttttKx","qKKKKKKKKKKKKKKq","KSSSSSSSSSSSSSSK","KssssssssssssssK","KttttttttttttttK","KKKKKKKKKKKKKKKK","qKKqqqqqqqqqqKKx","qKKQQQqxqQQQQKKx","qKKqqqqxqQqqqKKx","qqqqqqqxqqqqqqqx","xxxxxxxxxxxxxxxx","qqqxqqqqqqqxqqqq"],
+  facade: ["aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","aaaaaaaaaaaaaaaa","bbbbbbbbbbbbbbbb","bbbbbbbbbbbbbbbb","KKKKKKKKKKKKKKKK","qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qQqqqqqxqQqqqqqx","qqqqqqqxqqqqqqqx"],
+  facadeWindow: ["aaaaaaaaaaaaaaaa","aKKKKKKKKKKKKKKa","aKGGGGGGGGGGGGKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","aKGgggggggggggKa","aKGgggggggggggKa","aKKKKKKKKKKKKKKa","bbbbbbbbbbbbbbbb","bbbbbbbbbbbbbbbb","KKKKKKKKKKKKKKKK","qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qQqqqqqxqQqqqqqx","qqqqqqqxqqqqqqqx"],
+  door: ["aaKKKKKKKKKKKKaa","aaKffffffffffKaa","aaKfKKKKKKKKfKaa","aaKfKGGGGGGKfKaa","aaKfKGggggGKfKaa","aaKfKKKKKKKKfKaa","aaKffffffffffKaa","aaKfttttttttfKaa","aaKffffffffvfKaa","bbKfttttttttfKbb","bbKffffffffffKbb","KKKKKKKKKKKKKKKK","qqqqqqqxqqqqqqqx","qQQQQQqxqQQQQQqx","qQqqqqqxqQqqqqqx","qqqqqqqxqqqqqqqx"],
   coffee: ["KKKKKKKKKKKKKKKK","AAAAAAAAAAAAAAAA","aaaaaaaaaaaaaaaa","aaaKKKKKKKKKKaaa","aaaKmmmmmmmmKaaa","aaaKmMMMMMMmKaaa","aaaKmMMMMMMmKaaa","aaaKmmmmmmmmKaaa","aaaKmmrrrrmmKaaa","aaaKmmmmmmmmKaaa","aaaKKKKKKKKKKaaa","KKffffffffffffKK","KffffffffffffffK","KKKKKKKKKKKKKKKK","dddddddddddddddd","wwwwwwwwwwwwwwww"],
 };
 
@@ -544,8 +554,26 @@ const WORDS = {
       editTitle: "정보 바꾸기", editSub: "외형과 이름, 역할, 팀을 바꿔요.", save: "저장",
       hireAs: (n) => (n ? n + " 고용하기" : "고용하기"),
       career: "경력", careerNone: "신입으로 들어와요.", careerAdd: "지난 세션에서 가져오기",
-      careerChange: "바꾸기", careerDrop: "빼기",
+      careerChange: "바꾸기", careerDrop: "빼기", careerRead: "경력 정리하기", careerUnread: "아직 정리하지 않았어요.",
       careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "기억 " + m + "개와 일하는 방식 " + s + "개를 들고 와요.",
+    },
+    career: {
+      title: "경력 가져오기",
+      sub: "이 컴퓨터에서 한 Claude Code 세션을 골라요. 대화는 읽기만 하고, 세션은 그대로 둬요.",
+      folder: "폴더", sessions: "지난 세션",
+      turns: (n, span) => span + " · 대화 " + n + "번",
+      live: "지금 터미널에서 쓰고 있어서 가져올 수 없어요",
+      none: "이 폴더에는 가져올 만한 세션이 없어요.",
+      read: "경력 정리하기",
+      cost: "Claude가 대화를 한 번 읽어요. 길면 최근 부분 위주로 읽어요.",
+      reading: "대화를 읽는 중이에요", readingWhy: "알게 된 것과 일하는 방식을 추리고 있어요.",
+      knows: "분야 지식", style: "일하는 방식", area: "분야", keep: "가져가기",
+      dropped: (n) => "비밀번호나 토큰처럼 보이는 " + n + "줄은 뺐어요.",
+      skipped: "대화가 길어서 앞부분은 건너뛰고 최근 부분을 읽었어요.",
+      pick: "가져갈 것만 남겨요. 문장은 고칠 수 있어요.",
+      back: "뒤로", cancel: "취소",
+      take: (n) => (n ? n + "개 가져오기" : "가져오기"),
+      from: (folder) => folder + " 세션",
     },
     teach: {
       titleTo: (name) => name + "에게 알려주기",
@@ -586,8 +614,26 @@ const WORDS = {
       editTitle: "Edit details", editSub: "Change how they look, their name, role and team.", save: "Save",
       hireAs: (n) => (n ? "Hire " + n : "Hire"),
       career: "Experience", careerNone: "They join new.", careerAdd: "Bring it from a past session",
-      careerChange: "Change", careerDrop: "Remove",
+      careerChange: "Change", careerDrop: "Remove", careerRead: "Sum it up", careerUnread: "Not summed up yet.",
       careerLine: (c) => c.project + " · " + c.span, careerCarries: (m, s) => "They bring " + m + (m === 1 ? " memory" : " memories") + " and " + s + (s === 1 ? " way of working." : " ways of working."),
+    },
+    career: {
+      title: "Bring in experience",
+      sub: "Pick a Claude Code session held on this computer. The conversation is only read; the session stays as it is.",
+      folder: "Folder", sessions: "Past sessions",
+      turns: (n, span) => span + " · " + n + " messages",
+      live: "In use in a terminal right now, so it cannot be brought in",
+      none: "No session in this folder is worth bringing in.",
+      read: "Sum up the experience",
+      cost: "Claude reads the conversation once. A long one is read from its most recent part.",
+      reading: "Reading the conversation", readingWhy: "Picking out what they learned and how they work.",
+      knows: "What they know", style: "How they work", area: "Area", keep: "Bring this",
+      dropped: (n) => n + (n === 1 ? " line that looked like a password or token was left out." : " lines that looked like passwords or tokens were left out."),
+      skipped: "The conversation was long, so its beginning was skipped and the recent part was read.",
+      pick: "Keep only what they should bring. You can reword any line.",
+      back: "Back", cancel: "Cancel",
+      take: (n) => (n ? "Bring " + n : "Bring them"),
+      from: (folder) => "a " + folder + " session",
     },
     teach: {
       titleTo: (name) => "Teach " + name,
@@ -804,11 +850,12 @@ function spriteCanvas(species, px) {
 // `teams` is the company's list as [{ key, label }] when the caller holds it.
 // `roles` likewise, as titles.
 // `career`, when given, opens where past experience is brought in and calls back with it.
-function openHire({ team = null, teams = null, roles = null, edit = null, career = null, onSave }) {
+// `from`, a candidate from the plaza, arrives with their look and their session.
+function openHire({ team = null, teams = null, roles = null, edit = null, career = null, from = null, onSave }) {
   const lang = uiLang();
   const w = WORDS[lang].hire;
   const local = (v) => (v && typeof v === "object" ? v[lang] : v);
-  const state = { species: edit ? SPECIES.get(edit.species) : null, career: null };
+  const state = { species: edit ? SPECIES.get(edit.species) : from ? SPECIES.get(from.species) : null, career: null };
 
   const scrim = document.createElement("div");
   scrim.className = "scrim";
@@ -884,24 +931,30 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
     const box = $("[data-career]");
     if (!box) return;
     const c = state.career;
-    box.innerHTML = c
+    const pending = !c && from;
+    box.innerHTML = pending
+      ? `<span class="career-tx"><b>${w.careerLine({ project: folderName(from.folder), span: local(from.span) })}</b><span>${w.careerUnread}</span></span>
+         <button class="btn btn-secondary btn-sm" type="button" data-career-read>${w.careerRead}</button>`
+      : c
       ? `<span class="career-tx"><b>${w.careerLine(c)}</b><span>${w.careerCarries(c.memories.length, c.style.length)}</span></span>
          <button class="btn btn-secondary btn-sm" type="button" data-career-add>${w.careerChange}</button>
          <button class="btn btn-secondary btn-sm" type="button" data-career-drop>${w.careerDrop}</button>`
       : `<span class="career-tx"><span>${w.careerNone}</span></span>
          <button class="btn btn-secondary btn-sm" type="button" data-career-add>${w.careerAdd}</button>`;
-    box.querySelector("[data-career-add]").addEventListener("click", () =>
-      career((picked) => {
-        state.career = picked;
-        renderCareer();
-      }),
-    );
+    const took = (picked) => {
+      state.career = picked;
+      renderCareer();
+    };
+    box.querySelector("[data-career-add]")?.addEventListener("click", () => career(took));
+    box.querySelector("[data-career-read]")?.addEventListener("click", () => career(took, from));
     box.querySelector("[data-career-drop]")?.addEventListener("click", () => {
       state.career = null;
       renderCareer();
     });
   }
   renderCareer();
+  // From the plaza the session is already chosen, so reading it is the next step.
+  if (from && career) queueMicrotask(() => career((picked) => ((state.career = picked), renderCareer()), from));
 
   // A nickname the user did not write is not their employee, so the button
   // waits for both.
@@ -931,7 +984,195 @@ function openHire({ team = null, teams = null, roles = null, edit = null, career
     close();
     onSave(hired);
   });
-  (edit ? name : cast.firstElementChild).focus({ preventScroll: true });
+  if (state.species) {
+    for (const x of cast.children) x.setAttribute("aria-pressed", String(x.getAttribute("aria-label") === local(state.species.species)));
+    $("[data-picked]").innerHTML = `<b>${local(state.species.species)}</b><span>${local(state.species.family)}</span>`;
+    $("[data-av]").replaceChildren(spriteCanvas(state.species.key, 32));
+    name.placeholder = local(state.species);
+    sync();
+  }
+  (edit || from ? name : cast.firstElementChild).focus({ preventScroll: true });
+}
+
+/* ═══ the plaza's candidates ═══ */
+// Claude Code sessions held on this computer, as the app lists them: the
+// app's own runs, short or old ones, hired and sent-away ones are left out.
+// `last` is how long ago the session was last written to; one written to in
+// the last five minutes is in use in a terminal.
+
+const CANDIDATES = [
+  { id: "s1", folder: "~/Projects/tinysoft", first: { ko: "결제 재시도 로직을 정리하자", en: "Let's sort out the payment retry logic" }, span: { ko: "9월 12일 – 9월 24일", en: "Sep 12 – Sep 24" }, turns: 214, last: { ko: "2일 전", en: "2 days ago" }, long: true },
+  { id: "s2", folder: "~/Projects/tinysoft", first: { ko: "웹훅 서명 검증이 가끔 실패해", en: "The webhook signature check fails now and then" }, span: { ko: "9월 26일", en: "Sep 26" }, turns: 38, last: { ko: "방금", en: "just now" }, live: true },
+  { id: "s3", folder: "~/Projects/settle", first: { ko: "정산 배치가 느린 이유 찾아줘", en: "Find out why the settlement batch is slow" }, span: { ko: "8월 30일 – 9월 2일", en: "Aug 30 – Sep 2" }, turns: 61, last: { ko: "3주 전", en: "3 weeks ago" } },
+  { id: "s4", folder: "~/Projects/orders", first: { ko: "주문 상태 타입을 좁혀 보자", en: "Let's narrow the order status type" }, span: { ko: "9월 20일", en: "Sep 20" }, turns: 27, last: { ko: "6일 전", en: "6 days ago" } },
+  { id: "s5", folder: "~/blog", first: { ko: "블로그에 다크 모드 넣어줘", en: "Add a dark mode to the blog" }, span: { ko: "9월 23일 – 9월 24일", en: "Sep 23 – Sep 24" }, turns: 44, last: { ko: "2일 전", en: "2 days ago" } },
+  { id: "s6", folder: "~/Projects/infra", first: { ko: "테라폼 모듈을 환경별로 쪼개자", en: "Split the Terraform modules by environment" }, span: { ko: "9월 15일 – 9월 22일", en: "Sep 15 – Sep 22" }, turns: 132, last: { ko: "4일 전", en: "4 days ago" }, long: true },
+  { id: "s7", folder: "~/Projects/app-mobile", first: { ko: "푸시 알림 딥링크가 안 열려", en: "Push notification deep links don't open" }, span: { ko: "9월 21일", en: "Sep 21" }, turns: 88, last: { ko: "5일 전", en: "5 days ago" } },
+  { id: "s8", folder: "~/dotfiles", first: { ko: "zsh 설정 좀 정리해줘", en: "Tidy up my zsh config" }, span: { ko: "9월 19일", en: "Sep 19" }, turns: 19, last: { ko: "1주 전", en: "1 week ago" } },
+  { id: "s9", folder: "~/Projects/design-system", first: { ko: "버튼 variant를 정리하자", en: "Let's clean up the button variants" }, span: { ko: "9월 8일 – 9월 12일", en: "Sep 8 – Sep 12" }, turns: 53, last: { ko: "2주 전", en: "2 weeks ago" } },
+  { id: "s10", folder: "~/Projects/tinysoft", first: { ko: "환불 API가 멱등한지 확인해줘", en: "Check the refund API is idempotent" }, span: { ko: "9월 18일", en: "Sep 18" }, turns: 36, last: { ko: "8일 전", en: "8 days ago" } },
+  { id: "s11", folder: "~/Projects/admin", first: { ko: "관리자 권한 체크를 미들웨어로 옮기자", en: "Move the admin permission check into middleware" }, span: { ko: "9월 10일 – 9월 11일", en: "Sep 10 – Sep 11" }, turns: 71, last: { ko: "2주 전", en: "2 weeks ago" } },
+].map((c, i) => ({ ...c, species: CAST[(i * 7 + 3) % CAST.length].key }));
+
+const folderName = (folder) => folder.split("/").filter(Boolean).at(-1);
+
+// What reading a session sums up: the sample answers every session the same way.
+const SUMMED = {
+  knows: [
+    { area: "db", text: { ko: "결제 재시도는 멱등키로 묶어요. 같은 키는 한 번만 처리돼요.", en: "Payment retries share an idempotency key; one key is handled once." } },
+    { area: "arch", text: { ko: "PG사 응답은 어댑터에서만 해석하고, 도메인에는 결과만 넘겨요.", en: "Only the adapter reads the gateway's reply; the domain gets the outcome." } },
+    { area: "security", text: { ko: "웹훅은 서명을 먼저 검증하고, 실패하면 본문을 읽지 않아요.", en: "A webhook's signature is checked first; the body is not read if it fails." } },
+    { area: "quality", text: { ko: "재시도 테스트는 시계를 주입해서 돌려요.", en: "Retry tests run with an injected clock." } },
+  ],
+  style: [
+    { ko: "바꾸기 전에 관련 테스트부터 돌려 봐요", en: "Run the related tests before changing anything" },
+    { ko: "커밋은 작게, 이유를 적어서", en: "Small commits, each saying why" },
+  ],
+  dropped: 2,
+};
+
+/* ═══ bringing experience in ═══ */
+// Pick a session, one read-only Claude run sums it up, and the user keeps what
+// the hire brings. `session` given, it starts at reading.
+
+function openCareer(done, session = null, hired = new Set()) {
+  const lang = uiLang();
+  const w = WORDS[lang].career;
+  const local = (v) => (v && typeof v === "object" ? v[lang] : v);
+  const areas = WORDS[lang].areas;
+  const X = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
+  const ALERT = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg>';
+  const CHEVRON = '<svg viewBox="0 0 11 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5l4.5 4.5L10 1.5"/></svg>';
+  const pool = CANDIDATES.filter((c) => !hired.has(c.id));
+  const folders = [...new Set(pool.map((c) => c.folder))];
+
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="${w.title}"></div>`;
+  document.body.append(scrim);
+  const modal = scrim.firstElementChild;
+  const state = { folder: session?.folder ?? folders[0], session, knows: [], style: [] };
+  const close = () => {
+    scrim.remove();
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => e.key === "Escape" && scrim === [...document.querySelectorAll(".scrim")].at(-1) && close();
+  document.addEventListener("keydown", onKey);
+  scrim.addEventListener("pointerdown", (e) => e.target === scrim && close());
+  const head = `<div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${w.title}</span><span class="m-s">${w.sub}</span></span>
+    <button class="ibtn" type="button" data-close aria-label="${w.cancel}">${X}</button></div>`;
+  const bind = () => modal.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", close));
+
+  function pick() {
+    const list = pool.filter((c) => c.folder === state.folder);
+    modal.innerHTML = `${head}
+      <div class="m-sec">
+        <div class="field" style="margin-top:0">
+          <label class="label" for="careerFolder">${w.folder}</label>
+          <span class="select-wrap"><select class="select" id="careerFolder">${folders.map((f) => `<option value="${f}"${f === state.folder ? " selected" : ""}>${f}</option>`).join("")}</select>${CHEVRON}</span>
+        </div>
+        <div class="field">
+          <span class="label">${w.sessions}</span>
+          ${
+            list.length
+              ? `<div class="sessions" role="radiogroup" aria-label="${w.sessions}">${list
+                  .map(
+                    (x) => `<button class="sess" type="button" role="radio" data-sess="${x.id}" aria-checked="${state.session?.id === x.id}"${x.live ? " disabled" : ""}>
+                      <span class="sess-tx"><b>${local(x.first)}</b><span>${x.live ? w.live : w.turns(x.turns, local(x.span))}</span></span></button>`,
+                  )
+                  .join("")}</div>`
+              : `<p class="hint">${w.none}</p>`
+          }
+          <span class="hint">${w.cost}</span>
+        </div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button>
+        <button class="btn btn-primary btn-md" type="button" data-read${state.session ? "" : " disabled"}>${w.read}</button>
+      </div>`;
+    bind();
+    modal.querySelector("#careerFolder").addEventListener("change", (e) => {
+      state.folder = e.target.value;
+      state.session = null;
+      pick();
+    });
+    modal.querySelectorAll("[data-sess]").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.session = list.find((x) => x.id === b.dataset.sess);
+        pick();
+      }),
+    );
+    modal.querySelector("[data-read]").addEventListener("click", read);
+  }
+
+  // The sample stands in for the one Claude run that reads the session.
+  function read() {
+    modal.innerHTML = `${head}
+      <div class="m-sec"><div class="reading" role="status"><b>${w.reading}</b><span>${w.readingWhy}</span></div></div>
+      <div class="m-foot"><button class="btn btn-secondary btn-md" type="button" data-close>${w.cancel}</button></div>`;
+    bind();
+    setTimeout(() => {
+      if (!scrim.isConnected) return;
+      state.knows = SUMMED.knows.map((m) => ({ area: m.area, text: local(m.text), on: true }));
+      state.style = SUMMED.style.map((x) => ({ text: local(x), on: true }));
+      review();
+    }, 1200);
+  }
+
+  function review() {
+    const kept = () => state.knows.filter((m) => m.on && m.text.trim()).length + state.style.filter((x) => x.on && x.text.trim()).length;
+    const areaSelect = (m, i) =>
+      `<span class="select-wrap"><select class="select" data-area="${i}" aria-label="${w.area}">${Object.keys(areas).map((a) => `<option value="${a}"${a === m.area ? " selected" : ""}>${areas[a]}</option>`).join("")}</select>${CHEVRON}</span>`;
+    const row = (kind, x, i, extra = "") =>
+      `<div class="cand"${x.on ? "" : " data-off"}><input type="checkbox" data-on="${kind}:${i}" aria-label="${w.keep}"${x.on ? " checked" : ""} />
+        <span class="cand-body">${extra}<textarea class="textarea" rows="2" data-text="${kind}:${i}" maxlength="200" aria-label="${kind === "knows" ? w.knows : w.style}">${x.text.replace(/</g, "&lt;")}</textarea></span></div>`;
+    modal.innerHTML = `${head}
+      <div class="m-sec">
+        <div class="notice notice-warn" style="margin-bottom:14px"><span class="n-ic">${ALERT}</span>
+          <span class="n-tx"><b>${w.dropped(SUMMED.dropped)}</b>${state.session.long ? `<span>${w.skipped}</span>` : ""}</span></div>
+        <p class="hint" style="margin:0 0 4px">${w.pick}</p>
+        <div class="cand-group"><span class="label">${w.knows}</span>${state.knows.map((m, i) => row("knows", m, i, areaSelect(m, i))).join("")}</div>
+        <div class="cand-group"><span class="label">${w.style}</span>${state.style.map((x, i) => row("style", x, i)).join("")}</div>
+      </div>
+      <div class="m-foot">
+        <button class="btn btn-secondary btn-md" type="button" data-back>${w.back}</button>
+        <button class="btn btn-primary btn-md" type="button" data-take${kept() ? "" : " disabled"}>${w.take(kept())}</button>
+      </div>`;
+    bind();
+    const item = (key) => {
+      const [kind, i] = key.split(":");
+      return state[kind][Number(i)];
+    };
+    const sync = () => {
+      const b = modal.querySelector("[data-take]");
+      b.textContent = w.take(kept());
+      b.disabled = kept() === 0;
+    };
+    modal.querySelectorAll("[data-on]").forEach((c) =>
+      c.addEventListener("change", () => {
+        item(c.dataset.on).on = c.checked;
+        c.closest(".cand").toggleAttribute("data-off", !c.checked);
+        sync();
+      }),
+    );
+    modal.querySelectorAll("[data-text]").forEach((input) => input.addEventListener("input", () => ((item(input.dataset.text).text = input.value), sync())));
+    modal.querySelectorAll("[data-area]").forEach((sel) => sel.addEventListener("change", () => (state.knows[Number(sel.dataset.area)].area = sel.value)));
+    modal.querySelector("[data-back]").addEventListener("click", pick);
+    modal.querySelector("[data-take]").addEventListener("click", () => {
+      const from = w.from(folderName(state.session.folder));
+      close();
+      done({
+        session: state.session.id,
+        project: folderName(state.session.folder),
+        span: local(state.session.span),
+        memories: state.knows.filter((m) => m.on && m.text.trim()).map((m) => ({ area: m.area, text: m.text.trim(), from, used: 0 })),
+        style: state.style.filter((x) => x.on && x.text.trim()).map((x) => x.text.trim()),
+      });
+    });
+  }
+
+  if (session) read();
+  else pick();
 }
 
 /* ═══ a readiness check ═══ */
