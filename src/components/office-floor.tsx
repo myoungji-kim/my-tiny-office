@@ -371,7 +371,7 @@ export function OfficeFloor({
   const [hireTeam, setHireTeam] = useState<string | undefined>(undefined);
   const [teaching, setTeaching] = useState<EmployeeView | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [, start] = useTransition();
+  const [pending, start] = useTransition();
   const pop = useRef<HTMLDivElement>(null);
   const anchor = useRef<HTMLElement | null>(null);
   const focusFirst = useRef(false);
@@ -505,7 +505,7 @@ export function OfficeFloor({
                         {body}
                       </Link>
                     ) : (
-                      <button className={cls} type="button" disabled={act.off !== undefined} onClick={() => run(act)}>
+                      <button className={cls} type="button" disabled={pending || act.off !== undefined} onClick={() => run(act)}>
                         {body}
                       </button>
                     )}

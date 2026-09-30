@@ -5,6 +5,8 @@ import { useRef, useState, useTransition } from "react";
 
 import { startCompanyAction, switchCompanyAction } from "../app/actions";
 import { isReady, type ClaudeCodeStatus } from "../application/runtime-status";
+import { MAX_COMPANY_NAME } from "../domain/company";
+import { MAX_EMPLOYEE_NAME } from "../domain/employee";
 import { getDictionary, type Locale } from "../i18n";
 import { CAST, type CastMember } from "../ui/paint";
 
@@ -196,6 +198,7 @@ export function FirstRun({
               className="input input-lg"
               id="company-name"
               value={companyName}
+              maxLength={MAX_COMPANY_NAME}
               autoComplete="off"
               onChange={(e) => setCompanyName(e.target.value)}
             />
@@ -247,6 +250,7 @@ export function FirstRun({
               className="input input-lg"
               id="employee-name"
               value={name}
+              maxLength={MAX_EMPLOYEE_NAME}
               placeholder={(chosen ?? CAST[0]).name[locale]}
               autoComplete="off"
               onChange={(e) => setName(e.target.value)}
