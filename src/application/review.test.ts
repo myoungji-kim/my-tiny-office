@@ -10,7 +10,7 @@ import { forgetMemory, teachMemory } from "./memory";
 import { addTeam, moveEmployee, removeTeam } from "./organisation";
 import { createProject, finishProject, startProject } from "./project";
 import { askForReview, requestReview, settleReview, suggestReview } from "./review";
-import { applyTask, createTask, holdTask, pickUpWork } from "./task";
+import { applyTask, createTask, editTask, holdTask, pickUpWork } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 
 const companyId = toCompanyId("c");
@@ -178,6 +178,21 @@ describe("a review when the work or the reviewer moves on", () => {
     const next = await pickUpWork(ctx, companyId);
     assert(next.ok);
     expect(next.value.started.map((t) => t.assigneeId)).toEqual([mocha.id, pip.id]);
+  });
+
+  it("stays when only the priority changes, and goes when what the work is changes", async () => {
+    const mocha = await hire("모카");
+    const pip = await hire("삐약", true);
+    const webhook = await workInProgress();
+    assert((await pickUpWork(ctx, companyId)).ok);
+    const suggested = await suggestReview(ctx, webhook.id);
+    assert(suggested.ok && (await askForReview(ctx, suggested.value.review.id, pip.id)).ok);
+    const details = { projectId: pay, title: webhook.title, description: undefined, area: security, priority: "low" as const, assigneeId: mocha.id, reviewerId: undefined };
+
+    assert((await editTask(ctx, webhook.id, details)).ok);
+    await expect(ctx.reviews.findById(suggested.value.review.id)).resolves.toMatchObject({ state: "reviewing" });
+    assert((await editTask(ctx, webhook.id, { ...details, title: "서명 검증과 재시도" })).ok);
+    await expect(ctx.reviews.findById(suggested.value.review.id)).resolves.toMatchObject({ state: "withdrawn" });
   });
 
   it("hands the work to the user's approval when its reviewer goes on leave, and a new review can be asked", async () => {

@@ -99,8 +99,10 @@ export function editTask(
     const edited = taskDomain.editTask(task, details, assignee, ctx.now());
     if (!edited.ok) return edited;
     await ctx.tasks.save(edited.task);
-    // a review asked for is of the work as it was
-    const events = task.status === "working" ? await withdrawReviewsOn(ctx, task.companyId, [task.id]) : [];
+    // a review asked for is of the work as it was: it goes when what the work is,
+    // or who does it, changes, and stays for a new priority, area or reviewer
+    const changed = edited.task.status !== "working" || edited.task.revisedAt !== task.revisedAt || edited.task.assigneeId !== task.assigneeId;
+    const events = task.status === "working" && changed ? await withdrawReviewsOn(ctx, task.companyId, [task.id]) : [];
     return { ok: true, value: { task: edited.task }, events };
   });
 }
