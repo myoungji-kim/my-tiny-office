@@ -43,3 +43,23 @@
   .app { grid-template-columns: 1fr; }
   .side { border-bottom: 1px solid var(--line-2); }
 }
+
+.today-row { display: grid; grid-template-columns: 44px 16px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+
+.today-row:last-child { border-bottom: none; }
+
+.today-at { font-family: var(--mono); font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+.today-ic { display: grid; place-items: center; color: var(--muted); }
+
+.today-ic svg { width: 15px; height: 15px; }
+
+.today-row.you .today-ic { color: var(--brand); }
+
+.today-row.bad .today-ic { color: var(--bad); }
+
+.today-tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+
+.today-tx b { color: var(--ink); font-weight: 600; }
+
+.today-more { margin-top: 8px; }

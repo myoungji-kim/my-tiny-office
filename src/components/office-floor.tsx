@@ -349,6 +349,7 @@ export function OfficeFloor({
   memories,
   ready,
   plaza,
+  today,
   now,
 }: {
   readonly locale: Locale;
@@ -361,6 +362,8 @@ export function OfficeFloor({
   readonly memories: readonly MemoryView[];
   readonly ready: boolean;
   readonly plaza: boolean;
+  // 오늘, under the floor and above the cards
+  readonly today: ReactNode;
   readonly now: number;
 }) {
   const words = getDictionary(locale);
@@ -438,6 +441,7 @@ export function OfficeFloor({
   return (
     <>
       <RoomView plan={plan} words={words} openId={openId} onPick={pick} />
+      {today}
 
       <div>
         {groups.map((g) => (

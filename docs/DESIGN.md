@@ -133,10 +133,15 @@ people, three to a row.
 Under the floor, above the cards, **오늘** lists what happened in the office,
 newest first: who started what, a colleague starting a review, a memory drawn
 on, work finished and waiting on the user, work applied, someone going on
-leave. Each row is a domain event worded by the dictionary, with its time. The
+leave, someone joining, and work that stopped: a dropped agent, a command or
+a Jira or Confluence write the project does not allow, the spending cap. Each
+row is worded by the dictionary, with its time. It is read from what the
+company keeps (a task's start, finish and apply, a review's start, a run's
+end and the memories it drew on, a hire, a leave), since midnight
+(`src/server/today.ts`). The
 feed follows the room — a team's room, the meeting room and the lounge show
 what happened to the people in them — and shows six before 더 보기. Only what
-waits on the user carries an action, the way to it
+still waits on the user carries an action, the way to it
 (승인하러 가기, and 보러 가기 for work that stopped — a dropped agent, a command not allowed); the rest is there to
 be read.
 
@@ -289,8 +294,7 @@ than says it.
 - Hiding everyone leaves the paving empty with *구직자를 모두 숨겼어요. 명단의
   숨김에서 다시 보이게 할 수 있어요.*
 - A desk is added on the floor.
-- Once the office has its Today feed (office.html), it reads *보리가 경력직으로
-  입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
+- 오늘 reads *보리가 경력직으로 입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
 - On their page, the Record panel has 경력, and each memory brought reads
   *tinysoft 세션에서*.
 - The session itself is untouched and never attached: the employee's own
@@ -884,9 +888,8 @@ measured flags behind it.
 
 - **Asking for a review.** 동료 검토 받기 sits with the approval actions and opens a pick of colleagues who know the area, a busy one marked as looking after what they are on; the task dialog's 검토자 names one ahead. The mockup's in-progress 검토 붙이기 moved there, because real work finishes before anyone could catch it in progress.
 - **What is not built yet.** Every screen is built from its page in
-  `docs/ui`. Left out until what they show exists: today's feed in the office
-  and the people screen's 기억 tab (the activity feed and the memory-used
-  report), how often a memory was used (the person's page lists the memories taught
+  `docs/ui`. Left out until what they show exists: the people screen's 기억
+  tab (the activity feed and the memory-used report), how often a memory was used (the person's page lists the memories taught
   lately instead of the most used).
 - **Choosing a folder.** A browser cannot hand over a folder's path, so
   고르기 opens the operating system's folder dialog from the app's own server,
