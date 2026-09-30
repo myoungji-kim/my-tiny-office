@@ -63,7 +63,10 @@ second architecture. Its main process:
    server this checkout started, left by an app that was killed, that server
    is stopped first. Any other program there moves the app to a free port;
 2. shows the page in a sandboxed window;
-3. stops the server's process tree on quit.
+3. keeps running when the window closes, so the work goes on: on macOS in
+   the Dock, on Windows and Linux as an icon in the notification area that
+   opens the window again or quits;
+4. stops the server's process tree on quit.
 
 Nothing in `src/` knows about it, and the app stays usable as a plain web
 application.

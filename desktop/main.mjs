@@ -1,5 +1,6 @@
 // The desktop app is a window onto the app's own local server: it starts
 // `next start` with the computer's Node, shows it, and stops it on quit.
+// Closing the window is not quitting: the office keeps working behind it.
 // Nothing here reaches the server's code or data; the window is a browser tab
 // that can go nowhere else (docs/SECURITY.md §6).
 
@@ -8,9 +9,9 @@ import { accessSync, constants, existsSync, mkdirSync, openSync, readFileSync, s
 import http from "node:http";
 import net from "node:net";
 import { delimiter, dirname, isAbsolute, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { app, BrowserWindow, dialog, session, shell } from "electron";
+import { app, BrowserWindow, dialog, Menu, nativeImage, session, shell, Tray } from "electron";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -32,12 +33,18 @@ const WORDS = {
     noNode: "Node.js를 찾을 수 없어요. Node.js 22 이상을 설치한 뒤 다시 열어 주세요.",
     notBuilt: "앱이 아직 빌드되지 않았어요. 설치한 폴더에서 `npm run build`를 실행한 뒤 다시 열어 주세요.",
     failed: "사무실을 열지 못했어요. 기록을 확인해 주세요:",
+    open: "사무실 열기",
+    quit: "끝내기",
+    stillWorking: "창을 닫아도 직원들은 계속 일해요. 끝내려면 여기서 끝내기를 눌러요.",
   },
   en: {
     opening: "Opening the office…",
     noNode: "Node.js could not be found. Install Node.js 22 or later, then open the app again.",
     notBuilt: "The app has not been built yet. Run `npm run build` in its folder, then open it again.",
     failed: "The office could not open. See the log:",
+    open: "Open the office",
+    quit: "Quit",
+    stillWorking: "The office keeps working with the window closed. Quit from here to stop it.",
   },
 };
 const words = () => (app.getLocale().startsWith("ko") ? WORDS.ko : WORDS.en);
@@ -224,11 +231,45 @@ function openWindow() {
   void window.loadURL(origin === undefined ? splash(words().opening) : origin);
 }
 
+// Windows and Linux have no Dock, so the office behind a closed window lives
+// in the notification area, where it opens again or quits.
+let tray;
+async function showTray() {
+  if (process.platform === "darwin") return;
+  const { png } = await import(pathToFileURL(join(ROOT, "desktop", "icon.mjs")).href);
+  tray = new Tray(nativeImage.createFromBuffer(png(32)));
+  tray.setToolTip("My Tiny Office");
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: words().open, click: () => showWindow() },
+      { type: "separator" },
+      { label: words().quit, click: () => app.quit() },
+    ]),
+  );
+  tray.on("click", () => showWindow());
+}
+
+function showWindow() {
+  if (window === undefined) return openWindow();
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+}
+
+// said once a run, the first time the window closes with the office still open
+let told = false;
+function tellStillWorking() {
+  if (told || tray === undefined) return;
+  told = true;
+  if (process.platform === "win32") tray.displayBalloon({ title: "My Tiny Office", content: words().stillWorking });
+}
+
 async function start() {
   // only copying to the clipboard, which the page's copy buttons need
   session.defaultSession.setPermissionRequestHandler((_, permission, grant) => grant(permission === "clipboard-sanitized-write"));
 
   openWindow();
+  await showTray().catch(() => undefined);
   const fail = (message) => {
     if (quitting) return;
     dialog.showErrorBox("My Tiny Office", message);
@@ -256,16 +297,14 @@ async function start() {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
-    if (window === undefined) return openWindow();
-    if (window.isMinimized()) window.restore();
-    window.focus();
-  });
+  app.on("second-instance", () => showWindow());
   app.whenReady().then(start);
-  // On macOS closing the window leaves the office running, as apps there do:
-  // the work goes on, and the Dock brings the window back.
+  // Closing the window leaves the office running: the work goes on, and the
+  // Dock, the tray icon or opening the app again brings the window back.
+  // Without a tray to come back to, closing quits.
   app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit();
+    if (process.platform !== "darwin" && tray === undefined) return app.quit();
+    tellStillWorking();
   });
   app.on("activate", () => {
     if (window === undefined && origin !== undefined) openWindow();

@@ -189,6 +189,8 @@ agents, so it is a target in its own right.
   - On macOS the login shell is asked for `PATH`, since an app opened from
     the Dock gets a bare one. That runs the user's own shell startup files,
     as a terminal would.
+  - Closing the window is not quitting: the server and its agents keep
+    working until the app is quit from the Dock or the notification area.
   - Quitting stops the server. On macOS and Linux it gets SIGTERM and stops the
     agents it started as it exits; on Windows its process tree is ended.
     Either way, runs are reconciled as disconnected the next time it starts.
