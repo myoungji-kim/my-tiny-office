@@ -91,6 +91,32 @@ my-tiny-office/
     └── proxy.ts             refuses requests not addressed to this machine
 ```
 
+## Requirements
+
+Runs on macOS, Windows and Linux.
+
+- Node.js 22 or later (`better-sqlite3` needs it)
+- git
+- Claude Code, installed and logged in (run `claude` once and sign in); the app never asks for an API key
+- GitHub CLI (`gh`), optional: with it signed in, applied work opens its pull request directly
+
+`npm install` builds `better-sqlite3`. When no prebuilt binary fits, it compiles
+from source; on macOS that needs the Xcode Command Line Tools
+(`xcode-select --install`).
+
+Companies live outside the repository:
+
+| | |
+| --- | --- |
+| macOS | `~/Library/Application Support/my-tiny-office` |
+| Windows | `%LOCALAPPDATA%\my-tiny-office` |
+| Linux | `$XDG_DATA_HOME/my-tiny-office`, or `~/.local/share/my-tiny-office` |
+
+`MY_TINY_OFFICE_DATA_DIR` overrides it. Choosing a project folder opens the
+system picker: `osascript` on macOS, PowerShell on Windows, `zenity` or
+`kdialog` on Linux. Agents run commands through Bash on macOS and Linux, and
+through Bash and PowerShell on Windows (docs/SECURITY.md §2).
+
 ## Development
 
 ```bash

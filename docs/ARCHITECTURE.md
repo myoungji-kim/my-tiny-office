@@ -179,7 +179,7 @@ Employee
 ├── species        picks the sprite
 ├── roleId
 ├── teamId?
-└── availability   available | onLeave, and since when
+└── availability   available | onLeave | left, and since when for leave
 
 Agent              made the first time its employee is given work
 ├── id
@@ -262,9 +262,14 @@ PullRequest
 Review
 ```
 
-The app owns its own pull requests, reviews, and review statuses. Nothing is read from or written to a hosting provider.
+The app owns its own pull requests, reviews, and review statuses. Nothing about them is read from a hosting provider.
 
-A GitHub or GitLab integration may be added later as a separate integration. It must not replace the in-app entity.
+Applied work can go up to GitHub, only when the user asks for it on the task
+(`src/application/publish.ts`, `src/infrastructure/workspace/github.ts`): the
+task's `mto/<task>` branch is pushed to a branch of the same name on `origin`,
+then `gh pr create` opens the pull request when GitHub CLI is signed in, or a
+filled-in compare page opens in the browser. What that may touch is in
+SECURITY.md §6 (Publishing). The GitHub pull request does not replace the in-app entity.
 
 ## 8. Runtime Adapter
 
@@ -280,6 +285,9 @@ interface Workspace {
   prepare(folder: string, taskId: string): Promise<{ ok: true; path: string } | { ok: false }>;
   commit(folder: string, taskId: string, message: string): Promise<boolean>;
   remove(folder: string, taskId: string): Promise<void>;
+  discard(folder: string, taskId: string): Promise<void>;
+  removeFiles(folder: string, taskId: string, paths: readonly string[]): Promise<readonly string[]>;
+  diff(folder: string, taskId: string): Promise<string>;
 }
 ```
 
@@ -340,6 +348,7 @@ not a guess.
 | its end | the process's exit, after its `result` line if it had one |
 | stopping it | ending the process; the conversation is kept |
 | its workspace gone | `git worktree remove` once the task is approved |
+| its work thrown away | `git worktree remove --force` and `git branch -D mto/<task>` when an unfinished task, or its project, is deleted |
 
 **A task runs as `-p`, not `--bg`.** Only `-p` gives structured events —
 each tool call and result, a `permission_denied` event, and a final
@@ -361,7 +370,9 @@ action, and treats the tasks as the truth. Each tick:
 1. ends as disconnected any run the database thinks is going with no process
    behind it — what a restart leaves — and blocks its task;
 2. stops the run of any task that no longer wants one: held, handed over,
-   finished, or its company removed;
+   finished, its company removed, changed after the run started
+   (`revisedAt`), or deleted — a deleted task's worktree is discarded once
+   its agent exits, since it cannot go while the agent is in it;
 3. lets whoever is free pick up work, unless starting work is paused on this
    computer (`settings.json`) or Claude Code is not ready;
 4. launches a run for every task being worked on, unblocked, without one:
@@ -433,7 +444,7 @@ button says it is sending the change rather than saving it.
 
 **Handing the task to a different employee is not this.** A session belongs to
 one employee's agent, so the work starts again in a new session, with only the
-task's worktree carried over. The board says so before it happens.
+task's worktree carried over. The task dialog says so before it happens.
 
 **The project of a running task cannot change.** The session was launched in
 that workspace, and a different project is a different folder. The task is
@@ -627,12 +638,16 @@ The domain owns events such as:
 - the company: `CompanyCreated`
 - people: `EmployeeHired`, `EmployeeMoved`, `EmployeeWentOnLeave`, `EmployeeReturned`
 - projects: `ProjectCreated`, `ProjectStarted`, `ProjectHeld`, `ProjectResumed`,
-  `ProjectFinished`, `ProjectReopened`, `ProjectCommandAllowed`
+  `ProjectFinished`, `ProjectReopened`, `ProjectWriteAllowed`, `ProjectCommandAllowed`
 - tasks: `TaskCreated`, `TaskAssigned`, `TaskStarted`, `TaskFinished`, `TaskApplied`,
   `TaskSentBack`, `TaskHeld`, `TaskResumed`, `TaskBlocked`, `TaskUnblocked`, `TaskReturned`
 - areas and memory: `AreaAdded`, `AreaRenamed`, `AreaRemoved`, `MemoryTaught`, `MemoryRemoved`
 - review: `ReviewSuggested`, `ReviewQueued`, `ReviewStarted`, `ReviewSettled`,
   `ReviewWithdrawn`, `ReviewReleased`
+
+Deleting a task or a project, and letting someone go, emit none of their own;
+letting go emits only the `TaskReturned`, `ReviewWithdrawn` and
+`ReviewReleased` it causes.
 
 The union is `src/domain/events.ts`. Today the events feed the company's
 history (`src/application/history.ts`); the activity feed and the memory-used

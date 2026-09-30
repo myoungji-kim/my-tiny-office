@@ -44,7 +44,6 @@
 
   .danger-row p { margin: 0; flex: 1; font-size: 15px; color: var(--muted); }
 
-  .scope-acts { display: flex; justify-content: flex-end; margin-top: 12px; }
 
   .guide .scope { margin-top: 0; border: 0; padding: 0; }
 </style>
@@ -236,7 +235,7 @@
       toolsUnchecked: "아직 확인하지 않았어요", toolsUncheckedWhy: "확인하면 이 컴퓨터의 Claude 계정에 연결된 커넥터를 찾아요. 그전에는 Atlassian을 기본 이름으로 써요.",
       toolsNone: "연결된 커넥터가 없어요", toolsNoneWhy: "claude.ai의 설정 › 커넥터에서 연결한 뒤 다시 확인해 주세요.",
       toolUse: "Jira · Confluence · 프로젝트에서 켜면 써요", toolLater: "연결돼 있어요 · 아직 쓰지 않아요", toolUnused: "쓰지 않아요",
-      toolsCheck: "확인하기", toolsRecheck: "다시 확인", toolsChecking: "확인하는 중…",
+      toolsCheck: "확인하기", toolsRecheck: "다시 확인", toolsChecking: "확인하는 중…", toolsNeedClaude: "Claude Code가 준비되면 확인할 수 있어요.",
       toolsWhen: (at) => "마지막 확인 " + at + " · 확인할 때 Claude 사용량이 조금 들어요(약 $0.1).", toolsCost: "확인할 때 Claude 사용량이 조금 들어요(약 $0.1).",
       scopeTitle: "직원이 할 수 있는 일", scopeWhy: "모든 직원이 같은 범위 안에서 일해요. 실행할 수 있는 명령만 프로젝트마다 따로 정해요.",
       brief: {
@@ -307,7 +306,7 @@
       toolsUnchecked: "Not checked yet", toolsUncheckedWhy: "Checking finds the connectors this computer's Claude account has. Until then Atlassian is used by its usual name.",
       toolsNone: "No connectors", toolsNoneWhy: "Connect one in claude.ai under Settings › Connectors, then check again.",
       toolUse: "Jira · Confluence · used where a project turns it on", toolLater: "Connected · not used yet", toolUnused: "Not used",
-      toolsCheck: "Check", toolsRecheck: "Check again", toolsChecking: "Checking…",
+      toolsCheck: "Check", toolsRecheck: "Check again", toolsChecking: "Checking…", toolsNeedClaude: "This can be checked once Claude Code is ready.",
       toolsWhen: (at) => "Last checked " + at + " · A check uses a little Claude usage (about $0.1).", toolsCost: "A check uses a little Claude usage (about $0.1).",
       scopeTitle: "What employees may do", scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
       brief: {
@@ -465,7 +464,7 @@
     const button = document.getElementById("toolsCheck");
     button.innerHTML = REFRESH + (servers === null ? t().toolsCheck : t().toolsRecheck);
     button.disabled = RUNTIME.off;
-    document.getElementById("toolsWhen").textContent = servers === null ? t().toolsCost : t().toolsWhen(lang === "en" ? "Sep 30, 01:12" : "9월 30일 01:12");
+    document.getElementById("toolsWhen").textContent = RUNTIME.off ? t().toolsNeedClaude : servers === null ? t().toolsCost : t().toolsWhen(lang === "en" ? "Sep 30, 01:12" : "9월 30일 01:12");
   };
   renderTools();
   document.addEventListener("runtimeback", renderTools);

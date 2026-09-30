@@ -39,9 +39,13 @@ person, and no room is built by hand.
 **Leave and letting go.** Sending someone on leave returns their task to the
 backlog, with any work that was waiting for them, and gives back any review
 they were asked for; nobody on leave can be given work. Leave has no return date: it
-shows since when, and ends when the user brings them back. Letting someone go returns
-their task too and takes what they were taught with them; the company's
-history keeps their hire.
+shows since when, and ends when the user brings them back.
+
+Letting someone go cannot be undone. Their tasks go back to the backlog; work
+of theirs waiting for approval or held no longer names them, so whoever picks
+it up next takes it. A review they held is given back, a task naming them as
+reviewer names nobody, and what they were taught leaves with them. They stay
+only as a name — on what they did and in the history — and in no list.
 
 ## Agent
 
@@ -170,6 +174,21 @@ is a field on the task rather than a place in the flow, and the clock stops
 while it stands. Allowing the command carries on every task stopped on it;
 not allowing it carries this one on without it.
 
+**Work in progress can be changed.** The same person carries on in their own
+session with the change; only a changed title or description reaches the
+agent, so a new priority, area or reviewer alone does not interrupt it.
+Naming someone else, or nobody, sends the task back to the backlog to start
+over, with the folder as it is. The project cannot change while it runs — that
+is a different folder — so the task is held first. A review already asked for
+is withdrawn, since it was of the work as it was.
+
+**Unfinished tasks can be deleted.** A task that is not done goes with its
+conversation, steps, reviews, worktree and branch; one someone already worked
+on asks first, one only written down does not. A done task is the record and
+cannot be deleted. Deleting a project takes all its tasks, but an applied
+task's branch stays, since it holds what approving committed. The history
+keeps its lines.
+
 ## Review
 
 Review happens inside `working`, not after it: a task being reviewed is still
@@ -206,9 +225,11 @@ resuming follows the same rule.
 
 ## PR Collaboration
 
-In the MVP a `PullRequest` is not a real GitHub or GitLab pull request. It is a
-domain entity that records review, collaboration, and progress inside the
-company.
+A `PullRequest` here is the in-app review of work in progress: a domain entity
+that records review, collaboration, and progress inside the company. It is not
+the GitHub pull request that applied work can be sent up as (Tasks, above);
+that one is opened on GitHub only when the user asks, and the app keeps only
+its link.
 
 A PR is an activity card, not a place of its own. It belongs to a task that is
 still `working`, and it is where a colleague's comments and the back-and-forth

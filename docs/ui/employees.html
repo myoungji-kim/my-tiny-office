@@ -329,10 +329,9 @@
       styleSub: "분야와 상관없이 모든 업무에 들고 가요.", stylePlaceholder: "예: 커밋은 작게 나눠",
       headSub: (n, teams) => n + "명 · 팀 " + teams + "개",
       tabs: { list: "목록", org: "조직도", memory: "기억" },
-      editInfo: "정보 바꾸기", sendOnLeave: "휴가 보내기", comeBack: "복귀 처리", dismiss: "내보내기", keepThem: "계속 두기",
+      editInfo: "정보 바꾸기", sendOnLeave: "휴가 보내기", comeBack: "복귀 처리", dismiss: "떠나보내기", keepThem: "계속 두기",
       leaveWhy: (task) => "‘" + task + "’" + (hasBatchim(task) ? "은" : "는") + " 대기열로 돌아가요.",
-      dismissTitle: (n) => withParticle(n, "을", "를") + " 내보낼까요?",
-      dismissBody: "맡은 업무는 대기열로 돌아가고, 알려준 기억도 함께 떠나요. 회사 연혁의 합류 기록은 남아요.",
+      dismissWhy: "맡은 업무는 대기열로 돌아가고, 알려준 기억도 함께 떠나요. 회사 연혁의 합류 기록은 남아요.",
       noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
       teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
       moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
@@ -380,8 +379,7 @@
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
       editInfo: "Edit details", sendOnLeave: "Send on leave", comeBack: "Bring back", dismiss: "Let them go", keepThem: "Keep them",
       leaveWhy: (task) => "‘" + task + "’ goes back to the backlog.",
-      dismissTitle: (n) => "Let " + n + " go?",
-      dismissBody: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire.",
+      dismissWhy: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire.",
       noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
       teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
       moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
@@ -738,7 +736,7 @@
 
   /* ── managing a person ───────────────────────────────────────── */
   // Leave and return are the domain's own transitions; letting someone go is
-  // the one that cannot be undone, so it asks in a dialog.
+  // the one that cannot be undone, so it asks once more in place.
   document.getElementById("pMore").addEventListener("click", (e) => {
     const p = shown;
     const away = p.status === "leave";
@@ -762,20 +760,15 @@
           } },
       {
         label: t().dismiss, icon: ICON.trash, bad: true,
-        run: () => openConfirm({
-          title: t().dismissTitle(p.name),
-          body: t().dismissBody,
-          cancel: t().keepThem,
-          confirm: t().dismiss,
-          onConfirm: () => {
-            people.splice(people.indexOf(p), 1);
-            renderMembers();
-            location.hash = "";
-            rerenderPeople();
-          },
-        }),
+        confirm: t().dismissWhy,
+        run: () => {
+          people.splice(people.indexOf(p), 1);
+          renderMembers();
+          location.hash = "";
+          rerenderPeople();
+        },
       },
-    ], { keep: t().keep });
+    ], { keep: t().keepThem });
   });
   document.getElementById("pTabs").addEventListener("click", (e) => {
     const b = e.target.closest("[data-ptab]");

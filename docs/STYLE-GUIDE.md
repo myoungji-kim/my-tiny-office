@@ -232,7 +232,7 @@ reversible belongs in a popover.
   (teaching, hiring), which starts on its first field. Closing returns focus to
   the trigger.
 - `Escape` and a click outside both close, and closing saves nothing.
-- The confirm button says **what will happen** — `이 업무 맡기기`, `내보내기` —
+- The confirm button says **what will happen** — `이 업무 맡기기`, `떠나보내기` —
   never `확인`.
 - **Show the consequence of the choice in the same window**, before it is made.
 - A destructive confirm uses the danger icon and a danger button.
@@ -247,10 +247,10 @@ The interface talks about the user's office, not about itself.
 
 | Do | Don't |
 | --- | --- |
-| 모카를 내보낼까요? | 정말 삭제하시겠습니까? |
+| 모카를 떠나보낼까요? | 정말 삭제하시겠습니까? |
 | 진행 중이던 업무는 대기 상태로 돌아가요. | 이 작업은 되돌릴 수 없습니다. |
 | 두부가 로그인 폼 구현을 끝냈어요 | 작업 완료 |
-| 내보내기 | 확인 |
+| 떠나보내기 | 확인 |
 | 직원을 고용하면 업무를 맡길 수 있어요 | 권한이 없습니다 |
 
 - Name the thing. `업무` and `직원` beat `항목` and `대상`.

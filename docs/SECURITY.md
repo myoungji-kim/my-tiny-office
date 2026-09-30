@@ -35,7 +35,7 @@ claude -p
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
   --disable-slash-commands                     (not when plugins are chosen, §8)
   --strict-mcp-config                          (not in a project using a connector)
-  --tools Read,Edit,Write,Glob,Grep,Bash,PowerShell[,ToolSearch][,Skill]
+  --tools Read,Edit,Write,Glob,Grep,Bash[,PowerShell][,ToolSearch][,Skill]   (PowerShell only on Windows)
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>] [Skill]"
   [--plugin-dir <each chosen plugin, and one carrying the chosen skills>]
   --append-system-prompt-file <memory file>
@@ -61,7 +61,7 @@ Each flag earns its place:
 | `--strict-mcp-config` | Left out only in a project using a connector (§8). No MCP server but those passed with `--mcp-config`, and none is. Without it the account's claude.ai connectors (Gmail, Drive, Calendar, Atlassian) join the session **after its first turn**, so the init event shows none | ✓ 0 connectors through a four-step run; without it 92 connector tools arrived after step 1, and the run cost $0.59 instead of $0.04 |
 | `--tools …` | Only these built-in tools exist in the session; no WebFetch, WebSearch, Task, Cron. `ToolSearch` only with a connector: connector tools arrive deferred and nothing loads them without it | ✓ 7 tools; without `ToolSearch` a connector run saw no `mcp__` tool at all |
 | `Read(./**)` and friends | File tools confined to the worktree. The `Read` rule also governs Grep and Glob | ✓ outside read, write, grep and glob denied |
-| `<project commands>` | Each allowed command as `Bash(<cmd>)` **and** `PowerShell(<cmd>)`: on Windows the agent runs commands through PowerShell | ✓ |
+| `<project commands>` | Each allowed command as `Bash(<cmd>)`, and on Windows also as `PowerShell(<cmd>)`, where the agent runs commands through PowerShell too. On macOS and Linux the session has no PowerShell tool | ✓ |
 | stdin for the prompt | `--allowedTools` and `--tools` are variadic and swallow a trailing prompt argument; stdin also keeps task text out of the process list and past Windows' command-line limit | ✓ |
 | `--max-budget-usd 2` | A runaway stop, not a budget: $2 per run, fixed and not a setting. It is checked after a turn, so a run can overshoot (a $0.10 cap stopped at $0.20) | ✓ `error_max_budget_usd` |
 
@@ -205,6 +205,10 @@ agents, so it is a target in its own right.
   app, so opening a task's page stages nothing.
   A worktree and its branch are named only from the task's own UUID
   (`.worktrees/<task>`, `mto/<task>`), never from text anyone wrote.
+  The one destructive step is deleting an unfinished task, or a project:
+  `worktree remove --force <folder>/.worktrees/<task>` and `branch -D
+  mto/<task>`, touching only that task's worktree and branch (a finished
+  task's branch stays; only its worktree goes).
 - **Removing files.** An agent's tools cannot delete, and no command is
   allowed for it; it ends its report with `Remove: <path>` instead, and the app
   deletes the file only if the path stays inside the worktree, is not absolute

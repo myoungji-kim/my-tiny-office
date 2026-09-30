@@ -64,9 +64,13 @@ office. The screens are in DESIGN.md.
 
 - hire, and let go
 - send on leave, and bring back
-- give work
+- give work, and change work in progress
 - create, hold, finish and reopen projects
+- delete unfinished tasks, and projects
 - review and approve
+- send applied work up as a GitHub pull request
+- let a project use Jira and Confluence
+- choose which skills and plugins employees get
 - teach a memory
 - manage teams, roles and areas of expertise
 - keep several companies, switch between them, move one to another

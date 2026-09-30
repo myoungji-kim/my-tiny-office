@@ -23,7 +23,7 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, a task's page, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
-| `ui/settings.html` | The company's Claude Code, what employees may do and its guide, language, the open company's file, export, import and deleting it |
+| `ui/settings.html` | Settings in five tabs: Claude Code (its check and the connected tools), skills and plugins, general (starting work, screen width, language), the safety guide, and data (the open company's file, export, import, deleting it, the version) |
 | `ui/connect.html` | The company's Claude Code, blocked states, a folder and what is safe in it, work that stops itself, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
@@ -258,7 +258,8 @@ its reason and the way on, or finished work — "모카가 작업을 마쳤어�
 PR window: the task's branch, the branch it goes into (origin's branches, the
 one origin points at chosen), the remote, and the title and body, written from
 the task and its last report and editable. What stops it — no origin, not
-GitHub, the branch gone — is said at its top, and 올리기 stays off. When the last review asked for changes, the notice turns to a warning and
+GitHub, the branch gone — is said at its top, and 올리기 stays off. While it
+sends, the window cannot be closed. When the last review asked for changes, the notice turns to a warning and
 says so, since the fix reached approval without that reviewer agreeing. The
 header keeps every action, as page buttons.
 
@@ -294,7 +295,11 @@ this browser only.
 the work has gone up, PR: PR 열기, or GitHub에서 PR 만들기 when this computer has
 no signed-in GitHub CLI and GitHub's own page finishes it. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
-report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록.
+report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록 —
+every run's start and how it ended (finished with its minutes, or stopped: at a
+command or a write it may not make, at the spending cap, failed, disconnected,
+or stopped), reviews, changes asked for and applying; `projects.html#order/t6`
+shows each kind.
 
 A card names a stop by its reason only — 허용되지 않은 명령, with the command in
 its tooltip — and the page gives the command in full. A stop leads the page with
@@ -347,7 +352,9 @@ what the screen is for, not which row it sits in.
 ### Correcting and removing
 
 The same dialogs correct what they made. A task's popover and a project's `⋯`
-open them filled in, and the button says save instead of create.
+open them filled in, and the button says save instead of create. A working
+task's popover offers 업무 수정 too, off with the reason while Claude Code is
+not ready, as the task page's is. The popover never deletes.
 
 **Finished work is not rewritten.** A task in the done column is the record of
 what happened, and one waiting for approval is finished too — the answer there
@@ -360,6 +367,28 @@ change rather than saving it. Moving the task to another project is locked —
 that is a different folder — with the way around it, which is to hold the task
 first. Handing it to someone else starts a new session, and the dialog says so
 before it happens. ARCHITECTURE.md has the two commands this maps to.
+바뀐 내용 전달 stays off until something differs, and only a changed title or
+description stops the run (`Task.revisedAt`); a new priority, area or reviewer
+is taken without interrupting it. Someone else, or nobody, starts over with
+the folder as it is.
+
+**What cannot be undone asks once more in place.** The row in the `⋯` turns
+into a short line of what happens and two buttons, the action and a keep
+button; no dialog. The `⋯` is off while it is being done.
+
+- **Deleting a task.** A task that is not finished goes from its page's `⋯`,
+  and takes its conversation, steps, reviews, worktree and branch with it. It
+  asks with what is lost, unless it is only written down: a backlog task an
+  agent already worked on asks too.
+- **Deleting a project.** From its `⋯`, with all its tasks, finished ones
+  included, and says so; when work is in progress it adds that it stops. An
+  applied task's branch stays, since it holds what approving committed. The
+  history keeps its lines.
+- **Letting someone go.** 떠나보내기 in their page's `⋯`, kept with 계속 두기:
+  their task goes back to the backlog, a review they held is given back, a
+  task naming them as reviewer names nobody, and what they were taught leaves
+  with them. They stay only as a name (`availability: left`), on what they
+  did and in the history, and in no list.
 
 Where a task sits keeps following from who is on it: give a queued task to
 someone free and it starts; take the assignee away from one in progress and it
@@ -402,7 +431,7 @@ The header's `⋯`:
 | --- | --- |
 | 정보 바꾸기 | The hire dialog again, filled in: species, name, role, team |
 | 휴가 보내기 / 복귀 처리 | If they are on a task, it says first that the task goes back to the backlog |
-| 내보내기 | A confirm dialog, because it cannot be undone |
+| 떠나보내기 | Asked once more in place, in the menu, with what happens; the keep button is 계속 두기 |
 
 ### Memory on screen
 
@@ -520,7 +549,8 @@ Settings holds what belongs to this computer rather than to the company: the
 Claude Code everyone works through, the connectors its account has and the
 plugins and skills employees are given, the language, and the file the
 company is stored in. It is one column of panels under five tabs, one
-shown at a time and named in the address (`?tab=`): **Claude Code** first —
+shown at a time and named in the address (`?tab=`; `settings.html` uses a
+`#` hash for the same thing, since a static page has no server): **Claude Code** first —
 its check and the connectors its account has — then **스킬과 플러그인**, whose
 list grows with what the user installs, **일반** (업무 시작, 화면 폭, 언어),
 **안전 범위** (the boundary in three lines, then the guide in full, which used
@@ -530,12 +560,12 @@ version).
 | Panel | Holds |
 | --- | --- |
 | Claude Code | The same check as first run — installed, logged in — with 다시 확인 |
-| 직원이 할 수 있는 일 | On 안전 범위: the boundary in three lines, then the guide in full below it. The commands are not here: they are per project |
+| 연결된 도구 | The connectors this computer's Claude account has, as the last check found them: Atlassian — used where a project turns it on — and the rest named, not used. 확인하기 / 다시 확인 runs the check, which says what it costs; before one, a single row says so. While Claude Code is not ready the check is off and the hint says it can be checked once it is. A project dialog turning Atlassian on warns when the check found none (`settings.html?connectors=unchecked`, `?connectors=noatlassian`; `projects.html?connectors=noatlassian`) |
 | 스킬과 플러그인 | What this computer's Claude Code has in user scope — plugins, then skills — each with its own words and a tick, none ticked to start. What is ticked goes into every task's work; the hint says hooks and MCP servers stay off and that Claude Code's built-in skills come along (`settings.html?exts=none` for a computer with none) |
-| 연결된 도구 | The connectors this computer's Claude account has, as the last check found them: Atlassian — used where a project turns it on — and the rest named, not used. 확인하기 / 다시 확인 runs the check, which says what it costs; before one, a single row says so. A project dialog turning Atlassian on warns when the check found none (`settings.html?connectors=unchecked`, `?connectors=noatlassian`; `projects.html?connectors=noatlassian`) |
 | 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
 | 화면 폭 | 보통 · 넓게 · 전체, for every screen, kept in this browser; a task's page changes the same setting |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
+| 직원이 할 수 있는 일 | On 안전 범위: the boundary in three lines, then the guide in full below it. The commands are not here: they are per project |
 | 이 회사의 데이터 | The open company's file, with 복사; 내보내기 and 가져오기 |
 | 이 회사 삭제 | Set apart in red, last before the version |
 | 버전 | The app's version |
@@ -657,20 +687,6 @@ measured flags behind it.
   and the people screen's 기억 tab (the activity feed and the memory-used
   report), how often a memory was used (the person's page lists the memories taught
   lately instead of the most used).
-- **Changing work in progress.** 업무 수정 stays on a working task. Its button
-  is 바뀐 내용 전달: the same person stops and carries on with the change in
-  their session (`Task.revisedAt`); someone else, or nobody, starts over with
-  the folder as it is. The project is locked while it runs, with why.
-- **Letting someone go.** 내보내기 in their page's `⋯`, asked again with what
-  happens: their task goes back to the backlog, a review they held is given
-  back, a task naming them as reviewer names nobody, and what they were taught
-  leaves with them. They stay only as a name (`availability: left`), on what
-  they did and in the history, and in no list.
-- **Deleting.** A task that is not finished goes from its page's `⋯`, asked
-  again with what is lost unless it is only written down, and takes its
-  conversation, steps, reviews and worktree and branch with it. A project goes
-  from its `⋯` with all its tasks; an applied task's branch stays, since it
-  holds what approving committed. The history keeps its lines.
 - **Choosing a folder.** A browser cannot hand over a folder's path, so
   고르기 opens the operating system's folder dialog from the app's own server,
   with 경로 직접 입력 beside it; either is checked before anything is shown

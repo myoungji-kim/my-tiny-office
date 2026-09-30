@@ -925,37 +925,6 @@ function checkRow(c, copyLabel) {
     }`;
 }
 
-/* ═══ confirming what cannot be undone ═══ */
-
-function openConfirm({ title, body, cancel, confirm, onConfirm }) {
-  const scrim = document.createElement("div");
-  scrim.className = "scrim";
-  scrim.innerHTML = `<div class="dlg dlg-bad" role="alertdialog" aria-modal="true">
-    <span class="d-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.2l6 11H2z"/><path d="M8 6.6v3M8 11.4v.1"/></svg></span>
-    <div class="d-body">
-      <p class="d-t"></p><p class="d-d"></p>
-      <div class="dlg-acts">
-        <button class="btn btn-secondary btn-md" type="button" data-close></button>
-        <button class="btn btn-danger btn-md" type="button" data-ok></button>
-      </div>
-    </div>
-  </div>`;
-  const $ = (sel) => scrim.querySelector(sel);
-  $(".d-t").textContent = title;
-  $(".d-d").textContent = body;
-  $("[data-close]").textContent = cancel;
-  $("[data-ok]").textContent = confirm;
-  const returnTo = document.activeElement;
-  const close = () => { scrim.remove(); document.removeEventListener("keydown", onKey); returnTo?.focus?.({ preventScroll: true }); };
-  const onKey = (e) => { if (e.key === "Escape") close(); };
-  document.body.append(scrim);
-  document.addEventListener("keydown", onKey);
-  scrim.addEventListener("pointerdown", (e) => { if (e.target === scrim) close(); });
-  $("[data-close]").addEventListener("click", close);
-  $("[data-ok]").addEventListener("click", () => { close(); onConfirm(); });
-  $("[data-close]").focus();
-}
-
 /* ═══ moving things out before a delete ═══ */
 // Deleting a row that still holds something asks where it goes first.
 
