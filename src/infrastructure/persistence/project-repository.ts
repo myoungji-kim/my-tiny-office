@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm";
 
 import type { ProjectRepository } from "../../application/repositories";
 import { toCompanyId, toProjectId } from "../../domain/ids";
-import { isAllowableCommand, isAtlassianWrite, type Project } from "../../domain/project";
+import { isAllowableCommand, isAtlassianWrite, type Project, NO_OWN, ownOf, type OwnExtensions } from "../../domain/project";
 
 import type { AppDatabase } from "./database";
 import { projects } from "./schema";
@@ -31,6 +31,15 @@ function toWrites(raw: string, atlassian: boolean) {
   }
 }
 
+function toOwn(raw: string) {
+  try {
+    const value: unknown = JSON.parse(raw);
+    return ownOf(typeof value === "object" && value !== null ? (value as Partial<OwnExtensions>) : undefined);
+  } catch {
+    return NO_OWN;
+  }
+}
+
 function toProject(row: ProjectRow): Project {
   return {
     id: toProjectId(row.id),
@@ -42,6 +51,7 @@ function toProject(row: ProjectRow): Project {
     commands: toCommands(row.commands),
     atlassian: row.atlassian,
     writes: toWrites(row.writes, row.atlassian),
+    own: toOwn(row.own),
     status: row.status,
     priority: row.priority,
     heldReason: row.heldReason ?? undefined,
@@ -62,6 +72,7 @@ function toRow(project: Project): typeof projects.$inferInsert {
     commands: JSON.stringify(project.commands),
     atlassian: project.atlassian,
     writes: JSON.stringify(project.writes),
+    own: JSON.stringify(project.own),
     status: project.status,
     priority: project.priority,
     heldReason: project.heldReason ?? null,

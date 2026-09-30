@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Company } from "../../domain/company";
 import type { Employee } from "../../domain/employee";
 import { toAreaId, toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId } from "../../domain/ids";
-import type { Project } from "../../domain/project";
+import { NO_OWN, type Project } from "../../domain/project";
 import type { Task } from "../../domain/task";
 
 import { createSqliteCompanyRepository } from "./company-repository";
@@ -39,6 +39,7 @@ const pay: Project = {
   commands: ["npm test", "npm run lint"],
   atlassian: false,
   writes: [],
+  own: NO_OWN,
   status: "active",
   priority: "high",
   heldReason: undefined,

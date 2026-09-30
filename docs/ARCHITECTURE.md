@@ -535,7 +535,9 @@ connector check found for this computer's account
 A run is also given the user's plugins and skills ticked in settings
 (`src/infrastructure/runtime/extensions.ts`), found on this computer and
 kept in `settings.json`, like the connector check: they belong to this
-computer's Claude Code, not to a company. The domain knows writes by kind
+computer's Claude Code, not to a company. A project also keeps which of its
+own folder's skills are off and which of its plugins are on (`Project.own`);
+the runtime reads what the folder carries at launch. The domain knows writes by kind
 (`AtlassianWrite`), never by tool name. A write it does not allow is denied
 the same way, read from the call as where it goes and what it says, and blocks
 the task as `writeNotAllowed`; allowing it (`allowWrite`) adds the kind to the

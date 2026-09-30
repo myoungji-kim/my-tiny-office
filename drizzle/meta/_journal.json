@@ -85,6 +85,13 @@
       "when": 1790779377794,
       "tag": "0011_employee_career",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1790789427809,
+      "tag": "0012_project_own",
+      "breakpoints": true
     }
   ]
 }

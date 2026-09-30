@@ -1,9 +1,11 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative, resolve, isAbsolute } from "node:path";
 
-// What the user's Claude Code has installed in user scope, found on this
-// computer, and what of it the user chose for employees (SECURITY.md §8).
+import type { OwnExtensions } from "../../domain/project";
+
+// What the user's Claude Code has installed, for the user or for one project's
+// folder, and what of it the user chose for employees (SECURITY.md §8).
 export interface Extension {
   readonly id: string;
   readonly name: string;
@@ -55,24 +57,31 @@ function frontmatter(path: string): { readonly name?: string; readonly descripti
   return { name: field("name"), description: field("description") };
 }
 
-// Plugins installed for the user, only where Claude Code keeps them.
-function plugins(home: string): Extension[] {
+type Install = { readonly scope?: unknown; readonly installPath?: unknown; readonly projectPath?: unknown };
+
+const sameFolder = (a: string, b: string) =>
+  process.platform === "win32" || process.platform === "darwin" ? resolve(a).toLowerCase() === resolve(b).toLowerCase() : resolve(a) === resolve(b);
+const forUser = (i: Install) => i.scope === "user";
+const forFolder = (folder: string) => (i: Install) => (i.scope === "project" || i.scope === "local") && typeof i.projectPath === "string" && sameFolder(i.projectPath, folder);
+
+// Plugins installed where the install matches, only where Claude Code keeps them.
+function plugins(home: string, matches: (install: Install) => boolean): Extension[] {
   const root = resolve(home, ".claude", "plugins");
   const installed = json(join(root, "installed_plugins.json"));
   const entries = typeof installed === "object" && installed !== null ? (installed as { plugins?: unknown }).plugins : undefined;
   if (typeof entries !== "object" || entries === null) return [];
   return Object.entries(entries).flatMap(([id, installs]) => {
-    const user = Array.isArray(installs) ? installs.find((i) => typeof i === "object" && i !== null && i.scope === "user") : undefined;
-    const path = typeof user?.installPath === "string" ? resolve(user.installPath) : undefined;
+    const install: Install | undefined = Array.isArray(installs) ? installs.find((i) => typeof i === "object" && i !== null && matches(i)) : undefined;
+    const path = typeof install?.installPath === "string" ? resolve(install.installPath) : undefined;
     if (!EXTENSION_ID.test(id) || path === undefined || !within(root, path) || !isDirectory(path)) return [];
     const manifest = json(join(path, ".claude-plugin", "plugin.json")) as { description?: unknown } | undefined;
     return [{ id, name: id.split("@")[0], about: about(manifest?.description), path }];
   });
 }
 
-// The user's own skills: each a folder with a SKILL.md.
-function skills(home: string): Extension[] {
-  const root = resolve(home, ".claude", "skills");
+// Skills in a .claude/skills folder: each a folder with a SKILL.md, never a link out of it.
+function skillsIn(base: string): Extension[] {
+  const root = resolve(base, ".claude", "skills");
   let names: string[];
   try {
     names = readdirSync(root);
@@ -81,7 +90,7 @@ function skills(home: string): Extension[] {
   }
   return names.flatMap((id) => {
     const path = join(root, id);
-    if (!EXTENSION_ID.test(id) || !isDirectory(path) || !existsSync(join(path, "SKILL.md"))) return [];
+    if (!EXTENSION_ID.test(id) || lstatSync(path).isSymbolicLink() || !isDirectory(path) || !existsSync(join(path, "SKILL.md"))) return [];
     const { name, description } = frontmatter(join(path, "SKILL.md"));
     return [{ id, name: name ?? id, about: about(description), path }];
   });
@@ -99,20 +108,41 @@ export function installedExtensions(home: string = homedir()): Installed {
   return last.found;
 }
 
+const byName = (a: Extension, b: Extension) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+
 function scan(home: string): Installed {
-  const byName = (a: Extension, b: Extension) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-  return { plugins: plugins(home).sort(byName), skills: skills(home).sort(byName) };
+  return { plugins: plugins(home, forUser).sort(byName), skills: skillsIn(home).sort(byName) };
+}
+
+// What a project's own folder carries: its skills, and plugins installed for it alone.
+export function projectExtensions(folder: string, home: string = homedir()): Installed {
+  return { plugins: plugins(home, forFolder(folder)).sort(byName), skills: skillsIn(folder).sort(byName) };
+}
+
+// The skills Claude Code itself finds in a folder's .claude/skills.
+export function skillNamesIn(folder: string): string[] {
+  return skillsIn(folder).map((s) => s.id);
 }
 
 const WRAPPER = "my-tiny-office-skills";
 
 // The plugin folders a run is given: each chosen plugin as installed, and the
 // chosen skills carried in one plugin of the app's own, made in the run's folder.
-export function pluginDirs(chosen: Chosen | undefined, runFolder: string, give: { readonly plugins: boolean }, home: string = homedir()): string[] {
-  if (chosen === undefined) return [];
+// A project's own skills are copied from its folder, never the task's worktree.
+export function pluginDirs(
+  chosen: Chosen | undefined,
+  own: (OwnExtensions & { readonly folder: string }) | undefined,
+  runFolder: string,
+  give: { readonly plugins: boolean },
+  home: string = homedir(),
+): string[] {
   const found = installedExtensions(home);
-  const dirs = give.plugins ? found.plugins.filter((p) => chosen.plugins.includes(p.id)).map((p) => p.path) : [];
-  const carried = found.skills.filter((s) => chosen.skills.includes(s.id));
+  const project = own === undefined ? { plugins: [], skills: [] } : projectExtensions(own.folder, home);
+  const ownSkills = project.skills.filter((s) => !own?.skillsOff.includes(s.id));
+  const given = [...found.plugins.filter((p) => chosen?.plugins.includes(p.id)), ...project.plugins.filter((p) => own?.pluginsOn.includes(p.id))];
+  const dirs = give.plugins ? [...new Set(given.map((p) => p.path))] : [];
+  // the project's own skill stands in for the user's of the same name
+  const carried = [...found.skills.filter((s) => chosen?.skills.includes(s.id) && !ownSkills.some((o) => o.id === s.id)), ...ownSkills];
   if (carried.length > 0) {
     const wrapper = join(runFolder, WRAPPER);
     mkdirSync(join(wrapper, ".claude-plugin"), { recursive: true });

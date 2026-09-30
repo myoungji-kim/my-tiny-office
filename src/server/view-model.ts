@@ -83,6 +83,8 @@ export interface ProjectView {
   readonly commands: readonly string[];
   readonly atlassian: boolean;
   readonly writes: readonly AtlassianWrite[];
+  readonly skillsOff: readonly string[];
+  readonly pluginsOn: readonly string[];
   readonly status: ProjectStatus;
   readonly priority: Priority;
   readonly heldReason: string | undefined;
@@ -313,6 +315,8 @@ export async function loadOffice(
       commands: project.commands,
       atlassian: project.atlassian,
       writes: project.writes,
+      skillsOff: project.own.skillsOff,
+      pluginsOn: project.own.pluginsOn,
       status: project.status,
       priority: project.priority,
       heldReason: project.heldReason,

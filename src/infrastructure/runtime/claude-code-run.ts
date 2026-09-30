@@ -9,7 +9,7 @@ import { resolveDataDirectory } from "../persistence/data-directory";
 import { readSettings } from "../persistence/settings";
 import { findExecutable, startProcess } from "../process/run";
 import { atlassianServer, atlassianTools, writeOf, writeShown } from "./connectors";
-import { pluginDirs } from "./extensions";
+import { pluginDirs, skillNamesIn } from "./extensions";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
 const MAX_BUDGET_USD = "2";
@@ -23,6 +23,8 @@ export function launchArgs(input: {
   readonly atlassian: { readonly writes: readonly AtlassianWrite[]; readonly server: string } | undefined;
   // the chosen plugins' folders, the one carrying the chosen skills among them
   readonly plugins: readonly string[];
+  // skills Claude Code would load from the worktree itself, which the agent can edit
+  readonly worktreeSkills: readonly string[];
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
@@ -59,6 +61,7 @@ export function launchArgs(input: {
     tools,
     "--allowedTools",
     allowed.join(" "),
+    ...(plugins.length === 0 || input.worktreeSkills.length === 0 ? [] : ["--disallowedTools", ...input.worktreeSkills.map((name) => `Skill(${name})`)]),
     ...plugins.flatMap((dir) => ["--plugin-dir", dir]),
     "--append-system-prompt-file",
     input.memoryFile,
@@ -160,14 +163,14 @@ export const claudeCodeRuntime: AgentRuntime = {
     try {
       writeFileSync(memoryFile, input.memory);
       // a connector project runs its MCP servers, so it gets the chosen skills but no plugin
-      plugins = input.readOnly ? [] : pluginDirs(settings.extensions, folder, { plugins: input.atlassian === undefined });
+      plugins = input.readOnly ? [] : pluginDirs(settings.extensions, input.own, folder, { plugins: input.atlassian === undefined });
     } catch (error) {
       cleanUp();
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string; input: Json }>();
     const atlassian = input.atlassian && { ...input.atlassian, server: atlassianServer(settings.connectors?.servers) };
-    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian, plugins, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian, plugins, worktreeSkills: skillNamesIn(input.cwd), memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

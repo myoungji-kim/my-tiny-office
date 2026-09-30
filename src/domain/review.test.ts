@@ -3,7 +3,7 @@ import { assert, describe, expect, it } from "vitest";
 import type { Employee } from "./employee";
 import { toAreaId, toCompanyId, toEmployeeId, toEventId, toProjectId, toReviewId, toRoleId, toTaskId } from "./ids";
 import { pickUps, reviewsToStart } from "./pick-up";
-import type { Project } from "./project";
+import { NO_OWN, type Project } from "./project";
 import { askReviewer, liveReviews, releaseReview, reviewerToAsk, settleReview, startQueuedReview, statusOf, suggestReview, withdrawReview, type Review } from "./review";
 import type { Task } from "./task";
 
@@ -36,6 +36,7 @@ const pay: Project = {
   commands: [],
   atlassian: false,
   writes: [],
+  own: NO_OWN,
   status: "active",
   priority: "normal",
   heldReason: undefined,

@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `own` text DEFAULT '{}' NOT NULL;

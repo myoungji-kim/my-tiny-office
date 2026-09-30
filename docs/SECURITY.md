@@ -38,6 +38,7 @@ claude -p
   --strict-mcp-config                          (not in a project using a connector)
   --tools Read,Edit,Write,Glob,Grep,Bash[,PowerShell][,ToolSearch][,Skill]   (PowerShell only on Windows)
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>] [Skill]"
+  [--disallowedTools "Skill(<each skill in the worktree's .claude/skills>)"]   (when skills are on, §8)
   [--plugin-dir <each chosen plugin, and one carrying the chosen skills>]
   --append-system-prompt-file <memory file>
   --max-budget-usd 2
@@ -371,9 +372,16 @@ Skill tool too. A reviewer is given none. Measured on `2.1.284`:
 
 **A project's own skills and plugins** (DESIGN.md › the project dialog) are
 given the same way, and only for that project's tasks:
-- its skills are read from `<project folder>/.claude/skills`, the user's own
+- its skills are copied from `<project folder>/.claude/skills`, the user's own
   checkout, never from the task's worktree. An agent can edit the worktree's
-  copy, and what it wrote must not come back to it as instructions;
+  copy, and what it wrote must not come back to it as instructions. Once skills
+  are on, Claude Code loads the worktree's `.claude/skills` itself under
+  `--setting-sources project` (measured on `2.1.284`), so each of those names
+  is denied with `--disallowedTools Skill(<name>)`: a call to one is refused
+  and the run carries on, and the checkout's copy comes as
+  `my-tiny-office-skills:<name>`. `--setting-sources ""` would drop them too,
+  but also the project's `CLAUDE.md`. A skill folder that is a link is not
+  given;
 - its plugins are those `installed_plugins.json` lists in project or local
   scope for that folder, given only once ticked, with their hooks and MCP
   servers off as above.

@@ -123,6 +123,8 @@ export const projects = sqliteTable(
     atlassian: integer("atlassian", { mode: "boolean" }).notNull().default(false),
     // a JSON array of the Jira and Confluence writes allowed
     writes: text("writes").notNull().default("[]"),
+    // a JSON object: its folder's skills turned off, its plugins turned on
+    own: text("own").notNull().default("{}"),
     status: text("status", { enum: projectStatuses }).notNull(),
     priority: text("priority", { enum: priorities }).notNull(),
     heldReason: text("held_reason"),

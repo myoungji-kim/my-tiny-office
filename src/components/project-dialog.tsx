@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
-import { checkFolderAction, editProjectAction, newProjectAction, pickFolderAction, type FolderOutcome } from "../app/project-actions";
+import { checkFolderAction, editProjectAction, folderExtensionsAction, newProjectAction, pickFolderAction, type FolderOutcome, type OwnExtensionView } from "../app/project-actions";
 import { isAllowableCommand, MAX_COMMANDS, type AtlassianWrite, type Priority } from "../domain/project";
 import { getDictionary, type Locale } from "../i18n";
 import type { ProjectView } from "../server/view-model";
@@ -12,7 +12,6 @@ import type { ProjectView } from "../server/view-model";
 import { Icon } from "./icons";
 
 const PRIORITIES = ["low", "normal", "high"] as const;
-
 
 const FOLDER = (
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
@@ -53,6 +52,11 @@ export function ProjectDialog({
   const [run, setRun] = useState("");
   const [atlassian, setAtlassian] = useState(edit?.atlassian ?? false);
   const [writes, setWrites] = useState<readonly AtlassianWrite[]>(edit?.writes ?? []);
+  // a project's own skills are given unless unticked; its plugins only once ticked
+  const [skillsOff, setSkillsOff] = useState<readonly string[]>(edit?.skillsOff ?? []);
+  const [pluginsOn, setPluginsOn] = useState<readonly string[]>(edit?.pluginsOn ?? []);
+  const [own, setOwn] = useState<{ readonly folder: string; readonly skills: readonly OwnExtensionView[]; readonly plugins: readonly OwnExtensionView[] } | undefined>(undefined);
+  const [openFold, setOpenFold] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
   // the folder dialog waits on the user, so it says so apart from saving
@@ -65,6 +69,15 @@ export function ProjectDialog({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    if (folder === undefined || !chosen) return;
+    let current = true;
+    void folderExtensionsAction(folder).then((found) => current && setOwn({ folder, ...found }));
+    return () => {
+      current = false;
+    };
+  }, [folder, chosen]);
 
   const say = (reason: string) => setError(t.errors[reason as keyof typeof t.errors] ?? t.errors.unknown);
 
@@ -102,7 +115,7 @@ export function ProjectDialog({
 
   const save = () =>
     start(async () => {
-      const input = { name, description: about, priority, folder, commands: folder === undefined ? [] : runs, atlassian: folder !== undefined && atlassian, writes: atlassian ? writes : [] };
+      const input = { name, description: about, priority, folder, commands: folder === undefined ? [] : runs, atlassian: folder !== undefined && atlassian, writes: atlassian ? writes : [], skillsOff, pluginsOn };
       if (edit !== undefined) {
         const result = await editProjectAction(companyId, edit.id, input);
         if (result.error !== undefined) return say(result.error);
@@ -115,6 +128,42 @@ export function ProjectDialog({
     });
 
   const heading = edit === undefined ? w.newProjectTitle : w.editProjectTitle;
+  const found = own !== undefined && own.folder === folder ? own : undefined;
+  const ownOn = {
+    skills: found?.skills.filter((x) => !skillsOff.includes(x.id)).length ?? 0,
+    plugins: found?.plugins.filter((x) => pluginsOn.includes(x.id)).length ?? 0,
+  };
+  const toolsWarned = atlassian && atlassianMissing;
+  const toggle = (list: readonly string[], id: string, on: boolean) => (on ? [...list, id] : list.filter((x) => x !== id));
+
+  // One open at a time; a warning inside keeps its fold open.
+  const fold = (key: string, label: string, summary: string, body: ReactNode, force = false) => (
+    <details
+      className="fold pfold"
+      name="pfold"
+      open={force || openFold === key}
+      onToggle={(e) => {
+        const opened = e.currentTarget.open;
+        setOpenFold((was) => (opened ? key : was === key ? undefined : was));
+      }}
+    >
+      <summary>
+        <span className="label">{label}</span>
+        <span className="pfold-sum">{summary}</span>
+        <span className="fold-ic">{Icon.chevron}</span>
+      </summary>
+      {body}
+    </details>
+  );
+  const extRow = (x: OwnExtensionView, on: boolean, change: (on: boolean) => void) => (
+    <label key={x.id} className="ext">
+      <input type="checkbox" checked={on} onChange={(e) => change(e.target.checked)} />
+      <span className="ext-tx">
+        <b>{x.name}</b>
+        {x.about !== undefined && <span title={x.about}>{x.about}</span>}
+      </span>
+    </label>
+  );
 
   return (
     <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -234,93 +283,137 @@ export function ProjectDialog({
             </span>
           </div>
 
-          {folder !== undefined && chosen && (
-            <div className="field">
-              <span className="label">{w.fRuns}</span>
-              {runs.length > 0 ? (
-                <div className="runs">
-                  {runs.map((r) => (
-                    <span key={r} className="run">
-                      {r}
-                      <button type="button" aria-label={w.removeRun(r)} onClick={() => setRuns(runs.filter((x) => x !== r))}>
-                        {Icon.x}
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <span className="hint" style={{ marginTop: 0 }}>
-                  {w.runsNone}
-                </span>
-              )}
-              <div className="run-add">
-                <input
-                  className="input"
-                  placeholder={w.runPlaceholder}
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-label={w.fRuns}
-                  value={run}
-                  onChange={(e) => setRun(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter") return;
-                    e.preventDefault();
-                    addRun();
-                  }}
-                />
-                <button className="btn btn-secondary btn-sm" type="button" onClick={addRun}>
-                  {w.addRun}
-                </button>
-              </div>
-              <span className="hint">{w.runsHint}</span>
-            </div>
-          )}
-
-          {folder !== undefined && chosen && (
-            <div className="field">
-              <span className="label">{w.fTools}</span>
-              <div className="opts" role="radiogroup" aria-label={w.fTools}>
-                <button className="opt" type="button" role="radio" aria-checked={!atlassian} onClick={() => setAtlassian(false)}>
-                  {w.toolsOff}
-                </button>
-                <button className="opt" type="button" role="radio" aria-checked={atlassian} onClick={() => setAtlassian(true)}>
-                  {w.toolsOn}
-                </button>
-              </div>
-              <span className="hint">{w.toolsHint}</span>
-              {atlassian && atlassianMissing && (
-                <div className="notice notice-warn" style={{ marginTop: 10 }}>
-                  <span className="n-ic">{Icon.alert}</span>
-                  <span className="n-tx">
-                    <b>{w.toolsMissing}</b>
-                    <span>{w.toolsMissingWhy}</span>
+          {folder !== undefined &&
+            chosen &&
+            fold(
+              "runs",
+              w.fRuns,
+              runs.length > 0 ? w.sumRuns(runs[0], runs.length - 1) : w.sumNone,
+              <div className="field">
+                {runs.length > 0 ? (
+                  <div className="runs">
+                    {runs.map((r) => (
+                      <span key={r} className="run">
+                        {r}
+                        <button type="button" aria-label={w.removeRun(r)} onClick={() => setRuns(runs.filter((x) => x !== r))}>
+                          {Icon.x}
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="hint" style={{ marginTop: 0 }}>
+                    {w.runsNone}
                   </span>
+                )}
+                <div className="run-add">
+                  <input
+                    className="input"
+                    placeholder={w.runPlaceholder}
+                    autoComplete="off"
+                    spellCheck={false}
+                    aria-label={w.fRuns}
+                    value={run}
+                    onChange={(e) => setRun(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter") return;
+                      e.preventDefault();
+                      addRun();
+                    }}
+                  />
+                  <button className="btn btn-secondary btn-sm" type="button" onClick={addRun}>
+                    {w.addRun}
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
+                <span className="hint">{w.runsHint}</span>
+              </div>,
+            )}
 
-          {folder !== undefined && chosen && atlassian && (
-            <div className="field">
-              <span className="label">{w.fWrites}</span>
-              {writes.length > 0 ? (
-                <div className="runs">
-                  {writes.map((x) => (
-                    <span key={x} className="run word">
-                      {w.writes[x]}
-                      <button type="button" aria-label={w.removeWrite(w.writes[x])} onClick={() => setWrites(writes.filter((y) => y !== x))}>
-                        {Icon.x}
-                      </button>
-                    </span>
-                  ))}
+          {folder !== undefined &&
+            chosen &&
+            fold(
+              "tools",
+              w.fTools,
+              atlassian ? w.toolsOn + (writes.length > 0 ? w.sumWrites(writes.length) : "") : w.toolsOff,
+              <>
+                <div className="field">
+                  <div className="opts" role="radiogroup" aria-label={w.fTools}>
+                    <button className="opt" type="button" role="radio" aria-checked={!atlassian} onClick={() => setAtlassian(false)}>
+                      {w.toolsOff}
+                    </button>
+                    <button className="opt" type="button" role="radio" aria-checked={atlassian} onClick={() => setAtlassian(true)}>
+                      {w.toolsOn}
+                    </button>
+                  </div>
+                  <span className="hint">{w.toolsHint}</span>
+                  {toolsWarned && (
+                    <div className="notice notice-warn" style={{ marginTop: 10 }}>
+                      <span className="n-ic">{Icon.alert}</span>
+                      <span className="n-tx">
+                        <b>{w.toolsMissing}</b>
+                        <span>{w.toolsMissingWhy}</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <span className="hint" style={{ marginTop: 0 }}>
-                  {w.writesNone}
+                {atlassian && (
+                  <div className="field">
+                    <span className="label">{w.fWrites}</span>
+                    {writes.length > 0 ? (
+                      <div className="runs">
+                        {writes.map((x) => (
+                          <span key={x} className="run word">
+                            {w.writes[x]}
+                            <button type="button" aria-label={w.removeWrite(w.writes[x])} onClick={() => setWrites(writes.filter((y) => y !== x))}>
+                              {Icon.x}
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="hint" style={{ marginTop: 0 }}>
+                        {w.writesNone}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>,
+              toolsWarned,
+            )}
+
+          {folder !== undefined &&
+            chosen &&
+            fold(
+              "ext",
+              w.fOwnExt,
+              ownOn.skills + ownOn.plugins > 0 ? w.sumExt(ownOn.skills, ownOn.plugins) : w.sumNone,
+              <div className="field">
+                {found !== undefined && found.skills.length + found.plugins.length > 0 ? (
+                  <>
+                    {found.skills.length > 0 && (
+                      <div className="ext-group">
+                        <b>{w.ownSkills}</b>
+                        {found.skills.map((x) => extRow(x, !skillsOff.includes(x.id), (on) => setSkillsOff(toggle(skillsOff, x.id, !on))))}
+                      </div>
+                    )}
+                    {found.plugins.length > 0 && (
+                      <div className="ext-group">
+                        <b>{w.ownPlugins}</b>
+                        {found.plugins.map((x) => extRow(x, pluginsOn.includes(x.id), (on) => setPluginsOn(toggle(pluginsOn, x.id, on))))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <span className="hint" style={{ marginTop: 0 }}>
+                    {w.ownNone}
+                  </span>
+                )}
+                <span className="hint">
+                  {w.ownHint} <Link href="/settings?tab=skills">{w.ownEveryProject}</Link>
+                  {w.ownHintEnd}
                 </span>
-              )}
-            </div>
-          )}
+              </div>,
+            )}
 
           {error !== undefined && (
             <p className="hint" role="alert">

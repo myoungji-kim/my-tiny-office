@@ -5,7 +5,8 @@ import { requestReview } from "../application/review";
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite, removeProject } from "../application/project";
 import { approveTask, carryOn, createTask, editTask, holdTask, removeTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
-import { isAtlassianWrite } from "../domain/project";
+import { isAtlassianWrite, ownOf } from "../domain/project";
+import { projectExtensions } from "../infrastructure/runtime/extensions";
 import { checkFolder } from "../infrastructure/workspace/folder";
 import { pickFolder } from "../infrastructure/workspace/folder-picker";
 import { branchOf, gitWorkspace } from "../infrastructure/workspace/git";
@@ -32,6 +33,21 @@ export async function pickFolderAction(): Promise<FolderOutcome> {
   return picked.ok ? outcomeOf(checkFolder(picked.path)) : { error: picked.reason };
 }
 
+export interface OwnExtensionView {
+  readonly id: string;
+  readonly name: string;
+  readonly about: string | undefined;
+}
+
+// The skills and plugins a folder keeps for itself, for the dialog to offer.
+export async function folderExtensionsAction(path: string): Promise<{ readonly skills: readonly OwnExtensionView[]; readonly plugins: readonly OwnExtensionView[] }> {
+  const checked = checkFolder(str(path));
+  if (!checked.ok) return { skills: [], plugins: [] };
+  const found = projectExtensions(checked.folder);
+  const view = ({ id, name, about }: OwnExtensionView) => ({ id, name, about });
+  return { skills: found.skills.map(view), plugins: found.plugins.map(view) };
+}
+
 export interface ProjectInput {
   readonly name: string;
   readonly description: string;
@@ -40,6 +56,8 @@ export interface ProjectInput {
   readonly commands: readonly string[];
   readonly atlassian: boolean;
   readonly writes: readonly string[];
+  readonly skillsOff: readonly string[];
+  readonly pluginsOn: readonly string[];
 }
 
 // The folder is checked again here: only what it resolves to on this computer is kept.
@@ -55,6 +73,7 @@ function details(input: ProjectInput) {
     commands: Array.isArray(input.commands) ? input.commands.map(str) : [],
     atlassian: input.atlassian === true,
     writes: Array.isArray(input.writes) ? input.writes.filter(isAtlassianWrite) : [],
+    own: ownOf({ skillsOff: Array.isArray(input.skillsOff) ? input.skillsOff : [], pluginsOn: Array.isArray(input.pluginsOn) ? input.pluginsOn : [] }),
   };
 }
 

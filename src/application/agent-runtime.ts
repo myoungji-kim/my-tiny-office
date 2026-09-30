@@ -1,4 +1,4 @@
-import type { AtlassianWrite } from "../domain/project";
+import type { AtlassianWrite, OwnExtensions } from "../domain/project";
 import type { StepKind } from "../domain/run";
 
 // What any runtime reports about a run, in the app's words rather than its own.
@@ -26,6 +26,8 @@ export interface LaunchInput {
   readonly resume: string | undefined;
   // a reviewer only reads: no edits, no commands
   readonly readOnly: boolean;
+  // the project's folder, and which of the skills and plugins it carries the run gets
+  readonly own: (OwnExtensions & { readonly folder: string }) | undefined;
 }
 
 export interface RunningAgent {

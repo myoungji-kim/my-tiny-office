@@ -33,6 +33,21 @@ export type AtlassianWrite = (typeof ATLASSIAN_WRITES)[number];
 
 export const isAtlassianWrite = (value: unknown): value is AtlassianWrite => (ATLASSIAN_WRITES as readonly unknown[]).includes(value);
 
+export interface OwnExtensions {
+  readonly skillsOff: readonly string[];
+  readonly pluginsOn: readonly string[];
+}
+
+export const NO_OWN: OwnExtensions = { skillsOff: [], pluginsOn: [] };
+const EXTENSION_NAME = /^[A-Za-z0-9._@-]{1,100}$/;
+const MAX_OWN = 50;
+
+// Names that could be a skill's folder or a plugin's id, each once.
+export function ownOf(raw: Partial<OwnExtensions> | undefined): OwnExtensions {
+  const names = (list: readonly string[] | undefined) => [...new Set((list ?? []).filter((n) => typeof n === "string" && EXTENSION_NAME.test(n)))].slice(0, MAX_OWN);
+  return { skillsOff: names(raw?.skillsOff), pluginsOn: names(raw?.pluginsOn) };
+}
+
 export interface Project {
   readonly id: ProjectId;
   readonly companyId: CompanyId;
@@ -48,6 +63,9 @@ export interface Project {
   readonly atlassian: boolean;
   // The writes they make there without asking; only with the connector on.
   readonly writes: readonly AtlassianWrite[];
+  // Of the skills and plugins its own folder carries: skills are given unless
+  // turned off, plugins only once turned on.
+  readonly own: OwnExtensions;
   readonly status: ProjectStatus;
   readonly priority: Priority;
   readonly heldReason: string | undefined;
@@ -89,6 +107,7 @@ export interface CreateProjectInput {
   readonly commands?: readonly string[];
   readonly atlassian?: boolean;
   readonly writes?: readonly AtlassianWrite[];
+  readonly own?: OwnExtensions;
   readonly priority: Priority;
 }
 
@@ -120,6 +139,7 @@ export function createProject(
     commands,
     atlassian: input.atlassian === true,
     writes,
+    own: ownOf(input.own),
     status: "planned",
     priority: input.priority,
     heldReason: undefined,
@@ -141,6 +161,7 @@ export interface ProjectDetails {
   readonly commands: readonly string[];
   readonly atlassian: boolean;
   readonly writes: readonly AtlassianWrite[];
+  readonly own: OwnExtensions;
   readonly priority: Priority;
 }
 
@@ -164,7 +185,7 @@ export function editProject(
   return {
     ok: true,
     // the dialog shows the folder and its boundary, so saving it is choosing it
-    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, folderConfirmed: true, commands, atlassian: details.atlassian, writes, priority: details.priority },
+    project: { ...project, name, description: details.description?.trim() || undefined, folder: details.folder, folderConfirmed: true, commands, atlassian: details.atlassian, writes, own: ownOf(details.own), priority: details.priority },
   };
 }
 

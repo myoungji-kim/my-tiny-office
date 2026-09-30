@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Employee } from "./employee";
 import { toCompanyId, toEmployeeId, toProjectId, toRoleId, toTaskId } from "./ids";
 import { pickUps } from "./pick-up";
-import type { Priority, Project, ProjectStatus } from "./project";
+import { NO_OWN, type Priority, type Project, type ProjectStatus } from "./project";
 import type { Task, TaskStatus } from "./task";
 
 const companyId = toCompanyId("c");
@@ -31,6 +31,7 @@ const project = (id: string, priority: Priority, status: ProjectStatus = "active
   commands: [],
   atlassian: false,
   writes: [],
+  own: NO_OWN,
   status,
   priority,
   heldReason: undefined,
