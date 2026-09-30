@@ -62,7 +62,20 @@ export function StepDialog({
               <label className="label" htmlFor="step-text">
                 {field.label}
               </label>
-              <input ref={first} className="input" id="step-text" placeholder={field.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+              <input
+                ref={first}
+                className="input"
+                id="step-text"
+                placeholder={field.placeholder}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  // Enter that ends a Korean syllable is not a submit
+                  if (e.key !== "Enter" || e.nativeEvent.isComposing || pending || text.trim() === "") return;
+                  e.preventDefault();
+                  go();
+                }}
+              />
             </div>
           )}
           {error !== undefined && (

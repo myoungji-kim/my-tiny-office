@@ -235,7 +235,7 @@ export function ProjectDialog({
                   value={typed}
                   onChange={(e) => setTyped(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key !== "Enter") return;
+                    if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
                     e.preventDefault();
                     check();
                   }}
@@ -322,7 +322,7 @@ export function ProjectDialog({
                     value={run}
                     onChange={(e) => setRun(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key !== "Enter") return;
+                      if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
                       e.preventDefault();
                       addRun();
                     }}

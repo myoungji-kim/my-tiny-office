@@ -132,7 +132,7 @@ export function TaskActions({
       {dialog === "rework" && (
         <StepDialog
           heading={w.reworkTitle}
-          why={w.reworkWhy(who?.name ?? "")}
+          why={who === undefined ? w.reworkWhyAnyone : who.status === "onLeave" ? w.reworkWhyLater(who.name) : w.reworkWhy(who.name)}
           yes={w.actions.rework}
           cancel={w.cancel}
           field={{ label: w.reworkLabel, placeholder: w.reworkPlaceholder }}

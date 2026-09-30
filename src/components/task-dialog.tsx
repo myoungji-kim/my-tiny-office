@@ -230,8 +230,8 @@ export function TaskDialog({
               <select className="select" id="nt-reviewer" value={reviewing?.id ?? ""} disabled={chosen === undefined || reviewers.length === 0} onChange={(e) => setReviewer(e.target.value)}>
                 <option value="">{w.noReviewer}</option>
                 {reviewers.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name}
+                  <option key={e.id} value={e.id} disabled={e.status === "onLeave"}>
+                    {e.status === "onLeave" ? w.onLeaveOption(e.name) : e.name}
                   </option>
                 ))}
               </select>
