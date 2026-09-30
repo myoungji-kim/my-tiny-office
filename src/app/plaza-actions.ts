@@ -12,6 +12,7 @@ import { readSettings, writeSettings } from "../infrastructure/persistence/setti
 import { readCareer } from "../infrastructure/runtime/career-read";
 import { claudeCodeStatus } from "../infrastructure/runtime/claude-code-status";
 import { isSessionId, readSession, sessionFile } from "../infrastructure/runtime/sessions";
+import { getWork } from "../infrastructure/work";
 import { loadCandidates, type CandidateView } from "../server/plaza";
 import { areaName } from "../components/names";
 
@@ -62,7 +63,10 @@ export async function readCareerAction(companyId: string, sessionId: string): Pr
   if (ctx === undefined) return { error: "companyNotFound" };
   if (plazaOf(getCompanyFiles().directory).off === true) return { error: "plazaOff" };
   const file = typeof sessionId === "string" ? sessionFile(sessionId) : undefined;
-  if (file === undefined || readSession(sessionId) === undefined) return { error: "sessionNotFound" };
+  const session = file === undefined ? undefined : readSession(sessionId);
+  if (file === undefined || session === undefined) return { error: "sessionNotFound" };
+  // someone is still writing it in a terminal
+  if (session.inUse) return { error: "sessionInUse" };
   if (!isReady(await claudeCodeStatus())) return { error: "claudeNotReady" };
 
   const company = toCompanyId(companyId);
@@ -90,15 +94,18 @@ export interface BroughtInput {
 // are read here, never taken from the browser.
 export async function hireWithCareerAction(companyId: string, who: WhoInput, brought: BroughtInput): Promise<{ readonly id?: string; readonly error?: string }> {
   const ctx = contextFor(companyId);
-  if (ctx === undefined) return { error: "companyNotFound" };
+  if (ctx === undefined || typeof who !== "object" || who === null) return { error: ctx === undefined ? "companyNotFound" : "unknown" };
   const species = SPECIES.find((s) => s === who?.species);
   if (species === undefined) return { error: "speciesUnknown" };
   const sessionId = optional(brought?.sessionId);
   const session = sessionId === undefined ? undefined : readSession(sessionId);
   if (sessionId !== undefined && session === undefined) return { error: "sessionNotFound" };
+  const company = toCompanyId(companyId);
+  // a session is someone's past once per company
+  if (session !== undefined && (await ctx.employees.findByCompany(company)).some((e) => e.career?.sessionId === session.id)) return { error: "sessionHired" };
   const lines = (value: unknown) => (Array.isArray(value) ? value : []);
   const result = await hireEmployee(ctx, {
-    companyId: toCompanyId(companyId),
+    companyId: company,
     name: str(who.name),
     species,
     roleId: toRoleId(str(who.roleId)),
@@ -113,6 +120,8 @@ export async function hireWithCareerAction(companyId: string, who: WhoInput, bro
           },
   });
   if (!result.ok) return { error: result.reason };
+  // someone new and free may take work from the backlog
+  void getWork().kick();
   revalidatePath("/", "layout");
   return { id: result.value.employee.id };
 }

@@ -232,7 +232,7 @@ export const ko: Dictionary = {
     lastFinished: "최근 완료",
     joined: "입사",
     career: "경력",
-    careerKv: (folder: string, span: string, n: number) => folder + " · " + span + " · " + n + "개 가져옴",
+    careerKv: (folder: string, span: string, n: number) => folder + " · " + span + (n > 0 ? " · " + n + "개 가져옴" : ""),
     doneAndReviews: "완료한 업무 · 검토",
     counts: (a: number, b: number) => a + "건 · " + b + "건",
     latest: "최근에 알려준 기억",
@@ -818,6 +818,8 @@ export const ko: Dictionary = {
     high: "높음",
   },
   errors: {
+    sessionInUse: "지금 터미널에서 쓰고 있는 세션이에요. 끝나면 할 수 있어요.",
+    sessionHired: "이 세션에서 이미 고용한 직원이 있어요.",
     plazaOff: "광장이 꺼져 있어요. 설정에서 켤 수 있어요.",
     sessionNotFound: "그 세션을 찾을 수 없어요. 지워졌거나 너무 오래됐을 수 있어요.",
     claudeNotReady: "Claude Code가 준비되면 할 수 있어요.",

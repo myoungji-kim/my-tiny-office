@@ -95,9 +95,10 @@ export function HireDialog({
     start(async () => {
       if (chosen === undefined) return;
       const who = { name: trimmed, species: chosen.key, roleId: role, teamId: teamId || undefined };
+      // a candidate from the plaza came from their session, summed up or not
       const withCareer = edit === undefined && (brought !== undefined || from !== undefined);
       const result: { readonly id?: string; readonly error?: string } = withCareer
-        ? await hireWithCareerAction(companyId, who, { sessionId: brought?.session.id, expertise: brought?.knows ?? [], style: brought?.style ?? [] })
+        ? await hireWithCareerAction(companyId, who, { sessionId: brought?.session.id ?? from?.id, expertise: brought?.knows ?? [], style: brought?.style ?? [] })
         : edit === undefined
           ? await hireAction(companyId, who)
           : await editEmployeeAction(companyId, edit.id, who);

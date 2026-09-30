@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { hideCandidateAction } from "../app/plaza-actions";
 import { getDictionary, type Locale } from "../i18n";
@@ -89,9 +89,10 @@ export function PlazaView({
   const pop = useRef<HTMLDivElement>(null);
   const anchor = useRef<HTMLElement | null>(null);
 
-  const everyone = candidates.filter((c) => !hired.has(c.id));
-  const waiting = everyone.filter((c) => !hidden.has(c.id));
-  const standing = waiting.slice(0, SLOTS.length);
+  const everyone = useMemo(() => candidates.filter((c) => !hired.has(c.id)), [candidates, hired]);
+  const waiting = useMemo(() => everyone.filter((c) => !hidden.has(c.id)), [everyone, hidden]);
+  // redrawn only when who stands there changes, not on every keystroke in the list
+  const standing = useMemo(() => waiting.slice(0, SLOTS.length), [waiting]);
   const open = waiting.find((c) => c.id === openId);
 
   useEffect(() => {

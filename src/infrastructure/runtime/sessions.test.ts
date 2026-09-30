@@ -63,11 +63,11 @@ describe("listSessions", () => {
 describe("excerpt", () => {
   it("keeps what was said, and never a line that looks like a secret", () => {
     const cut = excerpt(
-      [
+      Buffer.from([
         said("user", "배포 스크립트 좀 봐줘\nAPI_KEY=sk-abcdefghijklmnopqrstuvwx"),
         said("assistant", [{ type: "text", text: "토큰은 환경 변수로 옮겨요." }, { type: "tool_use", name: "Bash" }]),
         said("user", [{ type: "tool_result", content: "ghp_aaaaaaaaaaaaaaaaaaaaaaaa" }]),
-      ].join("\n"),
+      ].join("\n")),
     );
 
     expect(cut).toEqual({ text: "User: 배포 스크립트 좀 봐줘\n\nClaude: 토큰은 환경 변수로 옮겨요.", dropped: 1, cut: false });

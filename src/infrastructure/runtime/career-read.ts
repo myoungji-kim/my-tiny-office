@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { findExecutable, runProcess } from "../process/run";
 
-import { spokenText } from "./sessions";
+import { said } from "./sessions";
 
 // Summing up a session a hire comes from (SECURITY.md §8b): its transcript,
 // cut down to what was said, goes to one Claude run that can do nothing but
@@ -37,25 +37,16 @@ export interface Excerpt {
 
 // What the person and Claude said, in order; tool calls, their output and
 // Claude Code's own notes are left out.
-export function excerpt(transcript: string): Excerpt {
+export function excerpt(transcript: Buffer): Excerpt {
   let dropped = 0;
   const turns: string[] = [];
-  for (const raw of transcript.split("\n")) {
-    let line: Record<string, unknown>;
-    try {
-      line = JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      continue;
-    }
-    if (line.type !== "user" && line.type !== "assistant") continue;
-    const said = spokenText(line);
-    if (said === undefined) continue;
-    const kept = said.split("\n").filter((l) => {
+  for (const { who, text } of said(transcript)) {
+    const kept = text.split("\n").filter((l) => {
       const secret = SECRET.some((pattern) => pattern.test(l));
       if (secret) dropped += 1;
       return !secret;
     });
-    if (kept.length > 0) turns.push(`${line.type === "user" ? "User" : "Claude"}: ${kept.join("\n")}`);
+    if (kept.length > 0) turns.push(`${who === "user" ? "User" : "Claude"}: ${kept.join("\n")}`);
   }
   const text = turns.join("\n\n");
   const cut = text.length > MAX_TRANSCRIPT;
@@ -146,7 +137,7 @@ export type ReadResult = { readonly ok: true; readonly proposal: Proposal; reado
 export async function readCareer(file: string, areas: readonly Area[]): Promise<ReadResult> {
   const claude = findExecutable("claude");
   if (claude.kind !== "found") return { ok: false };
-  const cut = excerpt(readFileSync(file, "utf8"));
+  const cut = excerpt(readFileSync(file));
   const folder = mkdtempSync(join(tmpdir(), "my-tiny-office-read-"));
   try {
     const run = await runProcess(claude.path, readArgs(), { cwd: folder, input: readPrompt(areas, cut.text), timeoutMs: READ_TIMEOUT_MS });

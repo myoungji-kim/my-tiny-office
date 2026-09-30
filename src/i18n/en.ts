@@ -229,7 +229,7 @@ export const en = {
     lastFinished: "Last finished",
     joined: "Joined",
     career: "Experience",
-    careerKv: (folder: string, span: string, n: number) => folder + " · " + span + " · brought " + n,
+    careerKv: (folder: string, span: string, n: number) => folder + " · " + span + (n > 0 ? " · brought " + n : ""),
     doneAndReviews: "Tasks · reviews",
     counts: (a: number, b: number) => a + " · " + b,
     latest: "Taught lately",
@@ -817,6 +817,8 @@ export const en = {
     high: "High",
   },
   errors: {
+    sessionInUse: "This session is in use in a terminal. Try again once it is finished.",
+    sessionHired: "Someone has already been hired from this session.",
     plazaOff: "The plaza is off. Settings can turn it on.",
     sessionNotFound: "That session could not be found. It may have been deleted, or be too old.",
     claudeNotReady: "This can be done once Claude Code is ready.",

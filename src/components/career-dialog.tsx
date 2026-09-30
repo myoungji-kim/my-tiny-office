@@ -54,6 +54,8 @@ export function CareerDialog({
   const [chosen, setChosen] = useState<CandidateView | undefined>(session);
   const [step, setStep] = useState<Step>(session !== undefined && ready ? "reading" : "pick");
   const [summed, setSummed] = useState<Summed | undefined>(undefined);
+  // why a reading did not happen, when it was not the run itself that failed
+  const [why, setWhy] = useState<string | undefined>(undefined);
   // what a session summed up to, so going back and forth does not read it again
   const cache = useRef(new Map<string, Summed>());
   const modal = useRef<HTMLDivElement>(null);
@@ -91,7 +93,10 @@ export function CareerDialog({
     }
     setStep("reading");
     void readCareerAction(companyId, s.id).then((result: CareerRead) => {
-      if ("error" in result) return setStep("failed");
+      if ("error" in result) {
+        setWhy(result.error === "careerReadFailed" ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
+        return setStep("failed");
+      }
       const next: Summed = {
         knows: result.knows.map((k) => ({ areaId: k.areaId, text: k.text, on: !k.known, known: k.known })),
         style: result.style.map((x) => ({ text: x.text, on: !x.known, known: x.known })),
@@ -215,7 +220,7 @@ export function CareerDialog({
             <span className="n-ic">{Icon.alert}</span>
             <span className="n-tx">
               <b>{step === "failed" ? w.failTitle : w.emptyTitle}</b>
-              <span>{step === "failed" ? w.failWhy : w.emptyWhy}</span>
+              <span>{step === "failed" ? (why ?? w.failWhy) : w.emptyWhy}</span>
             </span>
           </div>
         </div>

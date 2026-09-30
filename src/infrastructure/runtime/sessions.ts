@@ -70,17 +70,37 @@ function head(path: string): string {
   }
 }
 
-// what was said, by either side; the count needs the whole file, so it is kept until the file changes
+const NEWLINE = 0x0a;
+const USER = Buffer.from('"type":"user"');
+const ASSISTANT = Buffer.from('"type":"assistant"');
+const TEXT = Buffer.from('"type":"text"');
+const TOOL_RESULT = Buffer.from('"tool_result"');
+
+// What was said, by either side, in order. Decoding and parsing are what
+// cost, and tool output is most of a transcript, so lines are looked at as
+// bytes and only one that can be something said is decoded and parsed.
+export function* said(bytes: Buffer): Generator<{ readonly who: "user" | "assistant"; readonly text: string }> {
+  for (let start = 0; start < bytes.length; ) {
+    const end = bytes.indexOf(NEWLINE, start);
+    const stop = end === -1 ? bytes.length : end;
+    const raw = bytes.subarray(start, stop);
+    start = stop + 1;
+    const maybe = raw.includes(USER) ? !raw.includes(TOOL_RESULT) : raw.includes(ASSISTANT) && raw.includes(TEXT);
+    if (!maybe) continue;
+    const line = parse(raw.toString("utf8"));
+    if (line === undefined || (line.type !== "user" && line.type !== "assistant")) continue;
+    const text = spokenText(line);
+    if (text !== undefined) yield { who: line.type, text };
+  }
+}
+
+// the count needs the whole file, so it is kept until the file changes
 const counted = new Map<string, { readonly size: number; readonly mtime: number; readonly messages: number }>();
 function messagesIn(path: string, size: number, mtime: number): number {
   const known = counted.get(path);
   if (known !== undefined && known.size === size && known.mtime === mtime) return known.messages;
   let messages = 0;
-  for (const raw of readFileSync(path, "utf8").split("\n")) {
-    if (!raw.includes('"type":"user"') && !raw.includes('"type":"assistant"')) continue;
-    const line = parse(raw);
-    if (line !== undefined && (line.type === "user" || line.type === "assistant") && spokenText(line) !== undefined) messages += 1;
-  }
+  for (const _said of said(readFileSync(path))) messages += 1;
   counted.set(path, { size, mtime, messages });
   return messages;
 }
