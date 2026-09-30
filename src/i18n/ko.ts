@@ -157,6 +157,7 @@ export const ko: Dictionary = {
     companyHint: "나중에 바꿀 수 있어요.",
     next: "다음",
     back: "뒤로",
+    backToOffice: "사무실로 돌아가기",
     hireTitle: "첫 직원을 뽑아요",
     hireSub: "한 명이면 충분해요. 나중에 더 뽑을 수 있어요.",
     speciesLabel: "어떤 친구인가요",

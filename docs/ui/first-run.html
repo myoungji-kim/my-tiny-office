@@ -313,7 +313,7 @@
       nameLabel: "이름",
       nameHint: "짧을수록 좋아요. 나중에 바꿀 수 있어요.",
       roleLabel: "역할",
-      back: "뒤로",
+      back: "뒤로", backToOffice: "사무실로 돌아가기",
       hire: "고용하기",
       opened: "사무실이 열렸어요",
       headcount: (n) => `직원 ${n}명`,
@@ -347,7 +347,7 @@
       nameLabel: "Name",
       nameHint: "Shorter is better. You can change it later.",
       roleLabel: "Role",
-      back: "Back",
+      back: "Back", backToOffice: "Back to the office",
       hire: "Hire",
       opened: "Your office is open",
       headcount: (n) => `${n} employee${n === 1 ? "" : "s"}`,
@@ -420,7 +420,8 @@
   renderWhere();
 
   const entry = { "#new": 2, "#import": 5 }[location.hash];
-  if (entry) { signedIn = true; renderChecks(); go(entry); }
+  // come from an open office, the way back is to it, not to the welcome
+  if (entry) { signedIn = true; renderChecks(); go(entry); document.getElementById("back1").textContent = t().backToOffice; }
   renderChecks();
 
   /* ── 3. species picker ───────────────────────────────────────── */
@@ -455,7 +456,7 @@
 
   /* ── 4. arrival ──────────────────────────────────────────────── */
   document.getElementById("toHire").addEventListener("click", () => go(3));
-  document.getElementById("back1").addEventListener("click", () => go(1));
+  document.getElementById("back1").addEventListener("click", () => (entry ? (location.href = "office.html" + (lang === "en" ? "?lang=en" : "")) : go(1)));
   document.getElementById("back2").addEventListener("click", () => go(2));
 
   function rerenderArrival() {

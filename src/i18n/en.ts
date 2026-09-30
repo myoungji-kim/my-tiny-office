@@ -154,6 +154,7 @@ export const en = {
     companyHint: "You can change this later.",
     next: "Next",
     back: "Back",
+    backToOffice: "Back to the office",
     hireTitle: "Hire your first employee",
     hireSub: "One is enough. You can hire more later.",
     speciesLabel: "Who are they?",

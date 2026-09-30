@@ -127,6 +127,11 @@ export function FirstRun({
             </div>
           )}
           <div className="acts">
+            {entry !== undefined && (
+              <button className="btn btn-ghost btn-lg" type="button" onClick={() => router.push("/")}>
+                {words.backToOffice}
+              </button>
+            )}
             <button className="btn btn-secondary btn-lg" type="button" disabled={!ready || pending} autoFocus={entry === "import"} onClick={() => file.current?.click()}>
               {words.startImport}
             </button>
@@ -205,8 +210,9 @@ export function FirstRun({
             <span className="hint">{words.companyHint}</span>
           </div>
           <div className="acts">
-            <button className="btn btn-ghost btn-lg" type="button" onClick={() => setStep(1)}>
-              {words.back}
+            {/* come from an open office, the way back is to it */}
+            <button className="btn btn-ghost btn-lg" type="button" onClick={() => (entry === undefined ? setStep(1) : router.push("/"))}>
+              {entry === undefined ? words.back : words.backToOffice}
             </button>
             <button className="btn btn-primary btn-lg" type="button" disabled={companyName.trim() === ""} onClick={() => setStep(3)}>
               {words.next}
