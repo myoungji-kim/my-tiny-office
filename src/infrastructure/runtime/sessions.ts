@@ -150,6 +150,15 @@ export function listSessions(root: string = join(claudeHome(), "projects"), now:
   return sessions.sort((a, b) => b.to - a.to);
 }
 
+export function readSession(id: string, root: string = join(claudeHome(), "projects"), now: number = Date.now()): Session | undefined {
+  const path = sessionFile(id, root);
+  try {
+    return path === undefined ? undefined : read(path, now);
+  } catch {
+    return undefined;
+  }
+}
+
 // Where a session's file is, found by its id alone.
 export function sessionFile(id: string, root: string = join(claudeHome(), "projects")): string | undefined {
   if (!isSessionId(id)) return undefined;

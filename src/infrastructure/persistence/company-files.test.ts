@@ -95,6 +95,14 @@ describe("settings", () => {
     expect(readSettings(directory)).toEqual({});
   });
 
+  it("keeps the plaza switched off, and the sessions it hides by ids that could be theirs", () => {
+    const id = "b477a1ec-4706-4cc4-b017-a887aedc242e";
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ plaza: { off: true, hidden: [id, "../x", id, 3] } }));
+    expect(readSettings(directory)).toEqual({ plaza: { off: true, hidden: [id] } });
+    writeFileSync(join(directory, "settings.json"), JSON.stringify({ plaza: { off: "yes", hidden: [] } }));
+    expect(readSettings(directory)).toEqual({});
+  });
+
   it("round-trips what it writes", () => {
     const lastCompanyId = randomUUID();
     writeSettings(directory, { lastCompanyId, locale: "en" });

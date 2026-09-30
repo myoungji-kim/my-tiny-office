@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { SERVER_NAME } from "../runtime/connector-check";
 import { EXTENSION_ID, type Chosen } from "../runtime/extensions";
+import { isSessionId } from "../runtime/sessions";
 
 import { isCompanyId } from "./company-files";
 
@@ -17,6 +18,8 @@ export interface AppSettings {
   readonly connectors?: { readonly checkedAt: number; readonly servers: readonly string[] };
   // the user's plugins and skills that employees are given
   readonly extensions?: Chosen;
+  // the plaza: off reads no session at all; hidden ones are only kept out of it
+  readonly plaza?: { readonly off?: true; readonly hidden: readonly string[] };
 }
 
 const FILE = "settings.json";
@@ -34,14 +37,22 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { lastCompanyId, locale, workPaused, connectors, extensions } = raw as Record<string, unknown>;
+  const { lastCompanyId, locale, workPaused, connectors, extensions, plaza } = raw as Record<string, unknown>;
   return {
     ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
     ...(locale === "ko" || locale === "en" ? { locale } : {}),
     ...(workPaused === true ? { workPaused } : {}),
     ...connectorsOf(connectors),
     ...extensionsOf(extensions),
+    ...plazaOf(plaza),
   };
+}
+
+function plazaOf(raw: unknown): Pick<AppSettings, "plaza"> {
+  if (typeof raw !== "object" || raw === null) return {};
+  const { off, hidden } = raw as Record<string, unknown>;
+  const ids = Array.isArray(hidden) ? [...new Set(hidden.filter((id): id is string => typeof id === "string" && isSessionId(id)))] : [];
+  return off !== true && ids.length === 0 ? {} : { plaza: { ...(off === true ? { off } : {}), hidden: ids } };
 }
 
 const ids = (raw: unknown): string[] => (Array.isArray(raw) ? [...new Set(raw.filter((id): id is string => typeof id === "string" && EXTENSION_ID.test(id)))] : []);
