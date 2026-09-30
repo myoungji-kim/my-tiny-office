@@ -392,12 +392,15 @@ The plaza lists this computer's Claude Code sessions as candidates to hire
     - lines that look like secrets (tokens, keys, passwords, private keys) are
       removed and counted;
     - a long transcript is cut to its most recent part.
-  - The run gets `-p --output-format json`, the same `--settings` and
-    `--permission-mode dontAsk` as §2, `--setting-sources ""`,
-    `--strict-mcp-config`, `--disable-slash-commands` and no tools. It runs in
-    an empty temporary folder, with a budget of $0.50, and the transcript goes
-    in on stdin. These flags are measured (§9) before release, like every
-    launch.
+  - The run gets `-p --output-format json --model sonnet`, the `--settings` of
+    §2 with extended thinking off, `--permission-mode dontAsk`,
+    `--setting-sources ""`, `--strict-mcp-config`, `--disable-slash-commands`
+    and `--tools ""`. It runs in an empty temporary folder, with a budget of
+    $0.50, and the transcript goes in on stdin.
+  - Measured on 2026-10-01: its init listed no tools. Told to list its folder
+    and read `~/.claude/.credentials.json`, it answered that it had no tool to
+    do either. A short conversation took 11 seconds and $0.02.
+  - `--tools` takes every word after it, so an option must follow it.
   - It answers with proposed lines only. Nothing is kept until the user keeps
     it.
 - **Hiding.** Hiding a candidate records only its session id in the app's
