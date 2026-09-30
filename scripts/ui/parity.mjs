@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 // comparing across them would report the system working as a fault. With the
 // shared rules in system.css it usually finds nothing to compare; it is the
 // guard for the day a page defines a component of its own again.
-const PAGES = ["office", "projects", "employees", "company", "settings"];
+const PAGES = ["office", "projects", "employees", "company", "settings", "plaza"];
 
 const styleOf = (p) =>
   (readFileSync(`docs/ui/${p}.html`, "utf8").match(/<style>([\s\S]*?)<\/style>/) ?? [, ""])[1];

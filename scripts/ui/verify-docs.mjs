@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 
-const PAGES = ["index", "first-run", "office", "projects", "employees", "company", "settings", "connect", "components", "characters"];
+const PAGES = ["index", "first-run", "office", "projects", "employees", "company", "settings", "plaza", "connect", "components", "characters"];
 const src = Object.fromEntries(PAGES.map((p) => [p, readFileSync(`docs/ui/${p}.html`, "utf8")]));
 const guide = readFileSync("docs/STYLE-GUIDE.md", "utf8");
 // The tokens and the cast moved out of the pages, so that is where to read them.

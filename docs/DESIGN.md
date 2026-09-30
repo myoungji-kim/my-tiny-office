@@ -23,6 +23,7 @@ before building or changing a screen.
 | `ui/projects.html` | The project list, a project's board, a task's page, and choosing who reviews |
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
+| `ui/plaza.html` | The plaza outside the company: the scene, a candidate's résumé, the list, hiring from it |
 | `ui/settings.html` | Settings in five tabs: Claude Code (its check and the connected tools), skills and plugins, general (starting work, screen width, language), the safety guide, and data (the open company's file, export, import, deleting it, the version) |
 | `ui/connect.html` | The company's Claude Code, blocked states, a folder and what is safe in it, work that stops itself, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
@@ -82,7 +83,8 @@ blockers, recent activity, team workload.
 
 One floating white panel on a grey page. The sidebar is fixed width and carries
 the company's name (which leads to the company screen) with a switcher beside
-it, the menu, and the active company's roster. The switcher lists every
+it, the menu, and the active company's roster. At its foot, under 회사 밖, is
+광장, apart from the company's own screens, then 설정. The switcher lists every
 company on this computer — each is a file of its own and nothing crosses
 between them — then 새 회사 만들기 and 기존 회사 가져오기. From there a new
 company starts first run at its name and an import at arrival: this computer's
@@ -174,12 +176,16 @@ state because it is not a transition: it changes what someone knows, not what
 they are doing. Taught to someone on leave, the dialog says they carry it from
 the first task after they are back.
 
-### The plaza
+## The plaza
 
-Outside the office door, on the whole-floor tab, is **광장**: Claude Code
-sessions held on this computer, standing as candidates. They are real
+Outside the company is **광장**, a screen of its own: Claude Code sessions held
+on this computer, standing as candidates. They are real
 sessions, not a decoration. None of them is part of the company until the
 user hires one, and hiring brings in only what the user keeps.
+
+The office is the company. The plaza is kept apart from it. The sidebar lists
+it under its own caption, **회사 밖**, above 설정, and 설정 › 일반 › 광장 set
+to 숨기기 removes it.
 
 **1. Who comes.** The app lists Claude Code's own session files
 (`~/.claude/projects/<folder>/<session>.jsonl`) across the whole computer.
@@ -200,19 +206,21 @@ user hires one, and hiring brings in only what the user keeps.
 - **Hiding it:** 설정 › 일반 › 광장 hides the plaza. The hire dialog's 지난
   세션에서 가져오기 goes with it, and no session file is read at all.
 
-**2. The scene.** Under the floor sits a strip four tiles high:
+**2. The screen.** The header reads **광장**, *회사 밖이에요. 이 컴퓨터의 Claude
+Code 세션이 구직자로 모여요.*, and 구직자 N명 on the right. Under it, the
+scene is the same width as the office's floor, six tiles high:
 
-- the building's front wall, with windows and the door in the middle;
-- two rows of paving, with a lamp at each end and a bench beside the door;
+- the office's front wall, with windows and its door in the middle;
+- four rows of paving, with a lamp at each end and a bench beside the door;
 - grass along the bottom, with a tree at each end.
 
-The head reads **광장 · 구직자 N명** with **명단 보기**.
+Under the scene is the list (4).
 
-Candidates stand on the paving, one every three tiles, most recently active
-first. A candidate's species follows from their session, so the same one
+Candidates stand in two lines on the paving, one every three tiles, most
+recently active first. A candidate's species follows from their session, so the same one
 always looks the same. Their tag is the folder's name. One in use carries a
-**작업 중** bubble. When more are waiting than there is room for, the last
-place is a **+N명** chip that opens the list. With nobody waiting, the paving
+**작업 중** bubble. Tags sit on a dark chip so they read on the paving. Anyone
+past the two lines is still in the list. With nobody waiting, the paving
 is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Code로 일하면
 구직자가 찾아와요.*
 
@@ -229,7 +237,7 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 - **광장에서 보내기** removes them from the plaza. That can be undone from the
   list.
 
-**4. The list.** 명단 보기, or +N명, opens **구직자 명단**:
+**4. The list.** **구직자 명단**, a panel under the scene:
 
 - a search over folders and first messages;
 - 전체 · 쉬는 중 · 작업 중 with counts;
@@ -262,8 +270,8 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 - The candidate leaves the plaza; that session never comes back to it. If the
   user chose a different session in 경력 가져오기 instead, that session is the
   one used up, and the candidate stays.
-- The office stays open: the new desk shows them. Their page is one click
-  away, unlike a hire from the people screen, which opens it.
+- The plaza stays open, with a notice: *보리가 입사했어요 · tinysoft 세션에서
+  6개를 가져왔어요. 사무실에 책상이 생겼어요.* and 직원 페이지 보기.
 - Sending everyone away leaves the paving empty with *구직자를 모두 보냈어요.
   명단에서 다시 부를 수 있어요.*
 - A desk is added on the floor.
@@ -273,7 +281,7 @@ is empty and a line says *광장이 조용해요. 이 컴퓨터에서 Claude Cod
 - The session itself is untouched and never attached: the employee's own
   agent starts sessions of its own.
 
-The mockup is office.html's whole floor. The toggle is in settings.html's
+The mockup is plaza.html. The toggle is in settings.html's
 general tab. Its samples show every state:
 - `~/Projects/tinysoft` (the webhook one) is in use.
 - `~/Projects/design-system` fails its first reading, then succeeds on 다시

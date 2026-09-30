@@ -536,7 +536,7 @@ const STATUS = {
 
 const WORDS = {
   ko: {
-    nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정" },
+    nav: { office: "사무실", projects: "프로젝트", people: "직원", company: "회사", settings: "설정", outside: "회사 밖", plaza: "광장" },
     companies: { switch: "회사 바꾸기", create: "새 회사 만들기", import: "기존 회사 가져오기" },
     agentLost: "에이전트 연결이 끊겼어요", copied: "복사했어요",
     runtime: {
@@ -605,7 +605,7 @@ const WORDS = {
     },
   },
   en: {
-    nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings" },
+    nav: { office: "Office", projects: "Projects", people: "People", company: "Company", settings: "Settings", outside: "Outside the company", plaza: "Plaza" },
     companies: { switch: "Switch company", create: "Start a new company", import: "Import an existing company" },
     agentLost: "The agent disconnected", copied: "Copied",
     runtime: {
@@ -1603,7 +1603,7 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
     '<path d="M2 6.5L8 2l6 4.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>';
 
   const GROUPS = [
-    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["projects", "프로젝트", "Projects"], ["employees", "직원", "People"], ["company", "회사", "Company"], ["settings", "설정", "Settings"]]],
+    ["화면", "Screens", [["first-run", "첫 실행", "First run"], ["office", "사무실", "Office"], ["projects", "프로젝트", "Projects"], ["employees", "직원", "People"], ["company", "회사", "Company"], ["settings", "설정", "Settings"], ["plaza", "광장", "Plaza"]]],
     ["문서", "Reference", [["connect", "연결", "Connect"], ["components", "컴포넌트", "Components"], ["characters", "캐릭터", "Cast"]]],
   ];
 

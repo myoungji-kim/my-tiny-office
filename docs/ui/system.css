@@ -207,6 +207,9 @@ button { font: inherit; color: inherit; }
 
 /* ═══ the app shell ═══ */
 
+/* A caption over the sidebar's items that are not the company's own. */
+.side-cap { display: block; padding: 0 10px 6px; font-size: 13px; font-weight: 600; color: var(--faint); }
+
 .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; flex: none; }
 
 .logo svg { width: 14px; height: 14px; color: #fff; }

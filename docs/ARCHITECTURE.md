@@ -47,8 +47,8 @@ untrusted. Nothing under `src/infrastructure` may be imported from a client
 component.
 
 Each screen is a route — `/` the office, `/projects`, `/projects/<id>` and
-`/projects/<id>/<task>`, `/people` and `/people/<id>`, `/company`, `/settings`
-and `/new` for another company — and what a screen is showing (a room, a tab, a
+`/projects/<id>/<task>`, `/people` and `/people/<id>`, `/company`, `/settings`,
+`/plaza` outside the company, and `/new` for another company — and what a screen is showing (a room, a tab, a
 filter) is in its query string. The company open is the one `settings.json`
 names, so links never carry it. Two route handlers move files:
 `GET /settings/export` and `POST /settings/import`.

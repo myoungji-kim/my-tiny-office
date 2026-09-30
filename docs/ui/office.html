@@ -18,54 +18,6 @@
 
   .desk[aria-expanded="true"] { border-color: #fff; background: rgb(255 255 255 / .18); }
 
-  /* ═══ the plaza outside the door ═══ */
-
-  .plaza { margin-top: -6px; }
-
-  .plaza-hd { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
-
-  .plaza-hd h2 { margin: 0; font-size: 16px; font-weight: 600; }
-
-  .plaza-hd .n { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
-
-  .plaza-hd .btn { margin-left: auto; align-self: center; }
-
-  .plaza-scene { position: relative; }
-
-  .plaza .tag { max-width: 136px; overflow: hidden; text-overflow: ellipsis; }
-
-  .plaza-more { position: absolute; transform: translate(-50%, -50%); border: none; border-radius: 999px; padding: 5px 12px; background: rgb(255 255 255 / .92); color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 3px rgb(20 20 25 / .2); }
-
-  .plaza-more:hover { background: #fff; }
-
-  .plaza-quiet { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); margin: 0; padding: 6px 12px; border-radius: 8px; background: rgb(255 255 255 / .92); font-size: 15px; color: var(--muted); white-space: nowrap; }
-
-  .p-quote { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; line-height: 1.45; margin: 2px 0 6px; }
-
-  .p-kv { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); margin-top: 3px; }
-
-  .p-kv b { color: var(--ink); font-weight: 600; }
-
-  .modal.board { max-width: 680px; }
-
-  .board-list { margin-top: 10px; max-height: 420px; overflow: auto; }
-
-  .board-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
-
-  .board-row:last-child { border-bottom: none; }
-
-  .board-row canvas { border-radius: 9px; }
-
-  .board-tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-
-  .board-tx b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .board-tx span { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .board-acts { display: flex; align-items: center; gap: 6px; }
-
-  .board-note { flex: 1; font-size: 14px; color: var(--muted); }
-
   /* ═══ team cards ═══ */
 
   .grp { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
@@ -158,6 +110,11 @@
 
     <div class="side-foot">
       <div class="rule" style="margin:0 4px 10px"></div>
+      <span class="side-cap" data-t="nav.outside">회사 밖</span>
+      <div class="nav">
+        <a href="plaza.html"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 15.5h13"/><path d="M5.5 15.5v-5"/><circle cx="5.5" cy="7.3" r="2.6"/><path d="M9.5 12.5h5.5M10.5 12.5v3M14 12.5v3M9.5 10.6h5.5"/></svg><span data-t="nav.plaza">광장</span></a>
+      </div>
+      <div class="rule" style="margin:10px 4px"></div>
       <div class="nav">
         <a href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span data-t="nav.settings">설정</span></a>
       </div>
@@ -185,16 +142,6 @@
         <div class="room-wrap">
           <canvas class="room" aria-hidden="true" id="room" width="864" height="384"></canvas>
           <div class="overlay" id="overlay"></div>
-        </div>
-      </div>
-      <div class="plaza" id="plaza">
-        <div class="plaza-hd"><h2 id="plazaTitle"></h2><span class="n" id="plazaN"></span><button class="btn btn-secondary btn-sm" type="button" id="plazaBoard"></button></div>
-        <div class="stage">
-          <div class="room-wrap plaza-scene">
-            <canvas class="room" aria-hidden="true" id="plazaCanvas"></canvas>
-            <div class="overlay" id="plazaOverlay"></div>
-            <p class="plaza-quiet" id="plazaQuiet" hidden></p>
-          </div>
         </div>
       </div>
       <div class="panel">
@@ -268,21 +215,6 @@
       reviewKey: "검토", reviewingNow: "검토 중인 업무",
       sinceToday: "오늘부터",
       justBack: "휴가에서 막 돌아왔어요",
-      plaza: "광장", plazaCount: (n) => "구직자 " + n + "명", plazaBoard: "명단 보기", plazaMore: (n) => "+" + n + "명",
-      plazaQuiet: "광장이 조용해요. 이 컴퓨터에서 Claude Code로 일하면 구직자가 찾아와요.",
-      plazaAllAway: "구직자를 모두 보냈어요. 명단에서 다시 부를 수 있어요.",
-      cand: {
-        free: "쉬는 중", busy: "작업 중", first: "첫 메시지", span: "기간", turns: "메시지", turnsN: (n) => n + "개", last: "마지막 활동",
-        hire: "경력직으로 고용", busyWhy: "지금 터미널에서 쓰고 있는 세션이에요. 끝나면 고용할 수 있어요.", away: "광장에서 보내기",
-        busyLine: "작업 중 · 끝나면 고용할 수 있어요",
-        of: (f, first) => f + " 이력서 · “" + first + "”",
-      },
-      board: {
-        title: "구직자 명단", sub: "이 컴퓨터에서 한 Claude Code 세션이에요. 고용하기 전에는 아무것도 가져오지 않아요.",
-        search: "폴더나 첫 메시지로 찾기", all: "전체", hire: "경력직으로 고용", away: "보내기",
-        meta: (c) => c.folder + " · " + c.span + " · 메시지 " + c.turns + "개",
-        none: "찾는 구직자가 없어요.", allAway: "광장에 남은 구직자가 없어요.", sent: (n) => "보낸 구직자 " + n + "명", recall: "다시 부르기", close: "닫기",
-      },
     },
     en: {
       ...WORDS.en,
@@ -322,21 +254,6 @@
       reviewKey: "Review", reviewingNow: "Reviewing",
       sinceToday: "Since today",
       justBack: "Just back from leave",
-      plaza: "Plaza", plazaCount: (n) => n + (n === 1 ? " candidate" : " candidates"), plazaBoard: "See the list", plazaMore: (n) => "+" + n,
-      plazaQuiet: "The plaza is quiet. Work with Claude Code on this computer and candidates turn up.",
-      plazaAllAway: "Everyone was sent away. The list can call them back.",
-      cand: {
-        free: "Free", busy: "In use", first: "First message", span: "Dates", turns: "Messages", turnsN: (n) => String(n), last: "Last active",
-        hire: "Hire with experience", busyWhy: "This session is in use in a terminal. It can be hired once it is done.", away: "Send away",
-        busyLine: "In use · can be hired once it is done",
-        of: (f, first) => "Résumé of " + f + " · “" + first + "”",
-      },
-      board: {
-        title: "Candidates", sub: "Claude Code sessions held on this computer. Nothing is brought in until you hire.",
-        search: "Find by folder or first message", all: "All", hire: "Hire with experience", away: "Send away",
-        meta: (c) => c.folder + " · " + c.span + " · " + c.turns + " messages",
-        none: "No candidate matches.", allAway: "Nobody is left in the plaza.", sent: (n) => n + " sent away", recall: "Call them back", close: "Close",
-      },
     },
   };
 
@@ -533,7 +450,6 @@
         : t().peopleSub(seatsOf(room).length);
 
     drawCards();
-    drawPlaza();
   }
 
   /* ── sidebar roster ──────────────────────────────────────────── */
@@ -681,20 +597,16 @@
   }
 
   /* ── hiring ──────────────────────────────────────────────────── */
-  // Sessions hired or sent away leave the plaza; sent-away ones can be called back.
+  // sessions brought in once are not offered again
   const hired = new Set();
-  const sentAway = new Set();
   const career = (done, session) => openCareer(done, session, hired);
 
-  function hireAt(team, from = null) {
+  function hireAt(team) {
     openHire({
       team,
-      from,
       career,
       // A hire brings their own desk.
       onSave: ({ career: brought, ...h }) => {
-        // the candidate walked in unless another session came instead
-        if (from && (!brought || brought.session === from.id)) hired.add(from.id);
         if (brought) hired.add(brought.session);
         const base = {
           ...h, id: "p" + (STAFF.length + 1), status: "available", done: 0, reviews: 0,
@@ -715,218 +627,6 @@
     });
   }
 
-  /* ── the plaza ───────────────────────────────────────────────── */
-  // Outside the door, Claude Code sessions on this computer wait to be hired.
-  // Each stands on the paving, most recently active first, as far as there is
-  // room; the rest are counted and listed.
-
-  const plazaCanvas = document.getElementById("plazaCanvas");
-  const plazaCtx = plazaCanvas.getContext("2d");
-  const plazaOverlay = document.getElementById("plazaOverlay");
-  const tx = (v) => (v && typeof v === "object" ? v[lang] : v);
-  const waiting = () => CANDIDATES.filter((c) => !hired.has(c.id) && !sentAway.has(c.id));
-  const SPACING = 3;
-
-  function drawPlaza() {
-    const wrap = document.getElementById("plaza");
-    wrap.hidden = roomOf(room).kind !== "all";
-    if (wrap.hidden) return;
-    const w = canvas.width / T, h = 4, door = Math.floor(w / 2);
-    plazaCanvas.width = w * T;
-    plazaCanvas.height = h * T;
-    plazaCtx.imageSmoothingEnabled = false;
-    plazaOverlay.innerHTML = "";
-    for (let x = 0; x < w; x++) {
-      paint(plazaCtx, TILES[x === door ? "door" : x % 4 === 1 ? "facadeWindow" : "facade"], S, x * T, 0);
-      paint(plazaCtx, TILES.pave, S, x * T, T);
-      paint(plazaCtx, TILES.pave, S, x * T, 2 * T);
-      paint(plazaCtx, TILES[x === 0 || x === w - 1 ? "tree" : "grass"], S, x * T, 3 * T);
-    }
-    paint(plazaCtx, TILES.lamp, S, 0, T);
-    paint(plazaCtx, TILES.lamp, S, (w - 1) * T, T);
-    if (door + 2 < w - 1) paint(plazaCtx, TILES.bench, S, (door + 2) * T, T);
-
-    const list = waiting();
-    document.getElementById("plazaTitle").textContent = t().plaza;
-    document.getElementById("plazaN").textContent = t().plazaCount(list.length);
-    const board = document.getElementById("plazaBoard");
-    board.textContent = t().plazaBoard;
-    board.hidden = list.length === 0 && sentAway.size === 0;
-    const quiet = document.getElementById("plazaQuiet");
-    quiet.textContent = sentAway.size ? t().plazaAllAway : t().plazaQuiet;
-    quiet.hidden = list.length > 0;
-
-    const slots = [];
-    for (let x = 1; x <= w - 2; x += SPACING) slots.push(x);
-    const shown = list.length > slots.length ? list.slice(0, slots.length - 1) : list;
-    shown.forEach((c, i) => {
-      const x = slots[i], sp = SPECIES.get(c.species);
-      paint(plazaCtx, sp.sprite, S, x * T, 2 * T, skin(sp));
-      standing(c, x);
-    });
-    if (list.length > shown.length) {
-      const more = document.createElement("button");
-      more.className = "plaza-more";
-      more.type = "button";
-      more.style.left = slots[shown.length] * T + T / 2 + "px";
-      more.style.top = 2.5 * T + "px";
-      more.textContent = t().plazaMore(list.length - shown.length);
-      more.addEventListener("click", openBoard);
-      plazaOverlay.append(more);
-    }
-  }
-
-  function standing(c, x) {
-    const btn = document.createElement("button");
-    btn.className = "desk";
-    btn.type = "button";
-    btn.dataset.cand = c.id;
-    btn.style.left = x * T - 4 + "px";
-    btn.style.top = 2 * T - 4 + "px";
-    btn.style.width = T + 8 + "px";
-    btn.style.height = T + 8 + "px";
-    btn.setAttribute("aria-label", t().cand.of(folderName(c.folder), tx(c.first)));
-    btn.title = tx(c.first) + " · " + tx(c.span);
-    btn.setAttribute("aria-haspopup", "dialog");
-    btn.setAttribute("aria-expanded", "false");
-    btn.addEventListener("click", (e) => openCandidate(c, btn, e.detail === 0));
-    plazaOverlay.append(btn);
-
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.style.left = x * T + T / 2 + "px";
-    tag.style.top = 3 * T + 6 + "px";
-    tag.textContent = folderName(c.folder);
-    plazaOverlay.append(tag);
-    if (!c.live) return;
-    const bub = document.createElement("span");
-    bub.className = "bub";
-    bub.style.left = x * T + T / 2 + "px";
-    bub.style.top = 2 * T - 30 + "px";
-    bub.innerHTML = '<span class="dot working"></span>' + t().cand.busy;
-    plazaOverlay.append(bub);
-  }
-
-  function openCandidate(c, el, viaKey) {
-    if (anchor === el && pop.hasAttribute("data-open")) return close();
-    close();
-    el.setAttribute("aria-expanded", "true");
-    const state = c.live ? "working" : "available";
-    pop.innerHTML = `
-      <div class="p-hd">
-        <span class="p-av"><canvas aria-hidden="true" width="32" height="32"></canvas></span>
-        <span style="flex:1;min-width:0">
-          <span class="p-name">${folderName(c.folder)}</span>
-          <span class="p-role" title="${c.folder}">${c.folder}</span>
-        </span>
-        <span class="chip ${state}"><span class="dot ${state}"></span>${c.live ? t().cand.busy : t().cand.free}</span>
-      </div>
-      <div class="p-rule"></div>
-      <div class="p-state">
-        <span class="c-k">${t().cand.first}</span>
-        <span class="p-quote">“${tx(c.first)}”</span>
-        <span class="p-kv"><span>${t().cand.span}</span><b>${tx(c.span)}</b></span>
-        <span class="p-kv"><span>${t().cand.turns}</span><b>${t().cand.turnsN(c.turns)}</b></span>
-        <span class="p-kv"><span>${t().cand.last}</span><b>${tx(c.last)}</b></span>
-      </div>
-      <div class="p-rule"></div>
-      <div class="p-acts">
-        <button class="mrow mrow-key" type="button" data-hire${c.live ? " disabled" : ""}>${I.plus}${t().cand.hire}</button>
-        ${c.live ? `<p class="p-why">${t().cand.busyWhy}</p>` : ""}
-        <button class="mrow" type="button" data-away>${I.away}${t().cand.away}</button>
-      </div>`;
-    pop.setAttribute("aria-label", t().cand.of(folderName(c.folder), tx(c.first)));
-    drawAvatar(pop.querySelector("canvas"), c.species);
-    pop.querySelector("[data-hire]").addEventListener("click", () => {
-      close();
-      hireAt(null, c);
-    });
-    pop.querySelector("[data-away]").addEventListener("click", () => {
-      close();
-      sentAway.add(c.id);
-      drawPlaza();
-    });
-    anchor = el;
-    pop.setAttribute("data-open", "");
-    place(el);
-    if (viaKey) pop.querySelector(".mrow:not(:disabled)")?.focus({ preventScroll: true });
-  }
-
-  function openBoard() {
-    close();
-    const b = t().board;
-    const scrim = document.createElement("div");
-    scrim.className = "scrim";
-    scrim.innerHTML = `<div class="modal board" role="dialog" aria-modal="true" aria-label="${b.title}">
-      <div class="m-hd"><span style="flex:1;min-width:0"><span class="m-t">${b.title}</span><span class="m-s">${b.sub}</span></span>
-        <button class="ibtn" type="button" data-close aria-label="${b.close}">${I.x}</button></div>
-      <div class="m-sec">
-        <input class="input" type="search" data-find placeholder="${b.search}" aria-label="${b.search}" autocomplete="off" />
-        <div class="opts" role="radiogroup" aria-label="${b.all}" style="margin-top:10px" data-filter></div>
-        <div class="board-list" data-list></div>
-      </div>
-      <div class="m-foot"><span class="board-note" data-note></span><button class="btn btn-secondary btn-md" type="button" data-close>${b.close}</button></div>
-    </div>`;
-    document.body.append(scrim);
-    const $ = (sel) => scrim.querySelector(sel);
-    let filter = "all";
-    const shut = () => {
-      scrim.remove();
-      document.removeEventListener("keydown", onKey);
-    };
-    const onKey = (e) => e.key === "Escape" && scrim === [...document.querySelectorAll(".scrim")].at(-1) && shut();
-    document.addEventListener("keydown", onKey);
-    scrim.addEventListener("pointerdown", (e) => e.target === scrim && shut());
-    scrim.querySelectorAll("[data-close]").forEach((x) => x.addEventListener("click", shut));
-
-    function fill() {
-      const all = waiting();
-      const find = $("[data-find]").value.trim().toLowerCase();
-      const counts = { all: all.length, free: all.filter((c) => !c.live).length, busy: all.filter((c) => c.live).length };
-      $("[data-filter]").innerHTML = ["all", "free", "busy"]
-        .map((k) => `<button class="opt" type="button" role="radio" data-f="${k}" aria-checked="${filter === k}">${k === "all" ? b.all : t().cand[k]} ${counts[k]}</button>`)
-        .join("");
-      $("[data-filter]").querySelectorAll("[data-f]").forEach((x) => x.addEventListener("click", () => ((filter = x.dataset.f), fill())));
-      const list = all
-        .filter((c) => filter === "all" || (filter === "busy") === Boolean(c.live))
-        .filter((c) => !find || c.folder.toLowerCase().includes(find) || tx(c.first).toLowerCase().includes(find));
-      $("[data-list]").innerHTML = list.length
-        ? list
-            .map(
-              (c) => `<div class="board-row"><canvas aria-hidden="true" width="36" height="36" data-av="${c.species}"></canvas>
-                <span class="board-tx"><b>${tx(c.first)}</b><span>${c.live ? t().cand.busyLine + " · " : ""}${b.meta({ folder: c.folder, span: tx(c.span), turns: c.turns })}</span></span>
-                <span class="board-acts"><button class="ibtn ibtn-sm" type="button" data-away="${c.id}" aria-label="${b.away}" title="${b.away}">${I.away}</button>
-                <button class="btn btn-secondary btn-sm" type="button" data-hire="${c.id}"${c.live ? ` disabled` : ""}>${b.hire}</button></span></div>`,
-            )
-            .join("")
-        : `<p class="hint">${all.length === 0 ? b.allAway : b.none}</p>`;
-      $("[data-list]").querySelectorAll("[data-av]").forEach((cv) => drawAvatar(cv, cv.dataset.av));
-      $("[data-list]").querySelectorAll("[data-hire]").forEach((x) =>
-        x.addEventListener("click", () => {
-          shut();
-          hireAt(null, CANDIDATES.find((c) => c.id === x.dataset.hire));
-        }),
-      );
-      $("[data-list]").querySelectorAll("[data-away]").forEach((x) =>
-        x.addEventListener("click", () => {
-          sentAway.add(x.dataset.away);
-          drawPlaza();
-          fill();
-        }),
-      );
-      $("[data-note]").innerHTML = sentAway.size ? `${b.sent(sentAway.size)} · <button class="btn btn-ghost btn-sm" type="button" data-recall>${b.recall}</button>` : "";
-      $("[data-recall]")?.addEventListener("click", () => {
-        sentAway.clear();
-        drawPlaza();
-        fill();
-      });
-    }
-    $("[data-find]").addEventListener("input", fill);
-    fill();
-    $("[data-find]").focus({ preventScroll: true });
-  }
-  document.getElementById("plazaBoard").addEventListener("click", openBoard);
-
   /* ── anchored popover ────────────────────────────────────────── */
   const I = {
     plug: PLUG,
@@ -936,8 +636,6 @@
     info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 7.3v4M8 5.1v.1"/></svg>',
     sun: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.6"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1"/></svg>',
     undo: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 3.8v3.4h3.4"/><path d="M4 7.2a4.6 4.6 0 1 1 .8 4.4"/></svg>',
-    away: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5l4.5 4.5-4.5 4.5M14 8H4.5"/></svg>',
-    x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
   };
 
   // Only transitions the domain allows from this state. The first row is the
@@ -1070,7 +768,7 @@
 
   function close() {
     pop.removeAttribute("data-open");
-    document.querySelectorAll("[data-id], [data-cand]").forEach((n) => n.setAttribute("aria-expanded", "false"));
+    document.querySelectorAll("[data-id]").forEach((n) => n.setAttribute("aria-expanded", "false"));
     anchor = null;
   }
 
@@ -1078,7 +776,7 @@
     // The anchor closes itself on the click that follows; closing here first
     // would clear it and let that click reopen the popover.
     if (!anchor || pop.contains(e.target) || anchor.contains(e.target)) return;
-    if (!e.target.closest("[data-id], [data-cand]")) close();
+    if (!e.target.closest("[data-id]")) close();
   });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape" || !anchor) return;
