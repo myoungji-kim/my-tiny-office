@@ -544,6 +544,10 @@ const WORDS = {
       offWhy: "하던 업무와 기억은 그대로예요. 터미널에서 claude auth login을 실행한 뒤 다시 확인해 주세요. 그때까지 새 업무는 시작하지 않아요.",
       recheck: "다시 확인", cannotStart: "Claude Code가 멈춰서 지금은 새 업무를 시작할 수 없어요.",
     },
+    elsewhere: {
+      title: "다른 곳에서 켜진 My Tiny Office가 일을 맡고 있어요",
+      why: "이 창에서도 사무실을 보고 업무를 맡길 수 있어요. 일은 저쪽에서 진행돼요. 저쪽을 끄면 30초 안에 여기서 이어받아요.",
+    },
     status: { working: "업무 중", reviewing: "검토 중", available: "대기 중", leave: "휴가 중" },
     areas: { arch: "아키텍처", types: "타입 안정성", db: "데이터베이스", security: "보안", l10n: "로컬라이제이션", product: "기획", quality: "품질" },
     teams: { backend: "백엔드팀", frontend: "프론트엔드팀", planning: "기획팀", design: "디자인팀" },
@@ -612,6 +616,10 @@ const WORDS = {
       off: "Claude Code signed out",
       offWhy: "Tasks in progress and everything remembered are untouched. Run claude auth login in a terminal, then check again. Nothing new starts until then.",
       recheck: "Check again", cannotStart: "Claude Code has stopped, so nothing new can start right now.",
+    },
+    elsewhere: {
+      title: "Another My Tiny Office on this computer is doing the work",
+      why: "You can see the office and give work from here too. The work runs over there. Close it, and this one takes over within 30 seconds.",
     },
     status: { working: "Working", reviewing: "Reviewing", available: "Free", leave: "On leave" },
     areas: { arch: "Architecture", types: "Type safety", db: "Database", security: "Security", l10n: "Localization", product: "Product", quality: "Quality" },
@@ -1548,6 +1556,43 @@ function runtimeBack() {
   else mount();
 })();
 
+/* ═══ another server doing the work ═══ */
+// One server works a data directory at a time. Another one on the same data
+// (the desktop app with npm run dev beside it) shows the office and takes
+// work, and every screen says the work runs over there. ?work=elsewhere
+// turns the sample's state on from a link.
+const ELSEWHERE_KEY = "mto.elsewhere";
+const ELSEWHERE = {
+  on: (() => {
+    const asked = new URLSearchParams(location.search).get("work") === "elsewhere";
+    try {
+      if (asked) sessionStorage.setItem(ELSEWHERE_KEY, "on");
+      return sessionStorage.getItem(ELSEWHERE_KEY) === "on";
+    } catch {
+      return asked;
+    }
+  })(),
+};
+
+(() => {
+  const mount = () => {
+    const body = document.querySelector(".app .body");
+    if (!ELSEWHERE.on || !body) return;
+    const w = WORDS[uiLang()].elsewhere;
+    const line = document.createElement("div");
+    line.id = "elsewhereLine";
+    line.className = "notice";
+    line.innerHTML = `<span class="n-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="1.8" y="3.2" width="8.4" height="6.6" rx="1.2"/><path d="M5.8 12.8h8.4V6.2"/></svg></span>
+      <span class="n-tx"><b>${w.title}</b><span>${w.why}</span></span>`;
+    // below Claude Code's line when both are up: that one stops everything
+    const runtime = document.getElementById("runtimeLine");
+    if (runtime) runtime.after(line);
+    else body.prepend(line);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
+  else mount();
+})();
+
 /* ═══ copying a command ═══ */
 // Whichever screen shows a command, its copy button takes the command without
 // the prompt, one line each.
@@ -1630,7 +1675,7 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
 
     // The screens that show the company's Claude Code state. The switch sits
     // with them, and only where it changes something; reference pages have none.
-    const STATEFUL = ["office", "projects", "employees", "company", "settings"];
+    const STATEFUL = ["office", "projects", "employees", "company", "settings", "plaza"];
 
     for (const [ko, en, items] of GROUPS) {
       const label = document.createElement("span");
@@ -1644,7 +1689,7 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
         if (here === key) a.setAttribute("aria-current", "page");
         nav.append(a);
       }
-      if (items.some(([key]) => key === "office") && STATEFUL.includes(here)) nav.append(runtimeSwitch());
+      if (items.some(([key]) => key === "office") && STATEFUL.includes(here)) nav.append(runtimeSwitch(), elsewhereSwitch());
       nav.append(sep());
     }
 
@@ -1659,6 +1704,25 @@ const COMPANIES = [{ name: "My Tiny Office", open: true }, { name: "사이드 �
         setRuntimeOff(!RUNTIME.off);
         const u = new URL(location.href);
         u.searchParams.delete("claude");
+        location.href = u.toString();
+      });
+      return b;
+    }
+
+    function elsewhereSwitch() {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.state = "elsewhere";
+      b.className = "toggle";
+      b.textContent = lang === "en" ? "Working elsewhere" : "다른 곳에서 일하는 중";
+      b.setAttribute("aria-pressed", String(ELSEWHERE.on));
+      b.addEventListener("click", () => {
+        try {
+          if (ELSEWHERE.on) sessionStorage.removeItem(ELSEWHERE_KEY);
+          else sessionStorage.setItem(ELSEWHERE_KEY, "on");
+        } catch {}
+        const u = new URL(location.href);
+        u.searchParams.delete("work");
         location.href = u.toString();
       });
       return b;

@@ -804,6 +804,23 @@ It ends at the **first employee**, not at the company. A user dropped into an
 empty office has nothing to look at, and the office is the product. Every field
 says it can be changed later, because a first decision should not feel heavy.
 
+## When another server does the work
+
+One server works a data directory at a time (ARCHITECTURE.md › How work
+runs). Another one on the same data still shows the office and takes work.
+That happens with `npm run dev` beside the desktop app, or a server left
+running after the app was killed. Every screen of that other server says so
+in one line above its content, below Claude Code's line when both are up:
+
+> **다른 곳에서 켜진 My Tiny Office가 일을 맡고 있어요**
+> 이 창에서도 사무실을 보고 업무를 맡길 수 있어요. 일은 저쪽에서 진행돼요. 저쪽을
+> 끄면 30초 안에 여기서 이어받아요.
+
+- It is a plain notice rather than a warning: nothing is wrong, and nothing
+  here needs doing. It has no button.
+- It goes away by itself once this server takes the work over.
+- The mockup's bar turns it on with **다른 곳에서 일하는 중**, or `?work=elsewhere`.
+
 ## When the agent is unavailable
 
 Every employee works through Claude Code, so there is no fake work to fall

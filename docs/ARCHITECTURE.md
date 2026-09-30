@@ -58,8 +58,10 @@ names, so links never carry it. Two route handlers move files:
 The desktop app (`desktop/`) is an Electron window onto that same server, not a
 second architecture. Its main process:
 
-1. starts `next start` on `127.0.0.1:4317`, or a free port if that is taken, with
-   the computer's own Node, so `better-sqlite3` is never rebuilt for Electron;
+1. starts `next start` on `127.0.0.1:4317` with the computer's own Node, so
+   `better-sqlite3` is never rebuilt for Electron. If 4317 already answers as
+   My Tiny Office, a server left by an app that was killed, the window opens
+   onto that one instead. Any other program there moves it to a free port;
 2. shows the page in a sandboxed window;
 3. stops the server's process tree on quit.
 
