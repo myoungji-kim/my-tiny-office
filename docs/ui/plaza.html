@@ -199,7 +199,12 @@
     if (typeof v === "string") el.textContent = v;
   }
   document.getElementById("headSub").textContent = t().sub;
-  mountRoster(document.getElementById("members"), (p) => { location.href = "employees.html" + (lang === "en" ? "?lang=en" : "") + "#" + p.id; });
+  const renderMembers = () => {
+    const box = document.getElementById("members");
+    box.replaceChildren();
+    mountRoster(box, (p) => { location.href = "employees.html" + (lang === "en" ? "?lang=en" : "") + "#" + p.id; });
+  };
+  renderMembers();
 
   /* ── the scene ───────────────────────────────────────────────── */
   // The office's front wall with its door, the paving where candidates stand
@@ -427,7 +432,7 @@
           ...h, id: "p" + (STAFF.length + 1), status: "available", done: 0, reviews: 0, joined: "2026. 9. 26.",
           memories: brought?.memories ?? [], style: brought?.style ?? [],
         });
-        mountRoster(document.getElementById("members"), () => undefined);
+        renderMembers();
         document.getElementById("arrivedTitle").textContent = t().arrived(h.name);
         document.getElementById("arrivedBody").textContent = brought ? t().arrivedWith(brought.project, brought.memories.length + brought.style.length) : t().arrivedNew;
         const go = document.getElementById("arrivedGo");
