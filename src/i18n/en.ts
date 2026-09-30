@@ -875,7 +875,7 @@ export const en = {
     pickerUnavailable: "This computer has no folder dialog the app can open. Type the path instead.",
     pickerBusy: "A folder dialog is already open.",
     pickCancelled: "No folder was picked.",
-    folderInUse: "Someone is working in this folder, so it cannot change now. Try again once the task is done.",
+    folderInUse: "Work in this folder has not been applied yet, so it cannot change now. Approve or delete that work first.",
     projectHasNoFolder: "Choose a workspace to start it.",
     projectNotPlanned: "It has already started.",
     projectNotActive: "Only an active project can do that.",

@@ -74,8 +74,12 @@ export function editProject(
   return ctx.withTransaction(async () => {
     const project = await ctx.projects.findById(projectId);
     if (project === undefined) return { ok: false, reason: "projectNotFound" };
-    const running = (await ctx.tasks.findByCompany(project.companyId)).filter((t) => t.projectId === project.id && t.status === "working").length;
-    const edited = projectDomain.editProject(project, details, running);
+    // a task's work stays in the folder it was made in until it is applied
+    const ran = new Set((await ctx.runs.findByCompany(project.companyId)).map((r) => r.taskId as string));
+    const unapplied = (await ctx.tasks.findByCompany(project.companyId)).filter(
+      (t) => t.projectId === project.id && (t.status === "working" || (t.status !== "done" && ran.has(t.id))),
+    ).length;
+    const edited = projectDomain.editProject(project, details, unapplied);
     if (!edited.ok) return edited;
     await ctx.projects.save(edited.project);
     return { ok: true, value: { project: edited.project }, events: [] };

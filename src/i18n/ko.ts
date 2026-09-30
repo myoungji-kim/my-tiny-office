@@ -876,7 +876,7 @@ export const ko: Dictionary = {
     pickerUnavailable: "이 컴퓨터에서는 폴더 선택 창을 열 수 없어요. 경로를 직접 입력해 주세요.",
     pickerBusy: "폴더 선택 창이 이미 열려 있어요.",
     pickCancelled: "폴더를 고르지 않았어요.",
-    folderInUse: "직원이 이 폴더에서 일하는 중이라 지금은 바꿀 수 없어요. 업무가 끝난 뒤 다시 해 주세요.",
+    folderInUse: "이 폴더에 아직 반영하지 않은 업무가 있어서 지금은 바꿀 수 없어요. 그 업무를 승인하거나 지운 뒤 바꿔 주세요.",
     projectHasNoFolder: "프로젝트 폴더를 정해야 시작할 수 있어요.",
     projectNotPlanned: "이미 시작한 프로젝트예요.",
     projectNotActive: "진행 중인 프로젝트에서만 할 수 있어요.",

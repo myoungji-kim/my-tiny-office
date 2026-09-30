@@ -167,12 +167,12 @@ export interface ProjectDetails {
 
 export type EditProjectFailure = CreateProjectFailure | "folderInUse";
 
-// A project's details can change at any time, except its folder while work is
-// running in it: the runs already have their worktrees there.
+// A project's details can change at any time, except its folder while work
+// made in it is not applied yet: that work lives in worktrees there.
 export function editProject(
   project: Project,
   details: ProjectDetails,
-  running: number,
+  unapplied: number,
 ): { readonly ok: true; readonly project: Project } | { readonly ok: false; readonly reason: EditProjectFailure } {
   const name = details.name.trim();
   if (name === "") return { ok: false, reason: "projectNameRequired" };
@@ -181,7 +181,7 @@ export function editProject(
   if (commands.length > MAX_COMMANDS) return { ok: false, reason: "tooManyCommands" };
   const writes = writesOf(details.atlassian, details.writes);
   if (!writes.every(isAtlassianWrite)) return { ok: false, reason: "writeNotAllowable" };
-  if (details.folder !== project.folder && running > 0) return { ok: false, reason: "folderInUse" };
+  if (details.folder !== project.folder && unapplied > 0) return { ok: false, reason: "folderInUse" };
   return {
     ok: true,
     // the dialog shows the folder and its boundary, so saving it is choosing it

@@ -1,13 +1,15 @@
 import { assert, beforeEach, describe, expect, it } from "vitest";
 
-import { toCompanyId, toEventId, type AreaId, type ProjectId } from "../domain/ids";
+import { toAgentId, toCompanyId, toEventId, toRunId, type AreaId, type ProjectId } from "../domain/ids";
+import { NO_OWN } from "../domain/project";
+import { startRun } from "../domain/run";
 import { blockTask } from "../domain/task";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
 import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
-import { allowCommand, createProject, holdProject, resumeProject, startProject } from "./project";
+import { allowCommand, createProject, editProject, holdProject, resumeProject, startProject } from "./project";
 import { askForReview, suggestReview } from "./review";
 import { createTask, pickUpWork } from "./task";
 import { createTestContext, firstRole } from "./test-context";
@@ -97,5 +99,22 @@ describe("allowing a command", () => {
     expect(allowed.value.project.commands).toEqual(["npm test", "npm run typecheck"]);
     await expect(ctx.tasks.findById(webhook.id)).resolves.toMatchObject({ status: "working", blocker: undefined });
     expect(allowed.events.map((e) => e.type)).toEqual(["ProjectCommandAllowed", "TaskUnblocked"]);
+  });
+});
+
+describe("editProject", () => {
+  it("keeps the folder while work made in it waits to be applied", async () => {
+    const mocha = await hire("모카");
+    const made = await createTask(ctx, { companyId, projectId: pay, title: "Paginate", priority: "normal", assigneeId: mocha.id });
+    assert(made.ok);
+    const agent = { id: toAgentId("a"), companyId, employeeId: mocha.id, runtime: "claudeCode" as const, createdAt: 0 };
+    await ctx.agents.save(agent);
+    await ctx.runs.save(startRun({ id: toRunId("r"), agent, taskId: made.value.task.id, sessionId: undefined }, 0));
+    await ctx.tasks.save({ ...made.value.task, status: "approval" });
+    const details = { name: "결제 개편", description: undefined, folder: "/code/other", commands: [], atlassian: false, writes: [], own: NO_OWN, priority: "high" as const };
+
+    await expect(editProject(ctx, pay, details)).resolves.toMatchObject({ ok: false, reason: "folderInUse" });
+    await ctx.tasks.save({ ...made.value.task, status: "done" });
+    await expect(editProject(ctx, pay, details)).resolves.toMatchObject({ ok: true });
   });
 });
