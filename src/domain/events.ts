@@ -39,6 +39,10 @@ export interface EmployeeReturned extends EmployeeEvent {
   readonly type: "EmployeeReturned";
 }
 
+export interface EmployeeLeft extends EmployeeEvent {
+  readonly type: "EmployeeLeft";
+}
+
 interface ProjectEvent extends DomainEventBase {
   readonly projectId: ProjectId;
   readonly projectName: string;
@@ -198,6 +202,7 @@ export type DomainEvent =
   | EmployeeMoved
   | EmployeeWentOnLeave
   | EmployeeReturned
+  | EmployeeLeft
   | ProjectCreated
   | ProjectStarted
   | ProjectHeld

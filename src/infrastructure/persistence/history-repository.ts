@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import type { MilestoneRepository, ReviewRepository } from "../../application/repositories";
 import { toCompanyId, toEmployeeId, toMilestoneId, toProjectId, toReviewId, toTaskId, toTeamId } from "../../domain/ids";
@@ -64,6 +64,8 @@ function toMilestone(row: typeof milestones.$inferSelect): RecordedMilestone | u
       return row.employeeId === null || row.employeeName === null
         ? undefined
         : { ...base, kind: "joined", employeeId: toEmployeeId(row.employeeId), employeeName: row.employeeName, first: row.first === true };
+    case "left":
+      return row.employeeId === null || row.employeeName === null ? undefined : { ...base, kind: "left", employeeId: toEmployeeId(row.employeeId), employeeName: row.employeeName };
     case "teamFormed":
       return row.teamId === null ? undefined : { ...base, kind: "teamFormed", teamId: toTeamId(row.teamId) };
     case "tasksDone":
@@ -104,6 +106,9 @@ export function createSqliteMilestoneRepository(db: AppDatabase): MilestoneRepos
           projectName: "projectName" in milestone ? milestone.projectName : null,
         })
         .run();
+    },
+    async removeJoined(employeeId) {
+      db.delete(milestones).where(and(eq(milestones.kind, "joined"), eq(milestones.employeeId, employeeId))).run();
     },
   };
 }

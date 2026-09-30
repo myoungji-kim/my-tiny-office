@@ -14,6 +14,7 @@ const person = (id: string, status: EmployeeView["status"], teamId?: string): Em
   hiredAt: 0,
   finished: 0,
   reviewed: 0,
+  worked: false,
   status,
   agentLost: false,
   task: undefined,

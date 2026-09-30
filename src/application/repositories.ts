@@ -18,6 +18,7 @@ export interface EmployeeRepository {
   findById(id: EmployeeId): Promise<Employee | undefined>;
   findByCompany(companyId: CompanyId): Promise<readonly Employee[]>;
   save(employee: Employee): Promise<void>;
+  remove(id: EmployeeId): Promise<void>;
 }
 
 export interface ProjectRepository {
@@ -59,10 +60,11 @@ export interface ReviewRepository {
   removeByTask(taskId: TaskId): Promise<void>;
 }
 
-// History is only ever added to.
+// History is only ever added to, but for the hire of someone who did nothing.
 export interface MilestoneRepository {
   findByCompany(companyId: CompanyId): Promise<readonly RecordedMilestone[]>;
   add(milestone: RecordedMilestone): Promise<void>;
+  removeJoined(employeeId: EmployeeId): Promise<void>;
 }
 
 export interface MemoryRepository {
@@ -74,6 +76,7 @@ export interface MemoryRepository {
 export interface AgentRepository {
   findByCompany(companyId: CompanyId): Promise<readonly Agent[]>;
   save(agent: Agent): Promise<void>;
+  removeByEmployee(employeeId: EmployeeId): Promise<void>;
 }
 
 export interface RunRepository {

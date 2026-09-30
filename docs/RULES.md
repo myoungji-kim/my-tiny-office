@@ -331,12 +331,15 @@ The feed should consume domain events.
 ## Progression
 
 The company's history records milestones as they happen, not reconstructed
-later, so a hire stays in it after the person leaves:
+later, so a hire stays in it after the person leaves. The one exception is
+someone let go whose agent never ran: they leave no trace, their hire
+included.
 
 | Milestone | When |
 | --- | --- |
 | 창업 | The company is created |
 | 합류 | Every hire; the first is called out |
+| 떠남 | Someone who worked is let go |
 | 팀 생김 | A team gets its first member |
 | 첫 업무 완료 | Once, company-wide |
 | 업무 N건 | 10 · 50 · 100 · 500 |

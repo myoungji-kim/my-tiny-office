@@ -140,14 +140,15 @@ export function sendOnLeave(ctx: AppContext, employeeId: EmployeeId): Promise<Em
 
 // Letting someone go returns their work to the backlog, gives back any review
 // they were asked for, and what they were taught leaves with them. The
-// history keeps their hire, and their past work keeps their name.
+// history keeps their hire and that they left, and their past work keeps
+// their name; someone who never worked leaves no trace at all.
 export function letGo(ctx: AppContext, employeeId: EmployeeId): Promise<EmployeeResult<"employeeNotFound" | "employeeGone">> {
   return ctx.withTransaction(async () => {
     const employee = await ctx.employees.findById(employeeId);
     if (employee === undefined) return { ok: false, reason: "employeeNotFound" };
-    const gone = employeeDomain.letGo(employee);
-    if (!gone.ok) return gone;
     const now = ctx.now();
+    const gone = employeeDomain.letGo(employee, toEventId(ctx.newId()), now);
+    if (!gone.ok) return gone;
 
     const events: DomainEvent[] = [];
     const returned = [];
@@ -177,8 +178,19 @@ export function letGo(ctx: AppContext, employeeId: EmployeeId): Promise<Employee
       if (memory.employeeId === employee.id) await ctx.memories.remove(memory.id);
     }
 
+    const worked = employeeDomain.hasWorked(employee.id, await ctx.agents.findByCompany(employee.companyId), await ctx.runs.findByCompany(employee.companyId));
+    const named =
+      (await ctx.tasks.findByCompany(employee.companyId)).some((t) => t.assigneeId === employee.id || t.reviewerId === employee.id) ||
+      (await ctx.reviews.findByCompany(employee.companyId)).some((r) => r.reviewerId === employee.id);
+    if (!worked && !named) {
+      await ctx.agents.removeByEmployee(employee.id);
+      await ctx.milestones.removeJoined(employee.id);
+      await ctx.employees.remove(employee.id);
+      return { ok: true, value: { employee: gone.employee }, events };
+    }
     await ctx.employees.save(gone.employee);
-    return { ok: true, value: { employee: gone.employee }, events };
+    await recordMilestones(ctx, employee.companyId, gone.events);
+    return { ok: true, value: { employee: gone.employee }, events: [...events, ...gone.events] };
   });
 }
 

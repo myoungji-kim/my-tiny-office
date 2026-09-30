@@ -7,6 +7,7 @@ import type { Timestamp } from "./time";
 export type Milestone =
   | { readonly kind: "founded" }
   | { readonly kind: "joined"; readonly employeeId: EmployeeId; readonly employeeName: string; readonly first: boolean }
+  | { readonly kind: "left"; readonly employeeId: EmployeeId; readonly employeeName: string }
   | { readonly kind: "teamFormed"; readonly teamId: TeamId }
   | { readonly kind: "firstTaskDone" }
   | { readonly kind: "tasksDone"; readonly count: number }
@@ -53,7 +54,8 @@ export function alreadyRecorded(milestone: Milestone, history: readonly Mileston
     case "teamFormed":
       return history.some((m) => m.kind === "teamFormed" && m.teamId === milestone.teamId);
     case "joined":
-      return history.some((m) => m.kind === "joined" && m.employeeId === milestone.employeeId);
+    case "left":
+      return history.some((m) => m.kind === milestone.kind && m.employeeId === milestone.employeeId);
     case "projectFinished":
       return false;
   }
@@ -70,6 +72,8 @@ export function milestonesFor(event: DomainEvent, facts: CompanyFacts): Mileston
       ];
     case "EmployeeMoved":
       return teamFormedBy(event.teamId, facts);
+    case "EmployeeLeft":
+      return [{ kind: "left", employeeId: event.employeeId, employeeName: event.employeeName }];
     case "TaskApplied": {
       const count = facts.tasksApplied;
       return [

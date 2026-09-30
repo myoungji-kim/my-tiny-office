@@ -1,6 +1,7 @@
 import { assert, beforeEach, describe, expect, it } from "vitest";
 
-import { toAreaId, toCompanyId, toRoleId, toTeamId } from "../domain/ids";
+import { toAgentId, toAreaId, toCompanyId, toRoleId, toRunId, toTeamId } from "../domain/ids";
+import { startRun } from "../domain/run";
 
 import { createCompany } from "./company";
 import type { AppContext } from "./context";
@@ -117,6 +118,9 @@ describe("letGo", () => {
     assert((await pickUpWork(ctx, companyId)).ok);
     assert((await teachMemory(ctx, { companyId, kind: "style", employeeId: mocha.value.employee.id, text: "Small commits" })).ok);
     assert((await teachMemory(ctx, { companyId, kind: "company", text: "Korean first" })).ok);
+    const agent = { id: toAgentId("a"), companyId, employeeId: mocha.value.employee.id, runtime: "claudeCode" as const, createdAt: now };
+    await ctx.agents.save(agent);
+    await ctx.runs.save(startRun({ id: toRunId("r"), agent, taskId: work.value.task.id, sessionId: undefined }, now));
 
     assert((await letGo(ctx, mocha.value.employee.id)).ok);
     assert((await letGo(ctx, bori.value.employee.id)).ok);
@@ -125,6 +129,11 @@ describe("letGo", () => {
     expect((await ctx.memories.findByCompany(companyId)).map((m) => m.text)).toEqual(["Korean first"]);
     await expect(ctx.employees.findById(mocha.value.employee.id)).resolves.toMatchObject({ name: "모카", availability: "left" });
     await expect(letGo(ctx, mocha.value.employee.id)).resolves.toEqual({ ok: false, reason: "employeeGone" });
+    // the history keeps both that they joined and that they left
+    expect((await ctx.milestones.findByCompany(companyId)).filter((m) => "employeeId" in m && m.employeeId === mocha.value.employee.id).map((m) => m.kind)).toEqual(["joined", "left"]);
+    // 보리 never worked, and goes without a trace
+    await expect(ctx.employees.findById(bori.value.employee.id)).resolves.toBeUndefined();
+    expect((await ctx.milestones.findByCompany(companyId)).some((m) => "employeeId" in m && m.employeeId === bori.value.employee.id)).toBe(false);
     // nobody let go picks work up again
     assert((await pickUpWork(ctx, companyId)).ok);
     await expect(ctx.tasks.findById(work.value.task.id)).resolves.toMatchObject({ status: "backlog" });

@@ -31,6 +31,9 @@ export function createSqliteAgentRepository(db: AppDatabase): AgentRepository {
       const row = { companyId: agent.companyId, employeeId: agent.employeeId, runtime: agent.runtime, createdAt: agent.createdAt };
       db.insert(agents).values({ id: agent.id, ...row }).onConflictDoUpdate({ target: agents.id, set: row }).run();
     },
+    async removeByEmployee(employeeId) {
+      db.delete(agents).where(eq(agents.employeeId, employeeId)).run();
+    },
   };
 }
 

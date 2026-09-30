@@ -523,7 +523,9 @@ button; no dialog. The `⋯` is off while it is being done.
   their task goes back to the backlog, a review they held is given back, a
   task naming them as reviewer names nobody, and what they were taught leaves
   with them. They stay only as a name (`availability: left`), on what they
-  did and in the history, and in no list.
+  did and in the history, which adds that they left, and in no list. Someone
+  whose agent never ran is removed outright, their hire in the history too,
+  and the dialog says so.
 
 Where a task sits keeps following from who is on it: give a queued task to
 someone free and it starts; take the assignee away from one in progress and it

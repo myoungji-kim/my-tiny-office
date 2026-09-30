@@ -49,6 +49,7 @@ const I: Readonly<Record<string, ReactNode>> = {
 const ICON: Readonly<Record<MilestoneView["kind"], string>> = {
   founded: "flag",
   joined: "person",
+  left: "person",
   teamFormed: "team",
   firstTaskDone: "task",
   tasksDone: "task",
@@ -66,6 +67,8 @@ function sentence(m: MilestoneView, t: Dictionary, teams: readonly TeamView[]): 
       return w.founded;
     case "joined":
       return m.first ? w.joinedFirst(m.employeeName) : w.joined(m.employeeName);
+    case "left":
+      return w.left(m.employeeName);
     case "teamFormed": {
       const team = teams.find((x) => x.id === m.teamId);
       return team === undefined ? w.aTeamFormed : w.teamFormed(teamName(team, t.teams));

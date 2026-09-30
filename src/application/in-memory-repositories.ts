@@ -57,6 +57,9 @@ export function createInMemoryEmployeeRepository(): EmployeeRepository {
     async save(employee) {
       employees.set(employee.id, employee);
     },
+    async remove(id) {
+      employees.delete(id);
+    },
   };
 }
 
@@ -95,7 +98,7 @@ export function createInMemoryReviewRepository(): ReviewRepository {
 }
 
 export function createInMemoryMilestoneRepository(): MilestoneRepository {
-  const history: RecordedMilestone[] = [];
+  let history: RecordedMilestone[] = [];
   return {
     async findByCompany(companyId) {
       return history.filter((m) => m.companyId === companyId).sort((a, b) => a.at - b.at);
@@ -103,10 +106,16 @@ export function createInMemoryMilestoneRepository(): MilestoneRepository {
     async add(milestone) {
       history.push(milestone);
     },
+    async removeJoined(employeeId) {
+      history = history.filter((m) => !(m.kind === "joined" && m.employeeId === employeeId));
+    },
   };
 }
 
-export const createInMemoryAgentRepository = (): AgentRepository => createInMemoryList<AgentId, Agent>();
+export function createInMemoryAgentRepository(): AgentRepository {
+  const list = createInMemoryList<AgentId, Agent>();
+  return { ...list, removeByEmployee: (employeeId) => list.removeWhere((a) => a.employeeId === employeeId) };
+}
 
 export function createInMemoryRunRepository(): RunRepository {
   const runs = new Map<string, Run>();

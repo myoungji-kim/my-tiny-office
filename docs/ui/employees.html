@@ -336,7 +336,8 @@
       tabs: { list: "목록", org: "조직도", memory: "기억" },
       editInfo: "정보 바꾸기", sendOnLeave: "휴가 보내기", comeBack: "복귀 처리", dismiss: "떠나보내기", keepThem: "계속 두기",
       leaveWhy: (task) => "‘" + task + "’" + (hasBatchim(task) ? "은" : "는") + " 대기열로 돌아가요.",
-      dismissWhy: "맡은 업무는 대기열로 돌아가고, 알려준 기억도 함께 떠나요. 회사 연혁의 합류 기록은 남아요.",
+      dismissWhy: "맡은 업무는 대기열로 돌아가고, 알려준 기억도 함께 떠나요. 회사 연혁에는 합류와 떠난 기록이 남아요.",
+      dismissUnused: "아직 한 일이 없어서 흔적 없이 지워져요. 알려준 기억과 연혁의 합류 기록도 함께 사라져요.",
       noTeam: "팀 없음", leaveTeam: "팀에서 빼기", teamMenu: "팀 메뉴", personMenu: "직원 메뉴", addTeam: "팀 추가", renameTeam: "이름 바꾸기",
       teamName: "팀 이름", teamPlaceholder: "예: 결제팀", nameTaken: "이미 있는 이름이에요.",
       moveInto: (team) => withParticle(team, "으로", "로") + " 옮기기", moveToTeam: "옮길 팀", moveAndRemove: "옮기고 지우기",
@@ -386,7 +387,8 @@
       tabs: { list: "List", org: "Org chart", memory: "Memory" },
       editInfo: "Edit details", sendOnLeave: "Send on leave", comeBack: "Bring back", dismiss: "Let them go", keepThem: "Keep them",
       leaveWhy: (task) => "‘" + task + "’ goes back to the backlog.",
-      dismissWhy: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire.",
+      dismissWhy: "Their task goes back to the backlog and what you taught them leaves with them. The company's history keeps their hire and that they left.",
+      dismissUnused: "They have not done any work yet, so they go without a trace: what you taught them and their hire in the history go too.",
       noTeam: "No team", leaveTeam: "Take off the team", teamMenu: "Team actions", personMenu: "Person actions", addTeam: "Add a team", renameTeam: "Rename",
       teamName: "Team name", teamPlaceholder: "e.g. Payments", nameTaken: "That name is taken.",
       moveInto: (team) => "Move to " + team, moveToTeam: "Move them to", moveAndRemove: "Move and delete",
@@ -775,7 +777,8 @@
           } },
       {
         label: t().dismiss, icon: ICON.trash, bad: true,
-        confirm: t().dismissWhy,
+        // someone who never worked leaves nothing behind
+        confirm: p.done + p.reviews === 0 && !p.task && !p.review ? t().dismissUnused : t().dismissWhy,
         run: () => {
           people.splice(people.indexOf(p), 1);
           renderMembers();

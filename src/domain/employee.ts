@@ -1,4 +1,4 @@
-import type { EmployeeHired, EmployeeMoved, EmployeeReturned, EmployeeWentOnLeave } from "./events";
+import type { EmployeeHired, EmployeeLeft, EmployeeMoved, EmployeeReturned, EmployeeWentOnLeave } from "./events";
 import type { CompanyId, EmployeeId, EventId, RoleId, TeamId } from "./ids";
 import { checkName, type NameFailure } from "./name";
 import type { Timestamp } from "./time";
@@ -127,9 +127,20 @@ export function goOnLeave(
   };
 }
 
-export function letGo(employee: Employee): { readonly ok: true; readonly employee: Employee } | { readonly ok: false; readonly reason: "employeeGone" } {
+export function letGo(employee: Employee, eventId: EventId, now: Timestamp): LeaveTransition<EmployeeLeft, "employeeGone"> {
   if (employee.availability === "left") return { ok: false, reason: "employeeGone" };
-  return { ok: true, employee: { ...employee, availability: "left", leaveSince: undefined } };
+  return {
+    ok: true,
+    employee: { ...employee, availability: "left", leaveSince: undefined },
+    events: [{ eventId, type: "EmployeeLeft", occurredAt: now, companyId: employee.companyId, employeeId: employee.id, employeeName: employee.name }],
+  };
+}
+
+// Someone whose agent never ran did nothing the company keeps: letting them
+// go leaves no trace of them, their hire included.
+export function hasWorked(employeeId: EmployeeId, agents: readonly { readonly id: string; readonly employeeId: EmployeeId }[], runs: readonly { readonly agentId: string }[]): boolean {
+  const theirs = new Set(agents.filter((a) => a.employeeId === employeeId).map((a) => a.id));
+  return runs.some((r) => theirs.has(r.agentId));
 }
 
 export function returnFromLeave(

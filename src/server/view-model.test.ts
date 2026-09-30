@@ -125,6 +125,7 @@ describe("loadOffice", () => {
         hiredAt: expect.any(Number),
         finished: 0,
         reviewed: 0,
+        worked: false,
         status: "available",
         agentLost: false,
         task: undefined,

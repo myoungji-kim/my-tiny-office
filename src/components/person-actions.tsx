@@ -95,7 +95,7 @@ export function PersonActions({
             label: w.dismiss,
             icon: Icon.trash,
             bad: true,
-            confirm: w.dismissWhy,
+            confirm: person.worked ? w.dismissWhy : w.dismissUnused,
             run: () =>
               start(async () => {
                 const result = await letGoAction(companyId, person.id);

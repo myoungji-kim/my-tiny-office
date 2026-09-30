@@ -69,5 +69,9 @@ export function createSqliteEmployeeRepository(db: AppDatabase): EmployeeReposit
         .onConflictDoUpdate({ target: employees.id, set: updatable })
         .run();
     },
+
+    async remove(id) {
+      db.delete(employees).where(eq(employees.id, id)).run();
+    },
   };
 }

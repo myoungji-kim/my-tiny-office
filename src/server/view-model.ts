@@ -1,4 +1,5 @@
 import type { Company } from "../domain/company";
+import { hasWorked } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import type { AtlassianWrite, Priority, ProjectStatus } from "../domain/project";
 import { liveReviews, statusOf, type EmployeeStatus } from "../domain/review";
@@ -40,6 +41,8 @@ export interface EmployeeView {
   readonly leaveSince: number | undefined;
   readonly finished: number;
   readonly reviewed: number;
+  // their agent has run: letting them go keeps their record
+  readonly worked: boolean;
   // where a hire with experience came from, and how much of it they brought
   readonly career: { readonly folder: string; readonly from: number; readonly to: number; readonly brought: number } | undefined;
 }
@@ -219,6 +222,8 @@ export async function loadOffice(
   const areas = await ctx.areas.findByCompany(company.id);
   const memories = await ctx.memories.findByCompany(company.id);
   const milestones = await ctx.milestones.findByCompany(company.id);
+  const agents = await ctx.agents.findByCompany(company.id);
+  const runs = await ctx.runs.findByCompany(company.id);
   const weekAgo = now - 7 * 24 * 60 * 60_000;
   const within = (at: number | undefined) => at !== undefined && at > weekAgo;
   const applied = tasks.filter((task) => task.status === "done");
@@ -269,6 +274,7 @@ export async function loadOffice(
       hiredAt: employee.hiredAt,
       finished: tasks.filter((task) => task.assigneeId === employee.id && task.status === "done").length,
       reviewed: reviews.filter((review) => review.reviewerId === employee.id && review.state === "settled").length,
+      worked: hasWorked(employee.id, agents, runs),
       status: statusOf(employee, tasks, reviews),
       agentLost: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "disconnected"),
       leaveSince: employee.leaveSince,

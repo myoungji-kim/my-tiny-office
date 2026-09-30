@@ -22,6 +22,7 @@ const reviewStates = ["suggested", "queued", "reviewing", "settled", "withdrawn"
 const milestoneKinds = [
   "founded",
   "joined",
+  "left",
   "teamFormed",
   "firstTaskDone",
   "tasksDone",

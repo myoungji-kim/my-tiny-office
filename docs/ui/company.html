@@ -288,6 +288,7 @@
         tasks: (m) => "완료한 업무가 " + m.n + "건을 넘었어요",
         firstReview: (m) => withParticle(m.who.name, "이", "가") + " 첫 검토를 마쳤어요",
         memories: (m) => "가르친 기억이 " + m.n + "개가 됐어요",
+        left: (m) => withParticle(m.who.name, "이", "가") + " 회사를 떠났어요",
         project: (m) => "‘" + m.name + "’ 프로젝트를 마쳤어요<span> · " + m.days + "일</span>",
       },
       areasTitle: "전문 분야", areasSub: "우리 회사가 다루는 분야예요. 직원에게 알려준 기억은 모두 이 중 하나에 속해요.",
@@ -335,6 +336,7 @@
         tasks: (m) => "Past " + m.n + " tasks done",
         firstReview: (m) => m.who.name + " finished the first review",
         memories: (m) => m.n + " memories taught",
+        left: (m) => m.who.name + " left the company",
         project: (m) => "Finished ‘" + m.name + "’<span> · " + m.days + " days</span>",
       },
       areasTitle: "Expertise", areasSub: "What this company works in. Every memory taught belongs to one of these.",
@@ -416,7 +418,9 @@
     { on: "2026. 4. 28.", kind: "memories", n: 10 },
     { on: "2026. 5. 8.", kind: "joined", who: "p4", nth: 5 },
     { on: "2026. 5. 29.", kind: "project", name: "로그인 개편", days: 45 },
+    { on: "2026. 6. 2.", kind: "joined", name: "호두", nth: 6 },
     { on: "2026. 6. 12.", kind: "tasks", n: 50 },
+    { on: "2026. 8. 14.", kind: "left", name: "호두" },
     { on: "2026. 9. 20.", kind: "tasks", n: 100 },
   ];
 
@@ -434,7 +438,7 @@
     trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 4.4h10.4M6.2 4.4V2.8h3.6v1.6M4.2 4.4l.7 8.8h6.2l.7-8.8"/></svg>',
     book: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 2.6h7.4L13 5.2v8.2H3z"/><path d="M5.4 6.4h5.2M5.4 9h5.2M5.4 11.2h3"/></svg>',
   };
-  const MILE_ICON = { founded: "flag", joined: "person", team: "team", firstTask: "task", tasks: "task", firstReview: "eye", memories: "book", project: "flag" };
+  const MILE_ICON = { founded: "flag", joined: "person", left: "person", team: "team", firstTask: "task", tasks: "task", firstReview: "eye", memories: "book", project: "flag" };
 
   const areasOf = (p) => [...new Set(p.memories.map((m) => m.area))];
   const sum = (f) => people.reduce((n, p) => n + f(p), 0);
@@ -529,7 +533,8 @@
 
   /* ── milestones ──────────────────────────────────────────────── */
   const mileRow = (m) => {
-    const facts = { ...m, who: m.who ? who(m.who) : null };
+    // someone who has left is only a name
+    const facts = { ...m, who: m.who ? who(m.who) : m.name ? { name: m.name } : null };
     return `<div class="mile">
       <span class="mile-date">${fmtDay.format(day(m.on))}</span>
       <span class="mile-ic">${ICON[MILE_ICON[m.kind]]}</span>
