@@ -171,6 +171,11 @@ export function HireDialog({
               autoComplete="off"
               value={name}
               placeholder={chosen?.name[locale]}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || e.nativeEvent.isComposing || !ready) return;
+                e.preventDefault();
+                hire();
+              }}
               onChange={(e) => setName(e.target.value)}
             />
             <span className="hint">{w.nameHint}</span>

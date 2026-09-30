@@ -241,6 +241,7 @@ export const ko: Dictionary = {
   people: {
     title: "직원",
     hire: "직원 고용",
+    noPeople: "아직 직원이 없어요. 위의 ‘직원 고용’으로 첫 동료를 뽑아 보세요.",
     headSub: (n: number, teams: number) => n + "명 · 팀 " + teams + "개",
     tabs: { list: "목록", org: "조직도" },
     backToList: "직원 목록",

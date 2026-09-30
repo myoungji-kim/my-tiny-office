@@ -322,7 +322,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      title: "직원", hire: "직원 고용", backToList: "직원 목록", teach: "기억 알려주기",
+      title: "직원", hire: "직원 고용", noPeople: "아직 직원이 없어요. 위의 ‘직원 고용’으로 첫 동료를 뽑아 보세요.", backToList: "직원 목록", teach: "기억 알려주기",
       ptabs: { overview: "개요", memory: "기억", style: "일하는 방식" },
       areaFilter: "분야", memMenu: "기억 메뉴",
       now: "지금", record: "기록", often: "자주 쓰는 기억", allMemory: "기억 전체 보기",
@@ -373,7 +373,7 @@
     },
     en: {
       ...WORDS.en,
-      title: "People", hire: "Hire", backToList: "All people", teach: "Teach",
+      title: "People", hire: "Hire", noPeople: "Nobody works here yet. Hire your first colleague with Hire above.", backToList: "All people", teach: "Teach",
       ptabs: { overview: "Overview", memory: "Memory", style: "How they work" },
       areaFilter: "Areas", memMenu: "Memory actions",
       now: "Now", record: "Record", often: "Used most", allMemory: "All memory",
@@ -519,6 +519,7 @@
   const roster = document.getElementById("roster");
   function renderRoster() {
     roster.replaceChildren();
+    if (people.length === 0) roster.innerHTML = `<p class="empty-line">${t().noPeople}</p>`;
     for (const p of people) {
       const areas = areasOf(p);
       const b = document.createElement("a");

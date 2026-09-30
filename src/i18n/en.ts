@@ -238,6 +238,7 @@ export const en = {
   people: {
     title: "People",
     hire: "Hire",
+    noPeople: "Nobody works here yet. Hire your first colleague with Hire above.",
     headSub: (n: number, teams: number) => n + (n === 1 ? " person" : " people") + " · " + teams + (teams === 1 ? " team" : " teams"),
     tabs: { list: "List", org: "Org chart" },
     backToList: "All people",

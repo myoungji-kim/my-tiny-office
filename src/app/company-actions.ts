@@ -7,6 +7,7 @@ import { addArea, removeArea, renameArea } from "../application/memory";
 import { addRole, removeRole, renameRole } from "../application/organisation";
 import { toAreaId, toCompanyId, toRoleId } from "../domain/ids";
 import { getCompanyFiles } from "../infrastructure/persistence/company-files";
+import { getWork } from "../infrastructure/work";
 import { readSettings, writeSettings } from "../infrastructure/persistence/settings";
 
 import { contextFor, inCompany, optional, str, type Outcome } from "./action-context";
@@ -52,6 +53,8 @@ export async function deleteCompanyAction(companyId: string, typedName: string):
 
   const files = getCompanyFiles();
   files.remove(company.id);
+  // its agents stop now, not at the next tick
+  void getWork().kick();
   const next = files.ids()[0];
   writeSettings(files.directory, { ...readSettings(files.directory), lastCompanyId: next });
   revalidatePath("/", "layout");

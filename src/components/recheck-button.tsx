@@ -14,7 +14,7 @@ const REFRESH = (
 );
 
 // Asks again rather than trusting the last answer, and re-renders with it.
-function RefreshButton({ label, busyLabel, doneLabel, disabled = false, act }: { readonly label: string; readonly busyLabel: string; readonly doneLabel: string; readonly disabled?: boolean; readonly act: () => Promise<void> }) {
+function RefreshButton({ label, busyLabel, doneLabel, disabled = false, act }: { readonly label: string; readonly busyLabel: string; readonly doneLabel: string; readonly disabled?: boolean; readonly act: () => Promise<boolean | void> }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   // it says it looked, so a check that found nothing new still reads as done
@@ -26,8 +26,8 @@ function RefreshButton({ label, busyLabel, doneLabel, disabled = false, act }: {
       disabled={disabled || pending}
       onClick={() =>
         start(async () => {
-          await act();
-          setDone(true);
+          // a check that failed did not look, and says so beside it
+          setDone((await act()) !== false);
           router.refresh();
         })
       }
@@ -48,7 +48,12 @@ export function ConnectorCheckButton({ label, busyLabel, doneLabel, failed, disa
   const [error, setError] = useState<string | undefined>(undefined);
   return (
     <>
-      <RefreshButton label={label} busyLabel={busyLabel} doneLabel={doneLabel} disabled={disabled} act={async () => setError((await checkConnectorsAction()).ok ? undefined : failed)} />
+      <RefreshButton label={label} busyLabel={busyLabel} doneLabel={doneLabel} disabled={disabled} act={async () => {
+          const { ok } = await checkConnectorsAction();
+          setError(ok ? undefined : failed);
+          return ok;
+        }}
+      />
       {error !== undefined && (
         <span className="hint" role="alert" style={{ margin: 0 }}>
           {error}

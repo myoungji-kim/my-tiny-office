@@ -64,6 +64,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
     >
       {view === "list" ? (
         <div className="list" id="roster">
+          {employees.length === 0 && <p className="empty-line">{w.noPeople}</p>}
           {employees.map((e) => (
             <Link key={e.id} className="row-item" href={`/people/${e.id}`}>
               <span className="r-av">
