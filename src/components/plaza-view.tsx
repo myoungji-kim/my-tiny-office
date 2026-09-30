@@ -122,8 +122,12 @@ export function PlazaView({
     anchor.current = null;
   }, []);
   useDismiss(open !== undefined, pop, anchor, close);
+  // opened from the keyboard, focus goes into the résumé, as in the office
+  const focusFirst = useRef(false);
   useLayoutEffect(() => {
-    if (open !== undefined && pop.current !== null && anchor.current !== null) place(pop.current, anchor.current);
+    if (open === undefined || pop.current === null || anchor.current === null) return;
+    place(pop.current, anchor.current);
+    if (focusFirst.current) pop.current.querySelector<HTMLElement>("button:not(:disabled), a[href]")?.focus({ preventScroll: true });
   }, [open]);
 
   const hide = (id: string) => {
@@ -192,6 +196,7 @@ export function PlazaView({
                     onClick={(e) => {
                       if (openId === c.id) return close();
                       anchor.current = e.currentTarget;
+                      focusFirst.current = e.detail === 0;
                       setOpenId(c.id);
                     }}
                   />
