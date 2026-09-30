@@ -53,6 +53,8 @@ export function PersonActions({
   const [open, setOpen] = useState<Open>(assignFirst && why === undefined ? "assign" : undefined);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | undefined>(undefined);
+  const say = (result: { readonly error?: string }) =>
+    setError(result.error === undefined ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
   const close = useCallback(() => {
     setOpen(undefined);
     if (assignFirst) router.replace(`/people/${person.id}`, { scroll: false });
@@ -84,12 +86,12 @@ export function PersonActions({
         items={[
           { label: w.editInfo, icon: Icon.pen, run: () => setOpen("edit") },
           away
-            ? { label: w.comeBack, icon: Icon.undo, run: () => start(async () => void (await bringBackAction(companyId, person.id))) }
+            ? { label: w.comeBack, icon: Icon.undo, run: () => start(async () => say(await bringBackAction(companyId, person.id))) }
             : {
                 label: w.sendOnLeave,
                 icon: Icon.sun,
                 confirm: person.task === undefined ? undefined : w.leaveWhy(person.task.title),
-                run: () => start(async () => void (await sendOnLeaveAction(companyId, person.id))),
+                run: () => start(async () => say(await sendOnLeaveAction(companyId, person.id))),
               },
           {
             label: w.dismiss,

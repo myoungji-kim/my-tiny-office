@@ -110,6 +110,13 @@ export function OrgChart({
       setError(result.error === undefined ? undefined : (t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown));
     });
 
+  const moves = (p: EmployeeView) => [
+    ...teams
+      .filter((team) => team.id !== p.teamId)
+      .map((team) => ({ label: w.moveInto(label(team)), icon: Icon.swap, run: () => act(() => moveEmployeeAction(companyId, p.id, team.id)) })),
+    ...(p.teamId === undefined ? [] : [{ label: w.leaveTeam, icon: Icon.x, run: () => act(() => moveEmployeeAction(companyId, p.id, undefined)) }]),
+  ];
+
   const personCard = (p: EmployeeView) => (
     <div key={p.id} className="tcard-wrap">
       <Link className="tcard" href={`/people/${p.id}`}>
@@ -123,16 +130,8 @@ export function OrgChart({
           <span className="t-role">{p.role}</span>
         </span>
       </Link>
-      <RowMenu
-        label={w.personMenu}
-        keep={w.keep}
-        items={[
-          ...teams
-            .filter((team) => team.id !== p.teamId)
-            .map((team) => ({ label: w.moveInto(label(team)), icon: Icon.swap, run: () => act(() => moveEmployeeAction(companyId, p.id, team.id)) })),
-          ...(p.teamId === undefined ? [] : [{ label: w.leaveTeam, icon: Icon.x, run: () => act(() => moveEmployeeAction(companyId, p.id, undefined)) }]),
-        ]}
-      />
+      {/* with no team to move to, there is nothing to offer */}
+      {moves(p).length > 0 && <RowMenu label={w.personMenu} keep={w.keep} items={moves(p)} />}
     </div>
   );
 

@@ -26,12 +26,16 @@ export interface WhoInput {
   readonly teamId: string | undefined;
 }
 
-export async function hireAction(companyId: string, input: WhoInput): Promise<Outcome> {
+export async function hireAction(companyId: string, input: WhoInput): Promise<Outcome & { readonly id?: string }> {
   const species = speciesOf(input.species);
   if (species === undefined) return { error: "speciesUnknown" };
-  return inCompany(companyId, (ctx, id) =>
-    hireEmployee(ctx, { companyId: id, name: str(input.name), species, roleId: toRoleId(str(input.roleId)), teamId: teamOf(input.teamId) }),
-  );
+  let hired: string | undefined;
+  const outcome = await inCompany(companyId, async (ctx, id) => {
+    const made = await hireEmployee(ctx, { companyId: id, name: str(input.name), species, roleId: toRoleId(str(input.roleId)), teamId: teamOf(input.teamId) });
+    if (made.ok) hired = made.value.employee.id;
+    return made;
+  });
+  return { ...outcome, id: hired };
 }
 
 export async function editEmployeeAction(companyId: string, employeeId: string, input: WhoInput): Promise<Outcome> {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { editEmployeeAction, hireAction } from "../app/people-actions";
@@ -62,6 +63,7 @@ export function HireDialog({
   readonly onClose: () => void;
 }) {
   const t = getDictionary(locale);
+  const router = useRouter();
   const w = t.hire;
   const [chosen, setChosen] = useState<CastMember | undefined>(edit !== undefined ? castMember(edit.species) : from !== undefined ? castMember(from.species) : undefined);
   const [brought, setBrought] = useState<Brought | undefined>(undefined);
@@ -109,8 +111,11 @@ export function HireDialog({
         setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
         return;
       }
-      if (result.id !== undefined) onHired?.(result.id, trimmed, brought);
       onClose();
+      if (result.id === undefined) return;
+      // their page opens next, where the first thing to do is teach them
+      if (onHired !== undefined) onHired(result.id, trimmed, brought);
+      else router.push(`/people/${result.id}`);
     });
 
   return (
