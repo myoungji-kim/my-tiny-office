@@ -153,7 +153,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
                 <div className="recheck">
                   <ConnectorCheckButton label={connectors === undefined ? w.toolsCheck : w.toolsRecheck} busyLabel={w.toolsChecking} doneLabel={t.claude.checkedNow} failed={w.toolsFailed} disabled={!isReady(status)} />
                 </div>
-                <p className="hint">{connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
+                <p className="hint">{!isReady(status) ? w.toolsNeedClaude : connectors === undefined ? w.toolsCost : w.toolsWhen(whenText(locale, connectors.checkedAt))}</p>
               </>,
             )}
           </>

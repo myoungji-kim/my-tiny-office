@@ -193,6 +193,8 @@ export function ProjectBoard({
     if (task.status === "held" && task.assigneeId !== undefined) acts.push({ label: w.actions.teach, then: { kind: "teach", task } });
     // Finished work is the record of what happened, so it is not rewritten.
     if ((task.status === "backlog" || task.status === "held") && writable) acts.push({ label: w.actions.edit, then: { kind: "edit", task, assignee: false } });
+    // a change to running work restarts the agent
+    if (task.status === "working" && writable) acts.push({ label: w.actions.edit, off: !ready, then: { kind: "edit", task, assignee: false } });
   }
   const gated = acts.some((a) => a.off === true);
 

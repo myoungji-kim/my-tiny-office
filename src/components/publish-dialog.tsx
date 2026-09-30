@@ -36,12 +36,13 @@ function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly
   const [pending, start] = useTransition();
   const first = useRef<HTMLInputElement>(null);
 
+  useEffect(() => first.current?.focus({ preventScroll: true }), []);
+  // while it is being sent the window stays, so what went wrong is not lost
   useEffect(() => {
-    first.current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !pending && onClose();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, pending]);
 
   // what stops it before anything is sent, in the order one would fix it
   const stop = draft.remote === undefined ? t.errors.noRemote : !draft.github ? t.errors.notGitHub : !draft.branchExists ? w.prGoneWhy(draft.branch) : draft.bases.length === 0 ? t.errors.baseNotFound : undefined;
@@ -54,7 +55,7 @@ function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly
     });
 
   return (
-    <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && !pending && onClose()}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={w.prTitle}>
         <div className="m-hd">
           <span style={{ flex: 1, minWidth: 0 }}>
@@ -122,7 +123,7 @@ function PublishDialog({ locale, companyId, taskId, draft, onClose }: { readonly
           )}
         </div>
         <div className="m-foot">
-          <button className="btn btn-secondary btn-md" type="button" onClick={onClose}>
+          <button className="btn btn-secondary btn-md" type="button" disabled={pending} onClick={onClose}>
             {t.projects.cancel}
           </button>
           <button className="btn btn-primary btn-md" type="button" disabled={pending || stop !== undefined || title.trim() === ""} onClick={send}>

@@ -47,7 +47,7 @@ export function ProjectControls({
   const w = t.projects;
   const a = w.actions;
   const [open, setOpen] = useState<Open>(editFirst ? "edit" : undefined);
-  const [, start] = useTransition();
+  const [pending, start] = useTransition();
   const router = useRouter();
   const close = useCallback(() => {
     setOpen(undefined);
@@ -91,7 +91,7 @@ export function ProjectControls({
     label: a.removeProject,
     icon: Icon.trash,
     bad: true,
-    confirm: project.status === "done" ? w.removeProjectDone : mine.length === 0 ? w.removeProjectEmpty : w.removeProjectWhy(mine.length),
+    confirm: project.status === "done" ? w.removeProjectDone : mine.length === 0 ? w.removeProjectEmpty : w.removeProjectWhy(mine.length, running),
     run: () =>
       start(async () => {
         const result = await removeProjectAction(companyId, project.id);
@@ -107,7 +107,7 @@ export function ProjectControls({
           {error}
         </span>
       )}
-      <RowMenu className="ibtn" label={w.projectActions} keep={t.people.keep} items={[...items, removal]} />
+      <RowMenu className="ibtn" label={w.projectActions} keep={t.people.keep} busy={pending} items={[...items, removal]} />
       {project.takesWork && (
         <button className="btn btn-primary btn-lg" type="button" onClick={() => setOpen("task")}>
           {Icon.plus}

@@ -72,6 +72,10 @@ describe("editing work", () => {
 
     now += minute;
     await expect(editTask(ctx, running.id, details)).resolves.toMatchObject({ ok: true, value: { task: { status: "working", title: "Paginate by cursor", revisedAt: now } } });
+    // what the agent does not read does not restart it
+    const revised = now;
+    now += minute;
+    await expect(editTask(ctx, running.id, { ...details, priority: "high" })).resolves.toMatchObject({ ok: true, value: { task: { priority: "high", revisedAt: revised } } });
     await expect(editTask(ctx, running.id, { ...details, projectId: other })).resolves.toEqual({ ok: false, reason: "projectLockedWhileRunning" });
     await expect(editTask(ctx, running.id, { ...details, assigneeId: bori.id })).resolves.toMatchObject({ ok: true, value: { task: { status: "backlog", assigneeId: bori.id } } });
   });

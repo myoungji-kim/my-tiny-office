@@ -25,6 +25,7 @@ export function TaskActions({
   areas,
   memories,
   ready,
+  worked,
   assignFirst,
 }: {
   readonly locale: Locale;
@@ -36,6 +37,8 @@ export function TaskActions({
   readonly areas: readonly AreaView[];
   readonly memories: readonly MemoryView[];
   readonly ready: boolean;
+  // an agent has already worked on it
+  readonly worked: boolean;
   // another screen's 담당 변경 arrives with the assignee open
   readonly assignFirst: boolean;
 }) {
@@ -46,6 +49,8 @@ export function TaskActions({
   const canAssign = task.status === "backlog" && live;
   const canEdit = (task.status === "backlog" || task.status === "held" || task.status === "working") && project.takesWork;
   const canResume = task.status === "held" && live;
+  // a change to running work restarts the agent
+  const restarts = canEdit && task.status === "working";
   const deciding = task.status === "approval" && project.status !== "done";
   const who = employees.find((e) => e.id === task.assigneeId);
   const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "rework" | "review" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
@@ -62,11 +67,11 @@ export function TaskActions({
       if (result.error !== undefined) return setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
       router.push(`/projects/${project.id}`);
     });
-  const canRemove = task.status !== "done" && project.status !== "done" && !removing;
+  const canRemove = task.status !== "done" && project.status !== "done";
 
   return (
     <>
-      {!ready && (canAssign || canResume || deciding) && <span className="ghost-note">{t.claude.cannotStart}</span>}
+      {!ready && (canAssign || canResume || deciding || restarts) && <span className="ghost-note">{t.claude.cannotStart}</span>}
       {error !== undefined && (
         <span className="hint" role="alert" style={{ margin: 0 }}>
           {error}
@@ -77,11 +82,13 @@ export function TaskActions({
           className="ibtn"
           label={w.taskActions}
           keep={t.people.keep}
-          items={[{ label: w.actions.removeTask, icon: Icon.trash, bad: true, confirm: task.status === "backlog" ? undefined : w.removeTaskWhy[task.status], run: remove }]}
+          busy={removing}
+          // a task only written down goes without asking
+          items={[{ label: w.actions.removeTask, icon: Icon.trash, bad: true, confirm: task.status === "backlog" && !worked ? undefined : w.removeTaskWhy[task.status], run: remove }]}
         />
       )}
       {canEdit && (
-        <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("edit")}>
+        <button className="btn btn-secondary btn-lg" type="button" disabled={restarts && !ready} onClick={() => setDialog("edit")}>
           {w.actions.edit}
         </button>
       )}

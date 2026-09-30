@@ -69,6 +69,14 @@ export function TaskDialog({
   const target = projects.find((p) => p.id === into);
 
   const running = edit?.status === "working";
+  const unchanged =
+    running &&
+    title.trim() === edit.title &&
+    (description.trim() || undefined) === edit.description &&
+    area === edit.area &&
+    priority === edit.priority &&
+    (who || undefined) === edit.assigneeId &&
+    reviewing?.id === edit.reviewerId;
   // What naming this person means for where the work goes next.
   const whatHappens = running
     ? who === edit.assigneeId
@@ -240,7 +248,7 @@ export function TaskDialog({
           <button className="btn btn-secondary btn-md" type="button" onClick={onClose}>
             {w.cancel}
           </button>
-          <button className="btn btn-primary btn-md" type="button" disabled={pending || title.trim() === "" || target === undefined} onClick={save}>
+          <button className="btn btn-primary btn-md" type="button" disabled={pending || unchanged || title.trim() === "" || target === undefined} onClick={save}>
             {edit === undefined ? w.create : running ? w.sendChange : w.save}
           </button>
         </div>

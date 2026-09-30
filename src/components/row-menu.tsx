@@ -27,12 +27,15 @@ export function RowMenu({
   keep,
   className = "ibtn ibtn-sm",
   icon = Icon.more,
+  busy = false,
 }: {
   readonly label: string;
   readonly items: readonly MenuItem[];
   readonly keep: string;
   readonly className?: string;
   readonly icon?: ReactNode;
+  // what was chosen is still being done
+  readonly busy?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [asking, setAsking] = useState<MenuItem | undefined>(undefined);
@@ -87,6 +90,8 @@ export function RowMenu({
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
+        disabled={busy}
+        aria-busy={busy}
         onClick={(e) => {
           e.stopPropagation();
           if (open) close();

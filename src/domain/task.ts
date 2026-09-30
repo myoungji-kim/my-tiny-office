@@ -200,7 +200,9 @@ export function editTask(task: Task, details: TaskDetails, assignee: Employee | 
   };
   if (task.status !== "working") return { ok: true, task: changed };
   if (assignee?.id !== task.assigneeId) return { ok: true, task: { ...paused(changed, now), status: "backlog", blocker: undefined, revisedAt: undefined } };
-  return { ok: true, task: { ...changed, revisedAt: now } };
+  // the agent is told only what it reads: the title and the description
+  const reads = changed.title !== task.title || changed.description !== task.description;
+  return { ok: true, task: reads ? { ...changed, revisedAt: now } : changed };
 }
 
 export type StartTaskFailure = "taskNotInBacklog" | "taskHasAnotherAssignee" | "employeeFromAnotherCompany" | "employeeOnLeave";

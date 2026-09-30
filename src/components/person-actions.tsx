@@ -51,7 +51,7 @@ export function PersonActions({
   const away = person.status === "onLeave";
   const why = away ? w.cannotAssign : ready ? undefined : t.claude.cannotStart;
   const [open, setOpen] = useState<Open>(assignFirst && why === undefined ? "assign" : undefined);
-  const [, start] = useTransition();
+  const [pending, start] = useTransition();
   const [error, setError] = useState<string | undefined>(undefined);
   const close = useCallback(() => {
     setOpen(undefined);
@@ -79,7 +79,8 @@ export function PersonActions({
       <RowMenu
         className="ibtn"
         label={w.personMenu}
-        keep={w.keep}
+        keep={w.keepThem}
+        busy={pending}
         items={[
           { label: w.editInfo, icon: Icon.pen, run: () => setOpen("edit") },
           away

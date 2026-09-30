@@ -388,6 +388,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
                 areas={office.areas}
                 memories={office.memories}
                 ready={ready}
+                worked={work?.sessionId !== undefined}
                 assignFirst={(await param(searchParams, "do")) === "assign"}
               />
             </div>
