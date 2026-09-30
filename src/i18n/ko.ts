@@ -823,7 +823,6 @@ export const ko: Dictionary = {
     plazaOff: "광장이 꺼져 있어요. 설정에서 켤 수 있어요.",
     sessionNotFound: "그 세션을 찾을 수 없어요. 지워졌거나 너무 오래됐을 수 있어요.",
     claudeNotReady: "Claude Code가 준비되면 할 수 있어요.",
-    careerReadFailed: "경력을 정리하지 못했어요.",
     folderNotChosenHere: "먼저 이 컴퓨터에서 폴더를 다시 골라 주세요.",
     lastRole: "직원마다 역할이 하나씩 있어서, 마지막 역할은 지울 수 없어요.",
     roleHeld: "이 역할인 직원이 있어요. 먼저 바꿀 역할을 골라 주세요.",

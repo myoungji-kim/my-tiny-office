@@ -822,7 +822,6 @@ export const en = {
     plazaOff: "The plaza is off. Settings can turn it on.",
     sessionNotFound: "That session could not be found. It may have been deleted, or be too old.",
     claudeNotReady: "This can be done once Claude Code is ready.",
-    careerReadFailed: "The experience could not be summed up.",
     folderNotChosenHere: "Choose its folder on this computer first.",
     lastRole: "Everyone needs a role, so the last one stays.",
     roleHeld: "Someone has this role. Choose what they become first.",

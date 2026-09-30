@@ -201,12 +201,11 @@ async function start() {
   const port = await choosePort();
   const logFile = startServer(node, path, port);
   // the server going away, before the office opens or after, ends the app with where to look
-  server.once("error", () => fail(`${words().failed}
-${logFile}`));
-  server.once("exit", () => fail(`${words().failed}
-${logFile}`));
+  const failed = () => fail(`${words().failed}\n${logFile}`);
+  server.once("error", failed);
+  server.once("exit", failed);
   const url = `http://127.0.0.1:${port}`;
-  if (!(await waitForServer(url))) return fail(`${words().failed}\n${logFile}`);
+  if (!(await waitForServer(url))) return failed();
   origin = url;
   if (window === undefined) openWindow();
   else void window.loadURL(origin);
