@@ -1,5 +1,4 @@
-import { randomUUID } from "node:crypto";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
@@ -37,12 +36,14 @@ const MAX_NEW_FILE = 1024 * 1024;
 // No repository hook, filesystem monitor or external diff tool ever runs: an
 // agent can edit files those may point at, and they would run with the user's
 // rights, outside the session's boundary.
-const NO_HOOKS = join(tmpdir(), "my-tiny-office-no-hooks", randomUUID());
+// It is made empty and private, so nobody else on this computer can put a hook in it.
+let noHooks: string | undefined;
+const hooksPath = () => (noHooks ??= mkdtempSync(join(tmpdir(), "my-tiny-office-no-hooks-")));
 
 async function git(args: readonly string[], timeoutMs = GIT_TIMEOUT_MS): Promise<RunResult | undefined> {
   const found = findExecutable("git");
   if (found.kind !== "found") return undefined;
-  const safe = ["-c", "core.quotepath=false", "-c", `core.hooksPath=${NO_HOOKS}`, "-c", "core.fsmonitor=false"];
+  const safe = ["-c", "core.quotepath=false", "-c", `core.hooksPath=${hooksPath()}`, "-c", "core.fsmonitor=false"];
   return runProcess(found.path, [...safe, ...args], { timeoutMs });
 }
 
@@ -204,6 +205,14 @@ export async function removeWorktree(folder: string, taskId: string): Promise<vo
 
 // A file the agent asked to remove, deleted only when it lies inside the
 // worktree and outside its git data; a link is removed, never what it points at.
+const realOf = (path: string) => {
+  try {
+    return realpathSync.native(path);
+  } catch {
+    return undefined;
+  }
+};
+
 export async function removeFiles(folder: string, taskId: string, paths: readonly string[]): Promise<string[]> {
   const root = worktreePath(folder, taskId);
   const removed: string[] = [];
@@ -212,6 +221,10 @@ export async function removeFiles(folder: string, taskId: string, paths: readonl
     const full = resolve(root, asked);
     const inside = relative(root, full);
     if (inside === "" || inside.startsWith("..") || isAbsolute(inside) || inside.split(sep)[0].toLowerCase() === ".git") continue;
+    // a folder on the way that links out of the worktree must not carry the removal with it
+    const parent = realOf(dirname(full));
+    const within = parent === undefined ? undefined : relative(realOf(root) ?? root, parent);
+    if (within === undefined || within.startsWith("..") || isAbsolute(within) || within.split(sep)[0].toLowerCase() === ".git") continue;
     const stat = lstatSync(full, { throwIfNoEntry: false });
     if (stat === undefined || stat.isDirectory()) continue;
     unlinkSync(full);

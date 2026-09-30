@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -127,6 +127,18 @@ describe("a task's worktree", () => {
     expect(existsSync(join(repo, "outside.txt"))).toBe(true);
     expect(existsSync(join(made.path, ".git"))).toBe(true);
     expect(await changesIn(repo, TASK)).toEqual([{ path: "a.txt", added: 0, removed: 1 }]);
+  });
+
+  it("never follows a linked folder out of the worktree to remove a file", async () => {
+    const made = await prepareWorktree(repo, TASK);
+    assert(made.ok);
+    const outside = realpathSync.native(mkdtempSync(join(tmpdir(), "mto-outside-")));
+    writeFileSync(join(outside, "precious.txt"), "keep");
+    symlinkSync(outside, join(made.path, "up"), "junction");
+
+    expect(await removeFiles(repo, TASK, ["up/precious.txt"])).toEqual([]);
+    expect(existsSync(join(outside, "precious.txt"))).toBe(true);
+    rmSync(outside, { recursive: true, force: true });
   });
 
   it("refuses a folder that is not a repository or has no commit yet", async () => {

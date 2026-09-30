@@ -93,7 +93,7 @@ export function openDatabase(
   filePath: string,
   { create = true, migrationsFolder = join(process.cwd(), MIGRATIONS_FOLDER) }: OpenOptions = {},
 ): DatabaseHandle {
-  mkdirSync(dirname(filePath), { recursive: true });
+  mkdirSync(dirname(filePath), { recursive: true, mode: 0o700 });
 
   const connection = new Sqlite(filePath, { fileMustExist: !create });
   let copy: string | undefined;

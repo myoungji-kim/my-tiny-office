@@ -92,7 +92,7 @@ function prepare(copy: string, id: CompanyId): ImportResult {
 export function importCompany(files: CompanyFiles, bytes: Uint8Array): ImportResult {
   if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMPORT_BYTES) return { ok: false, reason: "notACompany" };
   const folder = join(files.directory, "imports");
-  mkdirSync(folder, { recursive: true });
+  mkdirSync(folder, { recursive: true, mode: 0o700 });
   const copy = join(folder, `${randomUUID()}.db`);
   const id = toCompanyId(randomUUID());
   try {
@@ -105,7 +105,7 @@ export function importCompany(files: CompanyFiles, bytes: Uint8Array): ImportRes
     }
     if (!prepared.ok) return prepared;
 
-    mkdirSync(dirname(files.pathOf(id)), { recursive: true });
+    mkdirSync(dirname(files.pathOf(id)), { recursive: true, mode: 0o700 });
     renameSync(copy, files.pathOf(id));
     try {
       files.open(id);

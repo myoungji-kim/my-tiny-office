@@ -73,7 +73,7 @@ function connectorsOf(raw: unknown): Pick<AppSettings, "connectors"> {
 
 // Written beside the target and renamed over it, so a crash never leaves half a file.
 export function writeSettings(directory: string, settings: AppSettings): void {
-  mkdirSync(directory, { recursive: true });
+  mkdirSync(directory, { recursive: true, mode: 0o700 });
   const target = join(directory, FILE);
   const temporary = `${target}.tmp`;
   writeFileSync(temporary, JSON.stringify(settings, null, 2));
