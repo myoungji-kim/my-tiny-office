@@ -644,6 +644,11 @@ metadata and first user message.
   and the Record panel can say where they came from. Its own Agent starts
   sessions of its own.
 
+The listing is `src/infrastructure/runtime/sessions.ts`. The excerpt and the
+one run are in `career-read.ts`. `src/server/plaza.ts` leaves out the sessions
+the company has hired. The actions are in `src/app/plaza-actions.ts`: hiring
+reads the session's folder and dates there, never from the browser.
+
 ## 11. Workspace Model
 
 Each project has one workspace, its folder, and every task in it a worktree of

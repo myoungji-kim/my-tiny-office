@@ -201,8 +201,11 @@ to 숨기기 removes it.
   - sessions not written to for ninety days.
 - **In use:** a session written to in the last five minutes is shown as
   작업 중.
-- **Refreshing:** the list is read when the office opens and every minute
-  while it is open, cached by each file's modification time.
+- **Refreshing:** the list is read each time the plaza or 경력 가져오기 opens.
+  A session's message count is kept until its file changes size or time.
+- **Programs' runs:** a session Claude Code records as run by a program
+  (`claude -p`, its entrypoint `sdk-…`) is never a candidate. That covers
+  this app's own agents, wherever their folder is.
 - **Hiding it:** 설정 › 일반 › 광장 hides the plaza. The hire dialog's 지난
   세션에서 가져오기 goes with it, and no session file is read at all.
 
@@ -285,7 +288,8 @@ than says it.
 - Hiding everyone leaves the paving empty with *구직자를 모두 숨겼어요. 명단의
   숨김에서 다시 보이게 할 수 있어요.*
 - A desk is added on the floor.
-- 오늘 reads *보리가 경력직으로 입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
+- Once the office has its Today feed (office.html), it reads *보리가 경력직으로
+  입사했어요 · tinysoft 세션에서 6개를 가져왔어요*.
 - On their page, the Record panel has 경력, and each memory brought reads
   *tinysoft 세션에서*.
 - The session itself is untouched and never attached: the employee's own
