@@ -17,17 +17,21 @@ const lineClass =(line: string) => (line.startsWith("+") && !line.startsWith("++
 // Each changed file opens its diff under it; the diff is shown as text, never run.
 export function TaskChanges({ companyId, taskId, changes }: { readonly companyId: string; readonly taskId: string; readonly changes: readonly FileChange[] }) {
   const [open, setOpen] = useState<Readonly<Record<string, string>>>({});
-  const [, start] = useTransition();
+  const [pending, start] = useTransition();
+  const [loading, setLoading] = useState<string | undefined>(undefined);
   const toggle = (path: string) => {
     if (open[path] !== undefined) return setOpen(Object.fromEntries(Object.entries(open).filter(([p]) => p !== path)));
+    setLoading(path);
     start(async () => {
-      const diff = await diffAction(companyId, taskId, path);
-      setOpen((now) => ({ ...now, [path]: diff }));
+      // a diff the server could not give stays closed rather than half open
+      const diff = await diffAction(companyId, taskId, path).catch(() => undefined);
+      setLoading(undefined);
+      if (diff !== undefined) setOpen((now) => ({ ...now, [path]: diff }));
     });
   };
   return changes.map((c) => (
     <div key={c.path}>
-      <button className="file" type="button" aria-expanded={open[c.path] !== undefined} onClick={() => toggle(c.path)}>
+      <button className="file" type="button" aria-expanded={open[c.path] !== undefined} aria-busy={pending && loading === c.path} disabled={pending && loading === c.path} onClick={() => toggle(c.path)}>
         <span className="file-path">{c.path}</span>
         <span className="file-add">+{c.added}</span>
         <span className="file-del">−{c.removed}</span>
