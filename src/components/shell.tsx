@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { ClaudeCodeStatus } from "../application/runtime-status";
 import { workPaused } from "../app/screen-data";
 import { getDictionary, type Locale } from "../i18n";
+import { plazaShown } from "../server/plaza";
 import type { CompanyOption, EmployeeView } from "../server/view-model";
 
 import { AgentMark } from "./agent-mark";
@@ -16,7 +17,7 @@ import { Sprite } from "./sprite";
 
 import pkg from "../../package.json";
 
-export type Screen = "office" | "projects" | "people" | "company" | "settings";
+export type Screen = "office" | "projects" | "people" | "company" | "settings" | "plaza";
 
 const HREF: Readonly<Record<Screen, string>> = {
   office: "/",
@@ -24,6 +25,7 @@ const HREF: Readonly<Record<Screen, string>> = {
   people: "/people",
   company: "/company",
   settings: "/settings",
+  plaza: "/plaza",
 };
 
 const ICON: Readonly<Record<Screen, ReactNode>> = {
@@ -47,6 +49,14 @@ const ICON: Readonly<Record<Screen, ReactNode>> = {
   company: (
     <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
       <path d="M3.5 14.5v-3.5M9 14.5v-7M14.5 14.5v-10.5" />
+    </svg>
+  ),
+  plaza: (
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.5 15.5h13" />
+      <path d="M5.5 15.5v-5" />
+      <circle cx="5.5" cy="7.3" r="2.6" />
+      <path d="M9.5 12.5h5.5M10.5 12.5v3M14 12.5v3M9.5 10.6h5.5" />
     </svg>
   ),
   settings: (
@@ -134,6 +144,15 @@ export function Shell({
 
         <div className="side-foot">
           <div className="rule" style={{ margin: "0 4px 10px" }} />
+          {plazaShown() && (
+            <>
+              <span className="side-cap">{t.nav.outside}</span>
+              <div className="nav">
+                <NavLink screen="plaza" current={screen} label={t.nav.plaza} />
+              </div>
+              <div className="rule" style={{ margin: "10px 4px" }} />
+            </>
+          )}
           <div className="nav">
             <NavLink screen="settings" current={screen} label={t.nav.settings} />
           </div>

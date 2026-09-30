@@ -6,11 +6,12 @@ import { CheckRows, ClaudeChecks, type Row } from "../../components/claude-check
 import { Head } from "../../components/head";
 import { Icon } from "../../components/icons";
 import { ConnectorCheckButton, RecheckButton } from "../../components/recheck-button";
-import { CopyButton, DataActions, DeleteCompany, ExtensionPicker, LanguagePicker, WorkPicker } from "../../components/settings-parts";
+import { CopyButton, DataActions, DeleteCompany, ExtensionPicker, LanguagePicker, PlazaPicker, WorkPicker } from "../../components/settings-parts";
 import { Shell } from "../../components/shell";
 import { WidthPicker } from "../../components/width-picker";
 import { toCompanyId } from "../../domain/ids";
 import { getDictionary, type Dictionary } from "../../i18n";
+import { plazaShown } from "../../server/plaza";
 import { getCompanyFiles } from "../../infrastructure/persistence/company-files";
 import { isAtlassianServer } from "../../infrastructure/runtime/connectors";
 import { installedExtensions } from "../../infrastructure/runtime/extensions";
@@ -184,6 +185,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         {tab === "general" && (
           <>
             {panel(w.workTitle, w.workWhy, <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />)}
+            {panel(w.plazaTitle, w.plazaWhy, <PlazaPicker shown={plazaShown()} label={w.plazaTitle} show={w.plazaShow} hide={w.plazaHide} />)}
             {panel(w.widthTitle, w.widthWhy, <WidthPicker label={w.widthTitle} names={w.widthsLong} look="opts" />)}
             {panel(w.langTitle, w.langWhy, <LanguagePicker locale={locale} label={w.langTitle} names={w.langNames} />)}
           </>

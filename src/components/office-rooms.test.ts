@@ -20,6 +20,7 @@ const person = (id: string, status: EmployeeView["status"], teamId?: string): Em
   review: undefined,
   lastFinished: undefined,
   leaveSince: undefined,
+  career: undefined,
 });
 
 describe("office rooms", () => {

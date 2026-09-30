@@ -209,7 +209,10 @@ export function StylePanel({
           ) : (
             <div key={rule.id} className="style-line">
               {Icon.hand}
-              <span>{rule.text}</span>
+              <span>
+                {rule.text}
+                {rule.career !== undefined && <span className="src">{w.fromWhere(w.fromSession(rule.career))}</span>}
+              </span>
                 <RowMenu
                   className="ibtn ibtn-sm line-menu"
                   label={w.styleMenu}

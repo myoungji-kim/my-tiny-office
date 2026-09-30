@@ -348,6 +348,7 @@ export function OfficeFloor({
   areas,
   memories,
   ready,
+  plaza,
   now,
 }: {
   readonly locale: Locale;
@@ -359,6 +360,7 @@ export function OfficeFloor({
   readonly areas: readonly AreaView[];
   readonly memories: readonly MemoryView[];
   readonly ready: boolean;
+  readonly plaza: boolean;
   readonly now: number;
 }) {
   const words = getDictionary(locale);
@@ -531,6 +533,7 @@ export function OfficeFloor({
           roles={roles}
           teams={teams.map((team) => ({ id: team.id, label: nameOf(team) }))}
           team={hireTeam}
+          career={plaza ? { areas, ready } : undefined}
           onClose={closeHire}
         />
       )}

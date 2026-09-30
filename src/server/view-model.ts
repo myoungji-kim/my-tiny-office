@@ -40,6 +40,8 @@ export interface EmployeeView {
   readonly leaveSince: number | undefined;
   readonly finished: number;
   readonly reviewed: number;
+  // where a hire with experience came from, and how much of it they brought
+  readonly career: { readonly folder: string; readonly from: number; readonly to: number; readonly brought: number } | undefined;
 }
 
 export interface AreaView {
@@ -56,6 +58,8 @@ export interface MemoryView {
   readonly text: string;
   // the task it was taught from, by title
   readonly source: string | undefined;
+  // brought from the session its employee was hired from, by that folder's name
+  readonly career: string | undefined;
   readonly createdAt: number;
 }
 
@@ -238,6 +242,11 @@ export async function loadOffice(
     };
   };
 
+  const folderName = (folder: string) => folder.split(/[\\/]/).filter(Boolean).at(-1) ?? folder;
+  const careerFolderOf = (employeeId: string | undefined) => {
+    const career = everyone.find((e) => e.id === employeeId)?.career;
+    return career === undefined ? undefined : folderName(career.folder);
+  };
   return {
     now,
     companies: companies.map((candidate) => ({ id: candidate.id, name: candidate.name })),
@@ -261,6 +270,15 @@ export async function loadOffice(
       status: statusOf(employee, tasks, reviews),
       agentLost: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "disconnected"),
       leaveSince: employee.leaveSince,
+      career:
+        employee.career === undefined
+          ? undefined
+          : {
+              folder: folderName(employee.career.folder),
+              from: employee.career.from,
+              to: employee.career.to,
+              brought: memories.filter((m) => m.employeeId === employee.id && m.broughtIn).length,
+            },
       ...deskOf(employee.id),
     })),
     former: everyone.filter((employee) => employee.availability === "left").map((employee) => ({ id: employee.id, name: employee.name, species: employee.species })),
@@ -283,6 +301,7 @@ export async function loadOffice(
       areaId: memory.areaId,
       text: memory.text,
       source: memory.sourceTaskId === undefined ? undefined : taskById.get(memory.sourceTaskId)?.title,
+      career: memory.broughtIn ? careerFolderOf(memory.employeeId) : undefined,
       createdAt: memory.createdAt,
     })),
     projects: projects.map((project) => ({

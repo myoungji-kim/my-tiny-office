@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { isReady } from "../../../application/runtime-status";
 import { ActButton } from "../../../components/act-button";
 import { AgentMark } from "../../../components/agent-mark";
-import { dateText, sinceText } from "../../../components/dates";
+import { dateText, sinceText, spanOf } from "../../../components/dates";
 import { Icon } from "../../../components/icons";
 import { MemoryCard } from "../../../components/memory-card";
 import { areaName } from "../../../components/names";
@@ -155,6 +155,12 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
                   <span>{w.joined}</span>
                   <b>{dateText(locale, person.hiredAt)}</b>
                 </div>
+                {person.career !== undefined && (
+                  <div className="kv">
+                    <span>{w.career}</span>
+                    <b>{w.careerKv(person.career.folder, spanOf(locale, person.career), person.career.brought)}</b>
+                  </div>
+                )}
                 <div className="kv">
                   <span>{w.doneAndReviews}</span>
                   <b>{w.counts(person.finished, person.reviewed)}</b>

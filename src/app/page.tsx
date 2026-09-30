@@ -10,6 +10,8 @@ import { Shell } from "../components/shell";
 import { STARTING_ROLES } from "../domain/organisation";
 import { getDictionary } from "../i18n";
 
+import { plazaShown } from "../server/plaza";
+
 import { dataDirectory, param, screenData, type SearchParams } from "./screen-data";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +62,7 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
         areas={office.areas}
         memories={office.memories}
         ready={isReady(status)}
+        plaza={plazaShown()}
         now={office.now}
       />
     </Shell>

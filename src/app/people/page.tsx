@@ -8,7 +8,9 @@ import { OrgChart } from "../../components/org-chart";
 import { statusColor } from "../../components/presence";
 import { Shell } from "../../components/shell";
 import { Sprite } from "../../components/sprite";
+import { isReady } from "../../application/runtime-status";
 import { getDictionary } from "../../i18n";
+import { plazaShown } from "../../server/plaza";
 import { companyScreen, param, type SearchParams } from "../screen-data";
 
 import { peopleData } from "./people-data";
@@ -22,6 +24,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
   const view = (await param(searchParams, "view")) === "org" ? "org" : "list";
   const data = peopleData(office, t);
   const { employees } = office;
+  const career = plazaShown() ? { areas: office.areas, ready: isReady(status) } : undefined;
 
   return (
     <Shell
@@ -35,7 +38,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
         <Head
           title={w.title}
           sub={w.headSub(employees.length, office.teams.length)}
-          right={<HireButton locale={locale} companyId={company.id} roles={data.roles} teams={data.teams} label={w.hire} />}
+          right={<HireButton locale={locale} companyId={company.id} roles={data.roles} teams={data.teams} label={w.hire} career={career} />}
           tabs={
             <>
               <Link className="tab" role="tab" aria-selected={view === "list"} href="/people">
@@ -85,7 +88,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
           ))}
         </div>
       ) : (
-        <OrgChart locale={locale} companyId={company.id} employees={employees} teams={office.teams} roles={data.roles} />
+        <OrgChart locale={locale} companyId={company.id} employees={employees} teams={office.teams} roles={data.roles} career={career} />
       )}
     </Shell>
   );

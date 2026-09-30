@@ -19,8 +19,10 @@ export function MemoryCard({
       {menu}
       <span className="mem-t">{memory.text}</span>
       <span className="mem-m">
-        {memory.source === undefined ? Icon.hand : Icon.task}
-        <span className="src">{memory.source === undefined ? words.toldDirectly : words.fromWhere(memory.source)}</span>
+        {memory.source === undefined && memory.career === undefined ? Icon.hand : Icon.task}
+        <span className="src">
+          {memory.career !== undefined ? words.fromWhere(words.fromSession(memory.career)) : memory.source === undefined ? words.toldDirectly : words.fromWhere(memory.source)}
+        </span>
       </span>
     </div>
   );

@@ -7,7 +7,7 @@ import { addTeamAction, moveEmployeeAction, removeTeamAction, renameTeamAction }
 import type { Outcome } from "../app/action-context";
 import { MAX_NAME } from "../domain/organisation";
 import { getDictionary, type Locale } from "../i18n";
-import type { EmployeeView, TeamView } from "../server/view-model";
+import type { AreaView, EmployeeView, TeamView } from "../server/view-model";
 
 import { AgentMark } from "./agent-mark";
 import { HireDialog, type Choice } from "./hire-dialog";
@@ -81,12 +81,14 @@ export function OrgChart({
   employees,
   teams,
   roles,
+  career,
 }: {
   readonly locale: Locale;
   readonly companyId: string;
   readonly employees: readonly EmployeeView[];
   readonly teams: readonly TeamView[];
   readonly roles: readonly Choice[];
+  readonly career?: { readonly areas: readonly AreaView[]; readonly ready: boolean };
 }) {
   const t = getDictionary(locale);
   const w = t.people;
@@ -230,7 +232,7 @@ export function OrgChart({
       )}
 
       {hireTeam !== undefined && (
-        <HireDialog locale={locale} companyId={companyId} roles={roles} teams={choices} team={hireTeam} onClose={stopHiring} />
+        <HireDialog locale={locale} companyId={companyId} roles={roles} teams={choices} team={hireTeam} career={career} onClose={stopHiring} />
       )}
     </div>
   );

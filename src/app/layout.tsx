@@ -13,6 +13,7 @@ import "./app.css";
 import "./first-run.css";
 import "./office.css";
 import "./people.css";
+import "./plaza.css";
 import "./projects.css";
 import "./company.css";
 import "./settings.css";

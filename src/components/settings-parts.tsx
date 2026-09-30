@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import { setExtensionAction, setLocaleAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
 import { deleteCompanyAction } from "../app/company-actions";
+import { setPlazaShownAction } from "../app/plaza-actions";
 import { getDictionary, type Locale } from "../i18n";
 
 import { uploadCompany, type Imported } from "./upload-company";
@@ -68,6 +69,20 @@ export function WorkPicker({ paused, label, auto, pause }: { readonly paused: bo
       </button>
       <button className="opt" type="button" role="radio" aria-checked={paused} onClick={() => start(() => setWorkPausedAction(true))}>
         {pause}
+      </button>
+    </div>
+  );
+}
+
+export function PlazaPicker({ shown, label, show, hide }: { readonly shown: boolean; readonly label: string; readonly show: string; readonly hide: string }) {
+  const [, start] = useTransition();
+  return (
+    <div className="opts" role="radiogroup" aria-label={label}>
+      <button className="opt" type="button" role="radio" aria-checked={shown} onClick={() => start(() => setPlazaShownAction(true))}>
+        {show}
+      </button>
+      <button className="opt" type="button" role="radio" aria-checked={!shown} onClick={() => start(() => setPlazaShownAction(false))}>
+        {hide}
       </button>
     </div>
   );

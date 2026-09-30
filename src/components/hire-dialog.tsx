@@ -3,10 +3,15 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { editEmployeeAction, hireAction } from "../app/people-actions";
+import { hireWithCareerAction } from "../app/plaza-actions";
 import { MAX_EMPLOYEE_NAME } from "../domain/employee";
 import { getDictionary, type Locale } from "../i18n";
+import type { CandidateView } from "../server/plaza";
+import type { AreaView } from "../server/view-model";
 import { CAST, castMember, type CastMember } from "../ui/paint";
 
+import { CareerDialog, type Brought } from "./career-dialog";
+import { spanOf } from "./dates";
 import { Sprite } from "./sprite";
 
 export interface Choice {
@@ -29,7 +34,9 @@ const Chevron = () => (
 );
 
 // Every hire after the first opens this dialog; a team is optional. With
-// `edit` it corrects who someone already is.
+// `edit` it corrects who someone already is. With `career`, while the plaza is
+// on, it can bring experience from a past session; `from`, a candidate from the
+// plaza, arrives with their look and their session.
 export function HireDialog({
   locale,
   companyId,
@@ -37,6 +44,9 @@ export function HireDialog({
   teams,
   team,
   edit,
+  career,
+  from,
+  onHired,
   onClose,
 }: {
   readonly locale: Locale;
@@ -45,11 +55,17 @@ export function HireDialog({
   readonly teams: readonly Choice[];
   readonly team?: string;
   readonly edit?: Who;
+  readonly career?: { readonly areas: readonly AreaView[]; readonly ready: boolean };
+  readonly from?: CandidateView;
+  readonly onHired?: (id: string, name: string, brought: Brought | undefined) => void;
   readonly onClose: () => void;
 }) {
   const t = getDictionary(locale);
   const w = t.hire;
-  const [chosen, setChosen] = useState<CastMember | undefined>(edit === undefined ? undefined : castMember(edit.species));
+  const [chosen, setChosen] = useState<CastMember | undefined>(edit !== undefined ? castMember(edit.species) : from !== undefined ? castMember(from.species) : undefined);
+  const [brought, setBrought] = useState<Brought | undefined>(undefined);
+  // from the plaza the session is chosen, so summing it up is the next step
+  const [reading, setReading] = useState<CandidateView | "pick" | undefined>(from !== undefined && career?.ready === true ? from : undefined);
   const [name, setName] = useState(edit?.name ?? "");
   const [role, setRole] = useState(edit?.roleId ?? roles[0]?.id ?? "");
   const [teamId, setTeamId] = useState(edit === undefined ? (team ?? "") : (edit.teamId ?? ""));
@@ -61,7 +77,8 @@ export function HireDialog({
     const returnTo = document.activeElement as HTMLElement | null;
     first.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      // a window opened over this one closes first
+      if (e.key === "Escape" && document.querySelectorAll(".scrim").length === 1) onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -78,11 +95,17 @@ export function HireDialog({
     start(async () => {
       if (chosen === undefined) return;
       const who = { name: trimmed, species: chosen.key, roleId: role, teamId: teamId || undefined };
-      const result = edit === undefined ? await hireAction(companyId, who) : await editEmployeeAction(companyId, edit.id, who);
+      const withCareer = edit === undefined && (brought !== undefined || from !== undefined);
+      const result: { readonly id?: string; readonly error?: string } = withCareer
+        ? await hireWithCareerAction(companyId, who, { sessionId: brought?.session.id, expertise: brought?.knows ?? [], style: brought?.style ?? [] })
+        : edit === undefined
+          ? await hireAction(companyId, who)
+          : await editEmployeeAction(companyId, edit.id, who);
       if (result.error !== undefined) {
         setError(t.errors[result.error as keyof typeof t.errors] ?? t.errors.unknown);
         return;
       }
+      if (result.id !== undefined) onHired?.(result.id, trimmed, brought);
       onClose();
     });
 
@@ -174,6 +197,46 @@ export function HireDialog({
               <Chevron />
             </span>
           </div>
+          {career !== undefined && edit === undefined && (
+            <div className="field">
+              <span className="label">{w.career}</span>
+              <div className="career">
+                {brought !== undefined ? (
+                  <>
+                    <span className="career-tx">
+                      <b>{w.careerLine(brought.session.name, spanOf(locale, brought.session))}</b>
+                      <span>{w.careerCarries(brought.knows.length, brought.style.length)}</span>
+                    </span>
+                    <button className="btn btn-secondary btn-sm" type="button" onClick={() => setReading(from ?? "pick")}>
+                      {w.careerChange}
+                    </button>
+                    <button className="btn btn-secondary btn-sm" type="button" onClick={() => setBrought(undefined)}>
+                      {w.careerDrop}
+                    </button>
+                  </>
+                ) : from !== undefined ? (
+                  <>
+                    <span className="career-tx">
+                      <b>{w.careerLine(from.name, spanOf(locale, from))}</b>
+                      <span>{career.ready ? w.careerUnread : t.career.needClaude}</span>
+                    </span>
+                    <button className="btn btn-secondary btn-sm" type="button" disabled={!career.ready} onClick={() => setReading(from)}>
+                      {w.careerRead}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="career-tx">
+                      <span>{w.careerNone}</span>
+                    </span>
+                    <button className="btn btn-secondary btn-sm" type="button" onClick={() => setReading("pick")}>
+                      {w.careerAdd}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           {error !== undefined && (
             <p className="hint" role="alert">
               {error}
@@ -189,6 +252,20 @@ export function HireDialog({
           </button>
         </div>
       </div>
+      {reading !== undefined && career !== undefined && (
+        <CareerDialog
+          locale={locale}
+          companyId={companyId}
+          areas={career.areas}
+          ready={career.ready}
+          session={reading === "pick" ? undefined : reading}
+          onDone={(next) => {
+            setBrought(next ?? undefined);
+            setReading(undefined);
+          }}
+          onClose={() => setReading(undefined)}
+        />
+      )}
     </div>
   );
 }
