@@ -118,6 +118,18 @@
 
   .fold > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: var(--r-card); }
 
+  .pfold { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+  .pfold > summary { min-height: 28px; }
+
+  .pfold > summary .label { margin: 0; flex: none; }
+
+  .pfold-sum { min-width: 0; font-size: 15px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .pfold[open] > summary { margin-bottom: 6px; }
+
+  .pfold .field:first-of-type { margin-top: 0; }
+
   .view-sw { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--surface); }
 
   .view-sw button { width: 30px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--muted); cursor: pointer; }
@@ -840,6 +852,8 @@
       ownNone: "이 폴더에는 따로 둔 스킬이나 플러그인이 없어요.",
       ownHint: "프로젝트 폴더에 있는 것만 보여요. 스킬은 원래 폴더의 것을 건네고, 플러그인은 체크해야 줘요. 모든 프로젝트에 쓰는 것은",
       ownEveryProject: "설정 › 스킬과 플러그인", ownHintEnd: "에서 골라요.",
+      sumNone: "없음", sumRuns: (first, more) => first + (more ? " 외 " + more + "개" : ""),
+      sumWrites: (n) => " · 쓰기 " + n + "종", sumExt: (skills, plugins) => [skills ? "스킬 " + skills + "개" : "", plugins ? "플러그인 " + plugins + "개" : ""].filter(Boolean).join(" · "),
       toolsHint: "Claude 계정에 연결해 둔 Atlassian 커넥터로 이슈와 문서를 읽어요. 쓰기는 처음 할 때 멈추고 물어봐요.",
       toolsMissing: "이 컴퓨터의 Claude 계정에 Atlassian이 없어요", toolsMissingWhy: "claude.ai에서 Atlassian을 연결한 뒤, 설정 › 연결된 도구에서 다시 확인해 주세요. 그전에는 업무가 Jira와 Confluence를 읽지 못해요.",
       fWrites: "허용한 쓰기", writesNone: "아직 없어요. 쓰려고 하면 업무가 멈추고 물어봐요.", removeWrite: (w) => w + " 빼기",
@@ -992,6 +1006,8 @@
       ownNone: "This folder keeps no skills or plugins of its own.",
       ownHint: "Only what the project's folder holds. Skills are handed over from the folder itself, and plugins only once ticked. For every project:",
       ownEveryProject: "Settings › Skills and plugins", ownHintEnd: ".",
+      sumNone: "None", sumRuns: (first, more) => first + (more ? " and " + more + " more" : ""),
+      sumWrites: (n) => " · " + n + (n === 1 ? " write" : " writes"), sumExt: (skills, plugins) => [skills ? skills + (skills === 1 ? " skill" : " skills") : "", plugins ? plugins + (plugins === 1 ? " plugin" : " plugins") : ""].filter(Boolean).join(" · "),
       toolsHint: "Issues and pages are read through the Atlassian connector your Claude account has. A write stops and asks the first time.",
       toolsMissing: "This computer's Claude account has no Atlassian", toolsMissingWhy: "Connect Atlassian in claude.ai, then check again under Settings › Connected tools. Until then tasks cannot read Jira or Confluence.",
       fWrites: "Writes allowed", writesNone: "None yet. A task that would write stops and asks.", removeWrite: (w) => "Remove " + w,
@@ -2212,6 +2228,14 @@
     const pluginsOn = dialog.dataset.pluginsOn !== undefined ? JSON.parse(dialog.dataset.pluginsOn) : editing?.pluginsOn ?? [];
     const ownSkills = SAMPLE_SKILLS[dir] ?? [];
     const ownPlugins = SAMPLE_PLUGINS[dir] ?? [];
+    const ownOn = { skills: ownSkills.filter((x) => !skillsOff.includes(x.id)).length, plugins: ownPlugins.filter((x) => pluginsOn.includes(x.id)).length };
+    const toolsWarned = atlassian && new URLSearchParams(location.search).get("connectors") === "noatlassian";
+    // one open at a time (name=), and the one opened stays open across a re-render
+    const fold = (key, label, summary, body, force = false) =>
+      `<details class="fold pfold" name="pfold" data-fold="${key}"${force || dialog.dataset.openFold === key ? " open" : ""}>
+        <summary><span class="label">${label}</span><span class="pfold-sum">${summary}</span><span class="fold-ic">${chevron}</span></summary>
+        ${body}
+      </details>`;
     const extRow = (kind, x, on) =>
       `<label class="ext"><input type="checkbox" data-own="${kind}:${x.id}"${on ? " checked" : ""} /><span class="ext-tx"><b>${x.id.split("@")[0]}</b><span title="${x.about[lang]}">${x.about[lang]}</span></span></label>`;
     const heading = editing ? t().editProjectTitle : t().newProjectTitle;
@@ -2256,17 +2280,15 @@
           <span class="hint">${dir ? t().folderHint : t().noFolderHint} ${dir ? `<a href="settings.html${lang === "en" ? "?lang=en" : ""}#safety">${t().scopeMore}</a>` : ""}</span>
         </div>
 
-        ${dir ? `<div class="field">
-          <span class="label">${t().fRuns}</span>
+        ${dir ? `${fold("runs", t().fRuns, runs.length ? t().sumRuns(runs[0], runs.length - 1) : t().sumNone, `<div class="field">
           ${runs.length
             ? `<div class="runs">${runs.map((r, i) => `<span class="run">${r}<button type="button" data-drop-run="${i}" aria-label="${t().removeRun(r)}">${X_SM}</button></span>`).join("")}</div>`
             : `<span class="hint" style="margin-top:0">${t().runsNone}</span>`}
           <div class="run-add"><input class="input" id="npRun" placeholder="${t().runPlaceholder}" autocomplete="off" spellcheck="false" /><button class="btn btn-secondary btn-sm" type="button" data-add-run>${t().addRun}</button></div>
           <span class="hint">${t().runsHint}</span>
-        </div>
+        </div>`)}
 
-        <div class="field">
-          <span class="label">${t().fTools}</span>
+        ${fold("tools", t().fTools, atlassian ? t().toolsOn + (writes.length ? t().sumWrites(writes.length) : "") : t().toolsOff, `<div class="field">
           <div class="opts" role="radiogroup" aria-label="${t().fTools}">
             <button class="opt" type="button" role="radio" aria-checked="${!atlassian}" data-atlassian="off">${t().toolsOff}</button>
             <button class="opt" type="button" role="radio" aria-checked="${atlassian}" data-atlassian="on">${t().toolsOn}</button>
@@ -2280,16 +2302,15 @@
           ${writes.length
             ? `<div class="runs">${writes.map((w, i) => `<span class="run word">${t().writes[w]}<button type="button" data-drop-write="${i}" aria-label="${t().removeWrite(t().writes[w])}">${X_SM}</button></span>`).join("")}</div>`
             : `<span class="hint" style="margin-top:0">${t().writesNone}</span>`}
-        </div>` : ""}
+        </div>` : ""}`, toolsWarned)}
 
-        <div class="field">
-          <span class="label">${t().fOwnExt}</span>
+        ${fold("ext", t().fOwnExt, ownOn.skills + ownOn.plugins ? t().sumExt(ownOn.skills, ownOn.plugins) : t().sumNone, `<div class="field">
           ${ownSkills.length + ownPlugins.length
             ? `${ownSkills.length ? `<div class="ext-group"><b>${t().ownSkills}</b>${ownSkills.map((x) => extRow("skill", x, !skillsOff.includes(x.id))).join("")}</div>` : ""}
                ${ownPlugins.length ? `<div class="ext-group"><b>${t().ownPlugins}</b>${ownPlugins.map((x) => extRow("plugin", x, pluginsOn.includes(x.id))).join("")}</div>` : ""}`
             : `<span class="hint" style="margin-top:0">${t().ownNone}</span>`}
           <span class="hint">${t().ownHint} <a href="settings.html${lang === "en" ? "?lang=en" : ""}#skills">${t().ownEveryProject}</a>${t().ownHintEnd}</span>
-        </div>` : ""}
+        </div>`)}` : ""}
       </div>
 
       <div class="m-foot">
@@ -2370,11 +2391,18 @@
         again(`[data-atlassian="${b.dataset.atlassian}"]`);
       });
     }
+    for (const d of dialog.querySelectorAll("[data-fold]")) {
+      d.addEventListener("toggle", () => {
+        if (d.open) dialog.dataset.openFold = d.dataset.fold;
+        else if (dialog.dataset.openFold === d.dataset.fold) delete dialog.dataset.openFold;
+      });
+    }
     for (const box of dialog.querySelectorAll("[data-own]")) {
       box.addEventListener("change", () => {
         const [kind, id] = box.dataset.own.split(":");
         if (kind === "skill") dialog.dataset.skillsOff = JSON.stringify(box.checked ? skillsOff.filter((x) => x !== id) : [...skillsOff, id]);
         else dialog.dataset.pluginsOn = JSON.stringify(box.checked ? [...pluginsOn, id] : pluginsOn.filter((x) => x !== id));
+        again(`[data-own="${box.dataset.own}"]`);
       });
     }
     for (const b of dialog.querySelectorAll("[data-drop-write]")) {

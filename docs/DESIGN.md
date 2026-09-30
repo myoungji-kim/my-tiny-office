@@ -880,7 +880,15 @@ boundary's last line names Atlassian as the one way out, and 허용한 쓰기 li
 the kinds of write the project's tasks make without asking, each removable. 안전 범위 in
 settings is the same promise in full, and the dialog links to it.
 
-Last comes **이 프로젝트의 스킬과 플러그인**: what the project's folder carries
+Once a folder is chosen, three settings follow, each folded to one line that
+says what it is set to: 실행할 수 있는 명령 (*npm test 외 2개*), Jira · Confluence
+(*쓰지 않음*, or the connector and how many writes it may make) and the
+project's skills and plugins (*스킬 2개*). One opens at a time, and a tick or a
+choice inside updates its line. A warning inside one, such as Atlassian
+missing, keeps it open. The name, description, priority and folder stay
+unfolded: they are what a new project needs, and the rest start right.
+
+The third is **이 프로젝트의 스킬과 플러그인**: what the project's folder carries
 for Claude Code, the way Claude Code itself finds it in a project.
 - **폴더에 있는 스킬:** each `<folder>/.claude/skills/<name>/SKILL.md`, ticked to
   start. They were written for this project, so a task there has them unless
