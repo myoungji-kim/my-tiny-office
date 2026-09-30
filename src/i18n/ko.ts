@@ -190,6 +190,7 @@ export const ko: Dictionary = {
     atMeeting: "회의실",
     noTeam: "팀 없음",
     hireDesk: "이 팀에 직원 고용",
+    hireNoTeam: "직원 고용",
     nobodyHere: "지금은 아무도 없어요.",
     work: "업무",
     reviewKey: "검토",

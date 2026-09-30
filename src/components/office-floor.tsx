@@ -455,10 +455,11 @@ export function OfficeFloor({
                 <Card key={p.id} p={p} open={openId === p.id} locale={locale} words={words} now={now} onPick={pick} />
               ))}
               {g.people.length === 0 && <p className="col-empty">{words.office.nobodyHere}</p>}
-              {g.team !== undefined && g.people.length > 0 && (
-                <button className="addcard" type="button" onClick={() => setHireTeam(g.team)}>
+              {/* people outside any team can be joined too, so a new company's office has a way to hire */}
+              {(g.team !== undefined || g.key === "noTeam") && g.people.length > 0 && (
+                <button className="addcard" type="button" onClick={() => setHireTeam(g.team ?? "")}>
                   <span className="plus">{Icon.plus}</span>
-                  {words.office.hireDesk}
+                  {g.team === undefined ? words.office.hireNoTeam : words.office.hireDesk}
                 </button>
               )}
             </div>

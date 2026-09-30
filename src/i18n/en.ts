@@ -187,6 +187,7 @@ export const en = {
     atMeeting: "Meeting room",
     noTeam: "No team",
     hireDesk: "Hire into this team",
+    hireNoTeam: "Hire",
     nobodyHere: "Nobody is here right now.",
     work: "WORK",
     reviewKey: "Review",

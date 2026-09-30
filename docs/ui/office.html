@@ -179,7 +179,7 @@
   const TEXT = {
     ko: {
       ...WORDS.ko,
-      hireDesk: "이 팀에 직원 고용", noTeam: "팀 없음", justHired: "방금 입사",
+      hireDesk: "이 팀에 직원 고용", hireNoTeam: "직원 고용", noTeam: "팀 없음", justHired: "방금 입사",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
       feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
       feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기", feedLook: "보러 가기",
@@ -218,7 +218,7 @@
     },
     en: {
       ...WORDS.en,
-      hireDesk: "Hire into this team", noTeam: "No team", justHired: "Just joined",
+      hireDesk: "Hire into this team", hireNoTeam: "Hire", noTeam: "No team", justHired: "Just joined",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
       feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
       feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it", feedLook: "Take a look",
@@ -581,14 +581,15 @@
         e.textContent = t().nobodyHere;
         grid.appendChild(e);
       }
-      if (t().teams[key] && group.length) {
+      // people outside any team can be joined too, so a new company's office has a way to hire
+      if ((t().teams[key] || key === "noTeam") && group.length) {
         const add = document.createElement("button");
         add.className = "addcard";
         add.type = "button";
         add.innerHTML =
           '<span class="plus"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg></span>' +
-          t().hireDesk;
-        add.addEventListener("click", () => hireAt(key));
+          (key === "noTeam" ? t().hireNoTeam : t().hireDesk);
+        add.addEventListener("click", () => hireAt(key === "noTeam" ? null : key));
         grid.appendChild(add);
       }
       wrap.appendChild(grid);
