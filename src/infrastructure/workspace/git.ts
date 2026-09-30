@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, unlinkSync } from "node:fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
@@ -87,30 +87,13 @@ export async function prepareWorktree(folder: string, taskId: string): Promise<W
     return { ok: false, reason: "worktreeFailed" };
   }
 
-  if ((await worktreeGit(folder, taskId)) === undefined) {
-    const head = await git(["-C", folder, "rev-parse", "--verify", "--quiet", "HEAD"]);
-    if (head?.code !== 0) return { ok: false, reason: "repositoryEmpty" };
-    const known = await git(["-C", folder, "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`]);
-    const added = await git(known?.code === 0 ? ["-C", folder, "worktree", "add", path, branch] : ["-C", folder, "worktree", "add", "-b", branch, path]);
-    if (added?.code !== 0) return { ok: false, reason: "worktreeFailed" };
-  }
-  const wt = await worktreeGit(folder, taskId);
-  return wt !== undefined && (await keepSkillsOut(wt)) ? { ok: true, path, branch } : { ok: false, reason: "worktreeFailed" };
-}
+  if ((await worktreeGit(folder, taskId)) !== undefined) return { ok: true, path, branch };
+  const head = await git(["-C", folder, "rev-parse", "--verify", "--quiet", "HEAD"]);
+  if (head?.code !== 0) return { ok: false, reason: "repositoryEmpty" };
 
-// The project's skills are given from its own folder (SECURITY.md §8), so the
-// worktree holds none an agent could edit into instructions for a later run.
-// Skip-worktree lives in this worktree's own index: nothing is committed or
-// shown as deleted, and the user's checkout keeps them.
-async function keepSkillsOut(wt: { readonly path: string; readonly args: readonly string[] }): Promise<boolean> {
-  const listed = await git([...wt.args, "ls-files", "-z", "--", ".claude/skills"]);
-  if (listed?.code !== 0) return false;
-  const files = listed.stdout.split("\0").filter((f) => f !== "");
-  if (files.length === 0) return true;
-  const marked = await git([...wt.args, "update-index", "--skip-worktree", "--", ...files]);
-  if (marked?.code !== 0) return false;
-  for (const file of files) rmSync(join(wt.path, file), { force: true });
-  return true;
+  const known = await git(["-C", folder, "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`]);
+  const added = await git(known?.code === 0 ? ["-C", folder, "worktree", "add", path, branch] : ["-C", folder, "worktree", "add", "-b", branch, path]);
+  return added?.code === 0 ? { ok: true, path, branch } : { ok: false, reason: "worktreeFailed" };
 }
 
 const DIFF = ["--no-ext-diff", "--no-textconv", "--no-renames"];

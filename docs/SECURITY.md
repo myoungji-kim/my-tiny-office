@@ -32,13 +32,12 @@ no shell:
 claude -p
   --output-format stream-json --verbose
   --permission-mode dontAsk
-  --setting-sources project                   ("" in a project using a connector, §8)
+  --setting-sources ""
   --settings '{"autoMemoryEnabled":false,"disableAllHooks":true}'
   --disable-slash-commands                     (not when plugins are chosen, §8)
   --strict-mcp-config                          (not in a project using a connector)
   --tools Read,Edit,Write,Glob,Grep,Bash[,PowerShell][,ToolSearch][,Skill]   (PowerShell only on Windows)
   --allowedTools "Read(./**) Edit(./**) Write(./**) <project commands> [<connector tools>] [Skill]"
-  [--disallowedTools "Skill(<each skill written into the worktree>)"]   (when skills are on, §8)
   [--plugin-dir <each chosen plugin, and one carrying the chosen skills>]
   --append-system-prompt-file <memory file>
   --max-budget-usd 2
@@ -58,7 +57,7 @@ Each flag earns its place:
 | --- | --- | --- |
 | `-p --output-format stream-json` | The only mode with structured events, permission-denial events and a spending cap. `--bg` logs are terminal output | ✓ |
 | `--permission-mode dontAsk` | Anything not allowed is denied without a prompt nobody would answer, and a `permission_denied` event is emitted | ✓ |
-| `--setting-sources project` | Drops the user's hooks, skills, plugins and MCP servers | ✓ 0 MCP tools, 0 skills, built-in plugins only |
+| `--setting-sources ""` | No settings file is read: not the user's hooks, skills, plugins or MCP servers, and not the worktree's own `.claude/settings.json`, `.claude/skills` or `.mcp.json`, which a repository can carry and the agent can write. A project settings file could otherwise set `env` (where the session sends its requests) or a helper command run with the user's rights. It also stops `CLAUDE.md` loading, so the session is told to read it | ✓ 0 MCP tools; a worktree skill not loaded; a worktree `CLAUDE.md` read when told to |
 | `--settings …` | Auto-memory and hooks off even if a project setting turns them on | ✓ hooks gone |
 | `--strict-mcp-config` | Left out only in a project using a connector (§8). No MCP server but those passed with `--mcp-config`, and none is. Without it the account's claude.ai connectors (Gmail, Drive, Calendar, Atlassian) join the session **after its first turn**, so the init event shows none | ✓ 0 connectors through a four-step run; without it 92 connector tools arrived after step 1, and the run cost $0.59 instead of $0.04 |
 | `--tools …` | Only these built-in tools exist in the session; no WebFetch, WebSearch, Task, Cron. `ToolSearch` only with a connector: connector tools arrive deferred and nothing loads them without it | ✓ 7 tools; without `ToolSearch` a connector run saw no `mcp__` tool at all |
@@ -314,14 +313,13 @@ settings file approving it, and even with `enableAllProjectMcpServers: false`
 in `--settings`. A repository can carry that file and an agent can write it.
 `--setting-sources ""` — no settings source at all — keeps it from starting,
 keeps the user's own MCP servers out too, and still brings the account's
-connectors (measured: no process, Atlassian tools answered). It also stops
-the folder's `CLAUDE.md` loading, so such a session is told to read it. A
-chosen plugin's MCP server starts the same way without the flag, so a
-connector project is given the chosen skills but no plugin.
+connectors (measured: no process, Atlassian tools answered); every run reads
+no settings source (§2). A chosen plugin's MCP server starts the same way
+without the flag, so a connector project is given the chosen skills but no
+plugin.
 
-So a project using the connector launches without `--strict-mcp-config` and
-with `--setting-sources ""`, adds `ToolSearch` to `--tools`, and adds to
-`--allowedTools`:
+So a project using the connector launches without `--strict-mcp-config`,
+adds `ToolSearch` to `--tools`, and adds to `--allowedTools`:
 
 - **Atlassian's read tools**, by name, from the list the app keeps
   (`src/infrastructure/runtime/connectors.ts`), measured against the tools
@@ -374,20 +372,12 @@ Skill tool too. A reviewer is given none. Measured on `2.1.284`:
 given the same way, and only for that project's tasks:
 - its skills are copied from `<project folder>/.claude/skills`, the user's own
   checkout, never from the task's worktree. An agent can edit the worktree's
-  copy, and what it wrote must not come back to it as instructions. Once
-  skills are on, Claude Code loads the worktree's `.claude/skills` itself
-  under `--setting-sources project`, so the worktree holds none: when it is
-  prepared, the tracked files there are marked skip-worktree in the worktree's
-  own index and removed, which neither commits nor shows them as deleted, and
-  an agent's edit to one is gone by the next run. A skill the agent writes
-  there under a new name is denied with `--disallowedTools Skill(<name>)`,
-  and the session is told why. That rule also denies a given skill of the same
-  name, so it is not how the checkout's skills are kept apart. The checkout's
-  copy comes as `my-tiny-office-skills:<name>`. `--setting-sources ""` would
-  drop the worktree's skills too, but also the project's `CLAUDE.md`.
-  Measured on `2.1.285` end to end: an unticked skill was not offered, the
-  checkout's edited copy was the one invoked, and the worktree's commit held
-  only the task's file. A skill folder that is a link is not given;
+  copy, and what it wrote must not come back to it as instructions; with no
+  settings source (§2) Claude Code does not load the worktree's skills at all,
+  and the checkout's copy comes as `my-tiny-office-skills:<name>`. Measured
+  on `2.1.285`: the worktree's skill was not listed, the app's plugin's was.
+  End to end, the checkout's edited copy was the one invoked and an unticked
+  skill was not offered. A skill folder that is a link is not given;
 - its plugins are those `installed_plugins.json` lists in project or local
   scope for that folder, given only once ticked, with their hooks and MCP
   servers off as above.
@@ -456,14 +446,13 @@ and check that the init event lists no MCP servers, no skills, no hooks and
 only the listed tools, and that after several turns the agent is still told of
 no connector: they arrive late, so the init event alone does not show them.
 
-For a connector launch, check that a worktree `.mcp.json` whose server writes
-a file does not start (`--setting-sources ""`), and that the connector still
-answers.
-
-Also check that a `.claude/settings.json` in the worktree allowing bare
-`Bash`, with `defaultMode: bypassPermissions`, changes nothing: a command
-not on the project's list is still denied (measured on `2.1.284`: the app's
-own flags decide). With a plugin chosen, check that its hook does not run and
+Check that a worktree `.mcp.json` whose server writes a file does not start,
+and that a connector launch still answers. Check that a worktree
+`.claude/settings.json` changes nothing: one allowing bare `Bash` with
+`defaultMode: bypassPermissions` still leaves a command off the project's
+list denied, and one setting `env` or `apiKeyHelper` has no effect. Check
+that a worktree `.claude/skills` skill is not listed and that a worktree
+`CLAUDE.md` is read when the session is told to. With a plugin chosen, check that its hook does not run and
 its MCP server does not join.
 
 Then launch a connector project's run and check that it lists the connector's

@@ -513,8 +513,9 @@ confined to the worktree (SECURITY.md §2).
 
 ### A session carries nothing of the user's own setup
 
-`--setting-sources project` keeps the user's hooks, skills, plugins, MCP
-servers and auto-memory out of every session, so an employee carries only
+`--setting-sources ""` keeps the user's hooks, skills, plugins, MCP
+servers and auto-memory out of every session, and the worktree's own settings
+file and skills with them, so an employee carries only
 what they were taught. `--strict-mcp-config` keeps the account's claude.ai
 connectors out too; they join a session after its first turn otherwise, and
 multiply its cost. That is why outside tools are out of the MVP; SECURITY.md §8

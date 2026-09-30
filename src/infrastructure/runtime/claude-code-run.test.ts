@@ -7,7 +7,7 @@ const CWD = "C:\\code\\pay\\.worktrees\\t1";
 
 describe("launchArgs", () => {
   it("is the launch SECURITY.md measured, with each allowed command for both shells", () => {
-    expect(launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32")).toEqual([
+    expect(launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32")).toEqual([
       "-p",
       "--output-format",
       "stream-json",
@@ -15,7 +15,7 @@ describe("launchArgs", () => {
       "--permission-mode",
       "dontAsk",
       "--setting-sources",
-      "project",
+      "",
       "--settings",
       '{"autoMemoryEnabled":false,"disableAllHooks":true}',
       "--disable-slash-commands",
@@ -32,13 +32,13 @@ describe("launchArgs", () => {
   });
 
   it("gives commands only to Bash on macOS and Linux", () => {
-    const args = launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "darwin");
+    const args = launchArgs({ commands: ["npm test"], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "darwin");
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash");
     expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**) Edit(./**) Write(./**) Bash(npm test)");
   });
 
   it("gives a reviewer only the tools that read, whatever the project allows", () => {
-    const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: undefined, readOnly: true });
+    const args = launchArgs({ commands: ["npm test"], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: true });
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Glob,Grep");
     expect(args[args.indexOf("--allowedTools") + 1]).toBe("Read(./**)");
     // and no connector, even in a project that uses one
@@ -46,7 +46,7 @@ describe("launchArgs", () => {
   });
 
   it("lets the Atlassian connector in by name only, in a project that uses it", () => {
-    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
+    const args = launchArgs({ commands: [], atlassian: { writes: ["jiraComment"], server: "claude_ai_Atlassian_Rovo" }, plugins: [], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
     const allowed = args[args.indexOf("--allowedTools") + 1].split(" ");
     expect(args).not.toContain("--strict-mcp-config");
     // and reads no settings source, so a folder's .mcp.json never starts
@@ -58,24 +58,22 @@ describe("launchArgs", () => {
     expect(allowed.filter((t) => t.startsWith("mcp__") && !t.startsWith("mcp__claude_ai_Atlassian_Rovo__"))).toEqual([]);
   });
 
-  it("gives the chosen plugins and their skills to the work, never to a reviewer, and never the worktree's own skills", () => {
-    const args = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail", "C:/run/my-tiny-office-skills"], worktreeSkills: ["release-notes"], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
+  it("gives the chosen plugins and their skills to the work, never to a reviewer", () => {
+    const args = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail", "C:/run/my-tiny-office-skills"], memoryFile: "m.md", resume: undefined, readOnly: false }, "win32");
     expect(args).not.toContain("--disable-slash-commands");
     expect(args[args.indexOf("--tools") + 1]).toBe("Read,Edit,Write,Glob,Grep,Bash,PowerShell,Skill");
     expect(args[args.indexOf("--allowedTools") + 1].split(" ")).toContain("Skill");
     expect(args.filter((a, i) => args[i - 1] === "--plugin-dir")).toEqual(["C:/p/ponytail", "C:/run/my-tiny-office-skills"]);
     expect(args).toContain("--strict-mcp-config");
-    expect(args[args.indexOf("--disallowedTools") + 1]).toBe("Skill(release-notes)");
 
-    const review = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail"], worktreeSkills: ["release-notes"], memoryFile: "m.md", resume: undefined, readOnly: true });
+    const review = launchArgs({ commands: [], atlassian: undefined, plugins: ["C:/p/ponytail"], memoryFile: "m.md", resume: undefined, readOnly: true });
     expect(review).toContain("--disable-slash-commands");
-    expect(review).not.toContain("--disallowedTools");
     expect(review).not.toContain("--plugin-dir");
   });
 
   it("continues a session only by its id, never by text that reads as a flag", () => {
-    expect(launchArgs({ commands: [], atlassian: undefined, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: SESSION, readOnly: false }).slice(-2)).toEqual(["--resume", SESSION]);
-    expect(() => launchArgs({ commands: [], atlassian: undefined, plugins: [], worktreeSkills: [], memoryFile: "m.md", resume: "--dangerously-skip-permissions", readOnly: false })).toThrow();
+    expect(launchArgs({ commands: [], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: SESSION, readOnly: false }).slice(-2)).toEqual(["--resume", SESSION]);
+    expect(() => launchArgs({ commands: [], atlassian: undefined, plugins: [], memoryFile: "m.md", resume: "--dangerously-skip-permissions", readOnly: false })).toThrow();
   });
 });
 

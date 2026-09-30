@@ -9,7 +9,7 @@ import { resolveDataDirectory } from "../persistence/data-directory";
 import { readSettings } from "../persistence/settings";
 import { findExecutable, startProcess } from "../process/run";
 import { atlassianServer, atlassianTools, writeOf, writeShown } from "./connectors";
-import { pluginDirs, skillNamesIn, worktreeSkillsNote } from "./extensions";
+import { pluginDirs } from "./extensions";
 
 // A runaway stop, not a budget: fixed, and not a setting (SECURITY.md §2).
 const MAX_BUDGET_USD = "2";
@@ -23,8 +23,6 @@ export function launchArgs(input: {
   readonly atlassian: { readonly writes: readonly AtlassianWrite[]; readonly server: string } | undefined;
   // the chosen plugins' folders, the one carrying the chosen skills among them
   readonly plugins: readonly string[];
-  // skills written into the worktree, which Claude Code would load itself
-  readonly worktreeSkills: readonly string[];
   readonly memoryFile: string;
   readonly resume: string | undefined;
   readonly readOnly: boolean;
@@ -47,10 +45,10 @@ export function launchArgs(input: {
     "--verbose",
     "--permission-mode",
     "dontAsk",
-    // Without --strict-mcp-config a folder's own .mcp.json would start its servers;
-    // reading no settings source keeps them, and the user's, out (SECURITY.md §8).
+    // No settings source at all: the worktree's .claude/settings.json, .mcp.json
+    // and skills are the agent's to write, so none of them is read (SECURITY.md §2).
     "--setting-sources",
-    connector === undefined ? "project" : "",
+    "",
     "--settings",
     JSON.stringify({ autoMemoryEnabled: false, disableAllHooks: true }),
     // skills come only through the chosen plugins, which bring the built-in ones along (SECURITY.md §8)
@@ -61,7 +59,6 @@ export function launchArgs(input: {
     tools,
     "--allowedTools",
     allowed.join(" "),
-    ...(plugins.length === 0 || input.worktreeSkills.length === 0 ? [] : ["--disallowedTools", ...input.worktreeSkills.map((name) => `Skill(${name})`)]),
     ...plugins.flatMap((dir) => ["--plugin-dir", dir]),
     "--append-system-prompt-file",
     input.memoryFile,
@@ -159,19 +156,18 @@ export const claudeCodeRuntime: AgentRuntime = {
     const cleanUp = () => rmSync(folder, { recursive: true, force: true });
     const memoryFile = join(folder, "memory.md");
     const settings = readSettings(resolveDataDirectory());
-    const worktreeSkills = skillNamesIn(input.cwd);
     let plugins: string[];
     try {
       // a connector project runs its MCP servers, so it gets the chosen skills but no plugin
       plugins = input.readOnly ? [] : pluginDirs(settings.extensions, input.own, folder, { plugins: input.atlassian === undefined });
-      writeFileSync(memoryFile, input.memory + (plugins.length > 0 && worktreeSkills.length > 0 ? "\n\n" + worktreeSkillsNote : ""));
+      writeFileSync(memoryFile, input.memory);
     } catch (error) {
       cleanUp();
       throw error;
     }
     const calls = new Map<string, { tool: string; command: string; input: Json }>();
     const atlassian = input.atlassian && { ...input.atlassian, server: atlassianServer(settings.connectors?.servers) };
-    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian, plugins, worktreeSkills, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
+    return startProcess(found.path, launchArgs({ commands: input.commands, atlassian, plugins, memoryFile, resume: input.resume, readOnly: input.readOnly }), {
       cwd: input.cwd,
       input: input.prompt,
       onLine: (line) => {

@@ -120,17 +120,8 @@ export function projectExtensions(folder: string, home: string = homedir()): Ins
   return { plugins: plugins(home, forFolder(folder)).sort(byName), skills: skillsIn(folder, false).sort(byName) };
 }
 
-// The skills Claude Code itself finds in a folder's .claude/skills.
-export function skillNamesIn(folder: string): string[] {
-  return skillsIn(folder, true).map((s) => s.id);
-}
 
 const WRAPPER = "my-tiny-office-skills";
-
-// A skill written into the worktree is refused by name (SECURITY.md §8);
-// without this an agent reads the refusal as a rule it should ask about.
-export const worktreeSkillsNote =
-  `Skills given to you come as \`${WRAPPER}:<name>\`. A skill with no prefix was written in this working copy and is refused on purpose; it is not given to you.`;
 
 // The plugin folders a run is given: each chosen plugin as installed, and the
 // chosen skills carried in one plugin of the app's own, made in the run's folder.

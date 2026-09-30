@@ -57,29 +57,6 @@ describe("a task's worktree", () => {
     expect(run("rev-parse", "--abbrev-ref", "HEAD").trim()).toBe("main");
   });
 
-  it("holds none of the project's skills, and never commits them as removed", async () => {
-    mkdirSync(join(repo, ".claude", "skills", "notes"), { recursive: true });
-    writeFileSync(join(repo, ".claude", "skills", "notes", "SKILL.md"), "---\nname: notes\n---\n");
-    run("add", "-A");
-    run("commit", "-q", "-m", "skills");
-    const made = await prepareWorktree(repo, TASK);
-    assert(made.ok);
-    const skill = join(made.path, ".claude", "skills", "notes", "SKILL.md");
-
-    expect(existsSync(skill)).toBe(false);
-    expect(await changesIn(repo, TASK)).toEqual([]);
-    // an agent's copy is gone again by the next run
-    mkdirSync(join(skill, ".."), { recursive: true });
-    writeFileSync(skill, "edited");
-    await prepareWorktree(repo, TASK);
-    expect(existsSync(skill)).toBe(false);
-
-    writeFileSync(join(made.path, "a.txt"), "two\n");
-    assert((await commitAll(repo, TASK, "Work")).ok);
-    expect(run("show", "--name-only", "--format=", branchOf(TASK)).trim()).toBe("a.txt");
-    expect(existsSync(join(repo, ".claude", "skills", "notes", "SKILL.md"))).toBe(true);
-  });
-
   it("runs no hook of the repository's", async () => {
     mkdirSync(join(repo, ".git", "hooks"), { recursive: true });
     const marker = join(repo, "hook-ran");

@@ -25,10 +25,10 @@ function memoryPrompt(employee: Employee, own: readonly Memory[], project: Pick<
       ? "No shell command is allowed in this project."
       : `The only shell commands allowed are these, each run on its own exactly as written, never joined with && ; | or redirected: ${allowed}.`,
     "If you need a command that is not allowed, try it once on its own; the user decides whether to allow it.",
+    "If this folder has a CLAUDE.md, read it first and follow it.",
     ...(project.atlassian
       ? [
           "You can read this project's Jira issues and Confluence pages with the Atlassian tools; load them with ToolSearch. No other connector is yours to use.",
-          "If this folder has a CLAUDE.md, read it first and follow it.",
           "A write to Jira or Confluence the project has not allowed stops the task the first time: make it once, as you mean it, and the user decides.",
         ]
       : []),
@@ -52,6 +52,7 @@ function reviewerPrompt(reviewer: Employee, own: readonly Memory[]): string {
   return (
     [
       `You are ${reviewer.name}, reviewing a colleague's work on one task. The current folder is their copy of the project, and you can only read it: change nothing.`,
+      "If this folder has a CLAUDE.md, read it first: it says how this project is meant to be.",
       "Read their changes, given below, and the files around them as you need. Say briefly what is good, then what should change, the most important first, each concrete enough to act on. Write in the language the task is written in.",
       "End with one last line: `Verdict: approve` if it can be applied as it is, or `Verdict: changes` if it should change first.",
       ...taught(own),
