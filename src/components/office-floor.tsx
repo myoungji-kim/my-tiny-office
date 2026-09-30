@@ -172,7 +172,7 @@ function RoomView({
                   style={{ left: x * T - 4, top: y * T - T - 6, width: 2 * T + 8, height: 2 * T + 10 }}
                   onClick={(e) => onPick(person.id, e.currentTarget, e.detail === 0)}
                 />
-                <span className="tag" style={{ left: x * T + T, top: y * T + T + 4, opacity: person.status === "working" ? undefined : 0.7 }}>
+                <span className="tag" title={person.name} style={{ left: x * T + T, top: y * T + T + 4, opacity: person.status === "working" ? undefined : 0.7 }}>
                   {person.name}
                 </span>
                 <span className="bub" style={{ left: x * T + T, top: y * T - T - 24 }}>

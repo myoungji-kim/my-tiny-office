@@ -47,6 +47,8 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
         <Head
           title={t.office.title}
           sub={sub}
+          // 오늘 shows only times; the date says which day it is
+          right={<span className="ghost-note">{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", hourCycle: "h23" }).format(office.now)}</span>}
           tabs={rooms.map((r) => (
             <Link key={r.key} className="tab" role="tab" aria-selected={r.key === room.key} href={r.kind === "all" ? "/" : `/?room=${encodeURIComponent(r.key)}`}>
               <span>{nameOf(r)}</span>

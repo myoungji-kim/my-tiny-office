@@ -79,7 +79,9 @@ My Tiny Office를 데스크톱 앱으로 설치해 줘.
    npm run app:install
    ```
 
-3. Open **My Tiny Office** from the Start menu.
+3. Open **My Tiny Office** from the Start menu. Closing its window quits the
+   app, and work in progress stops: the next time it opens, those tasks show
+   as disconnected, and 다시 연결 picks each up from its session.
 
 It is installed in `%LOCALAPPDATA%\Programs\My Tiny Office`, with a shortcut in
 `%APPDATA%\Microsoft\Windows\Start Menu\Programs`.
