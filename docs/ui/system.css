@@ -216,7 +216,7 @@ button { font: inherit; color: inherit; }
 
 .logo svg { width: 14px; height: 14px; color: #fff; }
 
-body:has(> .app) { padding: 22px 18px; }
+body:has(> .app) { padding: 22px 18px 40px; }
 
 .app {
     max-width: var(--app-width, 1400px); margin: 0 auto;
@@ -226,7 +226,7 @@ body:has(> .app) { padding: 22px 18px; }
     overflow: hidden;
     display: grid; grid-template-columns: 236px 1fr;
     /* the window's height: the sidebar stays put and the screen beside it scrolls */
-    height: calc(100vh - 44px); min-height: 560px; grid-template-rows: minmax(0, 1fr);
+    height: calc(100vh - 62px); min-height: 560px; grid-template-rows: minmax(0, 1fr);
   }
 
 .side { background: var(--subtle); padding: 16px 12px; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
@@ -608,6 +608,9 @@ section > h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
 }
 
 .body { padding: 16px 22px 24px; display: flex; flex-direction: column; gap: 18px; overflow: auto; flex: 1; }
+
+/* the body scrolls, so what is in it keeps its own height rather than squeezing to fit */
+.main > .body > * { flex-shrink: 0; }
 
 .room-wrap { position: relative; width: max-content; margin: 0 auto; }
 
