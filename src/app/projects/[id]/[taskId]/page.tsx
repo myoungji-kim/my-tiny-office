@@ -137,7 +137,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
       text: m.text,
       suggestions:
         m.suggestions.length === 0 || current === undefined ? undefined : (
-          <Suggestions locale={locale} companyId={company.id} person={current} task={{ id: task.id, title: task.title }} suggestions={m.suggestions} memories={office.memories} areas={office.areas} />
+          <Suggestions locale={locale} companyId={company.id} person={current} task={{ id: task.id, title: task.title, area: task.area }} suggestions={m.suggestions} memories={office.memories} areas={office.areas} />
         ),
     };
   };

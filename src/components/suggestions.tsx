@@ -27,7 +27,8 @@ export function Suggestions({
   readonly locale: Locale;
   readonly companyId: string;
   readonly person: EmployeeView;
-  readonly task: { readonly id: string; readonly title: string };
+  // its area is where what it showed is most likely to belong
+  readonly task: { readonly id: string; readonly title: string; readonly area: string | undefined };
   readonly suggestions: readonly Suggestion[];
   readonly memories: readonly MemoryView[];
   readonly areas: readonly AreaView[];
@@ -59,6 +60,7 @@ export function Suggestions({
           target={{ kind: "person", person }}
           memories={memories.filter((m) => m.employeeId === person.id)}
           areas={areas}
+          area={task.area}
           source={{ taskId: task.id, title: task.title }}
           text={teaching.text}
           onTaught={() => settle(teaching)}
