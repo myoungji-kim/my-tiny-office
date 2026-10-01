@@ -184,10 +184,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
 
         {tab === "general" && (
           <>
+            {panel(w.langTitle, w.langWhy, <LanguagePicker locale={locale} label={w.langTitle} names={w.langNames} />)}
             {panel(w.workTitle, w.workWhy, <WorkPicker paused={workPaused()} label={w.workTitle} auto={w.workAuto} pause={w.workPaused} />)}
             {panel(w.plazaTitle, w.plazaWhy, <PlazaPicker shown={plazaShown()} label={w.plazaTitle} show={w.plazaShow} hide={w.plazaHide} />)}
             {panel(w.widthTitle, w.widthWhy, <WidthPicker label={w.widthTitle} names={w.widthsLong} look="opts" />)}
-            {panel(w.langTitle, w.langWhy, <LanguagePicker locale={locale} label={w.langTitle} names={w.langNames} />)}
           </>
         )}
 

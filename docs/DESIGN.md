@@ -24,7 +24,7 @@ before building or changing a screen.
 | `ui/employees.html` | The list, a person's page, teaching, hiring, the org chart and teams |
 | `ui/company.html` | Overview, history, the areas and roles lists, company memory |
 | `ui/plaza.html` | The plaza outside the company: the scene, a candidate's résumé, the list, hiring from it |
-| `ui/settings.html` | Settings in five tabs: Claude Code (its check and the connected tools), skills and plugins, general (starting work, screen width, language), the safety guide, and data (the open company's file, export, import, deleting it, the version) |
+| `ui/settings.html` | Settings in five tabs: Claude Code (its check and the connected tools), skills and plugins, general (language, starting work, the plaza, screen width), the safety guide, and data (the open company's file, export, import, deleting it, the version) |
 | `ui/connect.html` | The company's Claude Code, blocked states, a folder and what is safe in it, work that stops itself, a dropped session, what a move leaves behind |
 | `ui/components.html` | Buttons, menu rows, notices, empty states, dialogs, modals, forms |
 | `ui/characters.html` | The twenty animal sprites, silhouette families, naming |
