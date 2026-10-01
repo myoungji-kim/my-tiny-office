@@ -1335,9 +1335,16 @@ function uiLang() {
 }
 
 // Whether the last syllable has a final consonant, which picks 이/가, 을/를, 은/는.
+// An English ending is read the way it is said in Korean, as src/i18n/korean.ts does.
 function hasBatchim(word) {
-  const c = word.charCodeAt(word.length - 1);
-  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  const w = word.trimEnd().replace(/[\s.,!?'"`’”)\]]+$/u, "");
+  const c = w.charCodeAt(w.length - 1);
+  if (c >= 0xac00 && c <= 0xd7a3) return (c - 0xac00) % 28 !== 0;
+  const last = w.at(-1) ?? "";
+  if (/[0-9]/.test(last)) return "013678".includes(last);
+  if (/(^|[^A-Za-z])[A-Z]$|[A-Z]{2}$/.test(w)) return "LMNR".includes(last);
+  const lower = w.toLowerCase();
+  return /(ng|[mnl])$/.test(lower) || /[aeiou][kpt]$/.test(lower);
 }
 
 function withParticle(word, afterFinal, afterVowel) {
