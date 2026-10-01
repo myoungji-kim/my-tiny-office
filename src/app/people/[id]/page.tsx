@@ -132,15 +132,20 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
               </div>
               <div className="panel-bd">
                 {now}
-                {person.agentLost && person.task !== undefined && (
+                {(person.agentLost || person.runFailed) && person.task !== undefined && (
                   <div className="notice notice-bad now-lost">
                     <span className="n-ic">{Icon.plug}</span>
                     <span className="n-tx">
-                      <b>{t.projects.agentLost}</b>
-                      <span>{t.projects.lostWhy}</span>
+                      <b>{person.agentLost ? t.projects.agentLost : t.projects.runFailed}</b>
+                      <span>{person.agentLost ? t.projects.lostWhy : t.projects.runFailedWhy}</span>
                     </span>
                     <span className="n-acts">
-                      <ActButton action={carryOnAction.bind(null, company.id, person.task.taskId)} label={t.projects.reconnect} disabled={!ready} errors={t.errors} />
+                      <ActButton
+                        action={carryOnAction.bind(null, company.id, person.task.taskId)}
+                        label={person.agentLost ? t.projects.reconnect : t.projects.retry}
+                        disabled={!ready}
+                        errors={t.errors}
+                      />
                     </span>
                   </div>
                 )}

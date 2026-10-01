@@ -35,6 +35,8 @@ export interface EmployeeView {
   readonly status: EmployeeStatus;
   // their agent stopped mid-task without saying how
   readonly agentLost: boolean;
+  // Claude Code ended their run on an error of its own
+  readonly runFailed: boolean;
   // the task they are working on, or the one they are reviewing
   readonly task: WorkOnDesk | undefined;
   readonly review: WorkOnDesk | undefined;
@@ -301,6 +303,7 @@ export async function loadOffice(
       justBack: justBack(employee, agents, runs),
       status: statusOf(employee, tasks, reviews),
       agentLost: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "disconnected"),
+      runFailed: tasks.some((task) => task.status === "working" && task.assigneeId === employee.id && task.blocker?.kind === "runFailed"),
       leaveSince: employee.leaveSince,
       career:
         employee.career === undefined

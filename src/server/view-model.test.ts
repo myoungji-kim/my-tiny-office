@@ -129,6 +129,7 @@ describe("loadOffice", () => {
         justBack: false,
         status: "available",
         agentLost: false,
+        runFailed: false,
         task: undefined,
         review: undefined,
         lastFinished: undefined,

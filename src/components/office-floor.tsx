@@ -278,9 +278,9 @@ function actsFor(p: EmployeeView, companyId: string, ready: boolean, words: Dict
               { icon: Icon.undo, label: a.comeBack, run: () => bringBackAction(companyId, p.id) },
               teach,
             ];
-  // A lost agent is the thing to deal with first; everything else steps back.
-  const reconnect: Act = { icon: Icon.plug, label: words.projects.reconnect, key: true, starts: true, run: () => carryOnAction(companyId, taskId) };
-  const offered = p.agentLost ? [reconnect, ...acts.map((act) => ({ ...act, key: false }))] : acts;
+  // Work that stopped by itself is the thing to deal with first; everything else steps back.
+  const reconnect: Act = { icon: Icon.plug, label: p.agentLost ? words.projects.reconnect : words.projects.retry, key: true, starts: true, run: () => carryOnAction(companyId, taskId) };
+  const offered = p.agentLost || p.runFailed ? [reconnect, ...acts.map((act) => ({ ...act, key: false }))] : acts;
   return offered.map((act) => (!ready && act.starts === true && act.off === undefined ? { ...act, off: words.claude.cannotStart } : act));
 }
 
@@ -292,9 +292,9 @@ function StateBlock({ p, locale, words, now }: { readonly p: EmployeeView; reado
         <span className="c-k">{o.inProgress}</span>
         <span className="c-task">{p.task.title}</span>
         <span className="p-nums"><span>{o.spent(p.task.minutes)}</span><b>{p.task.blocked ? words.projects.blocked : words.employeeStatus.working}</b></span>
-        {p.agentLost && (
+        {(p.agentLost || p.runFailed) && (
           <span className="p-lost">
-            <b>{words.projects.agentLost}</b> · {words.projects.lostWhy}
+            <b>{p.agentLost ? words.projects.agentLost : words.projects.runFailed}</b> · {p.agentLost ? words.projects.lostWhy : words.projects.runFailedWhy}
           </span>
         )}
       </>
