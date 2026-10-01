@@ -10,6 +10,19 @@ Create a company, hire employees, give them work, watch it happen, approve what 
 
 Every employee works through a real AI coding agent. Nothing is simulated.
 
+## A look around
+
+| | |
+| --- | --- |
+| ![The office: who is at their desk, working, in a meeting or on leave, and what happened today](docs/screenshots/office.png) | ![A project's board: tasks by where they are, with blockers and reviews on the cards](docs/screenshots/board.png) |
+| **The office.** Who is working, who is free, who is on leave, and what happened today. | **A project's board.** Each task where it is, with what stopped it or who is reviewing it. |
+| ![A task: the conversation with the employee and a colleague's review](docs/screenshots/task.png) | ![An employee: what they are on now and the memories they use most](docs/screenshots/person.png) |
+| **A task.** The work's conversation, a colleague's review, what changed. | **An employee.** What they are on, and what they have been taught and use. |
+| ![The plaza: this computer's Claude Code sessions as candidates to hire](docs/screenshots/plaza.png) | ![The company's history: hires, finished projects, milestones](docs/screenshots/history.png) |
+| **The plaza.** This computer's Claude Code sessions, as candidates to hire with their experience. | **The company's history.** Hires, people who left, finished projects and milestones. |
+
+The pictures are from the design mockups in `docs/ui`, with their sample company.
+
 ## Install
 
 My Tiny Office installs as a desktop app with its own window, icon and Start
@@ -204,6 +217,7 @@ my-tiny-office/
 │   ├── ARCHITECTURE.md
 │   ├── STYLE-GUIDE.md
 │   ├── SECURITY.md          what an agent may do, and how it is enforced
+│   ├── screenshots/         the pictures in this README, taken from docs/ui
 │   └── ui/                  the UI standard: open index.html
 ├── desktop/                 the desktop window and its installer
 ├── drizzle/                 the migrations, generated from the schema
@@ -212,6 +226,7 @@ my-tiny-office/
 │   ├── ISSUE_TEMPLATE/
 │   └── workflows/
 ├── scripts/
+│   ├── serve.mjs            npm run dev and npm start, with a token for the launch
 │   └── ui/                  the checks that keep docs/ui honest
 └── src/
     ├── app/
