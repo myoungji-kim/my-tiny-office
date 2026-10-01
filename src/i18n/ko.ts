@@ -956,7 +956,7 @@ export const ko: Dictionary = {
     memoryTextRequired: "기억할 내용을 적어 주세요.",
     memoryTextTooLong: "업무마다 들고 가기엔 너무 길어요. 한두 문장으로 줄여 주세요.",
     areaRequired: "분야를 골라 주세요.",
-    moveTargetNotFound: "옮길 팀을 찾을 수 없어요.",
+    moveTargetNotFound: "옮길 곳이 이미 없어요. 다른 곳을 골라 주세요.",
     areaNotFound: "이미 지워진 분야예요.",
     projectNotFound: "이미 지워진 프로젝트예요.",
     projectClosed: "업무는 시작 전이거나 진행 중인 프로젝트에만 적을 수 있어요.",

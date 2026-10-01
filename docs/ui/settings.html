@@ -300,9 +300,9 @@
     en: {
       ...WORDS.en,
       title: "Settings", headSub: "What My Tiny Office uses on this computer", tabSkills: "Skills and plugins", tabGeneral: "General", tabSafety: "Safety", tabData: "Data",
-      claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks.",
+      claudeWhy: "Every employee works through it. You sign in to Claude Code itself; this app only checks that you're signed in.",
       installed: "Claude Code installed", loggedIn: "Signed in", loggedOut: "Sign-in needed", loggedOutWhy: "Sign in once from a terminal. A browser will open.", recheck: "Check again", checkedNow: "Checked just now", copy: "Copy", copied: "Copied",
-      extTitle: "Skills and plugins", extWhy: "Of what this computer's Claude Code has installed, choose what employees get. Only what is chosen goes into their work.",
+      extTitle: "Skills and plugins", extWhy: "Choose which of the skills and plugins installed in this computer's Claude Code employees get. Only what you choose goes into their work.",
       extHint: "Hooks and MCP servers stay off, and what employees may do stays the same. Choosing any also lets them use the skills built into Claude Code. A project using Jira or Confluence gets the skills alone.",
       extPlugins: "Plugins", extSkills: "Skills", extNone: "This computer's Claude Code has no plugins or skills installed.",
       toolsTitle: "Connected tools", toolsWhy: "The connectors your Claude account has. Checking lets the app use this account's names for them. Employees use only Atlassian, in a project that turns it on.",
@@ -310,10 +310,10 @@
       toolsNone: "No connectors", toolsNoneWhy: "Connect one in claude.ai under Settings › Connectors, then check again.",
       toolUse: "Jira · Confluence · used where a project turns it on", toolLater: "Connected · not used yet", toolUnused: "Not used",
       toolsCheck: "Check", toolsRecheck: "Check again", toolsChecking: "Checking…", toolsNeedClaude: "This can be checked once Claude Code is ready.",
-      toolsWhen: (at) => "Last checked " + at + " · A check uses a little Claude usage (about $0.1).", toolsCost: "A check uses a little Claude usage (about $0.1).",
+      toolsWhen: (at) => "Last checked " + at + " · A check uses a little Claude usage (about $0.10).", toolsCost: "A check uses a little Claude usage (about $0.10).",
       scopeTitle: "What employees may do", scopeWhy: "Everyone works within the same limits. Only the commands they may run are set per project.",
       brief: {
-        yes: ["Read and edit files in a folder of each task's own, inside the project's folder", "Run only the commands the project allows"],
+        yes: ["Read and edit files in each task's own copy, inside the project's folder", "Run only the commands the project allows"],
         no: ["Nothing outside the folder, no internet, no push"],
       },
       guide: [
@@ -325,7 +325,7 @@
         ] },
         { title: "What they never do", kind: "no", rows: [
           "Read or write anything outside the project's folder.",
-          "Reach the internet, but for the connector a project turned on.",
+          "Reach the internet, except through a connector the project turns on.",
           "Push, merge or deploy. That stays yours.",
           "Use any other tool connected to your Claude account, such as Gmail, Drive or Slack.",
           "Bring in your personal Claude Code hooks, settings or memory. Of your plugins and skills, only those chosen in settings go with them.",
@@ -346,7 +346,7 @@
       ],
       workTitle: "Starting work", workWhy: "When on, whoever is free takes the next task from the backlog. When paused, new work only queues, and work in progress carries on.",
       workAuto: "Automatically", workPaused: "Paused",
-      plazaTitle: "Plaza", plazaWhy: "Claude Code sessions on this computer gather outside the office door as candidates. Only each session's folder, dates and first message are read, and nothing is brought in until you hire. Hidden, the hire dialog brings no past session either.",
+      plazaTitle: "Plaza", plazaWhy: "Claude Code sessions on this computer gather outside the office door as candidates. Only each session's folder, dates and first message are read, and nothing is brought in until you hire. While it's hidden, the hire dialog can't bring in past sessions either.",
       plazaShow: "Show", plazaHide: "Hide",
       widthTitle: "Width", widthWhy: "Every screen takes the same width. A task's page can change it too. Kept in this browser only.",
       widths: { normal: "Normal · 1400px", wide: "Wide · 1760px", full: "Full · the window" },

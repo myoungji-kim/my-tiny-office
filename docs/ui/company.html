@@ -333,9 +333,9 @@
         joined: (m) => m.nth === 1 ? m.who.name + " joined as the first hire" : m.who.name + " joined<span> · hire no. " + m.nth + "</span>",
         team: (m) => "The " + WORDS.en.teams[m.team] + " team formed",
         firstTask: (m) => m.who.name + " finished the first task<span> · " + m.task.en + "</span>",
-        tasks: (m) => "Past " + m.n + " tasks done",
+        tasks: (m) => "Reached " + m.n + " tasks done",
         firstReview: (m) => m.who.name + " finished the first review",
-        memories: (m) => m.n + " memories taught",
+        memories: (m) => m.n + (m.n === 1 ? " memory taught" : " memories taught"),
         left: (m) => m.who.name + " left the company",
         project: (m) => "Finished ‘" + m.name + "’<span> · " + m.days + " days</span>",
       },
@@ -357,7 +357,7 @@
       moveRoleSub: (n) => (n === 1 ? "1 person has" : n + " people have") + " this role. Choose what they become first.",
       moveRoleTo: "Change them to", changeAndRemove: "Change and delete",
       companyTitle: "Company memory", companySub: "Everyone knows these.", tellCompany: "Tell the whole company",
-      fromWhere: (x) => "from " + x, toldDirectly: "Told directly", usedTimes: (n) => "used " + n + "×", justTaught: "Just taught",
+      fromWhere: (x) => "from " + x, toldDirectly: "Taught by you", usedTimes: (n) => "used " + n + "×", justTaught: "Just taught",
     },
   };
 
