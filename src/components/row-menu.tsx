@@ -55,8 +55,9 @@ export function RowMenu({
     p.style.left = Math.round(Math.min(Math.max(EDGE, r.right - p.offsetWidth), innerWidth - p.offsetWidth - EDGE)) + "px";
     p.style.top = Math.round(Math.min(r.bottom + 6, innerHeight - p.offsetHeight - EDGE)) + "px";
     p.querySelector<HTMLElement>(".mrow:not(:disabled)")?.focus({ preventScroll: true });
-    addEventListener("scroll", close, { passive: true });
-    return () => removeEventListener("scroll", close);
+    // the screen scrolls inside its own area, whose scroll does not reach the window
+    addEventListener("scroll", close, { capture: true, passive: true });
+    return () => removeEventListener("scroll", close, { capture: true });
   }, [open, asking, close]);
 
   const choose = (item: MenuItem) => {

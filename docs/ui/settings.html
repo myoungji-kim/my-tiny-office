@@ -427,7 +427,7 @@
     const tab = TABS.find((x) => location.hash === "#" + x) ?? "claude";
     for (const el of document.querySelectorAll("[data-tab]")) el.hidden = el.dataset.tab !== tab;
     for (const a of document.querySelectorAll("[data-set-tab]")) a.setAttribute("aria-selected", String(a.dataset.setTab === tab));
-    scrollTo(0, 0);
+    document.querySelector(".main .body")?.scrollTo(0, 0);
   };
   addEventListener("hashchange", showView);
   showView();

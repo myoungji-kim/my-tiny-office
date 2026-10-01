@@ -816,7 +816,7 @@ function openRowMenu(anchor, items, { keep = "Keep it" } = {}) {
       closeRowMenu();
       back.focus({ preventScroll: true });
     });
-    window.addEventListener("scroll", closeRowMenu, { passive: true });
+    window.addEventListener("scroll", closeRowMenu, { capture: true, passive: true });
   }
 
   const row = (item, run) => {

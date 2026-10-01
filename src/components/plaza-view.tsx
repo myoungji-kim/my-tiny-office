@@ -128,6 +128,11 @@ export function PlazaView({
     if (open === undefined || pop.current === null || anchor.current === null) return;
     place(pop.current, anchor.current);
     if (focusFirst.current) pop.current.querySelector<HTMLElement>("button:not(:disabled), a[href]")?.focus({ preventScroll: true });
+    // the résumé stays by its candidate while the screen scrolls
+    const p = pop.current;
+    const follow = () => anchor.current !== null && place(p, anchor.current);
+    addEventListener("scroll", follow, true);
+    return () => removeEventListener("scroll", follow, true);
   }, [open]);
 
   const hide = (id: string) => {
