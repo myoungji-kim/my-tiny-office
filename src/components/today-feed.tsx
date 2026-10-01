@@ -9,6 +9,7 @@ import type { AreaView } from "../server/view-model";
 
 import { Icon } from "./icons";
 import { areaName } from "./names";
+import { costText } from "./money";
 
 const SHOWN = 6;
 
@@ -59,12 +60,15 @@ export function TodayFeed({
   items,
   names,
   areas,
+  cost,
 }: {
   readonly locale: Locale;
   readonly items: readonly TodayItem[];
   // everyone the lines may name, those who left included
   readonly names: Readonly<Record<string, string>>;
   readonly areas: readonly AreaView[];
+  // what today's runs cost, shown only where the feed is the whole office's
+  readonly cost?: number;
 }) {
   const t = getDictionary(locale);
   const w = t.office.today;
@@ -100,7 +104,14 @@ export function TodayFeed({
   return (
     <div className="panel">
       <div className="panel-hd">
-        <h2>{w.title}</h2>
+        <h2>
+          {w.title}
+          {cost !== undefined && cost > 0 && (
+            <span className="kn" title={w.costWhy}>
+              {costText(cost)}
+            </span>
+          )}
+        </h2>
         <p>{w.sub}</p>
       </div>
       <div className="panel-bd">

@@ -76,6 +76,7 @@ export default async function OfficePage({ searchParams }: { searchParams: Searc
             items={room.kind === "all" ? today : today.filter((i) => i.who !== undefined && inRoom.has(i.who))}
             names={Object.fromEntries([...employees, ...office.former].map((e) => [e.id, e.name]))}
             areas={office.areas}
+            cost={room.kind === "all" ? office.costToday : undefined}
           />
         }
         now={office.now}

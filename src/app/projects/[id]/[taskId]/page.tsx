@@ -5,6 +5,7 @@ import { Fragment, type ReactNode } from "react";
 import { isReady } from "../../../../application/runtime-status";
 import { ActButton } from "../../../../components/act-button";
 import { dateText } from "../../../../components/dates";
+import { costText } from "../../../../components/money";
 import { Icon } from "../../../../components/icons";
 import { areaName } from "../../../../components/names";
 import { blockerText, timeLine, withCode } from "../../../../components/task-lines";
@@ -212,6 +213,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           {area !== undefined && kv(w.tk.fArea, areaName(area, t.areas))}
           {kv(w.tk.fPrio, t.priority[task.priority])}
           {time !== undefined && kv(w.tk.fTime, time)}
+          {task.costUsd > 0 && kv(w.tk.fCost, <span title={w.tk.costWhy}>{costText(task.costUsd)}</span>)}
           {kv(w.tk.created, dateText(locale, task.createdAt))}
           {task.publishedUrl !== undefined && kv(w.tk.fPr, pullRequest)}
         </>,
@@ -244,7 +246,17 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           </>
         ),
       )}
-      {work !== undefined && work.log.length > 0 && fold(w.tk.log, <>{work.log.map((entry, i) => <Fragment key={i}>{kv(whenText(locale, entry.at), logText(entry))}</Fragment>)}</>, work.log.length)}
+      {work !== undefined && work.log.length > 0 && fold(w.tk.log, <>{work.log.map((entry, i) => (
+            <Fragment key={i}>
+              {kv(
+                whenText(locale, entry.at),
+                <>
+                  {logText(entry)}
+                  {entry.cost !== undefined && <span title={w.tk.costWhy}> · {costText(entry.cost)}</span>}
+                </>,
+              )}
+            </Fragment>
+          ))}</>, work.log.length)}
       {work?.sessionId !== undefined &&
         fold(
           w.tk.session,

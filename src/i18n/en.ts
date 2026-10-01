@@ -218,6 +218,7 @@ export const en = {
     cannotAssign: "They cannot take work while on leave.",
     actionOf: (name: string) => "Actions for " + name,
     today: {
+      costWhy: "The API price Claude Code reports. On a subscription, what you are billed differs.",
       title: "Today",
       sub: "What happened in the office, newest first.",
       nothing: "Nothing has happened in this room yet today.",
@@ -697,6 +698,8 @@ export const en = {
       fArea: "Area",
       fPrio: "Priority",
       fTime: "Time",
+      fCost: "Cost",
+      costWhy: "The API price Claude Code reports. On a subscription, what you are billed differs.",
       noReviewer: "None",
       talkReport: "Report",
       talkNow: "While working",

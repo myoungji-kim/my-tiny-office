@@ -11,6 +11,8 @@ import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
 
+import { startOfDay } from "./today";
+
 export interface CompanyOption {
   readonly id: string;
   readonly name: string;
@@ -124,6 +126,8 @@ export interface TaskView {
   readonly review: { readonly state: "queued" | "reviewing" | "settled"; readonly reviewerName: string } | undefined;
   // what the user or a reviewer asked to change when it was sent back
   readonly changesRequested: string | undefined;
+  // every run on it, its reviews included
+  readonly costUsd: number;
 }
 
 export type MilestoneView = RecordedMilestone;
@@ -163,6 +167,8 @@ export interface OfficeView {
   readonly stats: CompanyStats;
   readonly projects: readonly ProjectView[];
   readonly tasks: readonly TaskView[];
+  // what the runs that ended today cost, as Claude Code reported it
+  readonly costToday: number;
 }
 
 const empty: Omit<OfficeView, "now"> = {
@@ -179,6 +185,7 @@ const empty: Omit<OfficeView, "now"> = {
   stats: { tasksDone: 0, tasksDoneThisWeek: 0, reviews: 0, reviewsThisWeek: 0, memories: 0, memoriesThisWeek: 0 },
   projects: [],
   tasks: [],
+  costToday: 0,
 };
 
 export interface OfficeSource {
@@ -321,6 +328,7 @@ export async function loadOffice(
     teams: teams.map((team) => ({ id: team.id, suggested: team.suggested, name: team.name })),
     areas: areas.map((area) => ({ id: area.id, starting: area.starting, name: area.name })),
     milestones,
+    costToday: runs.filter((r) => r.endedAt !== undefined && r.endedAt >= startOfDay(now)).reduce((sum, r) => sum + r.costUsd, 0),
     stats: {
       tasksDone: applied.length,
       tasksDoneThisWeek: applied.filter((task) => within(task.appliedAt)).length,
@@ -377,6 +385,7 @@ export async function loadOffice(
       publishedUrl: task.publishedUrl,
       review: reviewOnCard(task, reviews, nameById),
       changesRequested: task.changesRequested,
+      costUsd: runs.filter((r) => r.taskId === task.id).reduce((sum, r) => sum + r.costUsd, 0),
     })),
   };
 }

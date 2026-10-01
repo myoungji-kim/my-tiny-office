@@ -600,8 +600,8 @@
       log: [
         { at: "09:58", kind: "created" },
         { at: "10:01", kind: "started", who: "p1" },
-        { at: "10:18", kind: "lost" },
-      ] },
+        { at: "10:18", kind: "lost", cost: 0.84 },
+      ], cost: 0.84 },
 
     { id: "t2", project: "pay", area: "security", priority: "high", status: "working", who: "p3", spent: 41,
       title: { ko: "결제 웹훅 서명 검증", en: "Verify the payment webhook signature" },
@@ -620,7 +620,7 @@
         { at: "09:40", kind: "created" },
         { at: "09:43", kind: "started", who: "p3" },
         { at: "10:12", kind: "reviewStarted", who: "p4" },
-      ] },
+      ], cost: 0.61 },
 
     { id: "t3", project: "order", area: "types", priority: "normal", status: "working", who: "p2", spent: 8,
       title: { ko: "주문 상태 타입 좁히기", en: "Narrow the order status type" },
@@ -637,10 +637,10 @@
       files: [{ file: "src/orders/status.ts", add: 12, del: 9 }],
       log: [
         { at: "10:16", kind: "started", who: "p2" },
-        { at: "10:24", kind: "stoppedAtRun" },
-      ] },
+        { at: "10:24", kind: "stoppedAtRun", cost: 0.12 },
+      ], cost: 0.12 },
 
-    { id: "t4", project: "pay", area: "arch", priority: "normal", status: "approval", who: "p1", spent: 52,
+    { id: "t4", project: "pay", area: "arch", priority: "normal", status: "approval", who: "p1", spent: 52, cost: 1.37,
       title: { ko: "결제 API 에러 응답 구조 변경", en: "Change the payment API error shape" },
       peer: { by: "p4", state: "done" },
       desc: { ko: "에러 응답을 { code, message, retryable } 하나로 맞춰요.", en: "Give every error response one shape: { code, message, retryable }." },
@@ -700,12 +700,12 @@
       log: [
         { at: "09:02", kind: "created" },
         { at: "09:08", kind: "started", who: "p1" },
-        { at: "09:55", kind: "reviewDone", who: "p4" },
-        { at: "10:19", kind: "reviewDone", who: "p4" },
-        { at: "10:20", kind: "finished", who: "p1", took: 52 },
+        { at: "09:55", kind: "reviewDone", who: "p4", cost: 0.21 },
+        { at: "10:19", kind: "reviewDone", who: "p4", cost: 0.24 },
+        { at: "10:20", kind: "finished", who: "p1", took: 52, cost: 0.92 },
       ] },
 
-    { id: "t5", project: "order", area: "db", priority: "normal", status: "approval", who: "p4", spent: 19,
+    { id: "t5", project: "order", area: "db", priority: "normal", status: "approval", who: "p4", spent: 19, cost: 2.22,
       title: { ko: "주문 테이블 인덱스 정리", en: "Tidy the order table indexes" } },
 
     // worked on and handed back to whoever is free, so deleting it asks; its
@@ -715,9 +715,9 @@
       log: [
         { at: "09:20", kind: "created" },
         { at: "09:22", kind: "started", who: "p2" },
-        { at: "09:31", kind: "stoppedAtWrite" },
+        { at: "09:31", kind: "stoppedAtWrite", cost: 0.18 },
         { at: "09:35", kind: "started", who: "p2" },
-        { at: "09:52", kind: "budget" },
+        { at: "09:52", kind: "budget", cost: 2.04 },
         { at: "09:55", kind: "started", who: "p2" },
         { at: "10:03", kind: "failed" },
         { at: "10:05", kind: "started", who: "p2" },
@@ -740,9 +740,9 @@
       files: [{ file: "docs/policy/refunds.md", add: 64, del: 0 }],
       log: [
         { at: "09:10", kind: "started", who: "p3" },
-        { at: "09:36", kind: "finished", who: "p3", took: 26 },
+        { at: "09:36", kind: "finished", who: "p3", took: 26, cost: 0.47 },
         { at: "09:40", kind: "applied" },
-      ] },
+      ], cost: 0.47 },
 
     // parked with their project, and picked up again when it resumes
     { id: "t11", project: "admin", area: "product", priority: "normal", status: "held", who: "p3", spent: 12, withProject: true,
@@ -864,7 +864,7 @@
       allowRun: "허용하고 이어서", withoutRun: "이 명령 없이 이어서",
       tk: {
         now: "지금 하는 일", did: "한 일", changed: "바뀐 것", review: "검토", desc: "업무 설명",
-        tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당자", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간",
+        tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당자", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간", fCost: "비용", costWhy: "Claude Code가 알려 준 API 기준 금액이에요. 구독 요금제라면 실제 청구와 달라요.",
         talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완해야 해요", talkReply: "답", talkRequest: "보완 요청", you: "나",
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
         splitLabel: "세부 정보 폭 조절", widthLabel: "화면 폭", widths: { normal: "보통", wide: "넓게", full: "전체" }, talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
@@ -885,8 +885,8 @@
         steps: { read: "읽는 중", edit: "수정", run: "실행" },
         took: (m) => m + "분 걸림",
         logs: {
-          created: () => "만듦", lost: () => "에이전트 연결이 끊김", applied: () => "승인해서 반영함", stoppedAtRun: () => "허용되지 않은 명령에서 멈춤",
-          stoppedAtWrite: () => "허용되지 않은 쓰기에서 멈춤", budget: () => "비용 한도에서 멈춤", failed: () => "실패하고 멈춤", stopped: () => "멈춤", sentBack: () => "보완을 요청함",
+          created: () => "만듦", lost: () => "Claude Code 연결이 끊김", applied: () => "승인해서 반영함", stoppedAtRun: () => "허용되지 않은 명령에서 멈춤",
+          stoppedAtWrite: () => "허용되지 않은 쓰기에서 멈춤", budget: () => "비용 한도에서 멈춤", failed: () => "오류로 멈춤", stopped: () => "멈춤", sentBack: () => "보완을 요청함",
           started: (e) => e.name + subjectParticle(e.name) + " 시작",
           reviewStarted: (e) => e.name + subjectParticle(e.name) + " 검토를 시작",
           reviewDone: (e) => e.name + subjectParticle(e.name) + " 검토를 마침",
@@ -1019,7 +1019,7 @@
       allowRun: "Allow and carry on", withoutRun: "Carry on without it",
       tk: {
         now: "Doing now", did: "What was done", changed: "What changed", review: "Review", desc: "About this task",
-        tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "Assignee", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time",
+        tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "Assignee", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time", fCost: "Cost", costWhy: "The API price Claude Code reports. On a subscription, what you are billed differs.",
         talkReport: "Report", talkNow: "While working", talkBefore: "Before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
         splitLabel: "Resize the details", widthLabel: "Width", widths: { normal: "Normal", wide: "Wide", full: "Full" }, talkOpen: "Expand", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
@@ -1160,6 +1160,9 @@
   // a card names the reason; the command itself is on the task's page
   const blockedText = (task) =>
     task.blocked.kind === "command" ? t().runBlocked : task.blocked.kind === "write" ? t().writeBlocked : task.blocked.kind === "failed" ? t().runFailed : t().agentLost;
+
+  // dollars as Claude Code reports them; a sliver still reads as spent
+  const money = (n) => (n < 0.01 ? "<$0.01" : "$" + n.toFixed(2));
 
   function noteFor(task) {
     if (task.blocked) return { cls: "blocked", svg: icon.none, text: blockedText(task) };
@@ -1476,6 +1479,7 @@
         <div class="kv"><span>${k.fReviewer}</span><b>${reviewer ? reviewer.name : k.noReviewer}</b></div>
         <div class="kv"><span>${k.fArea}</span><b>${areaLabel(task.area)}</b></div>
         <div class="kv"><span>${k.fPrio}</span><b>${t().priority[task.priority]}</b></div>
+        ${task.cost !== undefined ? `<div class="kv"><span>${k.fCost}</span><b title="${k.costWhy}">${money(task.cost)}</b></div>` : ""}
         ${task.spent !== undefined ? `<div class="kv"><span>${k.fTime}</span><b>${task.status === "working" ? t().spent(task.spent) : k.took(task.spent)}</b></div>` : ""}
         ${task.status === "done" && task.pr ? `<div class="kv"><span>${k.fPr}</span><b><a class="btn btn-secondary btn-sm" href="#"${task.pr === "opened" ? "" : ` title="${k.makePrHint}"`}>${task.pr === "opened" ? k.openPr : k.makePr}</a></b></div>` : ""}
       </div></div>`;
@@ -1492,7 +1496,7 @@
         <div class="kv"><span>branch</span><b class="mono">${branchOf(task)}</b></div>
         <span class="hint">${k.resumeHint}</span>
         <div class="cmd"><pre><span class="p">$</span> claude --resume ${task.session}</pre><button class="copy" type="button">${t().copy}</button></div>`) : "",
-      task.log?.length ? fold(k.log, task.log.length, task.log.map((l) => `<div class="kv"><span>${l.at}</span><b style="font-weight:500">${k.logs[l.kind]({ name: l.who ? byId.get(l.who).name : "", took: l.took })}</b></div>`).join("")) : "",
+      task.log?.length ? fold(k.log, task.log.length, task.log.map((l) => `<div class="kv"><span>${l.at}</span><b style="font-weight:500">${k.logs[l.kind]({ name: l.who ? byId.get(l.who).name : "", took: l.took })}${l.cost !== undefined ? ` <span title="${k.costWhy}">· ${money(l.cost)}</span>` : ""}</b></div>`).join("")) : "",
     ];
 
     const view = document.getElementById("taskView");

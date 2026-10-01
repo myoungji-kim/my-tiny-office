@@ -10,7 +10,8 @@ import type { AppContext } from "../application/context";
 import { hireEmployee, letGo } from "../application/employee";
 import { createProject, startProject } from "../application/project";
 import { assignTask, createTask, pickUpWork } from "../application/task";
-import { toCompanyId, toEmployeeId, type CompanyId } from "../domain/ids";
+import { toAgentId, toCompanyId, toEmployeeId, toRunId, type CompanyId } from "../domain/ids";
+import { endRun, startRun } from "../domain/run";
 import { createAppContext } from "../infrastructure/app-context";
 import {
   createCompanyFiles,
@@ -63,6 +64,28 @@ async function seedEmployee(companyId: CompanyId) {
   assert(hired.ok);
   return hired.value.employee;
 }
+
+describe("what the work cost", () => {
+  it("adds a task's runs, and today's for the office", async () => {
+    const company = await seedCompany();
+    const employee = await seedEmployee(company.id);
+    const project = await createProject(ctx, { companyId: company.id, name: "pay", priority: "normal", folder: "/code/pay" });
+    assert(project.ok);
+    const task = await createTask(ctx, { companyId: company.id, projectId: project.value.project.id, title: "Paginate", priority: "normal" });
+    assert(task.ok);
+    const agent = { id: toAgentId("a"), companyId: company.id, employeeId: employee.id, runtime: "claudeCode" as const, createdAt: current };
+    await ctx.agents.save(agent);
+    const run = (id: string, at: number, cost: number) => endRun(startRun({ id: toRunId(id), agent, taskId: task.value.task.id, sessionId: undefined }, at), { kind: "finished" }, cost, at + minute);
+    // yesterday's run counts for the task, not for today
+    await ctx.runs.save(run("r1", current - 86_400_000, 0.5));
+    await ctx.runs.save(run("r2", current, 0.25));
+
+    const office = await load(company.id);
+
+    expect(office.tasks[0].costUsd).toBeCloseTo(0.75);
+    expect(office.costToday).toBeCloseTo(0.25);
+  });
+});
 
 describe("loadOffice", () => {
   it("keeps someone let go out of every list, and names them on what they did", async () => {
@@ -228,6 +251,7 @@ describe("work through the office view", () => {
         heldReason: undefined,
         heldWithProject: false,
         createdAt: expect.any(Number),
+        costUsd: 0,
       },
     ]);
   });

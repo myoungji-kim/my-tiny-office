@@ -145,7 +145,7 @@
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hd"><h2 data-t="feedTitle">오늘</h2><p data-t="feedSub">사무실에서 일어난 일, 최신순이에요.</p></div>
+        <div class="panel-hd"><h2><span data-t="feedTitle">오늘</span><span class="kn" id="feedCost"></span></h2><p data-t="feedSub">사무실에서 일어난 일, 최신순이에요.</p></div>
         <div class="panel-bd" id="feed"></div>
       </div>
       <div id="teams"></div>
@@ -181,7 +181,7 @@
       ...WORDS.ko,
       hireDesk: "이 팀에 직원 고용", hireNoTeam: "직원 고용", noTeam: "팀 없음", justHired: "방금 입사",
       title: "사무실", date: "2026. 9. 26. (토) 10:24",
-      feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
+      feedCostWhy: "Claude Code가 알려 준 API 기준 금액이에요. 구독 요금제라면 실제 청구와 달라요.", feedTitle: "오늘", feedSub: "사무실에서 일어난 일, 최신순이에요.", feedNothing: "이 방에서는 오늘 아직 일어난 일이 없어요.",
       feedMore: (n) => n + "건 더 보기", feedLess: "접기", feedApprove: "승인하러 가기", feedLook: "보러 가기",
       lostWhy: "하던 업무와 기억은 그대로예요. 다시 연결하면 이어서 해요.",
       feed: {
@@ -221,7 +221,7 @@
       ...WORDS.en,
       hireDesk: "Hire into this team", hireNoTeam: "Hire", noTeam: "No team", justHired: "Just joined",
       title: "Office", date: "Sat, Sep 26, 2026 · 10:24",
-      feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
+      feedCostWhy: "The API price Claude Code reports. On a subscription, what you are billed differs.", feedTitle: "Today", feedSub: "What happened in the office, newest first.", feedNothing: "Nothing has happened in this room yet today.",
       feedMore: (n) => "Show " + n + " more", feedLess: "Show less", feedApprove: "Review it", feedLook: "Take a look",
       lostWhy: "The task and everything they remember are untouched. Reconnect and they pick it up.",
       feed: {
@@ -522,8 +522,14 @@
   let feedOpen = false;
 
   // The feed follows the room: a team's room and the lounge show the people in them.
+  // what today's runs cost, as Claude Code reported it
+  const TODAY_COST = 3.84;
+
   function renderFeed(here) {
     const box = document.getElementById("feed");
+    const cost = document.getElementById("feedCost");
+    cost.textContent = "$" + TODAY_COST.toFixed(2);
+    cost.title = t().feedCostWhy;
     const inRoom = (p) => (here.kind === "team" ? p.team === room : here.kind === "lounge" ? inLounge(byId.get(p.id)) : inMeeting(byId.get(p.id)));
     const mine = (e) => here.kind === "all" || (e.who && inRoom(fromCompany.get(e.who)));
     const list = EVENTS.filter(mine);

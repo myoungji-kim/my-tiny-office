@@ -34,6 +34,8 @@ export interface LogEntry {
   readonly by: string | undefined;
   // minutes, for a finished run
   readonly took: number | undefined;
+  // what the run cost, for an entry that ends one
+  readonly cost: number | undefined;
 }
 
 export interface TaskWork {
@@ -84,7 +86,7 @@ const RUN_END: Readonly<Record<NonNullable<Run["end"]>["kind"], LogKind>> = {
 };
 
 export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: string) => string | undefined, reviews: readonly Review[], requests: readonly TaskRequest[]): LogEntry[] {
-  const entry = (at: number, kind: LogKind, by?: string, took?: number): LogEntry => ({ at, kind, by, took });
+  const entry = (at: number, kind: LogKind, by?: string, took?: number): LogEntry => ({ at, kind, by, took, cost: undefined });
   const mine = reviews.filter((r) => r.taskId === task.id && r.startedAt !== undefined);
   // a reviewer's run is the review, said once as the review
   const reviewing = (run: Run) => mine.some((r) => r.reviewerId === employeeOf(run.agentId) && r.startedAt! <= run.startedAt && run.startedAt <= (r.settledAt ?? Infinity));
@@ -92,7 +94,7 @@ export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: st
   for (const run of runs.filter((r) => r.taskId === task.id && !reviewing(r))) {
     const by = employeeOf(run.agentId);
     log.push(entry(run.startedAt, "started", by));
-    if (run.end !== undefined && run.endedAt !== undefined) log.push(entry(run.endedAt, RUN_END[run.end.kind], by, run.end.kind === "finished" ? Math.max(1, Math.round((run.endedAt - run.startedAt) / 60_000)) : undefined));
+    if (run.end !== undefined && run.endedAt !== undefined) log.push({ ...entry(run.endedAt, RUN_END[run.end.kind], by, run.end.kind === "finished" ? Math.max(1, Math.round((run.endedAt - run.startedAt) / 60_000)) : undefined), cost: run.costUsd > 0 ? run.costUsd : undefined });
   }
   for (const review of mine) {
     log.push(entry(review.startedAt!, "reviewStarted", review.reviewerId));

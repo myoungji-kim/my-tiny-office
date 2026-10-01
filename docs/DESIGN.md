@@ -131,6 +131,7 @@ people, three to a row.
 ### Today
 
 Under the floor, above the cards, **오늘** lists what happened in the office,
+with what today's runs cost beside its title in the whole office's view,
 newest first: who started what, a colleague starting a review, a memory drawn
 on, work finished and waiting on the user, work applied, someone going on
 leave, someone joining, and work that stopped: a dropped agent, a command or
@@ -426,7 +427,9 @@ the window — set in Settings' 화면 폭 and kept for every screen; a task's p
 has the same choice beside its tabs, as a shortcut to the same setting. Both are kept in
 this browser only.
 
-**세부 정보** is fixed: status, who, reviewer, area, priority, time — and, once
+**세부 정보** is fixed: status, who, reviewer, area, priority, time, cost (every
+run on it, reviews included, as Claude Code reports it; its title says that is
+the API price, which a subscription is not billed) — and, once
 the work has gone up, PR: PR 열기, or GitHub에서 PR 만들기 when this computer has
 no signed-in GitHub CLI and GitHub's own page finishes it. 업무 설명
 follows. What is looked at now and then is folded: 들고 간 기억 (✓ on what they
