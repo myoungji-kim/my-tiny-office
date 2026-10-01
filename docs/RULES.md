@@ -230,7 +230,10 @@ Work in progress can be stopped without a reason: it is held, and resuming
 carries on in the same session. Anything else held needs one. A note the user
 adds while someone is on the task, or while it is held, reaches them in their
 next run: a run under way stops for it and picks up in the same session with
-everything added since the last run began.
+everything added since the last run began, and one that finished before it
+could stop carries on with it instead of going to approval. No note is taken
+while a colleague's review holds the work, or for finished work held back from
+approval.
 
 ## PR Collaboration
 

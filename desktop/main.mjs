@@ -284,8 +284,8 @@ const attention = (url) =>
       response.on("data", (chunk) => (body += chunk));
       response.on("end", () => {
         try {
-          const items = JSON.parse(body);
-          settle(response.statusCode === 200 && Array.isArray(items) ? items : undefined);
+          const said = JSON.parse(body);
+          settle(response.statusCode === 200 && Array.isArray(said?.items) ? said : undefined);
         } catch {
           settle(undefined);
         }
@@ -303,12 +303,13 @@ const shown = new Set();
 function watchAttention(url) {
   let seen;
   const look = async () => {
-    const items = await attention(url);
-    if (items !== undefined) {
+    const said = await attention(url);
+    if (said !== undefined) {
+      const { items } = said;
       const fresh = seen === undefined ? [] : items.filter((i) => !seen.has(i.key));
       seen = new Set(items.map((i) => i.key));
       const looking = window?.isVisible() === true && window.isFocused();
-      if (!looking && Notification.isSupported()) {
+      if (said.notify === true && !looking && Notification.isSupported()) {
         for (const item of fresh) {
           const note = new Notification({ title: String(item.title), body: String(item.body) });
           const href = String(item.href);

@@ -247,7 +247,11 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
           </>
         ),
       )}
-      {work !== undefined && work.log.length > 0 && fold(w.tk.log, <>{work.log.map((entry, i) => (
+      {work !== undefined &&
+        work.log.length > 0 &&
+        fold(
+          w.tk.log,
+          work.log.map((entry, i) => (
             <Fragment key={i}>
               {kv(
                 whenText(locale, entry.at),
@@ -257,7 +261,9 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
                 </>,
               )}
             </Fragment>
-          ))}</>, work.log.length)}
+          )),
+          work.log.length,
+        )}
       {work?.sessionId !== undefined &&
         fold(
           w.tk.session,
@@ -414,7 +420,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         talk={talk}
         live={live}
         note={
-          who !== undefined && (task.status === "working" || task.status === "held") && project.takesWork ? (
+          who !== undefined && task.takesNotes && project.takesWork ? (
             <TaskNote locale={locale} companyId={company.id} taskId={task.id} name={who.name} now={running} />
           ) : undefined
         }

@@ -252,6 +252,7 @@ describe("work through the office view", () => {
         heldWithProject: false,
         createdAt: expect.any(Number),
         costUsd: 0,
+        takesNotes: false,
       },
     ]);
   });

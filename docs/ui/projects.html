@@ -1461,8 +1461,10 @@
       : live || `<p class="col-empty talk-empty">${k.talkEmpty} ${task.status === "backlog" && !who ? t().whoTakes : ""}</p>`;
 
     // Someone on the task can be told more: now, it stops them and they carry on
-    // with it; held or stopped, it waits for them.
-    const hears = who && (task.status === "working" || task.status === "held");
+    // with it; held or stopped, it waits for them. Not while a colleague reviews
+    // it, nor for finished work held back from approval.
+    const reviewed = task.peer?.state === "queued" || task.peer?.state === "reviewing";
+    const hears = who && ((task.status === "working" && !reviewed) || (task.status === "held" && task.from !== "approval"));
     const noteBox = `<div class="field"><label class="label" for="tkNote">${k.noteLabel(who?.name ?? "")}</label>
       <div class="tk-say"><textarea class="textarea" id="tkNote" rows="2" placeholder="${k.notePlaceholder}"></textarea><button class="btn btn-secondary btn-sm" type="button" data-note disabled>${k.noteSend}</button></div>
       <span class="hint">${task.status === "working" && !task.blocked ? k.noteNow : k.noteLater}</span></div>`;
@@ -2548,7 +2550,7 @@
     confirmStep({
       heading: t().holdTaskTitle, why: t().holdTaskWhy, yes: t().holdYes,
       field: { label: t().holdReason, placeholder: t().holdTaskPlaceholder },
-      onYes: (text) => Object.assign(task, { status: "held", reason: { ko: text, en: text } }),
+      onYes: (text) => Object.assign(task, { status: "held", from: task.status, reason: { ko: text, en: text } }),
     });
   }
 
@@ -2557,7 +2559,7 @@
     confirmStep({
       heading: t().stopTitle, why: t().stopWhy, yes: t().actions.stop,
       field: { label: t().stopReason, placeholder: t().stopPlaceholder, optional: true },
-      onYes: (text) => Object.assign(task, { status: "held", reason: text ? { ko: text, en: text } : undefined }),
+      onYes: (text) => Object.assign(task, { status: "held", from: task.status, reason: text ? { ko: text, en: text } : undefined }),
     });
   }
 

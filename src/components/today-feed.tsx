@@ -8,8 +8,8 @@ import type { TodayItem, TodayKind } from "../server/today";
 import type { AreaView } from "../server/view-model";
 
 import { Icon } from "./icons";
-import { areaName } from "./names";
 import { costText } from "./money";
+import { areaName } from "./names";
 
 const SHOWN = 6;
 

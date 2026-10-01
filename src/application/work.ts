@@ -135,6 +135,9 @@ interface LiveRun {
   suggestions: readonly string[];
 }
 
+const noteSince = async (ctx: AppContext, task: taskDomain.Task, since: number): Promise<boolean> =>
+  (await ctx.requests.findByTask(task.companyId, task.id)).some((r) => r.kind === "note" && since <= r.at);
+
 // A task wants a run while it is being worked on, unblocked, by this person.
 const wantsRun = (task: taskDomain.Task | undefined, employeeId: EmployeeId | undefined): task is taskDomain.Task =>
   task !== undefined && task.status === "working" && task.blocker === undefined && task.assigneeId !== undefined && (employeeId === undefined || task.assigneeId === employeeId);
@@ -210,7 +213,7 @@ export function createWorkSupervisor(deps: {
           ? wantsRun(task, entry.employeeId) &&
             !heldForReview(entry.taskId, now) &&
             !(task.revisedAt !== undefined && entry.startedAt <= task.revisedAt) &&
-            !(await ctx.requests.findByTask(companyId, entry.taskId)).some((r) => r.kind === "note" && entry.startedAt <= r.at)
+            !(await noteSince(ctx, task, entry.startedAt))
           : task?.status === "working" && now.some((r) => r.id === entry.reviewId && r.state === "reviewing");
       if (!wanted) stop(entry);
     }
@@ -399,6 +402,8 @@ export function createWorkSupervisor(deps: {
 
     const task = await ctx.tasks.findById(entry.taskId);
     if (!wantsRun(task, entry.employeeId)) return;
+    // finished before it could be stopped for a note: the next run hears it
+    if (end.kind === "finished" && (await noteSince(ctx, task, entry.startedAt))) return;
     if (end.kind !== "finished") {
       const denied = entry.deniedWrite;
       return block(

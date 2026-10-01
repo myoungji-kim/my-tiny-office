@@ -89,7 +89,8 @@ export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: st
   const entry = (at: number, kind: LogKind, by?: string, took?: number): LogEntry => ({ at, kind, by, took, cost: undefined });
   const mine = reviews.filter((r) => r.taskId === task.id && r.startedAt !== undefined);
   // a reviewer's run is the review, said once as the review
-  const reviewing = (run: Run) => mine.some((r) => r.reviewerId === employeeOf(run.agentId) && r.startedAt! <= run.startedAt && run.startedAt <= (r.settledAt ?? Infinity));
+  const ofReview = (run: Run, r: Review) => r.reviewerId === employeeOf(run.agentId) && r.startedAt! <= run.startedAt && run.startedAt <= (r.settledAt ?? Infinity);
+  const reviewing = (run: Run) => mine.some((r) => ofReview(run, r));
   const log = [entry(task.createdAt, "created")];
   for (const run of runs.filter((r) => r.taskId === task.id && !reviewing(r))) {
     const by = employeeOf(run.agentId);
@@ -98,7 +99,8 @@ export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: st
   }
   for (const review of mine) {
     log.push(entry(review.startedAt!, "reviewStarted", review.reviewerId));
-    if (review.state === "settled" && review.settledAt !== undefined) log.push(entry(review.settledAt, "reviewDone", review.reviewerId));
+    const cost = runs.filter((r) => r.taskId === task.id && ofReview(r, review)).reduce((sum, r) => sum + r.costUsd, 0);
+    if (review.state === "settled" && review.settledAt !== undefined) log.push({ ...entry(review.settledAt, "reviewDone", review.reviewerId), cost: cost > 0 ? cost : undefined });
   }
   for (const request of requests) log.push(entry(request.at, request.kind === "note" ? "noted" : "sentBack"));
   if (task.appliedAt !== undefined) log.push(entry(task.appliedAt, "applied"));

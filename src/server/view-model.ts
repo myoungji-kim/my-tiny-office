@@ -2,11 +2,11 @@ import type { Company } from "../domain/company";
 import { hasWorked, type Employee } from "../domain/employee";
 import { toCompanyId } from "../domain/ids";
 import type { AtlassianWrite, Priority, ProjectStatus } from "../domain/project";
-import { liveReviews, statusOf, type EmployeeStatus, type Review } from "../domain/review";
+import { holdsTheWork, liveReviews, statusOf, type EmployeeStatus, type Review } from "../domain/review";
 import type { MemoryKind } from "../domain/memory";
 import type { Agent, Run } from "../domain/run";
 import type { RecordedMilestone } from "../domain/milestone";
-import { timeTaken, type Blocker, type Task, type TaskStatus } from "../domain/task";
+import { takesNotes, timeTaken, type Blocker, type Task, type TaskStatus } from "../domain/task";
 import { createAppContext } from "../infrastructure/app-context";
 import { getCompanyFiles, type CompanyFiles } from "../infrastructure/persistence/company-files";
 import { readSettings } from "../infrastructure/persistence/settings";
@@ -128,6 +128,8 @@ export interface TaskView {
   readonly changesRequested: string | undefined;
   // every run on it, its reviews included
   readonly costUsd: number;
+  // whoever is on it hears a note in their next run
+  readonly takesNotes: boolean;
 }
 
 export type MilestoneView = RecordedMilestone;
@@ -386,6 +388,7 @@ export async function loadOffice(
       review: reviewOnCard(task, reviews, nameById),
       changesRequested: task.changesRequested,
       costUsd: runs.filter((r) => r.taskId === task.id).reduce((sum, r) => sum + r.costUsd, 0),
+      takesNotes: takesNotes(task, reviews.some((r) => r.taskId === task.id && holdsTheWork(r))),
     })),
   };
 }

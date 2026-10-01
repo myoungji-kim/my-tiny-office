@@ -436,8 +436,9 @@ follows. What is looked at now and then is folded: 들고 간 기억 (✓ on wha
 report drawing on), 세션 (the worktree, its branch, and `claude --resume`), 기록 —
 every run's start and how it ended (finished with its minutes, or stopped: at a
 command or a write it may not make, at the spending cap, failed, disconnected,
-or stopped), reviews, changes asked for and applying; `projects.html#order/t6`
-shows each kind.
+or stopped) with what it cost, reviews with theirs, changes asked for, notes
+added, and applying — a run stopped from here reports no cost, so it shows
+none; `projects.html#order/t6` shows each kind.
 
 A card names a stop by its reason only — 허용되지 않은 명령, with the command in
 its tooltip — and the page gives the command in full. A stop leads the page with
@@ -516,7 +517,9 @@ the changes stay, and the reason is optional — the task is held and 다시 진
 carries on in the same session. Under the conversation, "<name>에게 덧붙여
 말하기" takes a note while someone is on the task or it is held: in progress, it
 stops the run, which picks up in the same session with the note; held or
-blocked, the hint says it is passed on when the work resumes. Enter sends,
+blocked, the hint says it is passed on when the work resumes. It is not there
+while a colleague reviews the work, nor for finished work held back from
+approval, since no run of theirs would hear it. Enter sends,
 Shift+Enter is a new line, and Enter that ends a Korean syllable sends nothing.
 The note is in the conversation as 덧붙인 말 and in the log as 덧붙여 말함.
 

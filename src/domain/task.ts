@@ -305,9 +305,14 @@ export function holdTask(
   };
 }
 
-// Someone still on the work can be told more: it reaches them in their next run.
-export function noteTask(task: Task, text: string, eventId: EventId, now: Timestamp): Transition<TaskNoted, "taskNotListening" | "noteRequired"> {
-  if (task.status !== "working" && task.status !== "held") return { ok: false, reason: "taskNotListening" };
+// A note reaches whoever is on the work in their next run: there is one while
+// the work is theirs, not while a colleague reviews it, and not for finished
+// work held back from approval.
+export const takesNotes = (task: Task, reviewed: boolean): boolean =>
+  (task.status === "working" && !reviewed) || (task.status === "held" && task.heldFrom !== "approval");
+
+export function noteTask(task: Task, reviewed: boolean, text: string, eventId: EventId, now: Timestamp): Transition<TaskNoted, "taskNotListening" | "noteRequired"> {
+  if (!takesNotes(task, reviewed)) return { ok: false, reason: "taskNotListening" };
   const said = text.trim();
   if (said === "") return { ok: false, reason: "noteRequired" };
   return { ok: true, task, events: [{ ...base(task, eventId, now), type: "TaskNoted", text: said }] };

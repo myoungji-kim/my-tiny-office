@@ -179,12 +179,21 @@ describe("hold and resume", () => {
     expect(holdTask(done.task, "", eventId, t0 + 2 * minute)).toEqual({ ok: false, reason: "reasonRequired" });
   });
 
-  it("takes a note while someone is on the work or it is held, and not once it is finished", () => {
-    expect(noteTask(working(), " add tests too ", eventId, t0)).toMatchObject({ ok: true, events: [{ type: "TaskNoted", text: "add tests too" }] });
-    expect(noteTask(working(), "  ", eventId, t0)).toEqual({ ok: false, reason: "noteRequired" });
+  it("takes a note only where someone will hear it in their next run", () => {
+    expect(noteTask(working(), false, " add tests too ", eventId, t0)).toMatchObject({ ok: true, events: [{ type: "TaskNoted", text: "add tests too" }] });
+    expect(noteTask(working(), false, "  ", eventId, t0)).toEqual({ ok: false, reason: "noteRequired" });
+    // a colleague's review holds the work; what it says decides what comes next
+    expect(noteTask(working(), true, "more", eventId, t0)).toEqual({ ok: false, reason: "taskNotListening" });
+    const stopped = holdTask(working(), "", eventId, t0 + minute);
+    assert(stopped.ok);
+    expect(noteTask(stopped.task, false, "more", eventId, t0)).toMatchObject({ ok: true });
+
     const done = finishWork(working(), eventId, t0 + minute);
     assert(done.ok);
-    expect(noteTask(done.task, "more", eventId, t0)).toEqual({ ok: false, reason: "taskNotListening" });
+    expect(noteTask(done.task, false, "more", eventId, t0)).toEqual({ ok: false, reason: "taskNotListening" });
+    const heldBack = holdTask(done.task, "later", eventId, t0 + 2 * minute);
+    assert(heldBack.ok);
+    expect(noteTask(heldBack.task, false, "more", eventId, t0)).toEqual({ ok: false, reason: "taskNotListening" });
   });
 
   it("brings finished work back waiting for approval", () => {

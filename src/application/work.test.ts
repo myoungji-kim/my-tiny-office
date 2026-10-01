@@ -378,6 +378,21 @@ describe("the work supervisor", () => {
     expect(launched[1].stopped).toBe(false);
   });
 
+  it("carries on with a note that came in as the run finished, rather than calling the work done", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    const started = ctx.now();
+    assert((await noteTask({ ...ctx, now: () => started + 1 }, id, "Add tests too.")).ok);
+    ctx = { ...ctx, now: () => started + 2 };
+    launched[0].emit({ kind: "result", outcome: "finished", costUsd: 0, report: "Done." });
+    launched[0].exit();
+    await settle();
+
+    expect(await statusOf(id)).toMatchObject({ status: "working", finishedAt: undefined });
+    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "While you were working, the user added:\n\nAdd tests too.\n\nTake it into account and carry on." });
+  });
+
   it("keeps a note to stopped work for when it resumes", async () => {
     const id = await oneTask();
     await settle();

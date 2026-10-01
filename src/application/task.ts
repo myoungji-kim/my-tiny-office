@@ -2,7 +2,7 @@ import type { DomainEvent } from "../domain/events";
 import { toEventId, toTaskId, type AreaId, type RunId, type CompanyId, type EmployeeId, type ProjectId, type TaskId } from "../domain/ids";
 import { pickUps, reviewsToStart } from "../domain/pick-up";
 import type { Priority } from "../domain/project";
-import { startQueuedReview, type Review } from "../domain/review";
+import { holdsTheWork, startQueuedReview, type Review } from "../domain/review";
 import { settleSuggestion as settleRun } from "../domain/run";
 import * as taskDomain from "../domain/task";
 
@@ -213,16 +213,19 @@ export const holdTask = (ctx: AppContext, taskId: TaskId, reason: string) =>
   );
 
 // A note to work under way stops the run, which picks up again with it.
-export const noteTask = (ctx: AppContext, taskId: TaskId, text: string) =>
-  changeTask(
+export const noteTask = async (ctx: AppContext, taskId: TaskId, text: string) => {
+  const task = await ctx.tasks.findById(taskId);
+  const reviewed = task !== undefined && (await ctx.reviews.findByCompany(task.companyId)).some((r) => r.taskId === taskId && holdsTheWork(r));
+  return changeTask(
     ctx,
     taskId,
-    (t) => taskDomain.noteTask(t, text, eventId(ctx), ctx.now()),
+    (t) => taskDomain.noteTask(t, reviewed, text, eventId(ctx), ctx.now()),
     async (task) => {
       await ctx.requests.add({ companyId: task.companyId, taskId: task.id, at: ctx.now(), text: text.trim(), kind: "note" });
       return [];
     },
   );
+};
 
 export const resumeTask = (ctx: AppContext, taskId: TaskId) =>
   changeTask(ctx, taskId, (t) => taskDomain.resumeTask(t, eventId(ctx), ctx.now()));

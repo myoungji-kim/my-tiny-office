@@ -69,9 +69,9 @@ second architecture. Its main process:
    opens the window again or quits;
 4. asks `GET /attention` every five seconds for what waits on the user in
    every company — the today feed's open items (`src/server/attention.ts`),
-   worded by the server in the user's language, or nothing while 알림 is off
-   — and shows what is new as a system notification, which opens
-   `/attention/open`: it makes that company the open one and goes to the task;
+   worded by the server in the user's language — and, unless 알림 is off,
+   shows what is new as a system notification. Clicking one opens
+   `/attention/open`, which makes that company the open one and goes to the task;
 5. stops the server's process tree on quit.
 
 Nothing in `src/` knows about it, and the app stays usable as a plain web
