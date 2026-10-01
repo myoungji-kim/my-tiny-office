@@ -14,6 +14,8 @@ export interface AppSettings {
   readonly locale?: "ko" | "en";
   // nobody free takes new work while this is set; work in progress carries on
   readonly workPaused?: boolean;
+  // the desktop app tells the user nothing while this is set
+  readonly notifyOff?: boolean;
   // the connectors this computer's Claude account had when last checked
   readonly connectors?: { readonly checkedAt: number; readonly servers: readonly string[] };
   // the user's plugins and skills that employees are given
@@ -37,11 +39,12 @@ export function readSettings(directory: string): AppSettings {
     return {};
   }
 
-  const { lastCompanyId, locale, workPaused, connectors, extensions, plaza } = raw as Record<string, unknown>;
+  const { lastCompanyId, locale, workPaused, notifyOff, connectors, extensions, plaza } = raw as Record<string, unknown>;
   return {
     ...(typeof lastCompanyId === "string" && isCompanyId(lastCompanyId) ? { lastCompanyId } : {}),
     ...(locale === "ko" || locale === "en" ? { locale } : {}),
     ...(workPaused === true ? { workPaused } : {}),
+    ...(notifyOff === true ? { notifyOff } : {}),
     ...connectorsOf(connectors),
     ...extensionsOf(extensions),
     ...plazaOf(plaza),

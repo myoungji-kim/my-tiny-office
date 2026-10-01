@@ -79,6 +79,12 @@ export async function setWorkPausedAction(paused: boolean): Promise<void> {
   revalidatePath("/", "layout");
 }
 
+export async function setNotifyAction(on: boolean): Promise<void> {
+  const files = getCompanyFiles();
+  writeSettings(files.directory, { ...readSettings(files.directory), notifyOff: on === true ? undefined : true });
+  revalidatePath("/", "layout");
+}
+
 // 스킬과 플러그인: one of the user's own, given to employees or taken back.
 export async function setExtensionAction(kind: "plugins" | "skills", id: string, on: boolean): Promise<void> {
   if ((kind !== "plugins" && kind !== "skills") || typeof id !== "string") return;

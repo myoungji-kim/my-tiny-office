@@ -156,6 +156,16 @@
 
         <div class="panel" data-tab="general">
           <div class="panel-hd">
+            <h2 data-t="notifyTitle">알림</h2>
+            <p data-t="notifyWhy">업무가 승인을 기다리거나 멈추면 알려 줘요. 창을 보고 있을 때는 알리지 않아요. 데스크톱 앱에서만 떠요.</p>
+          </div>
+          <div class="panel-bd">
+            <div class="opts" role="radiogroup" id="notifyOpts" data-a="notifyTitle" aria-label="알림"></div>
+          </div>
+        </div>
+
+        <div class="panel" data-tab="general">
+          <div class="panel-hd">
             <h2 data-t="plazaTitle">광장</h2>
             <p data-t="plazaWhy">사무실 문밖에 이 컴퓨터의 Claude Code 세션이 구직자로 모여요. 세션마다 폴더와 날짜, 첫 메시지만 읽고, 고용하기 전에는 아무것도 가져오지 않아요. 숨기면 고용 창에서도 지난 세션을 가져오지 않아요.</p>
           </div>
@@ -273,6 +283,7 @@
       ],
       workTitle: "업무 시작", workWhy: "켜 두면 비는 직원이 대기열의 업무를 알아서 가져가요. 멈추면 새 업무는 대기열에 쌓이기만 하고, 하던 일은 마저 해요.",
       workAuto: "자동으로", workPaused: "멈춤",
+      notifyTitle: "알림", notifyWhy: "업무가 승인을 기다리거나 멈추면 알려 줘요. 창을 보고 있을 때는 알리지 않아요. 데스크톱 앱에서만 떠요.", notifyOn: "켜기", notifyOff: "끄기",
       plazaTitle: "광장", plazaWhy: "사무실 문밖에 이 컴퓨터의 Claude Code 세션이 구직자로 모여요. 세션마다 폴더와 날짜, 첫 메시지만 읽고, 고용하기 전에는 아무것도 가져오지 않아요. 숨기면 고용 창에서도 지난 세션을 가져오지 않아요.",
       plazaShow: "보이기", plazaHide: "숨기기",
       widthTitle: "화면 폭", widthWhy: "모든 화면에 같은 폭이 적용돼요. 업무 상세에서도 바로 바꿀 수 있어요. 이 브라우저에만 기억돼요.",
@@ -346,6 +357,7 @@
       ],
       workTitle: "Starting work", workWhy: "When on, whoever is free takes the next task from the backlog. When paused, new work only queues, and work in progress carries on.",
       workAuto: "Automatically", workPaused: "Paused",
+      notifyTitle: "Notifications", notifyWhy: "Tells you when work waits for your approval or stops. Not while you're looking at the window. Desktop app only.", notifyOn: "On", notifyOff: "Off",
       plazaTitle: "Plaza", plazaWhy: "Claude Code sessions on this computer gather outside the office door as candidates. Only each session's folder, dates and first message are read, and nothing is brought in until you hire. While it's hidden, the hire dialog can't bring in past sessions either.",
       plazaShow: "Show", plazaHide: "Hide",
       widthTitle: "Width", widthWhy: "Every screen takes the same width. A task's page can change it too. Kept in this browser only.",
@@ -452,6 +464,24 @@
   renderWork();
 
   /* ── the plaza ───────────────────────────────────────────────── */
+  // Off, the desktop app tells the user nothing; the office still shows it all.
+  const notifyOpts = document.getElementById("notifyOpts");
+  let notifyOn = true;
+  const renderNotify = () => {
+    notifyOpts.replaceChildren();
+    for (const [on, label] of [[true, t().notifyOn], [false, t().notifyOff]]) {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", String(on === notifyOn));
+      b.textContent = label;
+      b.addEventListener("click", () => { notifyOn = on; renderNotify(); });
+      notifyOpts.appendChild(b);
+    }
+  };
+  renderNotify();
+
   // Hidden, the office shows no plaza and no session on this computer is read.
   const plazaOpts = document.getElementById("plazaOpts");
   let plazaShown = true;

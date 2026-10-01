@@ -12,7 +12,7 @@ import net from "node:net";
 import { delimiter, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { app, BrowserWindow, dialog, Menu, nativeImage, session, shell, Tray } from "electron";
+import { app, BrowserWindow, dialog, Menu, nativeImage, Notification, session, shell, Tray } from "electron";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -27,6 +27,9 @@ const ROOT = (() => {
 
 const PORT = 4317;
 const READY_TIMEOUT_MS = 90_000;
+const ATTENTION_EVERY_MS = 5_000;
+// Windows shows a notification only for an app whose Start menu shortcut carries this id.
+const APP_ID = "local.my-tiny-office";
 
 const WORDS = {
   ko: {
@@ -259,6 +262,72 @@ function showWindow() {
   window.focus();
 }
 
+// The installed shortcut is given the app's id, which Windows needs to show
+// its notifications; a shortcut to anything else is left as it is.
+function claimShortcut() {
+  if (process.platform !== "win32") return;
+  app.setAppUserModelId(APP_ID);
+  const link = join(app.getPath("appData"), "Microsoft", "Windows", "Start Menu", "Programs", "My Tiny Office.lnk");
+  try {
+    const { target, appUserModelId } = shell.readShortcutLink(link);
+    if (target.toLowerCase() === process.execPath.toLowerCase() && appUserModelId !== APP_ID) shell.writeShortcutLink(link, "update", { appUserModelId: APP_ID });
+  } catch {
+    // not installed from the Start menu: run from the checkout, notifications may not show
+  }
+}
+
+const attention = (url) =>
+  new Promise((settle) => {
+    const request = http.get(url + "/attention", { headers: { Cookie: `mto-token-${new URL(url).port}=${token}` } }, (response) => {
+      let body = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => (body += chunk));
+      response.on("end", () => {
+        try {
+          const items = JSON.parse(body);
+          settle(response.statusCode === 200 && Array.isArray(items) ? items : undefined);
+        } catch {
+          settle(undefined);
+        }
+      });
+    });
+    request.on("error", () => settle(undefined));
+    request.setTimeout(10_000, () => request.destroy());
+  });
+
+// What starts waiting on the user is said once, while they are not looking
+// at the window. What already waited when the app opened is not said at all.
+// The words are the server's, in the user's language; this only shows them.
+// held until clicked or dismissed, so a collected one does not lose its click
+const shown = new Set();
+function watchAttention(url) {
+  let seen;
+  const look = async () => {
+    const items = await attention(url);
+    if (items !== undefined) {
+      const fresh = seen === undefined ? [] : items.filter((i) => !seen.has(i.key));
+      seen = new Set(items.map((i) => i.key));
+      const looking = window?.isVisible() === true && window.isFocused();
+      if (!looking && Notification.isSupported()) {
+        for (const item of fresh) {
+          const note = new Notification({ title: String(item.title), body: String(item.body) });
+          const href = String(item.href);
+          shown.add(note);
+          note.on("close", () => shown.delete(note));
+          note.on("click", () => {
+            shown.delete(note);
+            showWindow();
+            if (href.startsWith("/")) void window?.loadURL(origin + href);
+          });
+          note.show();
+        }
+      }
+    }
+    if (!quitting) setTimeout(look, ATTENTION_EVERY_MS);
+  };
+  void look();
+}
+
 // said once a run, the first time the window closes with the office still open
 let told = false;
 function tellStillWorking() {
@@ -271,6 +340,7 @@ async function start() {
   // only copying to the clipboard, which the page's copy buttons need
   session.defaultSession.setPermissionRequestHandler((_, permission, grant) => grant(permission === "clipboard-sanitized-write"));
 
+  claimShortcut();
   openWindow();
   await showTray().catch(() => undefined);
   const fail = (message) => {
@@ -297,6 +367,7 @@ async function start() {
   origin = url;
   if (window === undefined) openWindow();
   else void window.loadURL(origin);
+  watchAttention(url);
 }
 
 if (!app.requestSingleInstanceLock()) {

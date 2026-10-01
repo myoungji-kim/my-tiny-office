@@ -67,7 +67,12 @@ second architecture. Its main process:
 3. keeps running when the window closes, so the work goes on: on macOS in
    the Dock, on Windows and Linux as an icon in the notification area that
    opens the window again or quits;
-4. stops the server's process tree on quit.
+4. asks `GET /attention` every five seconds for what waits on the user in
+   every company — the today feed's open items (`src/server/attention.ts`),
+   worded by the server in the user's language, or nothing while 알림 is off
+   — and shows what is new as a system notification, which opens
+   `/attention/open`: it makes that company the open one and goes to the task;
+5. stops the server's process tree on quit.
 
 Nothing in `src/` knows about it, and the app stays usable as a plain web
 application.

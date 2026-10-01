@@ -750,7 +750,7 @@ company is stored in. It is one column of panels under five tabs, one
 shown at a time and named in the address (`?tab=`; `settings.html` uses a
 `#` hash for the same thing, since a static page has no server): **Claude Code** first —
 its check and the connectors its account has — then **스킬과 플러그인**, whose
-list grows with what the user installs, **일반** (업무 시작, 화면 폭, 언어),
+list grows with what the user installs, **일반** (언어, 업무 시작, 알림, 광장, 화면 폭),
 **안전 범위** (the boundary in three lines, then the guide in full, which used
 to be a page of its own) and **데이터** (the file, deleting the company, the
 version).
@@ -761,6 +761,7 @@ version).
 | 연결된 도구 | The connectors this computer's Claude account has, as the last check found them: Atlassian — used where a project turns it on — and the rest named, not used. 확인하기 / 다시 확인 runs the check, which says what it costs; before one, a single row says so. While Claude Code is not ready the check is off and the hint says it can be checked once it is. A project dialog turning Atlassian on warns when the check found none (`settings.html?connectors=unchecked`, `?connectors=noatlassian`; `projects.html?connectors=noatlassian`) |
 | 스킬과 플러그인 | What this computer's Claude Code has in user scope — plugins, then skills — each with its own words and a tick, none ticked to start. What is ticked goes into every task's work, in every project; a project's own are in its dialog; the hint says hooks and MCP servers stay off and that Claude Code's built-in skills come along (`settings.html?exts=none` for a computer with none) |
 | 업무 시작 | 자동으로 · 멈춤. Paused, nobody free takes new work; what is running carries on |
+| 알림 | 켜기 · 끄기, on to start. The desktop app says, as a system notification, what starts waiting on the user — finished work to approve, a run stopped at a command or write, a lost connection, an error, the cost limit — in the today feed's words, with the company as its title. Clicking one opens that task, in its company. Nothing is said while the window is in front, nor for what already waited when the app opened. A browser tab says nothing |
 | 화면 폭 | 보통 · 넓게 · 전체, for every screen, kept in this browser; a task's page changes the same setting |
 | 언어 | 한국어 · English. What the user wrote is shown as written in both |
 | 직원이 할 수 있는 일 | On 안전 범위: the boundary in three lines, then the guide in full below it. The commands are not here: they are per project |

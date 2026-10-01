@@ -21,6 +21,7 @@ export const dataDirectory = (): string => getCompanyFiles().directory;
 export const workElsewhere = (): boolean => workingElsewhere(getCompanyFiles().directory);
 
 export const workPaused = (): boolean => readSettings(getCompanyFiles().directory).workPaused === true;
+export const notifies = (): boolean => readSettings(getCompanyFiles().directory).notifyOff !== true;
 
 // The user's plugins and skills employees are given on this computer.
 export const chosenExtensions = () => readSettings(getCompanyFiles().directory).extensions;

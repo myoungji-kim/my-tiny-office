@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { setExtensionAction, setLocaleAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
+import { setExtensionAction, setLocaleAction, setNotifyAction, setWorkPausedAction, switchCompanyAction } from "../app/actions";
 import { deleteCompanyAction } from "../app/company-actions";
 import { setPlazaShownAction } from "../app/plaza-actions";
 import { getDictionary, type Locale } from "../i18n";
@@ -69,6 +69,20 @@ export function WorkPicker({ paused, label, auto, pause }: { readonly paused: bo
       </button>
       <button className="opt" type="button" role="radio" aria-checked={paused} onClick={() => start(() => setWorkPausedAction(true))}>
         {pause}
+      </button>
+    </div>
+  );
+}
+
+export function NotifyPicker({ on, label, yes, no }: { readonly on: boolean; readonly label: string; readonly yes: string; readonly no: string }) {
+  const [, start] = useTransition();
+  return (
+    <div className="opts" role="radiogroup" aria-label={label}>
+      <button className="opt" type="button" role="radio" aria-checked={on} onClick={() => start(() => setNotifyAction(true))}>
+        {yes}
+      </button>
+      <button className="opt" type="button" role="radio" aria-checked={!on} onClick={() => start(() => setNotifyAction(false))}>
+        {no}
       </button>
     </div>
   );

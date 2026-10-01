@@ -210,6 +210,11 @@ agents, so it is a target in its own right.
     Either way, runs are reconciled as disconnected the next time it starts.
   - The server going away while the window is open ends the app with the
     path of its log.
+  - Notifications come from `/attention`, behind the same token as every
+    page: the app sends it as the cookie. The window is sent only to paths on
+    the server's own origin. On Windows the app sets its id on its own Start
+    menu shortcut, and only when that shortcut points at its own exe, since
+    Windows shows a notification only for an app whose shortcut carries it.
 - **One worker per data directory.** The server that holds
   `<data dir>/work.pid` runs the work; any other server on the same data
   runs none. Two workers would each take the other's runs for lost ones and

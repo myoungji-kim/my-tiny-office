@@ -153,6 +153,9 @@ folder (see [Requirements](#requirements)) until you delete that too.
 ### Good to know
 
 - `npm run app` opens the window straight from the clone, without installing.
+- The installed app tells you, as a system notification, when work waits for
+  your approval or stops; 설정 › 일반 › 알림 turns it off. A browser tab on
+  `npm run dev` does not.
 - Only one server works a data directory at a time. If the desktop app is
   open, a `npm run dev` on the same data shows the office but leaves the work
   to the app.
