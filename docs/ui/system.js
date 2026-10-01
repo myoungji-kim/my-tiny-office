@@ -737,6 +737,9 @@ const STAFF = [
       { area: "security", text: { ko: "비밀값은 .env에 두고 절대 커밋하지 않아요.", en: "Secrets live in .env and are never committed." }, from: null, used: 9 },
     ] },
 ];
+// The sample in English names its people in English too, as its cast does; a
+// real company keeps whatever names it gave them.
+if (uiLang() === "en") for (const p of STAFF) p.name = CAST.find((c) => c.key === p.species)?.en ?? p.name;
 
 /* ═══ the roster in the sidebar ═══ */
 // Presence: whichever screen you are on, you can still see who is in and what

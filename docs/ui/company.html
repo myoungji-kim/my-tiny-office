@@ -393,9 +393,9 @@
   ];
 
   const finished = [
-    { name: "로그인 개편", from: "2026. 4. 15.", to: "2026. 5. 29.", tasks: 14, crew: ["p2", "p5", "p3"] },
-    { name: "배포 파이프라인", from: "2026. 2. 2.", to: "2026. 3. 20.", tasks: 9, crew: ["p5", "p1"] },
-    { name: "첫 API", from: "2026. 1. 19.", to: "2026. 2. 27.", tasks: 11, crew: ["p5", "p3"] },
+    { name: lang === "en" ? "Login rework" : "로그인 개편", from: "2026. 4. 15.", to: "2026. 5. 29.", tasks: 14, crew: ["p2", "p5", "p3"] },
+    { name: lang === "en" ? "Deploy pipeline" : "배포 파이프라인", from: "2026. 2. 2.", to: "2026. 3. 20.", tasks: 9, crew: ["p5", "p1"] },
+    { name: lang === "en" ? "First API" : "첫 API", from: "2026. 1. 19.", to: "2026. 2. 27.", tasks: 11, crew: ["p5", "p3"] },
   ];
   const ONGOING = 2;
 
@@ -408,19 +408,19 @@
     { on: "2026. 1. 23.", kind: "firstTask", who: "p5", task: { ko: "개발 서버 띄우기", en: "Stand up the dev server" } },
     { on: "2026. 2. 20.", kind: "joined", who: "p3", nth: 2 },
     { on: "2026. 2. 20.", kind: "team", team: "planning" },
-    { on: "2026. 2. 27.", kind: "project", name: "첫 API", days: 40 },
+    { on: "2026. 2. 27.", kind: "project", name: lang === "en" ? "First API" : "첫 API", days: 40 },
     { on: "2026. 3. 2.", kind: "joined", who: "p1", nth: 3 },
     { on: "2026. 3. 2.", kind: "team", team: "backend" },
     { on: "2026. 3. 11.", kind: "tasks", n: 10 },
     { on: "2026. 3. 16.", kind: "firstReview", who: "p3" },
-    { on: "2026. 3. 20.", kind: "project", name: "배포 파이프라인", days: 47 },
+    { on: "2026. 3. 20.", kind: "project", name: lang === "en" ? "Deploy pipeline" : "배포 파이프라인", days: 47 },
     { on: "2026. 4. 15.", kind: "joined", who: "p2", nth: 4 },
     { on: "2026. 4. 28.", kind: "memories", n: 10 },
     { on: "2026. 5. 8.", kind: "joined", who: "p4", nth: 5 },
-    { on: "2026. 5. 29.", kind: "project", name: "로그인 개편", days: 45 },
-    { on: "2026. 6. 2.", kind: "joined", name: "호두", nth: 6 },
+    { on: "2026. 5. 29.", kind: "project", name: lang === "en" ? "Login rework" : "로그인 개편", days: 45 },
+    { on: "2026. 6. 2.", kind: "joined", name: lang === "en" ? "Walnut" : "호두", nth: 6 },
     { on: "2026. 6. 12.", kind: "tasks", n: 50 },
-    { on: "2026. 8. 14.", kind: "left", name: "호두" },
+    { on: "2026. 8. 14.", kind: "left", name: lang === "en" ? "Walnut" : "호두" },
     { on: "2026. 9. 20.", kind: "tasks", n: 100 },
   ];
 
