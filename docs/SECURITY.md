@@ -179,6 +179,20 @@ agents, so it is a target in its own right.
   `Origin` equal to the host, and a `Sec-Fetch-Site` that is not `cross-site`;
   otherwise 403. Next.js checks the origin of a server action too, but lets one
   without an `Origin` through, which this does not. No state changes on `GET`.
+- **Other programs on this computer.** A browser elsewhere is kept out by the
+  checks above, but anything else on the computer that can reach the port
+  (another user, a container, WSL, a local tool) could send its own `Host` and
+  `Origin`. So every request also needs this launch's token
+  (`src/server/access-token.ts`), 32 random bytes made by whatever started the
+  server and handed to it in `MY_TINY_OFFICE_TOKEN`: the desktop app sets it
+  as an `HttpOnly`, `SameSite=Strict` cookie on its own window, and
+  `npm run dev` and `npm start` (`scripts/serve.mjs`) print an address that
+  carries it once, which the server turns into that cookie and takes off the
+  address. The cookie is named after the port, since cookies are shared by a
+  host's ports. Without it, every request, static files included, gets 401
+  with a line saying where the address is. A server started some other way,
+  without a token, does not check; a program running as the same user could
+  read the company's file anyway, so this keeps out everyone else.
 - **Desktop window.** `desktop/main.mjs` is only a window onto the local
   server it starts, `next start` on `127.0.0.1`, run with the computer's own
   Node.

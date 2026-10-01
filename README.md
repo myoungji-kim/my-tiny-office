@@ -223,7 +223,7 @@ my-tiny-office/
     ├── server/
     ├── ui/                  the cast and tiles, drawn from docs/ui/system.js
     ├── instrumentation.ts   starts the work supervisor with the server
-    └── proxy.ts             refuses requests not addressed to this machine
+    └── proxy.ts             refuses requests not addressed to this machine, or without this launch's token
 ```
 
 ## Requirements
@@ -258,6 +258,10 @@ through Bash and PowerShell on Windows (docs/SECURITY.md §2).
 npm install
 npm run dev
 ```
+
+Open the address it prints, which carries a token for this launch; the
+server refuses requests without it (docs/SECURITY.md §6). `npm start` does the
+same for a production build.
 
 Checks:
 

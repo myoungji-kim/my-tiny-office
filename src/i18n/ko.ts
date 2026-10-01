@@ -16,6 +16,10 @@ export const ko: Dictionary = {
     create: "새 회사 만들기",
     import: "기존 회사 가져오기",
   },
+  access: {
+    title: "이 주소로는 열 수 없어요",
+    body: "My Tiny Office를 켠 터미널에 나온 주소로 열어 주세요. 데스크톱 앱은 그냥 열면 돼요.",
+  },
   notFound: {
     title: "찾는 화면이 없어요",
     body: "지워졌거나 다른 회사의 화면이에요.",

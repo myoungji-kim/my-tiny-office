@@ -5,6 +5,7 @@
 // that can go nowhere else (docs/SECURITY.md §6).
 
 import { execFileSync, spawn, spawnSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { accessSync, constants, existsSync, mkdirSync, openSync, readFileSync, statSync } from "node:fs";
 import http from "node:http";
 import net from "node:net";
@@ -151,6 +152,8 @@ const answers = (url) =>
   });
 
 let server;
+// Only this window holds it, so no other program on the computer reaches the server (SECURITY.md §6).
+const token = randomBytes(32).toString("hex");
 let quitting = false;
 
 function startServer(node, path, port) {
@@ -160,7 +163,7 @@ function startServer(node, path, port) {
   const out = openSync(logFile, "a");
   server = spawn(node, [join(ROOT, "node_modules", "next", "dist", "bin", "next"), "start", "-H", "127.0.0.1", "-p", String(port)], {
     cwd: ROOT,
-    env: { ...process.env, PATH: path, NODE_ENV: "production" },
+    env: { ...process.env, PATH: path, NODE_ENV: "production", MY_TINY_OFFICE_TOKEN: token },
     stdio: ["ignore", out, out],
     windowsHide: true,
     // its own process group, so a signal on quit reaches the server and not this app
@@ -289,6 +292,8 @@ async function start() {
   server.once("exit", failed);
   const url = `http://127.0.0.1:${port}`;
   if (!(await waitForServer(url))) return failed();
+  // cookies are shared across a host's ports, so it is named after this one, as the server expects
+  await session.defaultSession.cookies.set({ url, name: `mto-token-${port}`, value: token, httpOnly: true, sameSite: "strict" });
   origin = url;
   if (window === undefined) openWindow();
   else void window.loadURL(origin);

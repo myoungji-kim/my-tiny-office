@@ -62,7 +62,8 @@ second architecture. Its main process:
    `better-sqlite3` is never rebuilt for Electron. If 4317 is held by a
    server this checkout started, left by an app that was killed, that server
    is stopped first. Any other program there moves the app to a free port;
-2. shows the page in a sandboxed window;
+2. shows the page in a sandboxed window, holding the launch's token as a
+   cookie, without which the server refuses a request (SECURITY.md §6);
 3. keeps running when the window closes, so the work goes on: on macOS in
    the Dock, on Windows and Linux as an icon in the notification area that
    opens the window again or quits;

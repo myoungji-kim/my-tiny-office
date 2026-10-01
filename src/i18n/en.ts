@@ -13,6 +13,10 @@ export const en = {
     create: "Start a new company",
     import: "Import an existing company",
   },
+  access: {
+    title: "This address cannot open the office",
+    body: "Open the address printed in the terminal that started My Tiny Office. The desktop app needs nothing.",
+  },
   notFound: {
     title: "Nothing here",
     body: "It was removed, or it belongs to another company.",

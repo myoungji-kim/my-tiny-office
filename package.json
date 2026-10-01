@@ -6,9 +6,9 @@
   "type": "module",
   "main": "desktop/main.mjs",
   "scripts": {
-    "dev": "next dev -H 127.0.0.1",
+    "dev": "node scripts/serve.mjs dev",
     "build": "next build",
-    "start": "next start -H 127.0.0.1",
+    "start": "node scripts/serve.mjs start",
     "app": "electron .",
     "app:install": "node desktop/install.mjs",
     "typecheck": "tsc --noEmit",
