@@ -54,7 +54,7 @@ export function TaskActions({
   const restarts = canEdit && task.status === "working";
   const deciding = task.status === "approval" && project.status !== "done";
   const who = employees.find((e) => e.id === task.assigneeId);
-  const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "rework" | "review" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
+  const [dialog, setDialog] = useState<"assign" | "edit" | "hold" | "stop" | "rework" | "review" | undefined>(assignFirst && canAssign && ready ? "assign" : undefined);
   const close = useCallback(() => {
     setDialog(undefined);
     if (assignFirst) router.replace(`/projects/${project.id}/${task.id}`, { scroll: false });
@@ -87,6 +87,11 @@ export function TaskActions({
           // a task only written down goes without asking
           items={[{ label: w.actions.removeTask, icon: Icon.trash, bad: true, confirm: task.status === "backlog" && !worked ? undefined : w.removeTaskWhy[task.status], run: remove }]}
         />
+      )}
+      {task.status === "working" && (
+        <button className="btn btn-secondary btn-lg" type="button" onClick={() => setDialog("stop")}>
+          {w.actions.stop}
+        </button>
       )}
       {canEdit && (
         <button className="btn btn-secondary btn-lg" type="button" disabled={restarts && !ready} onClick={() => setDialog("edit")}>
@@ -122,6 +127,18 @@ export function TaskActions({
           yes={w.holdYes}
           cancel={w.cancel}
           field={{ label: w.holdReason, placeholder: w.holdTaskPlaceholder }}
+          errors={t.errors}
+          onYes={(reason) => holdTaskAction(companyId, task.id, reason)}
+          onClose={close}
+        />
+      )}
+      {dialog === "stop" && (
+        <StepDialog
+          heading={w.stopTitle}
+          why={w.stopWhy}
+          yes={w.actions.stop}
+          cancel={w.cancel}
+          field={{ label: w.stopReason, placeholder: w.stopPlaceholder, optional: true }}
           errors={t.errors}
           onYes={(reason) => holdTaskAction(companyId, task.id, reason)}
           onClose={close}

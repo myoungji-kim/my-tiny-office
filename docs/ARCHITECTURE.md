@@ -238,7 +238,7 @@ Run                one launch of an agent on a task
 └── endedAt?
 
 RunStep            what a run reported doing: read · edit · run · say
-TaskRequest        what the user asked for when sending the work back, as written
+TaskRequest        what the user asked, as written: sending the work back, or a note to it
 
 Area          the company's own list; seven to start, named by the dictionary
 Memory        expertise (an area) · style · company (no employee)
@@ -397,7 +397,7 @@ the office but does no work. Each tick:
    behind it — what a restart leaves — and blocks its task;
 2. stops the run of any task that no longer wants one: held, handed over,
    finished, its company removed, changed after the run started
-   (`revisedAt`), or deleted — a deleted task's worktree is discarded once
+   (`revisedAt`), told more after it started (a `note` request), or deleted — a deleted task's worktree is discarded once
    its agent exits, since it cannot go while the agent is in it;
 3. lets whoever is free pick up work, unless starting work is paused on this
    computer (`settings.json`) or Claude Code is not ready;
@@ -433,7 +433,8 @@ person, so nothing is assumed beyond `git` itself.
 Approving commits the worktree to the task's branch and removes the worktree
 (`approveTask`); sending back queues the task for the same person, whose next
 run resumes the session with the request, and keeps the request as written
-(`task_requests`).
+(`task_requests`). A note (`noteTask`) is kept the same way, with its kind;
+the next run's prompt carries every note since the last run began.
 
 A task's conversation (`src/server/task-work.ts`) is put together when the
 page is read, oldest first: each run's last `say` is its report, each settled

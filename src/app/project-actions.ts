@@ -3,7 +3,7 @@
 import { draftPublish, publishTask } from "../application/publish";
 import { requestReview } from "../application/review";
 import { createProject, editProject, finishProject, holdProject, reopenProject, resumeProject, startProject, allowCommand, allowWrite, removeProject } from "../application/project";
-import { approveTask, carryOn, createTask, editTask, holdTask, removeTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
+import { approveTask, carryOn, createTask, editTask, holdTask, noteTask, removeTask, resumeTask, sendBack, settleSuggestion } from "../application/task";
 import { toAreaId, toEmployeeId, toProjectId, toRunId, toTaskId } from "../domain/ids";
 import { isAtlassianWrite, ownOf } from "../domain/project";
 import { projectExtensions } from "../infrastructure/runtime/extensions";
@@ -193,6 +193,10 @@ export async function publishTaskAction(companyId: string, taskId: string, input
 
 export async function sendBackAction(companyId: string, taskId: string, reason: string): Promise<Outcome> {
   return inCompany(companyId, (ctx) => sendBack(ctx, toTaskId(str(taskId)), str(reason)));
+}
+
+export async function noteTaskAction(companyId: string, taskId: string, text: string): Promise<Outcome> {
+  return inCompany(companyId, (ctx) => noteTask(ctx, toTaskId(str(taskId)), str(text)));
 }
 
 export async function holdTaskAction(companyId: string, taskId: string, reason: string): Promise<Outcome> {

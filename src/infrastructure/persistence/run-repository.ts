@@ -149,7 +149,7 @@ export function createSqliteTaskRequestRepository(db: AppDatabase, newId: () => 
         .where(and(eq(taskRequests.companyId, companyId), eq(taskRequests.taskId, taskId)))
         .orderBy(asc(taskRequests.at), asc(taskRequests.id))
         .all()
-        .map((row) => ({ companyId: toCompanyId(row.companyId), taskId: toTaskId(row.taskId), at: row.at, text: row.text }));
+        .map((row) => ({ companyId: toCompanyId(row.companyId), taskId: toTaskId(row.taskId), at: row.at, text: row.text, kind: row.kind }));
     },
   };
 }

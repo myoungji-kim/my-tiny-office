@@ -198,7 +198,7 @@ export const sendBack = (ctx: AppContext, taskId: TaskId, reason: string) =>
     taskId,
     (t) => taskDomain.sendBack(t, reason, eventId(ctx), ctx.now()),
     async (task) => {
-      await ctx.requests.add({ companyId: task.companyId, taskId: task.id, at: ctx.now(), text: reason.trim() });
+      await ctx.requests.add({ companyId: task.companyId, taskId: task.id, at: ctx.now(), text: reason.trim(), kind: "sentBack" });
       return [];
     },
   );
@@ -210,6 +210,18 @@ export const holdTask = (ctx: AppContext, taskId: TaskId, reason: string) =>
     taskId,
     (t) => taskDomain.holdTask(t, reason, eventId(ctx), ctx.now()),
     async (task) => (task.status === "working" ? withdrawReviewsOn(ctx, task.companyId, [task.id]) : []),
+  );
+
+// A note to work under way stops the run, which picks up again with it.
+export const noteTask = (ctx: AppContext, taskId: TaskId, text: string) =>
+  changeTask(
+    ctx,
+    taskId,
+    (t) => taskDomain.noteTask(t, text, eventId(ctx), ctx.now()),
+    async (task) => {
+      await ctx.requests.add({ companyId: task.companyId, taskId: task.id, at: ctx.now(), text: text.trim(), kind: "note" });
+      return [];
+    },
   );
 
 export const resumeTask = (ctx: AppContext, taskId: TaskId) =>

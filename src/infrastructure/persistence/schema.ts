@@ -8,7 +8,7 @@ import { SUGGESTED_TEAMS } from "../../domain/organisation";
 import type { Priority, ProjectStatus } from "../../domain/project";
 import type { ReviewState } from "../../domain/review";
 import { RUNTIMES, type RunEnd, type RunState, type StepKind } from "../../domain/run";
-import type { TaskStatus } from "../../domain/task";
+import type { RequestKind, TaskStatus } from "../../domain/task";
 
 // Each list is checked against its domain union, and each CHECK is built from
 // its list, so widening a union without touching the schema fails to compile.
@@ -17,6 +17,7 @@ const priorities = ["low", "normal", "high"] as const satisfies readonly Priorit
 const projectStatuses = ["planned", "active", "held", "done"] as const satisfies readonly ProjectStatus[];
 const taskStatuses = ["backlog", "working", "approval", "done", "held"] as const satisfies readonly TaskStatus[];
 const heldFrom = ["backlog", "working", "approval"] as const satisfies readonly TaskStatus[];
+const requestKinds = ["sentBack", "note"] as const satisfies readonly RequestKind[];
 const memoryKinds = ["expertise", "style", "company"] as const satisfies readonly MemoryKind[];
 const reviewStates = ["suggested", "queued", "reviewing", "settled", "withdrawn"] as const satisfies readonly ReviewState[];
 const milestoneKinds = [
@@ -204,7 +205,7 @@ export const tasks = sqliteTable(
     check("tasks_worked_for", sql`${table.workedFor} >= 0`),
     check("tasks_working", sql`${table.status} <> 'working' or (${table.assigneeId} is not null and ${table.startedAt} is not null)`),
     check("tasks_running", sql`${table.runningSince} is null or ${table.status} = 'working'`),
-    check("tasks_held", sql`${table.status} <> 'held' or (${table.heldReason} is not null and ${table.heldFrom} is not null)`),
+    check("tasks_held", sql`${table.status} <> 'held' or ${table.heldFrom} is not null`),
     check("tasks_finished", sql`${table.status} not in ('approval', 'done') or ${table.finishedAt} is not null`),
     check("tasks_applied", sql`${table.status} <> 'done' or ${table.appliedAt} is not null`),
   ],
@@ -339,7 +340,7 @@ export const runs = sqliteTable(
   ],
 );
 
-// What the user asked of the work when they sent it back, kept as said.
+// What the user asked of the work, kept as said: sending it back, or a note while it is underway.
 export const taskRequests = sqliteTable(
   "task_requests",
   {
@@ -352,8 +353,9 @@ export const taskRequests = sqliteTable(
       .references(() => tasks.id),
     at: integer("at").notNull(),
     text: text("text").notNull(),
+    kind: text("kind", { enum: requestKinds }).notNull().default("sentBack"),
   },
-  (table) => [index("idx_task_requests_task").on(table.taskId, table.at)],
+  (table) => [index("idx_task_requests_task").on(table.taskId, table.at), check("task_requests_kind", oneOf(table.kind, requestKinds))],
 );
 
 export const runSteps = sqliteTable(

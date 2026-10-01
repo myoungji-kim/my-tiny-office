@@ -40,7 +40,7 @@ describe("removing work on SQLite", () => {
     await ctx.agents.save(agent);
     await ctx.runs.save(startRun({ id: toRunId("r1"), agent, taskId, sessionId: undefined }, 2));
     await ctx.runSteps.add({ companyId, taskId, runId: toRunId("r1"), at: 3, kind: "say", detail: "hi" });
-    await ctx.requests.add({ companyId, taskId, at: 4, text: "more" });
+    await ctx.requests.add({ companyId, taskId, at: 4, text: "more", kind: "sentBack" });
     await ctx.reviews.save({ id: toReviewId("v1"), companyId, taskId, reviewerId: undefined, state: "suggested", createdAt: 5, startedAt: undefined, settledAt: undefined, verdict: undefined, comments: undefined });
 
     assert((await removeProject(ctx, workspace, made.value.project.id)).ok);

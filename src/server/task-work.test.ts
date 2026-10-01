@@ -16,7 +16,7 @@ describe("a task's history", () => {
     const runs = [run("r1", "a1", 1 * min, 20 * min, { kind: "finished" }), run("r2", "a2", 21 * min, 25 * min, { kind: "finished" }), run("r3", "a1", 40 * min, 41 * min, { kind: "denied", command: "x" })];
     const reviews = [{ taskId: "t1", reviewerId: "bori", state: "settled", startedAt: 21 * min, settledAt: 25 * min }] as unknown as Review[];
 
-    const log = logOf(task, runs, employeeOf, reviews, [{ at: 30 * min, text: "more" } as never]);
+    const log = logOf(task, runs, employeeOf, reviews, [{ at: 30 * min, text: "more", kind: "sentBack" } as never, { at: 40.5 * min, text: "tests too", kind: "note" } as never]);
 
     expect(log.map((e) => [e.kind, e.by, e.took])).toEqual([
       ["created", undefined, undefined],
@@ -26,6 +26,7 @@ describe("a task's history", () => {
       ["reviewDone", "bori", undefined],
       ["sentBack", undefined, undefined],
       ["started", "mocha", undefined],
+      ["noted", undefined, undefined],
       ["stoppedAtRun", "mocha", undefined],
       ["applied", undefined, undefined],
     ]);

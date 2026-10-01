@@ -6,6 +6,7 @@ import type {
   TaskCreated,
   TaskFinished,
   TaskHeld,
+  TaskNoted,
   TaskResumed,
   TaskReturned,
   TaskSentBack,
@@ -64,12 +65,16 @@ export interface Task {
   readonly revisedAt: Timestamp | undefined;
 }
 
-// What the user asked for when they sent the work back, as they wrote it.
+// sentBack: what to change before it is done again; note: more to go on while it is underway
+export type RequestKind = "sentBack" | "note";
+
+// What the user asked of the work, as they wrote it.
 export interface TaskRequest {
   readonly companyId: CompanyId;
   readonly taskId: TaskId;
   readonly at: Timestamp;
   readonly text: string;
+  readonly kind: RequestKind;
 }
 
 type Transition<TEvent, TFailure extends string> =
@@ -291,12 +296,21 @@ export function holdTask(
     return { ok: false, reason: "taskNotHoldable" };
   }
   const why = reason.trim();
-  if (why === "") return { ok: false, reason: "reasonRequired" };
+  // stopping work under way needs no reason; setting work aside does
+  if (why === "" && task.status !== "working") return { ok: false, reason: "reasonRequired" };
   return {
     ok: true,
-    task: { ...paused(task, now), status: "held", heldFrom: task.status, heldReason: why, heldWithProject: withProject, blocker: undefined },
+    task: { ...paused(task, now), status: "held", heldFrom: task.status, heldReason: why || undefined, heldWithProject: withProject, blocker: undefined },
     events: [{ ...base(task, eventId, now), type: "TaskHeld", reason: why }],
   };
+}
+
+// Someone still on the work can be told more: it reaches them in their next run.
+export function noteTask(task: Task, text: string, eventId: EventId, now: Timestamp): Transition<TaskNoted, "taskNotListening" | "noteRequired"> {
+  if (task.status !== "working" && task.status !== "held") return { ok: false, reason: "taskNotListening" };
+  const said = text.trim();
+  if (said === "") return { ok: false, reason: "noteRequired" };
+  return { ok: true, task, events: [{ ...base(task, eventId, now), type: "TaskNoted", text: said }] };
 }
 
 // Finished work comes back waiting for approval; anything else queues again

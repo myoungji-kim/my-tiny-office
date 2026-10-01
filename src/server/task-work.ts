@@ -9,7 +9,7 @@ import { getCompanyFiles } from "../infrastructure/persistence/company-files";
 import { branchOf, changesIn, diffOf, worktreePath, type FileChange } from "../infrastructure/workspace/git";
 
 // One message of a task's conversation: an employee's report, a colleague's
-// review, or what the user asked for when they sent the work back.
+// review, or what the user asked: sending the work back, or a note to it.
 export type TalkMessage =
   | {
       readonly kind: "report";
@@ -22,11 +22,11 @@ export type TalkMessage =
       readonly suggestions: readonly { readonly runId: string; readonly text: string }[];
     }
   | { readonly kind: "review"; readonly id: string; readonly by: string; readonly at: number; readonly text: string; readonly verdict: Verdict }
-  | { readonly kind: "request"; readonly id: string; readonly at: number; readonly text: string };
+  | { readonly kind: "request"; readonly id: string; readonly at: number; readonly text: string; readonly note: boolean };
 
 // What happened to the task, in order: read from the task, its runs, its
 // reviews and the requests it was sent back with; nothing is kept for it apart.
-export type LogKind = "created" | "started" | "finished" | "stoppedAtRun" | "stoppedAtWrite" | "budget" | "failed" | "stopped" | "lost" | "reviewStarted" | "reviewDone" | "sentBack" | "applied";
+export type LogKind = "created" | "started" | "finished" | "stoppedAtRun" | "stoppedAtWrite" | "budget" | "failed" | "stopped" | "lost" | "reviewStarted" | "reviewDone" | "sentBack" | "noted" | "applied";
 export interface LogEntry {
   readonly at: number;
   readonly kind: LogKind;
@@ -71,7 +71,7 @@ function conversation(taskId: string, runs: readonly Run[], employeeOf: (agentId
     if (review.reviewerId === undefined || review.verdict === undefined || review.settledAt === undefined) continue;
     talk.push({ kind: "review", id: review.id, by: review.reviewerId, at: review.settledAt, text: review.comments ?? "", verdict: review.verdict });
   }
-  requests.forEach((r, i) => talk.push({ kind: "request", id: `${taskId}:${i}`, at: r.at, text: r.text }));
+  requests.forEach((r, i) => talk.push({ kind: "request", id: `${taskId}:${i}`, at: r.at, text: r.text, note: r.kind === "note" }));
   return talk.sort((a, b) => a.at - b.at);
 }
 
@@ -100,7 +100,7 @@ export function logOf(task: Task, runs: readonly Run[], employeeOf: (agentId: st
     log.push(entry(review.startedAt!, "reviewStarted", review.reviewerId));
     if (review.state === "settled" && review.settledAt !== undefined) log.push(entry(review.settledAt, "reviewDone", review.reviewerId));
   }
-  for (const request of requests) log.push(entry(request.at, "sentBack"));
+  for (const request of requests) log.push(entry(request.at, request.kind === "note" ? "noted" : "sentBack"));
   if (task.appliedAt !== undefined) log.push(entry(task.appliedAt, "applied"));
   return log.sort((a, b) => a.at - b.at);
 }

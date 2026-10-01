@@ -262,6 +262,10 @@
 
   .talk-sug > b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
 
+  .tk-say { display: flex; align-items: flex-end; gap: 6px; }
+
+  .tk-say .textarea { flex: 1; min-height: 64px; resize: vertical; }
+
   .talk-live { display: flex; align-items: center; gap: 8px; padding: 14px 0 4px; font-size: 14px; color: var(--muted); }
 
   .talk-live code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
@@ -809,7 +813,7 @@
       approveTitle: "반영해도 될까요?", approveWhy: "아직 어디에도 반영되지 않았어요. 승인하면 그때 적용돼요.",
       actions: {
         assign: "담당자 정하기", pickPeer: "동료 검토 받기",
-        approve: "승인하고 반영", rework: "보완 요청", hold: "보류",
+        approve: "승인하고 반영", rework: "보완 요청", hold: "보류", stop: "멈추기",
         resume: "다시 진행", teach: "이 내용 알려주기", open: "직원 화면에서 보기",
         detail: "업무 상세", edit: "업무 수정", removeTask: "업무 지우기",
         editProject: "프로젝트 수정", removeProject: "프로젝트 지우기",
@@ -823,7 +827,7 @@
       reworkTitle: "무엇을 보완할까요?", reworkLabel: "보완할 내용", reworkPlaceholder: "재시도할 수 있는 실패는 따로 나눠 주세요",
       reworkNow: (n) => n + subjectParticle(n) + " 하던 세션을 이어서 바로 고쳐요. 아직 아무 데도 반영되지 않았어요.",
       reworkLater: (n) => n + subjectParticle(n) + " 지금 하는 일을 마치고 이어서 고쳐요. 아직 아무 데도 반영되지 않았어요.",
-      holdTaskTitle: "이 업무를 보류할까요?", holdTaskWhy: "끝난 작업은 반영하지 않은 채로 남아요. 다시 진행하면 이어서 해요.",
+      holdTaskTitle: "이 업무를 보류할까요?", stopTitle: "이 업무를 멈출까요?", stopWhy: "하던 세션과 바뀐 것은 그대로 남아요. 다시 진행하면 이어서 해요.", stopReason: "멈추는 이유 (적지 않아도 돼요)", stopPlaceholder: "방향을 다시 정하고 이어서 하기로", holdTaskWhy: "끝난 작업은 반영하지 않은 채로 남아요. 다시 진행하면 이어서 해요.",
       holdTaskPlaceholder: "테스트 범위를 먼저 정하고 다시 하기로",
       noSeat: "이 분야를 아는 사람을 먼저 만들어야 해요",
       blocked: "막힘",
@@ -865,7 +869,8 @@
       tk: {
         now: "지금 하는 일", did: "한 일", changed: "바뀐 것", review: "검토", desc: "업무 설명",
         tabTalk: "대화", details: "세부 정보", fStatus: "상태", fWho: "담당자", fReviewer: "검토자", fArea: "분야", fPrio: "우선순위", fTime: "시간", fCost: "비용", costWhy: "Claude Code가 알려 준 API 기준 금액이에요. 구독 요금제라면 실제 청구와 달라요.",
-        talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완해야 해요", talkReply: "답", talkRequest: "보완 요청", you: "나",
+        talkReport: "작업 보고", talkNow: "지금 하는 말", talkBefore: "멈추기 전에 한 말", talkReview: "검토", talkApprove: "반영해도 돼요", talkChanges: "보완해야 해요", talkReply: "답", talkRequest: "보완 요청", talkNote: "덧붙인 말", you: "나",
+        noteLabel: (n) => n + "에게 덧붙여 말하기", notePlaceholder: "테스트도 같이 추가해 주세요", noteNow: "보내면 하던 걸 잠깐 멈추고, 이 말을 듣고 이어서 해요.", noteLater: "다시 진행할 때 이 말을 함께 전해요.", noteSend: "보내기",
         talkEmpty: "아직 아무도 시작하지 않았어요.", liveNow: "지금",
         splitLabel: "세부 정보 폭 조절", widthLabel: "화면 폭", widths: { normal: "보통", wide: "넓게", full: "전체" }, talkOpen: "펼치기", talkClose: "접기", talkAll: "전체 보기", talkLess: "줄여 보기", talkEarlier: (n) => "지난 대화 " + n + "개",
         decideTitle: (n) => n + subjectParticle(n) + " 작업을 마쳤어요", decideWhy: "바뀐 것을 확인하고 반영할지 정해 주세요.", seeChanges: "바뀐 것 보기",
@@ -886,7 +891,7 @@
         took: (m) => m + "분 걸림",
         logs: {
           created: () => "만듦", lost: () => "Claude Code 연결이 끊김", applied: () => "승인해서 반영함", stoppedAtRun: () => "허용되지 않은 명령에서 멈춤",
-          stoppedAtWrite: () => "허용되지 않은 쓰기에서 멈춤", budget: () => "비용 한도에서 멈춤", failed: () => "오류로 멈춤", stopped: () => "멈춤", sentBack: () => "보완을 요청함",
+          stoppedAtWrite: () => "허용되지 않은 쓰기에서 멈춤", budget: () => "비용 한도에서 멈춤", failed: () => "오류로 멈춤", stopped: () => "멈춤", sentBack: () => "보완을 요청함", noted: () => "덧붙여 말함",
           started: (e) => e.name + subjectParticle(e.name) + " 시작",
           reviewStarted: (e) => e.name + subjectParticle(e.name) + " 검토를 시작",
           reviewDone: (e) => e.name + subjectParticle(e.name) + " 검토를 마침",
@@ -964,7 +969,7 @@
       approveTitle: "Ready to apply?", approveWhy: "Nothing has been applied anywhere yet. Approving is what applies it.",
       actions: {
         assign: "Assign", pickPeer: "Ask a colleague to review",
-        approve: "Approve and apply", rework: "Send back", hold: "Hold",
+        approve: "Approve and apply", rework: "Send back", hold: "Hold", stop: "Stop",
         resume: "Resume", teach: "Teach them this", open: "Open in People",
         detail: "Task details", edit: "Edit task", removeTask: "Delete task",
         editProject: "Edit project", removeProject: "Delete project",
@@ -978,7 +983,7 @@
       reworkTitle: "What should change?", reworkLabel: "What to change", reworkPlaceholder: "Split out the retryable failures",
       reworkNow: (n) => n + " picks the same session back up and fixes it now. Nothing has been applied anywhere.",
       reworkLater: (n) => n + " fixes it after what they are on now. Nothing has been applied anywhere.",
-      holdTaskTitle: "Hold this task?", holdTaskWhy: "The finished work stays, unapplied. Resuming carries on from it.",
+      holdTaskTitle: "Hold this task?", stopTitle: "Stop this task?", stopWhy: "The session and the changes so far are kept. Resuming carries on from them.", stopReason: "Why you are stopping it (optional)", stopPlaceholder: "Settling the approach first, then carrying on", holdTaskWhy: "The finished work stays, unapplied. Resuming carries on from it.",
       holdTaskPlaceholder: "Parked until we agree what to cover",
       noSeat: "Someone has to learn this area first",
       blocked: "Blocked",
@@ -1020,7 +1025,8 @@
       tk: {
         now: "Doing now", did: "What was done", changed: "What changed", review: "Review", desc: "About this task",
         tabTalk: "Conversation", details: "Details", fStatus: "Status", fWho: "Assignee", fReviewer: "Reviewer", fArea: "Area", fPrio: "Priority", fTime: "Time", fCost: "Cost", costWhy: "The API price Claude Code reports. On a subscription, what you are billed differs.",
-        talkReport: "Report", talkNow: "While working", talkBefore: "Before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", you: "You",
+        talkReport: "Report", talkNow: "While working", talkBefore: "Before stopping", talkReview: "Review", talkApprove: "can be applied", talkChanges: "asked for changes", talkReply: "Reply", talkRequest: "Asked for changes", talkNote: "Added", you: "You",
+        noteLabel: (n) => "Tell " + n + " something more", notePlaceholder: "Add tests for it too", noteNow: "Sending it pauses them for a moment; they read it and carry on.", noteLater: "They get it when the task resumes.", noteSend: "Send",
         talkEmpty: "Nobody has started it yet.", liveNow: "Now",
         splitLabel: "Resize the details", widthLabel: "Width", widths: { normal: "Normal", wide: "Wide", full: "Full" }, talkOpen: "Expand", talkClose: "Fold", talkAll: "Show all", talkLess: "Show less", talkEarlier: (n) => n + " earlier",
         decideTitle: (n) => n + " finished the work", decideWhy: "Look over what changed and decide whether to apply it.", seeChanges: "See what changed",
@@ -1041,7 +1047,7 @@
         took: (m) => "took " + m + " min",
         logs: {
           created: () => "Created", lost: () => "The agent disconnected", applied: () => "Approved and applied", stoppedAtRun: () => "Stopped at a command it may not run",
-          stoppedAtWrite: () => "Stopped at a write it may not make", budget: () => "Stopped at the spending cap", failed: () => "Stopped on an error", stopped: () => "Stopped", sentBack: () => "Sent back",
+          stoppedAtWrite: () => "Stopped at a write it may not make", budget: () => "Stopped at the spending cap", failed: () => "Stopped on an error", stopped: () => "Stopped", sentBack: () => "Sent back", noted: () => "Added a note",
           started: (e) => e.name + " started",
           reviewStarted: (e) => e.name + " started the review",
           reviewDone: (e) => e.name + " finished the review",
@@ -1422,6 +1428,7 @@
       talk.push({ by: person, label: reviewing ? k.talkReview : k.talkReply, at: reviewing ? logAt("reviewDone") : "", text: m.text });
     }
     if (task.changes && !task.talk) talk.push({ by: null, label: k.talkRequest, at: "", text: task.changes, cls: "changes" });
+    for (const n of task.notes ?? []) talk.push({ by: null, label: k.talkNote, at: n.at, text: n.text });
     // what they said last closes the conversation: their report, or where they are
     if (task.said && who && !task.talk) {
       const k2 = task.blocked ? k.talkBefore : task.status === "working" ? k.talkNow : k.talkReport;
@@ -1452,6 +1459,13 @@
           <button class="copy-ic" type="button" data-copy="${i}" aria-label="${t().copy}" title="${t().copy}">${COPY}</button>
         </div>`).join("") + live
       : live || `<p class="col-empty talk-empty">${k.talkEmpty} ${task.status === "backlog" && !who ? t().whoTakes : ""}</p>`;
+
+    // Someone on the task can be told more: now, it stops them and they carry on
+    // with it; held or stopped, it waits for them.
+    const hears = who && (task.status === "working" || task.status === "held");
+    const noteBox = `<div class="field"><label class="label" for="tkNote">${k.noteLabel(who?.name ?? "")}</label>
+      <div class="tk-say"><textarea class="textarea" id="tkNote" rows="2" placeholder="${k.notePlaceholder}"></textarea><button class="btn btn-secondary btn-sm" type="button" data-note disabled>${k.noteSend}</button></div>
+      <span class="hint">${task.status === "working" && !task.blocked ? k.noteNow : k.noteLater}</span></div>`;
 
     const stepRow = (s) => `
           <div class="step"><span class="step-at">${s.at}</span><span class="step-ic">${TASK_ICON[s.kind]}</span>
@@ -1503,7 +1517,7 @@
     view.innerHTML = `${now}<div class="tk2">
         <div class="tk-main">
           <div class="tk-tabs"><div class="tabs" role="tablist">${tabsHtml}</div><div class="tk-tools">${taskTab === "talk" ? switcher : ""}${widthSwitch}</div></div>
-          <div class="tk-pane" data-pane="talk"${taskTab === "talk" ? "" : " hidden"}>${talkHtml}</div>
+          <div class="tk-pane" data-pane="talk"${taskTab === "talk" ? "" : " hidden"}>${talkHtml}${hears ? noteBox : ""}</div>
           <div class="tk-pane" data-pane="changes"${taskTab === "changes" ? "" : " hidden"}>${changesHtml}</div>
           <div class="tk-pane" data-pane="did"${taskTab === "did" ? "" : " hidden"}>${stepsHtml}</div>
         </div>
@@ -1576,6 +1590,21 @@
     }
     for (const b of view.querySelectorAll("[data-pass]")) b.addEventListener("click", () => { task.suggest.splice(Number(b.dataset.pass), 1); render(); });
     for (const b of view.querySelectorAll("[data-teach-sug]")) b.addEventListener("click", () => teachFrom(task, task.suggest[b.dataset.teachSug], () => { task.suggest.splice(Number(b.dataset.teachSug), 1); render(); }));
+    const noteText = view.querySelector("#tkNote");
+    const noteSend = view.querySelector("[data-note]");
+    noteText?.addEventListener("input", () => { noteSend.disabled = !noteText.value.trim(); });
+    noteText?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.shiftKey || e.isComposing || !noteText.value.trim()) return;
+      e.preventDefault();
+      noteSend.click();
+    });
+    noteSend?.addEventListener("click", () => {
+      const text = noteText.value.trim();
+      const now = new Date().toTimeString().slice(0, 5);
+      (task.notes ??= []).push({ at: now, text: { ko: text, en: text } });
+      (task.log ??= []).push({ at: now, kind: "noted" });
+      render();
+    });
     view.querySelector("[data-reconnect]")?.addEventListener("click", () => {
       task.blocked = undefined;
       if (who) who.agentLost = false;
@@ -1615,6 +1644,7 @@
     };
     if (task.status === "backlog" && live) button(t().actions.assign, "primary", () => assignTask(task), true);
     if (task.status === "working" && live) {
+      button(t().actions.stop, "secondary", () => askStopTask(task));
       button(t().actions.edit, "secondary", () => openEditTask(task), true);
     }
     if (task.status === "approval" && p.status !== "done") {
@@ -1904,7 +1934,7 @@
     }
 
     if (task.status === "held") {
-      say("p-said", `<b>${t().heldBecause}</b>${tx(task.reason)}`);
+      if (task.reason) say("p-said", `<b>${t().heldBecause}</b>${tx(task.reason)}`);
       if (live) acts.appendChild(gated(t().actions.resume, "key", () => resumeTask(task)));
       acts.appendChild(menu(t().actions.teach, null, () => teachFrom(task)));
     }
@@ -2473,11 +2503,11 @@
         </div>
         <div class="m-foot">
           <button class="btn btn-secondary btn-md" data-close>${t().cancel}</button>
-          <button class="btn btn-primary btn-md" data-yes${field ? " disabled" : ""}>${yes}</button>
+          <button class="btn btn-primary btn-md" data-yes${field && !field.optional ? " disabled" : ""}>${yes}</button>
         </div>`;
       const yesBtn = dialog.querySelector("[data-yes]");
       const text = dialog.querySelector("#stepText");
-      text?.addEventListener("input", () => { yesBtn.disabled = !text.value.trim(); });
+      text?.addEventListener("input", () => { yesBtn.disabled = !field.optional && !text.value.trim(); });
       dialog.querySelector("[data-close]").addEventListener("click", closeModal);
       yesBtn.addEventListener("click", () => {
         onYes(text?.value.trim());
@@ -2519,6 +2549,15 @@
       heading: t().holdTaskTitle, why: t().holdTaskWhy, yes: t().holdYes,
       field: { label: t().holdReason, placeholder: t().holdTaskPlaceholder },
       onYes: (text) => Object.assign(task, { status: "held", reason: { ko: text, en: text } }),
+    });
+  }
+
+  // Stopping keeps everything; the reason is the user's to give or not.
+  function askStopTask(task) {
+    confirmStep({
+      heading: t().stopTitle, why: t().stopWhy, yes: t().actions.stop,
+      field: { label: t().stopReason, placeholder: t().stopPlaceholder, optional: true },
+      onYes: (text) => Object.assign(task, { status: "held", reason: text ? { ko: text, en: text } : undefined }),
     });
   }
 

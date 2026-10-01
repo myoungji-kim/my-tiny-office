@@ -156,6 +156,7 @@ export function TaskView({
   locale,
   talk,
   live,
+  note,
   now,
   decide,
   changes,
@@ -166,6 +167,8 @@ export function TaskView({
   readonly locale: Locale;
   readonly talk: readonly TalkView[];
   readonly live: ReactNode;
+  // where the user adds to the work, while someone is on it
+  readonly note: ReactNode;
   // what stops the work, when something does
   readonly now: ReactNode;
   // who finished, when the work waits for the user, and who last asked for changes to it
@@ -263,6 +266,7 @@ export function TaskView({
             ))}
             {live}
             {talk.length === 0 && live === undefined && <p className="col-empty talk-empty">{w.talkEmpty}</p>}
+            {note}
           </div>
           <div className="tk-pane" role="tabpanel" aria-label={w.changed} hidden={tab !== "changes"}>
             {changes}

@@ -403,7 +403,7 @@ header keeps every action, as page buttons.
 
 | Tab | Holds | From |
 | --- | --- | --- |
-| 대화 | Everything said on the task, oldest first, one message each: a colleague's review, the reply, the user's request for changes, and last what the employee said — their report, what they are saying while they work, or what they said before they stopped. Each message is formatted markdown or its plain text (👁 · `<>` for all of them), copied from the icon that appears over it. What the agent thought worth remembering sits under its report, each with 넘기기 and 기억시키기. While they work, the step they are on closes the conversation. | Runs' reports, reviews, requests |
+| 대화 | Everything said on the task, oldest first, one message each: a colleague's review, the reply, the user's request for changes or note, and last what the employee said — their report, what they are saying while they work, or what they said before they stopped. Each message is formatted markdown or its plain text (👁 · `<>` for all of them), copied from the icon that appears over it. What the agent thought worth remembering sits under its report, each with 넘기기 and 기억시키기. While they work, the step they are on closes the conversation. | Runs' reports, reviews, requests |
 | 바뀐 것 | Every file with lines added and removed, a file opening to its diff, and what approving does — it commits to the task's branch, nothing is pushed | The task's worktree |
 | 한 일 | Every step — read, edited, ran — with its time | The runtime's event stream |
 
@@ -509,6 +509,16 @@ before it happens. ARCHITECTURE.md has the two commands this maps to.
 description stops the run (`Task.revisedAt`); a new priority, area or reviewer
 is taken without interrupting it. Someone else, or nobody, starts over with
 the folder as it is.
+
+**Work in progress can be stopped or told more, from its page.** 멈추기 sits
+beside 업무 수정 while the task is in progress; its dialog says the session and
+the changes stay, and the reason is optional — the task is held and 다시 진행
+carries on in the same session. Under the conversation, "<name>에게 덧붙여
+말하기" takes a note while someone is on the task or it is held: in progress, it
+stops the run, which picks up in the same session with the note; held or
+blocked, the hint says it is passed on when the work resumes. Enter sends,
+Shift+Enter is a new line, and Enter that ends a Korean syllable sends nothing.
+The note is in the conversation as 덧붙인 말 and in the log as 덧붙여 말함.
 
 **What cannot be undone asks once more in place.** The row in the `⋯` turns
 into a short line of what happens and two buttons, the action and a keep

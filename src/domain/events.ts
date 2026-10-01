@@ -110,6 +110,10 @@ export interface TaskSentBack extends TaskEvent {
   readonly type: "TaskSentBack";
   readonly reason: string;
 }
+export interface TaskNoted extends TaskEvent {
+  readonly type: "TaskNoted";
+  readonly text: string;
+}
 export interface TaskHeld extends TaskEvent {
   readonly type: "TaskHeld";
   readonly reason: string;
@@ -217,6 +221,7 @@ export type DomainEvent =
   | TaskFinished
   | TaskApplied
   | TaskSentBack
+  | TaskNoted
   | TaskHeld
   | TaskResumed
   | TaskBlocked

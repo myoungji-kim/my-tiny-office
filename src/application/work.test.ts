@@ -9,7 +9,7 @@ import { hireEmployee } from "./employee";
 import { teachMemory } from "./memory";
 import { requestReview } from "./review";
 import { allowCommand, allowWrite, createProject, startProject } from "./project";
-import { approveTask, carryOn, createTask, holdTask, sendBack, settleSuggestion, removeTask, editTask } from "./task";
+import { approveTask, carryOn, createTask, holdTask, noteTask, resumeTask, sendBack, settleSuggestion, removeTask, editTask } from "./task";
 import { createTestContext, firstRole } from "./test-context";
 import { createWorkSupervisor, type WorkSupervisor } from "./work";
 
@@ -356,6 +356,45 @@ describe("the work supervisor", () => {
     assert((await carryOn(ctx, id)).ok);
     await other.kick();
     expect(launched.at(-1)?.input).toMatchObject({ resume: SESSION, prompt: "Carry on with the task where you left off." });
+  });
+
+  it("stops a run when the user adds a note, and carries on in the same session with it", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    await settle();
+
+    const started = ctx.now();
+    assert((await noteTask({ ...ctx, now: () => started + 1 }, id, "Add tests too.")).ok);
+    ctx = { ...ctx, now: () => started + 2 };
+    await supervisor.kick();
+    launched[0].exit();
+    await settle();
+
+    expect(launched[0].stopped).toBe(true);
+    expect(launched[1].input).toMatchObject({ resume: SESSION, prompt: "While you were working, the user added:\n\nAdd tests too.\n\nTake it into account and carry on." });
+    // heard once: the run it restarted is not stopped for it again
+    await supervisor.kick();
+    expect(launched[1].stopped).toBe(false);
+  });
+
+  it("keeps a note to stopped work for when it resumes", async () => {
+    const id = await oneTask();
+    await settle();
+    launched[0].emit({ kind: "session", sessionId: SESSION });
+    const started = ctx.now();
+    ctx = { ...ctx, now: () => started + 1 };
+    assert((await holdTask(ctx, id, "")).ok);
+    await settle();
+    launched[0].exit();
+    await settle();
+    ctx = { ...ctx, now: () => started + 2 };
+    assert((await noteTask(ctx, id, "Use the new client.")).ok);
+    ctx = { ...ctx, now: () => started + 3 };
+    assert((await resumeTask(ctx, id)).ok);
+    await settle();
+
+    expect(launched.at(-1)?.input).toMatchObject({ resume: SESSION, prompt: "While you were working, the user added:\n\nUse the new client.\n\nTake it into account and carry on." });
   });
 
   it("stops the run of work that is held, and leaves the task as the user put it", async () => {

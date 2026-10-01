@@ -400,6 +400,10 @@
 
   .talk-sug > b { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
 
+  .tk-say { display: flex; align-items: flex-end; gap: 6px; }
+
+  .tk-say .textarea { flex: 1; min-height: 64px; resize: vertical; }
+
   .talk-live { display: flex; align-items: center; gap: 8px; padding: 14px 0 4px; font-size: 14px; color: var(--muted); }
 
   .talk-live code { font-family: var(--mono); font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }

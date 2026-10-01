@@ -62,10 +62,14 @@ function reviewerPrompt(reviewer: Employee, own: readonly Memory[]): string {
 
 // What the agent is told on this launch: the task itself in a new session,
 // or why it is picking its own session up again.
-function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">, revised: boolean): string {
-  const why = resumePrompt(task, continuing, begun, lastEnd, project);
-  if (!continuing || !revised) return why;
-  return `The task was changed while you were working on it. It now reads:\n\n${brief(task)}\n\n${why === CARRY_ON ? "Carry on with it as it is now." : why}`;
+function taskPrompt(task: taskDomain.Task, continuing: boolean, begun: boolean, lastEnd: RunEnd | undefined, project: Pick<Project, "commands" | "writes">, revised: boolean, notes: readonly string[]): string {
+  const resumed = resumePrompt(task, continuing, begun, lastEnd, project);
+  const why = continuing && revised ? `The task was changed while you were working on it. It now reads:\n\n${brief(task)}\n\n${resumed === CARRY_ON ? "Carry on with it as it is now." : resumed}` : resumed;
+  if (notes.length === 0) return why;
+  const said = notes.join("\n\n");
+  return continuing
+    ? `While you were working, the user added:\n\n${said}\n\n${why === CARRY_ON ? "Take it into account and carry on." : why}`
+    : `${why}\n\nThe user also added:\n\n${said}`;
 }
 
 const CARRY_ON = "Carry on with the task where you left off.";
@@ -203,7 +207,10 @@ export function createWorkSupervisor(deps: {
       const task = await ctx.tasks.findById(entry.taskId);
       const wanted =
         entry.reviewId === undefined
-          ? wantsRun(task, entry.employeeId) && !heldForReview(entry.taskId, now) && !(task.revisedAt !== undefined && entry.startedAt <= task.revisedAt)
+          ? wantsRun(task, entry.employeeId) &&
+            !heldForReview(entry.taskId, now) &&
+            !(task.revisedAt !== undefined && entry.startedAt <= task.revisedAt) &&
+            !(await ctx.requests.findByTask(companyId, entry.taskId)).some((r) => r.kind === "note" && entry.startedAt <= r.at)
           : task?.status === "working" && now.some((r) => r.id === entry.reviewId && r.state === "reviewing");
       if (!wanted) stop(entry);
     }
@@ -262,6 +269,8 @@ export function createWorkSupervisor(deps: {
     const resume = sessionToContinue(runs, task.id, agent.id);
     const last = runs.filter((r) => r.taskId === task.id && r.agentId === agent.id).sort((a, b) => b.startedAt - a.startedAt)[0];
     const begun = runs.some((r) => r.taskId === task.id);
+    // what the user added since the last run began, which that run never heard
+    const notes = (await ctx.requests.findByTask(task.companyId, task.id)).filter((r) => r.kind === "note" && (last === undefined || last.startedAt <= r.at)).map((r) => r.text);
     // the session is the runtime's to name; a resume that never names it did not take
     const run = startRun({ id: toRunId(ctx.newId()), agent, taskId: task.id, sessionId: undefined }, ctx.now());
     await ctx.runs.save(run);
@@ -273,7 +282,7 @@ export function createWorkSupervisor(deps: {
         {
           cwd: prepared.path,
           // the last run stopped for a change made after it started
-          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project, current.revisedAt !== undefined && last !== undefined && last.startedAt <= current.revisedAt),
+          prompt: taskPrompt(current, resume !== undefined, begun, last?.end, project, current.revisedAt !== undefined && last !== undefined && last.startedAt <= current.revisedAt, notes),
           memory: memoryPrompt(employee, carried, project),
           commands: project.commands,
           atlassian: project.atlassian ? { writes: project.writes } : undefined,

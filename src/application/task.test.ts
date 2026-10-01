@@ -196,7 +196,7 @@ describe("approval", () => {
 
     assert((await sendBack(ctx, done.id, "  split the retryable failures ")).ok);
 
-    await expect(ctx.requests.findByTask(companyId, done.id)).resolves.toEqual([{ companyId, taskId: done.id, at: now, text: "split the retryable failures" }]);
+    await expect(ctx.requests.findByTask(companyId, done.id)).resolves.toEqual([{ companyId, taskId: done.id, at: now, text: "split the retryable failures", kind: "sentBack" }]);
   });
 
   it("holds and resumes it as finished work", async () => {
@@ -253,7 +253,7 @@ describe("throwing work away", () => {
   it("deletes a task that is not finished, and refuses one that is", async () => {
     const pay = await project();
     const written = await task(pay);
-    await ctx.requests.add({ companyId, taskId: written.id, at: now, text: "more" });
+    await ctx.requests.add({ companyId, taskId: written.id, at: now, text: "more", kind: "sentBack" });
 
     assert((await removeTask(ctx, workspace, written.id)).ok);
     await expect(ctx.tasks.findById(written.id)).resolves.toBeUndefined();

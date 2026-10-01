@@ -226,6 +226,12 @@ and returns it to whoever did it: `working` if they are free, queued behind
 their current task if not. Holding it parks it with the reason attached;
 resuming follows the same rule.
 
+Work in progress can be stopped without a reason: it is held, and resuming
+carries on in the same session. Anything else held needs one. A note the user
+adds while someone is on the task, or while it is held, reaches them in their
+next run: a run under way stops for it and picks up in the same session with
+everything added since the last run began.
+
 ## PR Collaboration
 
 A `PullRequest` here is the in-app review of work in progress: a domain entity

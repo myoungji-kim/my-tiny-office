@@ -16,6 +16,7 @@ import { CopyButton } from "../../../../components/settings-parts";
 import { Suggestions } from "../../../../components/suggestions";
 import { TaskActions } from "../../../../components/task-actions";
 import { TaskChanges } from "../../../../components/task-changes";
+import { TaskNote } from "../../../../components/task-note";
 import { TaskView, type TalkView } from "../../../../components/task-view";
 import { loadTaskWork, type LogEntry, type TalkMessage } from "../../../../server/task-work";
 import { carriedBy } from "../../../../domain/memory";
@@ -119,7 +120,7 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
 
   const view = (m: TalkMessage): TalkView | undefined => {
     const at = whenText(locale, m.at);
-    if (m.kind === "request") return { id: m.id, name: w.tk.you, species: undefined, label: w.tk.talkRequest, tone: "changes", at, text: m.text, suggestions: undefined };
+    if (m.kind === "request") return { id: m.id, name: w.tk.you, species: undefined, label: m.note ? w.tk.talkNote : w.tk.talkRequest, tone: m.note ? undefined : "changes", at, text: m.text, suggestions: undefined };
     const by = named(m.by);
     if (by === undefined) return undefined;
     const current = person(m.by);
@@ -412,6 +413,11 @@ export default async function TaskPage({ params, searchParams }: { params: Promi
         locale={locale}
         talk={talk}
         live={live}
+        note={
+          who !== undefined && (task.status === "working" || task.status === "held") && project.takesWork ? (
+            <TaskNote locale={locale} companyId={company.id} taskId={task.id} name={who.name} now={running} />
+          ) : undefined
+        }
         now={now}
         decide={task.status === "approval" && who !== undefined ? { by: who.name, changesAskedBy: lastReview?.verdict === "changes" ? named(lastReview.by)?.name : undefined } : undefined}
         changes={changes}

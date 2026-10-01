@@ -9,6 +9,7 @@ import {
   createTask,
   finishWork,
   holdTask,
+  noteTask,
   resumeTask,
   returnToBacklog,
   sendBack,
@@ -166,6 +167,24 @@ describe("hold and resume", () => {
     assert(resumed.ok);
     expect(resumed.task).toMatchObject({ status: "backlog", assigneeId: mocha.id, heldReason: undefined });
     expect(timeTaken(resumed.task, t0 + 90 * minute)).toBe(5 * minute);
+  });
+
+  it("stops work under way without a reason, but sets finished work aside only with one", () => {
+    const stopped = holdTask(working(), " ", eventId, t0 + minute);
+    assert(stopped.ok);
+    expect(stopped.task).toMatchObject({ status: "held", heldFrom: "working", heldReason: undefined });
+
+    const done = finishWork(working(), eventId, t0 + minute);
+    assert(done.ok);
+    expect(holdTask(done.task, "", eventId, t0 + 2 * minute)).toEqual({ ok: false, reason: "reasonRequired" });
+  });
+
+  it("takes a note while someone is on the work or it is held, and not once it is finished", () => {
+    expect(noteTask(working(), " add tests too ", eventId, t0)).toMatchObject({ ok: true, events: [{ type: "TaskNoted", text: "add tests too" }] });
+    expect(noteTask(working(), "  ", eventId, t0)).toEqual({ ok: false, reason: "noteRequired" });
+    const done = finishWork(working(), eventId, t0 + minute);
+    assert(done.ok);
+    expect(noteTask(done.task, "more", eventId, t0)).toEqual({ ok: false, reason: "taskNotListening" });
   });
 
   it("brings finished work back waiting for approval", () => {

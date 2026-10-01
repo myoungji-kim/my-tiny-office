@@ -7,7 +7,7 @@ import type { Outcome } from "../app/action-context";
 import { useLatest } from "./use-latest";
 
 // A step that says what it does before it is taken; `field` asks for a line
-// of text, such as why, before the step can be taken.
+// of text, such as why, before the step can be taken, unless it is optional.
 export function StepDialog({
   heading,
   why,
@@ -22,7 +22,7 @@ export function StepDialog({
   readonly why: string;
   readonly yes: string;
   readonly cancel: string;
-  readonly field?: { readonly label: string; readonly placeholder: string };
+  readonly field?: { readonly label: string; readonly placeholder: string; readonly optional?: boolean };
   readonly errors: Readonly<Record<string, string>>;
   readonly onYes: (text: string) => Promise<Outcome>;
   readonly onClose: () => void;
@@ -40,6 +40,7 @@ export function StepDialog({
     return () => document.removeEventListener("keydown", onKey);
   }, [latestClose]);
 
+  const needsText = field !== undefined && field.optional !== true;
   const go = () =>
     start(async () => {
       const result = await onYes(text.trim());
@@ -71,7 +72,7 @@ export function StepDialog({
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
                   // Enter that ends a Korean syllable is not a submit
-                  if (e.key !== "Enter" || e.nativeEvent.isComposing || pending || text.trim() === "") return;
+                  if (e.key !== "Enter" || e.nativeEvent.isComposing || pending || (needsText && text.trim() === "")) return;
                   e.preventDefault();
                   go();
                 }}
@@ -92,7 +93,7 @@ export function StepDialog({
             ref={field === undefined ? first : undefined}
             className="btn btn-primary btn-md"
             type="button"
-            disabled={pending || (field !== undefined && text.trim() === "")}
+            disabled={pending || (needsText && text.trim() === "")}
             onClick={go}
           >
             {yes}
