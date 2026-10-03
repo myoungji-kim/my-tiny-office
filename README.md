@@ -43,11 +43,13 @@ Install My Tiny Office for me as a desktop app.
 1. Check what it needs: Node.js 22 or later (node --version), git, and Claude
    Code logged in (claude auth status). Tell me what is missing and ask before
    installing anything. If I am not logged in to Claude Code, tell me to run
-   claude auth login myself; do not log in for me.
+   claude auth login myself; do not log in for me. On an Intel Mac, install
+   Node.js from nodejs.org rather than Homebrew, which compiles it from source.
 2. Clone https://github.com/myoungji-kim/my-tiny-office.git into a folder that
    will stay (not a temporary one), since the installed app runs from it.
-3. In that folder run npm install, then npm run app:install. On macOS, if
-   better-sqlite3 fails to build, run xcode-select --install and try again.
+3. In that folder run npm install, then npm run app:install. If npm warns that
+   install scripts are not covered by allowScripts, leave them unapproved: the
+   app does not need them.
 4. Tell me where it was installed and how to open it.
 ```
 
@@ -60,11 +62,13 @@ My Tiny Office를 데스크톱 앱으로 설치해 줘.
 1. 필요한 것부터 확인해 줘: Node.js 22 이상(node --version), git, 그리고
    Claude Code 로그인 상태(claude auth status). 없는 게 있으면 알려 주고, 설치하기
    전에 먼저 물어봐 줘. Claude Code에 로그인이 안 돼 있으면 내가 직접
-   claude auth login을 하라고 알려 줘. 대신 로그인하지는 마.
+   claude auth login을 하라고 알려 줘. 대신 로그인하지는 마. Intel Mac이면
+   Node.js는 Homebrew 말고 nodejs.org에서 설치해 줘. Homebrew는 소스부터 빌드해.
 2. https://github.com/myoungji-kim/my-tiny-office.git 을 계속 둘 폴더(임시 폴더
    말고)에 clone해 줘. 설치된 앱이 그 폴더에서 실행돼.
-3. 그 폴더에서 npm install, 그다음 npm run app:install을 실행해 줘. macOS에서
-   better-sqlite3 빌드가 실패하면 xcode-select --install 후 다시 해 줘.
+3. 그 폴더에서 npm install, 그다음 npm run app:install을 실행해 줘. npm이
+   allowScripts에 없는 설치 스크립트가 있다고 경고해도 승인하지 마. 앱에는
+   필요 없어.
 4. 어디에 설치됐고 어떻게 여는지 알려 줘.
 ```
 
@@ -104,8 +108,8 @@ It is installed in `%LOCALAPPDATA%\Programs\My Tiny Office`, with a shortcut in
 1. Install what it needs, in Terminal:
 
    ```bash
-   xcode-select --install                        # git, and what better-sqlite3 builds with
-   brew install node                             # or the LTS installer from nodejs.org
+   xcode-select --install                        # git
+   brew install node                             # on an Intel Mac, use the LTS installer from nodejs.org
    curl -fsSL https://claude.ai/install.sh | bash   # Claude Code
    ```
 
